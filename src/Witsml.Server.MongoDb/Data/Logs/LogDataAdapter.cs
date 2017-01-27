@@ -314,7 +314,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 transaction.SetContext(uri);
 
                 DeleteEntity(uri);
-                DbGrowingObjectAdapter.Delete(uri);
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();
             }
