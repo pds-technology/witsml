@@ -18,7 +18,9 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.Datatypes;
+using LinqToQuerystring;
 using MongoDB.Driver;
 using PDS.Framework;
 
@@ -44,6 +46,27 @@ namespace PDS.Witsml.Server.Data.Transactions
         public MongoDbTransactionAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uri)
         {
             Logger.Debug("Creating instance.");
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<MongoDbTransaction> GetAll(EtpUri? parentUri = null)
+        {            
+            var query = GetQuery().AsQueryable();
+            var uri = parentUri?.Uri;
+
+            if (!string.IsNullOrWhiteSpace(parentUri?.Query))
+            {
+                query = query.LinqToQuerystring(parentUri.Value.Query);
+                uri = uri.Substring(0, uri.IndexOf('?'));
+            }
+
+            query = query.Where(x => x.Uri == uri);
+
+            return query.ToList();
         }
 
         /// <summary>
