@@ -458,7 +458,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 var mnemonic = GetMnemonic(curve);
                 var range = GetIndexRange(curve, increasing, isTimeLog);
 
-                Logger.DebugFormat("Index range for curve '{0}' - start: {1}, end: {2}.", mnemonic, range.Start, range.End);
+                // NOTE: logging here is too verbose!
+                //Logger.DebugFormat("Index range for curve '{0}' - start: {1}, end: {2}.", mnemonic, range.Start, range.End);
                 ranges.Add(mnemonic, range);
             }
 
@@ -1384,7 +1385,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (!ranges.TryGetValue(mnemonic, out current))
                     current = new Range<double?>(null, null);
 
-                Logger.DebugFormat("Current '{0}' index range - start: {1}, end: {2}.", mnemonic, current.Start, current.End);
+                // NOTE: logging here is too verbose!
+                //Logger.DebugFormat("Current '{0}' index range - start: {1}, end: {2}.", mnemonic, current.Start, current.End);
 
                 var update = reader.GetChannelIndexRange(i);
                 var start = current.Start;
@@ -1402,7 +1404,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     rangeExtended = true;
                 }
 
-                Logger.DebugFormat("Updated '{0}' index range - start: {1}, end: {2}.", mnemonic, start, end);
+                // NOTE: logging here is too verbose!
+                //Logger.DebugFormat("Updated '{0}' index range - start: {1}, end: {2}.", mnemonic, start, end);
                 ranges[mnemonic] = new Range<double?>(start, end);
             }
 
@@ -1421,12 +1424,14 @@ namespace PDS.Witsml.Server.Data.Logs
             if (range.Start.HasValue)
                 minIndex = CreateGenericMeasure(range.Start.Value, indexUnit);
             logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinIndex", minIndex);
-            Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", minIndex);
+            // NOTE: logging here is too verbose!
+            //Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", minIndex);
 
             if (range.End.HasValue)
                 maxIndex = CreateGenericMeasure(range.End.Value, indexUnit);
             logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxIndex", maxIndex);
-            Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", maxIndex);
+            // NOTE: logging here is too verbose!
+            //Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", maxIndex);
 
             if (isIndexCurve)
             {
@@ -1454,7 +1459,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 minDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).ToOffsetTime(offset).ToString("o");
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndex", minDate);
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndexSpecified", true);
-                Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
+                // NOTE: logging here is too verbose!
+                //Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
             }
 
             if (range.End.HasValue)
@@ -1462,7 +1468,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 maxDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).ToOffsetTime(offset).ToString("o");
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndex", maxDate);
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndexSpecified", true);
-                Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);
+                // NOTE: logging here is too verbose!
+                //Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);
             }
 
             if (isIndexCurve)

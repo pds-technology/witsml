@@ -118,7 +118,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="uri">The URI.</param>
         public void Attach(MongoDbAction action, string collection, string idPropertyName, BsonDocument document, EtpUri? uri = null)
         {
-            _log.Debug($"Attaching transaction for MongoDb collection {collection} with URI: {uri}");
+            _log.Debug($"Attaching '{action}' transaction for MongoDb collection {collection} with URI: {uri}");
 
             var transaction = new MongoDbTransaction
             {
@@ -144,10 +144,10 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         public void Save()
         {
-            _log.Debug($"Saving attached transactions for URI: {Uri}");
-
             var created = Transactions.Where(t => t.Status == TransactionStatus.Created).ToList();
             if (!created.Any()) return;
+
+            _log.Debug($"Saving attached transactions for URI: {Uri}");
 
             foreach (var transaction in created)
                 transaction.Status = TransactionStatus.Pending;
