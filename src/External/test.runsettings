@@ -24,6 +24,7 @@
                 <ModulePath>.*PDS.*Test\.dll$</ModulePath>  
                 <ModulePath>.*PDS\.Framework\.Web\.dll$</ModulePath>  
                 <ModulePath>.*super.*socket.*</ModulePath>  
+                <ModulePath>.*antlr.*</ModulePath>  
               </Exclude>  
             </ModulePaths>  
           </CodeCoverage>  
