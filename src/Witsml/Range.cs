@@ -47,20 +47,21 @@ namespace PDS.Witsml
 
             if (isTime)
             {
-                DateTimeOffset time;
+                var time = (start as DateTimeOffset?) ?? DateTimeOffset.MinValue;
 
-                if (start != null && DateTimeOffset.TryParse(start.ToString(), out time))
+                if (DateTimeOffset.MinValue != time || DateTimeOffset.TryParse(start?.ToString(), out time))
                 {
                     rangeStart = time.ToUnixTimeMicroseconds();
                     offset = time.Offset;
                 }
-                    
 
-                if (end != null && DateTimeOffset.TryParse(end.ToString(), out time))
+                time = (end as DateTimeOffset?) ?? DateTimeOffset.MinValue;
+
+                if (DateTimeOffset.MinValue != time || DateTimeOffset.TryParse(end?.ToString(), out time))
                 {
                     rangeEnd = time.ToUnixTimeMicroseconds();
                     offset = time.Offset;
-                }                  
+                }
             }
             else
             {

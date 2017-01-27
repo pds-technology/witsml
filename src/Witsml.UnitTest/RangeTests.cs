@@ -88,8 +88,8 @@ namespace PDS.Witsml
         [TestMethod]
         public void Range_ParseReturns_Range_For_Valid_DateTime()
         {
-            var start = new DateTimeOffset(2016, 12, 1, 0, 0, 0, new TimeSpan()); 
-            var end = new DateTimeOffset(2016, 12, 2, 0, 0, 0, new TimeSpan()); 
+            var start = new DateTimeOffset(2016, 12, 1, 12, 5, 17, 4, new TimeSpan());
+            var end = new DateTimeOffset(2016, 12, 2, 17, 2, 36, 9, new TimeSpan());
             var result = Range.Parse(start, end, true);
             Assert.AreEqual(new Range<double?>(start.ToUnixTimeMicroseconds(), end.ToUnixTimeMicroseconds(), new TimeSpan()), result);
         }
