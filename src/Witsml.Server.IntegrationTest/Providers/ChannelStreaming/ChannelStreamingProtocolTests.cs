@@ -123,27 +123,81 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Check channel data is in index order, and 
             //... check channel data is within requested range
-            foreach (var channelRangeInfo in channelRangeInfos)
+            VerifyChannelData(channelRangeInfos, data);
+        }
+
+        [TestMethod]
+        [Description("Verifying that issuing a ChannelRangeRequest on a time log returns the correct ChannelData objects ( i.e. range and index order )")]
+        public async Task IChannelStreamingProducer_ChannelData_Returned_For_Valid_ChannelRangeRequest_On_TimeLog()
+        {
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IChannelStreamingConsumer>();
+            var channelRangeInfos = new List<ChannelRangeInfo>();
+            var logUri = new EtpUri("eml://witsml14/well(804415d0-b5e7-4389-a3c6-cdb790f5485f)/wellbore(d3e7d4bf-0f29-4c2b-974d-4871cf8001fd)/log(e2401b72-550f-4695-ab27-d5b0589bde18)");
+            var uris = new List<string>
             {
-                var dataItems = data
-                    .SelectMany(d => d.Message.Data)
-                    .Where(d => d.ChannelId == channelRangeInfo.ChannelId[0])
-                    .ToArray();
-                var indexes = dataItems
-                    .Select(d => d.Indexes.FirstOrDefault())
-                    .ToArray();                
+                logUri.Append("logCurveInfo", "ROP"),
+            };
 
-                // Do we have an index for every dataItem.
-                Assert.AreEqual(dataItems.Length, indexes.Length);
+            // Register event handlers
+            var onChannelMetadata = HandleMultiPartAsync<ChannelMetadata>(x => handler.OnChannelMetadata += x);
+            var onChannelData = HandleMultiPartAsync<ChannelData>(x => handler.OnChannelData += x, uris.Count);
 
-                // Assert that there are no index values outside of the requested range
-                Assert.IsFalse(dataItems
-                    .Select(c => c.Indexes.First())
-                    .Any(i => i < channelRangeInfo.StartIndex && i > channelRangeInfo.EndIndex));
+            // Send Start message
+            handler.Start();
 
-                // Verify index order
-                VerifyIndexOrder(indexes);
+            // Send ChannelDescribe message for 1 channel
+            var messageId = handler.ChannelDescribe(uris);
+
+            // Wait for ChannelMetadata response
+            var argsMetadata = await onChannelMetadata;
+
+            // Verify ChannelMetadata
+            var channels = VerifyChannelMetadata(argsMetadata, uris, messageId);
+
+            // Get channels by mnemonic for inspection
+            var channelRop = channels.FirstOrDefault(c => c.ChannelName.Equals("ROP"));
+
+            // Request data from Mon, 04 Apr 2016 23:40:04.023 GMT to Mon, 04 Apr 2016 23:40:14.001 GMT
+            channelRangeInfos.Add(ToChannelRangeInfo(channelRop, 1459813204023000, 1459813214001000));
+
+            // Send ChannelRangeRequest messages for Message channel
+            messageId = handler.ChannelRangeRequest(channelRangeInfos);
+
+            // Wait for all ChannelData responses
+            var data = await onChannelData;
+
+            // Check count of data for each channel
+            Assert.IsNotNull(data);
+            Assert.AreEqual(uris.Count, data.Count);
+            Assert.AreEqual(5, data.SelectMany(x => x.Message.Data).Count());
+
+            // Check Correlation IDs
+            foreach (var arg in data)
+            {
+                VerifyCorrelationId(arg, messageId);
             }
+
+            // Check channel data is in index order, and 
+            //... check channel data is within requested range
+            VerifyChannelData(channelRangeInfos, data);
+
+            // Check that the index values have the correct milliseconds
+            var logData = data.SelectMany(x => x.Message.Data).ToList();
+            var expectedIndexValues = new[]
+            {
+                new DateTimeOffset(2016, 4, 4, 18, 40, 05, 999, new TimeSpan(-5,0,0)),
+                new DateTimeOffset(2016, 4, 4, 18, 40, 07, 43, new TimeSpan(-5,0,0)),
+                new DateTimeOffset(2016, 4, 4, 18, 40, 11, 172, new TimeSpan(-5,0,0)),
+                new DateTimeOffset(2016, 4, 4, 18, 40, 13, 890, new TimeSpan(-5,0,0)),
+                new DateTimeOffset(2016, 4, 4, 18, 40, 14, 1, new TimeSpan(-5,0,0))
+            };
+
+            logData.ForEach((x, i) =>
+            {
+                Assert.AreEqual(expectedIndexValues[i].ToUnixTimeMicroseconds(), x.Indexes[0]);
+            });
         }
 
         [TestMethod]
@@ -771,6 +825,31 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Assert.AreEqual(uom, channel.Uom);
             Assert.AreEqual(startIndex, channel.StartIndex);
             Assert.AreEqual(endIndex, channel.EndIndex);
+        }
+
+        private void VerifyChannelData(List<ChannelRangeInfo> channelRangeInfos, List<ProtocolEventArgs<ChannelData>> data)
+        {
+            foreach (var channelRangeInfo in channelRangeInfos)
+            {
+                var dataItems = data
+                    .SelectMany(d => d.Message.Data)
+                    .Where(d => d.ChannelId == channelRangeInfo.ChannelId[0])
+                    .ToArray();
+                var indexes = dataItems
+                    .Select(d => d.Indexes.FirstOrDefault())
+                    .ToArray();
+
+                // Do we have an index for every dataItem.
+                Assert.AreEqual(dataItems.Length, indexes.Length);
+
+                // Assert that there are no index values outside of the requested range
+                Assert.IsFalse(dataItems
+                    .Select(c => c.Indexes.First())
+                    .Any(i => i < channelRangeInfo.StartIndex && i > channelRangeInfo.EndIndex));
+
+                // Verify index order
+                VerifyIndexOrder(indexes);
+            }
         }
 
         private void VerifyIndexOrder(long[] indexes, bool isIncreasing = true)
