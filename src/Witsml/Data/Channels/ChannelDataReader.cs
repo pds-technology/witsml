@@ -1443,7 +1443,8 @@ namespace PDS.Witsml.Data.Channels
                 // If there is no channel data in the current row then don't process it
                 if (!HasValues(fullRowValues)) continue;
 
-                _log.DebugFormat("Appending channel data values for row: {0}", _current);
+                // Note: This was removed because it was too verbose but can be used later if needed.
+                //_log.DebugFormat("Appending channel data values for row: {0}", _current);
 
                 var channelValues = fullRowValues.Skip(Depth).ToList();
 
@@ -1594,7 +1595,8 @@ namespace PDS.Witsml.Data.Channels
 
         private void UpdateRanges(List<object> values, string[] mnemonics, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
-            _log.Debug("Updating index ranges.");
+            // Note: This was removed because it was too verbose but can be used later if needed.
+            //_log.Debug("Updating index ranges.");
 
             for (var i = 0; i < values.Count; i++)
             {
