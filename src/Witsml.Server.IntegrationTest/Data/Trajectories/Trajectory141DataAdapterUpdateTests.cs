@@ -91,7 +91,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Uid = Trajectory.Uid,
                 UidWell = Trajectory.UidWell,
                 UidWellbore = Trajectory.UidWellbore,
-                TrajectoryStation = new List<TrajectoryStation> {station1Update, station5}
+                TrajectoryStation = new List<TrajectoryStation> { station1Update, station5 }
             };
 
             DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
@@ -208,6 +208,150 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var updatedExtensionNameValue = updatedStation1.ExtensionNameValue[0];
             Assert.IsNotNull(updatedExtensionNameValue);
             Assert.AreEqual("2.0", updatedExtensionNameValue.Value?.Value);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Prepend_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 1 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Append_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 10 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Update_Trajectory_Data_Unchanged_ObjectGrowing_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
         }
 
         [TestMethod]

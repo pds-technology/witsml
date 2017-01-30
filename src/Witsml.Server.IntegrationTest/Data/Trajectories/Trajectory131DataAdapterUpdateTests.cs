@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.MagDeclUsed = new PlaneAngleMeasure {Uom = PlaneAngleUom.dega, Value = 20.0};
+            Trajectory.MagDeclUsed = new PlaneAngleMeasure { Uom = PlaneAngleUom.dega, Value = 20.0 };
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
@@ -143,6 +143,132 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(stations?.FirstOrDefault()?.MD.Value, result.MDMin.Value);
             Assert.AreEqual(Trajectory.TrajectoryStation?.LastOrDefault()?.MD.Value, result.MDMax.Value);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Prepend_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 1 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 10 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+            result = DevKit.GetAndAssert(Trajectory);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Update_Trajectory_Data_Unchanged_ObjectGrowing_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
         [TestMethod]
