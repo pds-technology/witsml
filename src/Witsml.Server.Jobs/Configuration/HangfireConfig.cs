@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using Hangfire;
 using PDS.Framework;
 
@@ -27,18 +28,31 @@ namespace PDS.Witsml.Server.Jobs.Configuration
     /// </summary>
     public static class HangfireConfig
     {
+        private static IDisposable _backgroundJobServer;
+        private static ConcurrentStack<string> _jobIds;
+
         /// <summary>
         /// Registers Hangfire jobs for the specified container.
         /// </summary>
-        /// <param name="container">The container.</param>
-        /// <returns>An IDisposible reference to the Hangfire BackgroundJobServer.</returns>
-        public static IDisposable Register(IContainer container)
+        /// <param name="container">The composition container.</param>
+        public static void Register(IContainer container)
         {
             GlobalConfiguration.Configuration.UseActivator(new ContainerJobActivator(container));
-            var backgroundJobServer = new BackgroundJobServer();
+            _backgroundJobServer = new BackgroundJobServer();
+            _jobIds = new ConcurrentStack<string>();
 
-            BackgroundJob.Enqueue<ObjectGrowingManager>(x => x.Start());
-            return backgroundJobServer;
+            var jobId = BackgroundJob.Enqueue<ObjectGrowingManager>(x => x.Start());
+            _jobIds.Push(jobId);
+        }
+
+        /// <summary>
+        /// Deletes background jobs and disposes Hangfire server.
+        /// </summary>
+        public static void Unregister()
+        {
+            _jobIds.ForEach(x => BackgroundJob.Delete(x));
+            _backgroundJobServer.Dispose();
+            _jobIds.Clear();
         }
     }
 }

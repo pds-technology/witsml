@@ -19,9 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Threading.Tasks;
+using System.Threading;
 using log4net;
-using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
@@ -31,58 +30,44 @@ namespace PDS.Witsml.Server.Jobs
     /// Job to manage the updating of the object growing flag in growing objects.
     /// </summary>
     [Export]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class ObjectGrowingManager
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
-        private static bool _isExpiringGrowingObjects = false;
+        private static bool _isExpiringGrowingObjects;
+
+        private readonly IGrowingObjectDataProvider _growingObjectDataProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectGrowingManager" /> class.
         /// </summary>
-        /// <param name="container">The container.</param>
         /// <param name="growingObjectDataProvider">The growing object data provider.</param>
         [ImportingConstructor]
-        public ObjectGrowingManager(IContainer container, IGrowingObjectDataProvider growingObjectDataProvider)
+        public ObjectGrowingManager(IGrowingObjectDataProvider growingObjectDataProvider)
         {
-            Container = container;
-            GrowingObjectDataProvider = growingObjectDataProvider;
+            _growingObjectDataProvider = growingObjectDataProvider;
         }
-
-        /// <summary>
-        /// Gets the container.
-        /// </summary>
-        /// <value>
-        /// The container.
-        /// </value>
-        public IContainer Container { get; }
-
-        /// <summary>
-        /// Gets the growing object data provider.
-        /// </summary>
-        /// <value>
-        /// The growing object data provider.
-        /// </value>
-        public IGrowingObjectDataProvider GrowingObjectDataProvider { get; }
 
         /// <summary>
         /// Starts the process to verify the object growing status of growing objects.
         /// </summary>
-        /// <returns></returns>
-        public async Task Start()
+        public void Start()
         {
+            if (_isExpiringGrowingObjects)
+            {
+                _log.Warn("Object Growing Expiration Job is already running");
+                return;
+            }
+
+            _log.Debug("Starting Object Growing Expiration Job");
+            _isExpiringGrowingObjects = true;
+
             // TODO: Implement a way to pause/restart the job at runtime.
+
             while (true)
             {
-                _log.Debug("Starting Object Growing Expiration Job");
-                if (!_isExpiringGrowingObjects)
-                {
-                    ExpireGrowingObjects();
-                }
-                else
-                {
-                    _log.Warn("Previous Object Growing Expiration Job Is Still Running");
-                }
-                await Task.Delay(WitsmlSettings.ChangeDetectionPeriod * 1000);
+                Thread.Sleep(WitsmlSettings.ChangeDetectionPeriod * 1000);
+                ExpireGrowingObjects();
             }
         }
 
@@ -97,19 +82,19 @@ namespace PDS.Witsml.Server.Jobs
             {
                 _isExpiringGrowingObjects = true;
 
-                var logWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
+                var logWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
                     DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
                 wellboreUris.AddRange(logWellboreUris);
 
-                //var trajectoryWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
+                //var trajectoryWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
                 //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
                 //wellboreUris.AddRange(trajectoryWellboreUris);
 
-                //var mudLogWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
+                //var mudLogWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
                 //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.MudLogGrowingTimeoutPeriod));
                 //wellboreUris.AddRange(mudLogWellboreUris);
 
-                GrowingObjectDataProvider.ExpireWellboreObjects(wellboreUris);
+                _growingObjectDataProvider.ExpireWellboreObjects(wellboreUris);
             }
             finally
             {

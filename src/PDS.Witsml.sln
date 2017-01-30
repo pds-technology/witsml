@@ -14,6 +14,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.UnitTest", "Witsml.UnitTest\Witsml.UnitTest.csproj", "{750F795F-0C36-4CB3-9372-C4A5A716C635}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.IntegrationTest", "Witsml.Server.IntegrationTest\Witsml.Server.IntegrationTest.csproj", "{C050AB68-0543-4A23-870C-2D07F872484B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{006F1A29-952B-4264-8E91-0D445F74B183} = {006F1A29-952B-4264-8E91-0D445F74B183}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
 EndProject
