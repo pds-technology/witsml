@@ -35,8 +35,6 @@ namespace PDS.Witsml.Web
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
-        private IDisposable _hangfire;
-
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -60,12 +58,12 @@ namespace PDS.Witsml.Web
 
             // Configure and register Hangfire jobs
             Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
-            _hangfire = HangfireConfig.Register(container);
+            HangfireConfig.Register(container);
         }
 
         protected void Application_End(object sender, EventArgs e)
         {
-            _hangfire.Dispose();
+            HangfireConfig.Unregister();
         }
     }
 }
