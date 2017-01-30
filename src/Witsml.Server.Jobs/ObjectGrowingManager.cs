@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Jobs
     public class ObjectGrowingManager
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
+        private static readonly object _lock = new object();
         private static bool _isExpiringGrowingObjects;
 
         private readonly IGrowingObjectDataProvider _growingObjectDataProvider;
@@ -53,14 +54,25 @@ namespace PDS.Witsml.Server.Jobs
         /// </summary>
         public void Start()
         {
+            const string message = "Object Growing Expiration Job is already running";
+
             if (_isExpiringGrowingObjects)
             {
-                _log.Warn("Object Growing Expiration Job is already running");
+                _log.Warn(message);
                 return;
             }
 
-            _log.Debug("Starting Object Growing Expiration Job");
-            _isExpiringGrowingObjects = true;
+            lock (_lock)
+            {
+                if (_isExpiringGrowingObjects)
+                {
+                    _log.Warn(message);
+                    return;
+                }
+
+                _log.Debug("Starting Object Growing Expiration Job");
+                _isExpiringGrowingObjects = true;
+            }
 
             // TODO: Implement a way to pause/restart the job at runtime.
 
@@ -78,28 +90,20 @@ namespace PDS.Witsml.Server.Jobs
         internal void ExpireGrowingObjects()
         {
             var wellboreUris = new List<string>();
-            try
-            {
-                _isExpiringGrowingObjects = true;
 
-                var logWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
-                    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
-                wellboreUris.AddRange(logWellboreUris);
+            var logWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
+                DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
+            wellboreUris.AddRange(logWellboreUris);
 
-                //var trajectoryWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
-                //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
-                //wellboreUris.AddRange(trajectoryWellboreUris);
+            //var trajectoryWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
+            //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
+            //wellboreUris.AddRange(trajectoryWellboreUris);
 
-                //var mudLogWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
-                //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.MudLogGrowingTimeoutPeriod));
-                //wellboreUris.AddRange(mudLogWellboreUris);
+            //var mudLogWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
+            //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.MudLogGrowingTimeoutPeriod));
+            //wellboreUris.AddRange(mudLogWellboreUris);
 
-                _growingObjectDataProvider.ExpireWellboreObjects(wellboreUris);
-            }
-            finally
-            {
-                _isExpiringGrowingObjects = false;
-            }
+            _growingObjectDataProvider.ExpireWellboreObjects(wellboreUris);
         }
     }
 }
