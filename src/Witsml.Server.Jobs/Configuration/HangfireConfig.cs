@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Concurrent;
 using Hangfire;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Jobs.Configuration
 {
@@ -29,7 +29,6 @@ namespace PDS.Witsml.Server.Jobs.Configuration
     public static class HangfireConfig
     {
         private static IDisposable _backgroundJobServer;
-        private static ConcurrentStack<string> _jobIds;
 
         /// <summary>
         /// Registers Hangfire jobs for the specified container.
@@ -37,12 +36,18 @@ namespace PDS.Witsml.Server.Jobs.Configuration
         /// <param name="container">The composition container.</param>
         public static void Register(IContainer container)
         {
-            GlobalConfiguration.Configuration.UseActivator(new ContainerJobActivator(container));
-            _backgroundJobServer = new BackgroundJobServer();
-            _jobIds = new ConcurrentStack<string>();
+            GlobalConfiguration.Configuration
+                .UseActivator(new ContainerJobActivator(container))
+                .UseLog4NetLogProvider();
 
-            var jobId = BackgroundJob.Enqueue<ObjectGrowingManager>(x => x.Start());
-            _jobIds.Push(jobId);
+            _backgroundJobServer = new BackgroundJobServer(new BackgroundJobServerOptions
+            {
+                HeartbeatInterval = TimeSpan.FromDays(1),
+                ServerCheckInterval = TimeSpan.FromDays(1)
+            });
+
+            var changeDetectionPeriod = Math.Max(WitsmlSettings.ChangeDetectionPeriod / 60, 1);
+            RecurringJob.AddOrUpdate<ObjectGrowingManager>(ObjectGrowingManager.JobId, x => x.Start(), Cron.MinuteInterval(changeDetectionPeriod));
         }
 
         /// <summary>
@@ -50,9 +55,7 @@ namespace PDS.Witsml.Server.Jobs.Configuration
         /// </summary>
         public static void Unregister()
         {
-            _jobIds.ForEach(x => BackgroundJob.Delete(x));
-            _backgroundJobServer.Dispose();
-            _jobIds.Clear();
+            _backgroundJobServer?.Dispose();
         }
     }
 }

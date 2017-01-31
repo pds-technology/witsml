@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Threading;
 using log4net;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
@@ -33,6 +32,7 @@ namespace PDS.Witsml.Server.Jobs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ObjectGrowingManager
     {
+        public static readonly string JobId = typeof(ObjectGrowingManager).FullName;
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
         private static readonly object _lock = new object();
         private static bool _isExpiringGrowingObjects;
@@ -76,10 +76,13 @@ namespace PDS.Witsml.Server.Jobs
 
             // TODO: Implement a way to pause/restart the job at runtime.
 
-            while (true)
+            try
             {
-                Thread.Sleep(WitsmlSettings.ChangeDetectionPeriod * 1000);
                 ExpireGrowingObjects();
+            }
+            finally
+            {
+                _isExpiringGrowingObjects = false;
             }
         }
 
