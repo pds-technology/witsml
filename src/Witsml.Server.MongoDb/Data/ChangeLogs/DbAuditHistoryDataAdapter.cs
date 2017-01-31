@@ -61,6 +61,26 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         }
 
         /// <summary>
+        /// Retrieves data objects from the data store using the specified parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <param name="context">The response context.</param>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
+        public override List<DbAuditHistory> Query(WitsmlQueryParser parser, ResponseContext context)
+        {
+            var entities = base.Query(parser, context);
+            var returnElements = parser.ReturnElements();
+
+            // Only return full changeHistory if requested
+            if (!OptionsIn.ReturnElements.All.Equals(returnElements) && !parser.Contains("changeHistory"))
+            {
+                entities.ForEach(x => x.ChangeHistory = null);
+            }
+
+            return entities;
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -93,6 +113,20 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of property names.</returns>
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
+        {
+            var returnElements = parser.ReturnElements();
+
+            return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore", "UidObject", "NameObject" }
+                : null;
         }
     }
 }

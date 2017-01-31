@@ -85,7 +85,8 @@ namespace PDS.Witsml.Server.Data
 
             // Format response using MongoDb projection, i.e. selecting specified fields only
             if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
-                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
+                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
+                OptionsIn.ReturnElements.LatestChangeOnly.Equals(returnElements))
             {
                 entities.AddRange(results.ToList());
             }
@@ -149,7 +150,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dateTimeValue">The date time value.</param>
         protected override void HandleDateTimeValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
-            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
+            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
             {
                 Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }
@@ -172,7 +173,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="timestampValue">The timestamp value.</param>
         protected override void HandleTimestampValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
-            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
+            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
             {
                 Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }

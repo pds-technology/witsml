@@ -16,45 +16,64 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Data.ChangeLogs;
-using PDS.Witsml.Server.Data.ChangeLogs;
 
 namespace PDS.Witsml.Server.Data.DbAuditHistories
 {
     [TestClass]
     public class DbAuditHistoryDataAdapterAddTests
     {
-        private DevKit141Aspect _devKit;
         public TestContext TestContext { get; set; }
 
-        private IWitsmlDataProvider _dataProvider;
+        private DevKit141Aspect _devKit;
         private IWitsmlDataAdapter<DbAuditHistory> _dataAdapter;
+        private DbAuditHistory _changeLog;
 
         [TestInitialize]
         public void TestSetUp()
         {
             _devKit = new DevKit141Aspect(TestContext);
-            _dataProvider = _devKit.Container.Resolve<IWitsmlDataProvider>(ObjectNames.ChangeLog141);
             _dataAdapter = _devKit.Container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>();
 
+            _changeLog = new DbAuditHistory
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name(),
+                UidObject = _devKit.Uid(),
+                NameObject = _devKit.Name(),
+                ObjectType = ObjectTypes.Well,
+                LastChangeType = ChangeInfoType.add,
+                LastChangeInfo = $"Well was added for test {TestContext.TestName}",
+                ChangeHistory = new List<ChangeHistory>()
+            };
+
+            _changeLog.CommonData = _changeLog.CommonData.Create();
+
+            _changeLog.ChangeHistory.Add(new ChangeHistory
+            {
+                ChangeInfo = _changeLog.LastChangeInfo,
+                ChangeType = _changeLog.LastChangeType,
+                DateTimeChange = _changeLog.CommonData.DateTimeLastChange
+            });
         }
 
         [TestMethod]
         public void DbAuditHistory_Test_Add()
         {
-            var changeLog = new DbAuditHistory() {Uid = Guid.NewGuid().ToString(), Name = "Test"};
+            _dataAdapter.Add(null, _changeLog);
 
-            _dataAdapter.Add(null, changeLog);
+            var changeLog = _dataAdapter.Get(_changeLog.GetUri());
 
             Assert.IsNotNull(changeLog);
+            Assert.AreEqual(_changeLog.Uid, changeLog.Uid);
+            Assert.AreEqual(_changeLog.Name, changeLog.Name);
+            Assert.AreEqual(_changeLog.UidObject, changeLog.UidObject);
+            Assert.AreEqual(_changeLog.NameObject, changeLog.NameObject);
+            Assert.AreEqual(_changeLog.LastChangeType, changeLog.LastChangeType);
         }
     }
 }
