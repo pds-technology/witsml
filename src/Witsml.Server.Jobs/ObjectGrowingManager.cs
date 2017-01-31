@@ -98,9 +98,9 @@ namespace PDS.Witsml.Server.Jobs
                 DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
             wellboreUris.AddRange(logWellboreUris);
 
-            //var trajectoryWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
-            //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
-            //wellboreUris.AddRange(trajectoryWellboreUris);
+            var trajectoryWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
+                DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
+            wellboreUris.AddRange(trajectoryWellboreUris);
 
             //var mudLogWellboreUris = _growingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
             //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.MudLogGrowingTimeoutPeriod));

@@ -19,10 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Jobs;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -32,6 +35,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [TestClass]
     public partial class Trajectory131DataAdapterUpdateTests : Trajectory131TestBase
     {
+        private const int GrowingTimeoutPeriod = 10;
+
         [TestMethod]
         public void Trajectory131DataAdapter_UpdateInStore_Update_Trajectory_Header()
         {
@@ -188,7 +193,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Data_ExpireGrowingObjects()
         {
             AddParents();
 
@@ -227,6 +232,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Assert.AreEqual(4, result.TrajectoryStation.Count);
             Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Trajectory);
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
         [TestMethod]
