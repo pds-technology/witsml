@@ -134,6 +134,8 @@
     <Compile Include="Data\Attachments\Attachment200Validator.generated.cs">
       <DependentUpon>Attachment200Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryDataProvider.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryValidator.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.generated.cs">
       <DependentUpon>ChannelSet200DataProvider.cs</DependentUpon>
@@ -380,9 +382,7 @@
       <Name>Witsml</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\ChangeLogs\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config">
       <SubType>Designer</SubType>

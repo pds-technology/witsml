@@ -108,6 +108,8 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Compatibility\UnknownElementSetting.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistory.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryList.cs" />
     <Compile Include="Data\DataObjectNavigationContext.cs" />
     <Compile Include="Data\DataObjectNavigator.cs" />
     <Compile Include="Data\Channels\ChannelDataBlock.cs" />
