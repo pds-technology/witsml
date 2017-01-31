@@ -18,6 +18,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -56,9 +57,15 @@ namespace PDS.Witsml.Web
             var store = container.Resolve<IWitsmlStore>();
             store.WMLS_GetCap(new WMLS_GetCapRequest(OptionsIn.DataVersion.Version141));
 
-            // Configure and register Hangfire jobs
-            Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
-            HangfireConfig.Register(container);
+            Task.Run(async () =>
+            {
+                // Wait before initializing Hangfire to give server time to warm up
+                await Task.Delay(WitsmlSettings.ChangeDetectionPeriod * 1000);
+
+                // Configure and register Hangfire jobs
+                Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
+                HangfireConfig.Register(container);
+            });
         }
 
         protected void Application_End(object sender, EventArgs e)

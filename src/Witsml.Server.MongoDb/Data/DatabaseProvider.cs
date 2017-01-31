@@ -49,6 +49,7 @@ namespace PDS.Witsml.Server.Data
         [ImportingConstructor]
         public DatabaseProvider(IContainer container, MongoDbClassMapper mapper)
         {
+            MongoDefaults.MaxConnectionIdleTime = TimeSpan.FromMinutes(1);
             _container = container;
             _client = new Lazy<IMongoClient>(CreateMongoClient);
             _connectionString = GetConnectionString();
@@ -114,7 +115,6 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The client interface.</returns>
         private IMongoClient CreateMongoClient()
         {
-            MongoDefaults.MaxConnectionIdleTime = TimeSpan.FromMinutes(1);
             return new MongoClient(_connectionString);
         }
 
