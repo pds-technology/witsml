@@ -18,9 +18,11 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess;
+using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Data.GrowingObjects;
@@ -41,6 +43,7 @@ namespace PDS.Witsml.Server.Data
         {
             RegisterDataTypes();
 
+            Register3<Witsml141.ChangeLog>();
             Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
             Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();
             Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
@@ -52,6 +55,7 @@ namespace PDS.Witsml.Server.Data
             Register3<ChannelDataChunk>();
             Register3<MongoDbTransaction>();
             Register3<DbGrowingObject>();
+            Register3<DbAuditHistory>();
 
             Register(new TimestampSerializer());
             Register(new XmlElementSerializer());
