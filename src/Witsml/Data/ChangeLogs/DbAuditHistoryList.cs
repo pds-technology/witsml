@@ -27,7 +27,7 @@ namespace PDS.Witsml.Data.ChangeLogs
     /// <seealso cref="Energistics.DataAccess.WITSML141.ChangeLogList" />
     [XmlInclude(typeof(ChangeLog))]
     [XmlInclude(typeof(DbAuditHistory))]
-    [XmlType(Namespace = "http://www.witsml.org/schemas/1series")]
+    [XmlType(TypeName = "changeLogs", Namespace = "http://www.witsml.org/schemas/1series")]
     [XmlRoot("changeLogs", IsNullable = false, Namespace = "http://www.witsml.org/schemas/1series")]
     public class DbAuditHistoryList : ChangeLogList
     {

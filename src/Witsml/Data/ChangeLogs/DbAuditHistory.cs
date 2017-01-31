@@ -26,7 +26,7 @@ namespace PDS.Witsml.Data.ChangeLogs
     /// Extended version of 141 ChangeLog for use as a common version ChangeLog
     /// </summary>
     /// <seealso cref="ChangeLog" />
-    [XmlType(Namespace = "http://www.witsml.org/schemas/1series")]
+    [XmlType(TypeName = "changeLog", Namespace = "http://www.witsml.org/schemas/1series")]
     public class DbAuditHistory : ChangeLog, IDataObject
     {
         /// <summary>
