@@ -42,8 +42,9 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// Data adapter that encapsulates CRUD functionality for <see cref="WbGeometry" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{WbGeometry}" />
-    [Export(typeof(IWitsmlDataAdapter<WbGeometry>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<WbGeometry>))]
+    [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataAdapter : MongoDbDataAdapter<WbGeometry>, IWitsml141Configuration
     {
@@ -71,7 +72,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             capServer.Add(Functions.AddToStore, ObjectTypes.WbGeometry);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.WbGeometry);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.WbGeometry);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

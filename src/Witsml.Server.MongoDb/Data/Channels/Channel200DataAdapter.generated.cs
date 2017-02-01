@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Channel}" />
     [Export(typeof(IWitsmlDataAdapter<Channel>))]
+    [Export200(ObjectTypes.Channel, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Channel200DataAdapter : MongoDbDataAdapter<Channel>
     {

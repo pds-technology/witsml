@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Messages
     /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Message}" />
-    [Export(typeof(IWitsmlDataAdapter<Message>))]
     [Export(typeof(IWitsml131Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Message>))]
+    [Export131(ObjectTypes.Message, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message131DataAdapter : MongoDbDataAdapter<Message>, IWitsml131Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Messages
             capServer.Add(Functions.AddToStore, ObjectTypes.Message);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Message);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Message);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

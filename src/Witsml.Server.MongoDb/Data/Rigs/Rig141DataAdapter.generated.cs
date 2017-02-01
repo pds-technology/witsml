@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// Data adapter that encapsulates CRUD functionality for <see cref="Rig" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Rig}" />
-    [Export(typeof(IWitsmlDataAdapter<Rig>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Rig>))]
+    [Export141(ObjectTypes.Rig, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig141DataAdapter : MongoDbDataAdapter<Rig>, IWitsml141Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Rigs
             capServer.Add(Functions.AddToStore, ObjectTypes.Rig);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Rig);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Rig);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

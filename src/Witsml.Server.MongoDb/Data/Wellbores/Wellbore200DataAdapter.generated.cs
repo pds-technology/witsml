@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
+    [Export200(ObjectTypes.Wellbore, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore200DataAdapter : MongoDbDataAdapter<Wellbore>
     {

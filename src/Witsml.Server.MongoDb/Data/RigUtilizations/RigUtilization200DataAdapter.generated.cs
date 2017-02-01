@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{RigUtilization}" />
     [Export(typeof(IWitsmlDataAdapter<RigUtilization>))]
+    [Export200(ObjectTypes.RigUtilization, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class RigUtilization200DataAdapter : MongoDbDataAdapter<RigUtilization>
     {

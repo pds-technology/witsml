@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
-    [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export(typeof(IWitsml131Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
+    [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

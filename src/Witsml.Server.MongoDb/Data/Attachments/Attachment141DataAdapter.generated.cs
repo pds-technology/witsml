@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// Data adapter that encapsulates CRUD functionality for <see cref="Attachment" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Attachment}" />
-    [Export(typeof(IWitsmlDataAdapter<Attachment>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Attachment>))]
+    [Export141(ObjectTypes.Attachment, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment141DataAdapter : MongoDbDataAdapter<Attachment>, IWitsml141Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Attachments
             capServer.Add(Functions.AddToStore, ObjectTypes.Attachment);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Attachment);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Attachment);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export141(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
     {

@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Trajectories.TrajectoryDataAdapter{Trajectory,TrajectoryStation}" />
-    [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export(typeof(IWitsml131Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
+    [Export131(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory131DataAdapter : TrajectoryDataAdapter<Trajectory, TrajectoryStation>, IWitsml131Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             capServer.Add(Functions.AddToStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

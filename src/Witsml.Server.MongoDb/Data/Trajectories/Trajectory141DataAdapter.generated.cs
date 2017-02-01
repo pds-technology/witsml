@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Trajectories.TrajectoryDataAdapter{Trajectory,TrajectoryStation}" />
-    [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
+    [Export141(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory141DataAdapter : TrajectoryDataAdapter<Trajectory, TrajectoryStation>, IWitsml141Configuration
     {

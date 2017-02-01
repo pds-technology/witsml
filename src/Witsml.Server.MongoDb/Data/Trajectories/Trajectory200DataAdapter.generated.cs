@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Trajectory}" />
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
+    [Export200(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory200DataAdapter : MongoDbDataAdapter<Trajectory>
     {

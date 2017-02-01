@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Attachment}" />
     [Export(typeof(IWitsmlDataAdapter<Attachment>))]
+    [Export200(ObjectTypes.Attachment, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment200DataAdapter : MongoDbDataAdapter<Attachment>
     {

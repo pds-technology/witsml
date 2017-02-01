@@ -39,8 +39,9 @@ namespace PDS.Witsml.Server.Data.Wells
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
-    [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export(typeof(IWitsml141Configuration))]
+    [Export(typeof(IWitsmlDataAdapter<Well>))]
+    [Export141(ObjectTypes.Well, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Wells
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

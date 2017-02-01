@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
     [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export200(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
