@@ -25,6 +25,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Framework;
+using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Transactions;
 
@@ -52,6 +53,11 @@ namespace PDS.Witsml.Server.Data
             DbCollectionName = dbCollectionName;
             IdPropertyName = idPropertyName;
             NamePropertyName = namePropertyName;
+
+            if (typeof(T) != typeof(DbAuditHistory))
+            {
+                AuditHistoryAdapter = container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as MongoDbDataAdapter<DbAuditHistory>;
+            }
         }
 
         /// <summary>
@@ -59,6 +65,12 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The database provider.</value>
         protected IDatabaseProvider DatabaseProvider { get; }
+
+        /// <summary>
+        /// Gets the audit history adapter.
+        /// </summary>
+        /// <value>The audit history adapter.</value>
+        protected MongoDbDataAdapter<DbAuditHistory> AuditHistoryAdapter { get; }
 
         /// <summary>
         /// Gets a reference to the current <see cref="MongoTransaction"/> instance.
@@ -447,6 +459,8 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
+                AuditInsert(uri, entity);
+
                 transaction.Attach(MongoDbAction.Add, dbCollectionName, IdPropertyName, null, uri);
                 transaction.Save();
             }
@@ -455,6 +469,17 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error inserting into {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Audits the insert operation.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        protected virtual void AuditInsert<TObject>(EtpUri uri, TObject entity)
+        {
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.add);
         }
 
         /// <summary>
@@ -492,6 +517,8 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
+                AuditUpdate(uri, current);
+
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
             }
@@ -500,6 +527,17 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error updating {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Audits the update operation.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity)
+        {
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update);
         }
 
         /// <summary>
@@ -539,6 +577,8 @@ namespace PDS.Witsml.Server.Data
 
                 var transaction = Transaction;
                 if (transaction == null) return;
+
+                AuditUpdate(uri, current);
 
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
@@ -621,8 +661,9 @@ namespace PDS.Witsml.Server.Data
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
-                if (current == null)
-                    return;
+
+                if (current == null) return;
+                AuditDelete(uri, current);
 
                 var transaction = Transaction;
                 if (transaction != null)
@@ -642,6 +683,17 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error deleting from {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Audits the delete operation.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        protected virtual void AuditDelete<TObject>(EtpUri uri, TObject entity)
+        {
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.delete);
         }
 
         /// <summary>
@@ -679,6 +731,8 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
+                AuditPartialDelete(uri, current);
+
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
             }
@@ -686,6 +740,97 @@ namespace PDS.Witsml.Server.Data
             {
                 Logger.ErrorFormat("Error partial deleting {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
+        }
+
+        /// <summary>
+        /// Audits the partial delete operation.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity)
+        {
+        }
+
+        /// <summary>
+        /// Audits the entity.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="changeType">Type of the change.</param>
+        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType changeType)
+        {
+            if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
+
+            var uriLower = uri.Uri.ToLowerInvariant();
+            var auditHistory = AuditHistoryAdapter.GetQuery().FirstOrDefault(x => x.Uri == uriLower);
+            var changeInfo = $"{changeType:G} {uri.ObjectType}";
+            var exists = false;
+
+            // Creating audit history entry
+            if (auditHistory == null)
+            {
+                var dataObject = entity as IDataObject;
+                var wellObject = entity as IWellObject;
+                var wellboreObject = entity as IWellboreObject;
+                var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
+
+                auditHistory = new DbAuditHistory
+                {
+                    ObjectType = uri.ObjectType,
+                    LastChangeInfo = changeInfo,
+                    LastChangeType = changeType,
+                    ChangeHistory = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory>(),
+                    NameWellbore = wellboreObject?.NameWellbore,
+                    UidWellbore = wellboreObject?.UidWellbore,
+                    NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell,
+                    UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
+                    NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
+                    UidObject = uri.ObjectId,
+                    Uri = uriLower
+                };
+
+                auditHistory.Uid = auditHistory.NewUid();
+                auditHistory.Name = auditHistory.Uid;
+                auditHistory.CommonData = auditHistory.CommonData.Create();
+            }
+            else // Updating existing entry
+            {
+                auditHistory.CommonData.DateTimeLastChange = DateTimeOffset.UtcNow;
+                auditHistory.LastChangeInfo = changeInfo;
+                auditHistory.LastChangeType = changeType;
+                exists = true;
+            }
+
+            // Append current change entry
+            auditHistory.ChangeHistory.Add(new Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory
+            {
+                Uid = Guid.NewGuid().ToString(),
+                ChangeInfo = auditHistory.LastChangeInfo,
+                ChangeType = auditHistory.LastChangeType,
+                DateTimeChange = auditHistory.CommonData.DateTimeLastChange
+            });
+
+            AuditEntity(auditHistory, exists);
+        }
+
+        /// <summary>
+        /// Audits the entity. Override this method to adjust the audit record
+        /// before it is submitted to the database or to prevent the audit.
+        /// </summary>
+        /// <param name="auditHistory">The audit history.</param>
+        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
+        protected virtual void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        {
+            if (exists)
+            {
+                AuditHistoryAdapter?.Replace(null, auditHistory);
+            }
+            else
+            {
+                AuditHistoryAdapter?.Add(null, auditHistory);
             }
         }
 
