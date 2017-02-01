@@ -87,6 +87,8 @@ namespace PDS.Witsml.Server.Configuration
             }
             else if (request.Function == Functions.DeleteFromStore)
             {
+                ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword, OptionsIn.DataVersion.Keyword);
+                ValidateCascadedDelete(optionsIn, WitsmlSettings.IsCascadeDeleteEnabled);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }

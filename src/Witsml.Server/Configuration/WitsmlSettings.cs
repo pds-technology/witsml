@@ -29,6 +29,11 @@ namespace PDS.Witsml.Server.Configuration
         public static bool IsUserAuthorizationEnabled = Properties.Settings.Default.IsUserAuthorizationEnabled;
 
         /// <summary>
+        /// The IsCascadeDeleteEnabled setting.
+        /// </summary>
+        public static bool IsCascadeDeleteEnabled = Properties.Settings.Default.IsCascadeDeleteEnabled;
+
+        /// <summary>
         /// The truncate XML out debug size
         /// </summary>
         public static int TruncateXmlOutDebugSize = Properties.Settings.Default.TruncateXmlOutDebugSize;

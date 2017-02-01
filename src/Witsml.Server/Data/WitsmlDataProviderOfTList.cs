@@ -133,6 +133,8 @@ namespace PDS.Witsml.Server.Data
             var root = WitsmlOperationContext.Current.Document.Root;
             var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
 
+            WitsmlOperationContext.Current.IsCascadeDelete = parser.CascadedDelete();
+
             return Delete(parser);
         }
 

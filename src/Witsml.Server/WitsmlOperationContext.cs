@@ -123,6 +123,12 @@ namespace PDS.Witsml.Server
         public XDocument Document { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this instance is cascade delete.
+        /// </summary>
+        /// <value><c>true</c> if requesting cascade delete; otherwise, <c>false</c>.</value>
+        public bool IsCascadeDelete { get; set; }
+
+        /// <summary>
         /// Gets the list of validation warnings encountered during the operation.
         /// </summary>
         /// <value>The list of validation warnings.</value>

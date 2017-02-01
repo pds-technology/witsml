@@ -128,5 +128,8 @@
     <Setting Name="IsUserAuthorizationEnabled" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="IsCascadeDeleteEnabled" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

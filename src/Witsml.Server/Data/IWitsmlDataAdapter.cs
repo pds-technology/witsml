@@ -68,6 +68,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="fields">The requested fields.</param>
         /// <returns>The partial data object instance.</returns>
         object Get(EtpUri uri, params string[] fields);
+        /// <summary>        /// Gets the URI for the specified data object.        /// </summary>        /// <param name="dataObject">The data object.</param>        /// <returns>The data object URI.</returns>        EtpUri GetUri(object dataObject);
 
         /// <summary>
         /// Deletes a data object by the specified URI.

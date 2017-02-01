@@ -401,5 +401,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((bool)(this["IsUserAuthorizationEnabled"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsCascadeDeleteEnabled {
+            get {
+                return ((bool)(this["IsCascadeDeleteEnabled"]));
+            }
+        }
     }
 }

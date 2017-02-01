@@ -265,6 +265,17 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets the URI for the specified data object.
         /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The data object URI.</returns>
+        EtpUri IWitsmlDataAdapter.GetUri(object dataObject)
+        {
+            if (!(dataObject is T)) return default(EtpUri);
+            return GetUri((T)dataObject);
+        }
+
+        /// <summary>
+        /// Gets the URI for the specified data object.
+        /// </summary>
         /// <param name="instance">The data object.</param>
         /// <returns>The URI representing the data object.</returns>
         /// <exception cref="System.InvalidOperationException"></exception>
@@ -306,6 +317,49 @@ namespace PDS.Witsml.Server.Data
         protected virtual IWitsmlTransaction GetTransaction()
         {
             return Container.Resolve<IWitsmlTransaction>();
+        }
+
+        /// <summary>
+        /// Deletes all child objects related to the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        protected virtual void DeleteAll(EtpUri uri)
+        {
+            var adapters = new List<IWitsmlDataAdapter>();
+
+            if (OptionsIn.DataVersion.Version200.Equals(uri.Version))
+            {
+                // Cascade delete not defined for WITSML 2.0 / ETP
+                return;
+            }
+            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            {
+                adapters.Add(Container.Resolve<IWitsmlDataAdapter>(new ObjectName(ObjectTypes.Wellbore, uri.Version)));
+            }
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            {
+                var exclude = new[] { ObjectTypes.Well, ObjectTypes.Wellbore, ObjectTypes.ChangeLog };
+
+                var type = OptionsIn.DataVersion.Version141.Equals(uri.Version)
+                    ? typeof(IWitsml141Configuration)
+                    : typeof(IWitsml131Configuration);
+
+                Container
+                    .ResolveAll(type)
+                    .Cast<IWitsmlDataAdapter>()
+                    .Where(x => !exclude.ContainsIgnoreCase(ObjectTypes.GetObjectType(x.DataObjectType)))
+                    .ForEach(adapters.Add);
+            }
+
+            foreach (var adapter in adapters)
+            {
+                var dataObjects = adapter.GetAll(uri);
+
+                foreach (var dataObject in dataObjects)
+                {
+                    adapter.Delete(adapter.GetUri(dataObject));
+                }
+            }
         }
     }
 }
