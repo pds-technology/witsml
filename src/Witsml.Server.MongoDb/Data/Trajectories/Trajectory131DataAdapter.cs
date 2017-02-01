@@ -20,13 +20,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.Datatypes;
+using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-    public partial class Trajectory131DataAdapter
+    [Export131(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]
+    public partial class Trajectory131DataAdapter : IGrowingObjectDataAdapter
     {
         /// <summary>
         /// Clears the trajectory stations.
@@ -94,6 +97,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.Debug("Set trajectory MD ranges.");
 
+            var isObjectGrowing = false;
+
             if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count <= 0)
             {
                 dataObject.MDMin = null;
@@ -107,12 +112,42 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var alwaysInclude = force ||
                                 OptionsIn.ReturnElements.All.Equals(returnElements) ||
                                 OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements);
+            var isUpdateInStore = WitsmlOperationContext.Current.Request.Function == Functions.UpdateInStore;
 
             if (alwaysInclude || parser.Contains("mdMn"))
-                dataObject.MDMin = dataObject.TrajectoryStation.FirstOrDefault()?.MD;
+            {
+                var firstStation = dataObject.TrajectoryStation.First();
+
+                if (dataObject.MDMin != null &&
+                    dataObject.MDMin.Value > firstStation.MD.Value &&
+                    isUpdateInStore)
+                {
+                    isObjectGrowing = true;
+                }
+
+                dataObject.MDMin = firstStation.MD;
+            }
 
             if (alwaysInclude || parser.Contains("mdMx"))
-                dataObject.MDMax = dataObject.TrajectoryStation.LastOrDefault()?.MD;
+            {
+                var lastStation = dataObject.TrajectoryStation.Last();
+
+                if (dataObject.MDMax != null &&
+                    dataObject.MDMax.Value < lastStation.MD.Value &&
+                    isUpdateInStore)
+                {
+                    isObjectGrowing = true;
+                }
+
+                dataObject.MDMax = lastStation.MD;
+            }
+
+            if (isObjectGrowing)
+            {
+                var uri = dataObject.GetUri();
+                dataObject.ObjectGrowing = true;
+                DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
+            }
         }
 
         /// <summary>
@@ -133,6 +168,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override List<TrajectoryStation> GetTrajectoryStation(Trajectory dataObject)
         {
             return dataObject.TrajectoryStation;
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="trajectoryUri">The Trajectory URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected override void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive)
+        {
         }
     }
 }

@@ -566,7 +566,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Updates the IsActive field of a wellbore.
         /// </summary>
         /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">If set to <c>true</c> [is active].</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
         protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
         {
             

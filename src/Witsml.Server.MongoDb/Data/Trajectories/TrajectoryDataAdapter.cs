@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess;
@@ -28,6 +29,8 @@ using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -59,6 +62,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.Debug("Instance created.");
         }
+
+        /// <summary>
+        /// Gets or sets the database growing object adapter.
+        /// </summary>
+        /// <value>
+        /// The database growing object adapter.
+        /// </value>
+        [Import]
+        public IGrowingObjectDataProvider DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -200,6 +212,35 @@ namespace PDS.Witsml.Server.Data.Trajectories
    
                 transaction.Commit();
             }
+        }
+
+        /// <summary>
+        /// Updates the object growing field of a trajectory.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
+        public void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
+        {
+            var entity = GetEntity(uri);
+
+            if (entity == null)
+            {
+                Logger.DebugFormat("Trajectory not found with uri '{0}'.", uri);
+                return;
+            }
+
+            Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            // Join existing Transaction
+            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, entity.ToBsonDocument(), uri);
+            Transaction.Save();
+
+            // Update ObjectGrowing
+            var update = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            mongoUpdate.UpdateFields(filter, update);
         }
 
         /// <summary>
@@ -447,6 +488,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="dataObject">The trajectory data object.</param>
         /// <returns>The trajectory station collection.</returns>
         protected abstract List<TChild> GetTrajectoryStation(T dataObject);
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="trajectoryUri">The Log URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected abstract void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive);
 
         private bool UpdateStations(T dataObject)
         {

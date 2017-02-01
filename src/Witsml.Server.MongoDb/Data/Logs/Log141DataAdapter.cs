@@ -434,11 +434,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Updates the IsActive field of a wellbore.
         /// </summary>
         /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
         protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
         {
             var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(logUri.Version));
-            dataAdapter.UpdateIsActive(logUri.Parent, true);
+            dataAdapter.UpdateIsActive(logUri.Parent, isActive);
         }
 
         /// <summary>
