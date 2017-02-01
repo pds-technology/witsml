@@ -203,6 +203,12 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(uri);
+
+                if (WitsmlOperationContext.Current.IsCascadeDelete)
+                {
+                    DeleteAll(uri);
+                }
+
                 DeleteEntity(uri);
                 transaction.Commit();
             }
