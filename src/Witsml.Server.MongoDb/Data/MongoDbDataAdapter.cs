@@ -772,14 +772,15 @@ namespace PDS.Witsml.Server.Data
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
             var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, entity, changeType);
-            var exists = string.IsNullOrWhiteSpace(auditHistory.Uid);
-            if (!exists)
+            var isNewEntry = string.IsNullOrWhiteSpace(auditHistory.Uid);
+
+            if (isNewEntry)
             {
                 auditHistory.Uid = auditHistory.NewUid();
                 auditHistory.Name = auditHistory.Uid;
             }
 
-            AuditEntity(auditHistory, exists);
+            AuditEntity(auditHistory, isNewEntry);
         }
 
         /// <summary>
@@ -787,16 +788,16 @@ namespace PDS.Witsml.Server.Data
         /// before it is submitted to the database or to prevent the audit.
         /// </summary>
         /// <param name="auditHistory">The audit history.</param>
-        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
-        protected virtual void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        /// <param name="isNewEntry">if set to <c>true</c> add a new entry.</param>
+        protected virtual void AuditEntity(DbAuditHistory auditHistory, bool isNewEntry)
         {
-            if (exists)
+            if (isNewEntry)
             {
-                AuditHistoryAdapter?.Replace(null, auditHistory);
+                AuditHistoryAdapter?.Add(null, auditHistory);
             }
             else
             {
-                AuditHistoryAdapter?.Add(null, auditHistory);
+                AuditHistoryAdapter?.Replace(null, auditHistory);
             }
         }
 
