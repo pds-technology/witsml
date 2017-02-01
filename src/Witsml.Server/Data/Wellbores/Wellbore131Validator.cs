@@ -97,7 +97,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 // Validate that there are no child data-objects if cascading deletes are not invoked.
                 foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
                 {
-                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Energistics.DataAccess.WITSML141.Wellbore) || dataAdapter.DataObjectType == typeof(DbAuditHistory))
+                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore) || dataAdapter.DataObjectType == typeof(DbAuditHistory))
                         continue;
 
                     if (dataAdapter.Any(uri))
