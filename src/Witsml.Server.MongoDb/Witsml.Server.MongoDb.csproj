@@ -223,7 +223,7 @@
       <DependentUpon>Trajectory200DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Trajectories\TrajectoryDataAdapter.cs" />
-    <Compile Include="Data\Transactions\MongoDbTransactionAdapter.cs" />
+    <Compile Include="Data\Transactions\DbTransactionDataAdapter.cs" />
     <Compile Include="Data\Transactions\MongoTransaction.cs" />
     <Compile Include="Data\Transactions\TransactionEnums.cs" />
     <Compile Include="Data\UidGenerator.cs" />
@@ -261,10 +261,10 @@
     </Compile>
     <Compile Include="Data\XmlElementSerializer.cs" />
     <Compile Include="Data\GrowingObjects\DbGrowingObject.cs" />
-    <Compile Include="Data\GrowingObjects\DbGrowingObjectAdapter.cs" />
+    <Compile Include="Data\GrowingObjects\DbGrowingObjectDataAdapter.cs" />
     <Compile Include="Models\ChannelDataChunk.cs" />
     <Compile Include="Models\ChunkExtensions.cs" />
-    <Compile Include="Data\Transactions\MongoDbTransaction.cs" />
+    <Compile Include="Data\Transactions\DbTransaction.cs" />
     <Compile Include="Data\MongoDbUpdateContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

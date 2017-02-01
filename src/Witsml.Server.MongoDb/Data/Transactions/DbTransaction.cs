@@ -24,7 +24,7 @@ namespace PDS.Witsml.Server.Data.Transactions
     /// <summary>
     /// Class for transaction entry in MongoDb
     /// </summary>
-    public class MongoDbTransaction
+    public class DbTransaction
     {
         /// <summary>
         /// Gets or sets the transaction tid.

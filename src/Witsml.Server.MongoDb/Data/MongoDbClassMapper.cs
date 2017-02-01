@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Data
 
             // Custom
             Register3<ChannelDataChunk>();
-            Register3<MongoDbTransaction>();
+            Register3<DbTransaction>();
             Register3<DbGrowingObject>();
             Register3<DbAuditHistory>();
 

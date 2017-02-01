@@ -51,12 +51,12 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="adapter">The transaction adapter.</param>
         [ImportingConstructor]
-        public MongoTransaction(IDatabaseProvider databaseProvider, MongoDbTransactionAdapter adapter)
+        public MongoTransaction(IDatabaseProvider databaseProvider, DbTransactionDataAdapter adapter)
         {
             _databaseProvider = databaseProvider;
             Adapter = adapter;
             Id = Guid.NewGuid().ToString();
-            Transactions = new List<MongoDbTransaction>();
+            Transactions = new List<DbTransaction>();
             InitializeRootTransaction();
         }       
 
@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <summary>
         /// The list of transaction records. 
         /// </summary>
-        public List<MongoDbTransaction> Transactions { get; }
+        public List<DbTransaction> Transactions { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoDatabase"/> instance associated with the current transaction.
@@ -80,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// Gets the transaction adapter.
         /// </summary>
         /// <value>The adapter.</value>
-        public MongoDbTransactionAdapter Adapter { get; }
+        public DbTransactionDataAdapter Adapter { get; }
 
         /// <summary>
         /// Sets the context for the root transaction.
@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         {
             _log.Debug($"Attaching '{action}' transaction for MongoDb collection {collection} with URI: {uri}");
 
-            var transaction = new MongoDbTransaction
+            var transaction = new DbTransaction
             {
                 TransactionId = Id,
                 Collection = collection,
@@ -203,14 +203,14 @@ namespace PDS.Witsml.Server.Data.Transactions
             Database = null;
         }
 
-        private void Update(MongoDbTransaction transaction)
+        private void Update(DbTransaction transaction)
         {
             var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
             var filter = GetDocumentFilter(new EtpUri(transaction.Uri), transaction.IdPropertyName);
             collection.ReplaceOne(filter, transaction.Value);
         }
 
-        private void Delete(MongoDbTransaction transaction)
+        private void Delete(DbTransaction transaction)
         {
             var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
             var filter = GetDocumentFilter(new EtpUri(transaction.Uri), transaction.IdPropertyName);
@@ -298,8 +298,8 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// Gets the active transaction.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        /// <returns>Returns an <see cref="MongoDbTransaction" /> instance.</returns>
-        private MongoDbTransaction GetActiveTransaction(EtpUri uri)
+        /// <returns>Returns an <see cref="DbTransaction" /> instance.</returns>
+        private DbTransaction GetActiveTransaction(EtpUri uri)
         {
             var timeout = DateTime.UtcNow.AddMinutes(-1 * ServerTimeoutMinutes);
 

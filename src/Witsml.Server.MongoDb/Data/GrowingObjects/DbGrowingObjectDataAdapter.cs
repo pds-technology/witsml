@@ -23,6 +23,7 @@ using System.Linq;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
+using PDS.Witsml.Data.ChangeLogs;
 
 namespace PDS.Witsml.Server.Data.GrowingObjects
 {
@@ -31,18 +32,18 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
     /// </summary>
     [Export(typeof(IGrowingObjectDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DbGrowingObjectAdapter : MongoDbDataAdapter<DbGrowingObject>, IGrowingObjectDataProvider
+    public class DbGrowingObjectDataAdapter : MongoDbDataAdapter<DbGrowingObject>, IGrowingObjectDataProvider
     {
         private readonly IWellboreDataAdapter _wellbore141DataAdapter;
         private readonly IWellboreDataAdapter _wellbore200DataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DbGrowingObjectAdapter"/> class.
+        /// Initializes a new instance of the <see cref="DbGrowingObjectDataAdapter"/> class.
         /// </summary>
         /// <param name="container">The container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public DbGrowingObjectAdapter(IContainer container, IDatabaseProvider databaseProvider) : 
+        public DbGrowingObjectDataAdapter(IContainer container, IDatabaseProvider databaseProvider) : 
             base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uri)
         {
             _wellbore141DataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(OptionsIn.DataVersion.Version141.Value));
@@ -141,18 +142,40 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
 
                     transaction.SetContext(etpUri);
 
-                    //check for other growing objects of wellbore
+                    // Check for other growing objects of wellbore
                     if (GetActiveWellboreCount(uri) != 0)
                         continue;
 
                     if (OptionsIn.DataVersion.Version141.Equals(etpUri.Version))
                         _wellbore141DataAdapter.UpdateIsActive(etpUri, false);
+
                     else if (OptionsIn.DataVersion.Version200.Equals(etpUri.Version))
                         _wellbore200DataAdapter.UpdateIsActive(etpUri, false);
 
                     transaction.Commit();
                 }
             }
+        }
+
+        /// <summary>
+        /// Audits the entity. Override this method to adjust the audit record
+        /// before it is submitted to the database or to prevent the audit.
+        /// </summary>
+        /// <param name="auditHistory">The audit history.</param>
+        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
+        protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        {
+            // Excluding DbGrowingObject from audit history
+        }
+
+        /// <summary>
+        /// Gets the URI for the specified data object.
+        /// </summary>
+        /// <param name="instance">The data object.</param>
+        /// <returns>The URI representing the data object.</returns>
+        protected override EtpUri GetUri(DbGrowingObject instance)
+        {
+            return new EtpUri(instance.Uri);
         }
 
         private FilterDefinition<DbGrowingObject> BuildDataFilter(string objectType, DateTime expiredDateTime)
@@ -178,18 +201,6 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         {
             var filter = MongoDbUtility.BuildFilter<DbGrowingObject>("WellboreUri", wellboreUri);
             return GetCollection().Count(filter);
-        }
-
-        /// <summary>
-        /// Gets the URI for the specified data object.
-        /// </summary>
-        /// <param name="instance">The data object.</param>
-        /// <returns>
-        /// The URI representing the data object.
-        /// </returns>
-        protected override EtpUri GetUri(DbGrowingObject instance)
-        {
-            return new EtpUri(instance.Uri);
         }
     }
 }

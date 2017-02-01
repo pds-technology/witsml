@@ -128,5 +128,16 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore", "UidObject", "NameObject" }
                 : null;
         }
+
+        /// <summary>
+        /// Audits the entity. Override this method to adjust the audit record
+        /// before it is submitted to the database or to prevent the audit.
+        /// </summary>
+        /// <param name="auditHistory">The audit history.</param>
+        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
+        protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        {
+            // Excluding DbAuditHistory from audit history
+        }
     }
 }

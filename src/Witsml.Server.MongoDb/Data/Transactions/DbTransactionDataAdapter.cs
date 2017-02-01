@@ -23,27 +23,28 @@ using Energistics.Datatypes;
 using LinqToQuerystring;
 using MongoDB.Driver;
 using PDS.Framework;
+using PDS.Witsml.Data.ChangeLogs;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a <see cref="MongoDbTransaction"/>
     /// </summary>
-    /// <seealso cref="Transactions.MongoDbTransaction" />
+    /// <seealso cref="Transactions.DbTransaction" />
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class MongoDbTransactionAdapter : MongoDbDataAdapter<MongoDbTransaction>
+    public class DbTransactionDataAdapter : MongoDbDataAdapter<DbTransaction>
     {
         private const string MongoDbTransaction = "dbTransaction";
         private const string TransactionIdField = "TransactionId";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbTransactionAdapter" /> class.
+        /// Initializes a new instance of the <see cref="DbTransactionDataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbTransactionAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uri)
+        public DbTransactionDataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uri)
         {
             Logger.Debug("Creating instance.");
         }
@@ -53,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<MongoDbTransaction> GetAll(EtpUri? parentUri = null)
+        public override List<DbTransaction> GetAll(EtpUri? parentUri = null)
         {            
             var query = GetQuery().AsQueryable();
             var uri = parentUri?.Uri;
@@ -73,7 +74,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// Inserts the entities.
         /// </summary>
         /// <param name="entities">The entities.</param>
-        public void InsertEntities(List<MongoDbTransaction> entities)
+        public void InsertEntities(List<DbTransaction> entities)
         {
             var collection = GetCollection();
             collection.InsertMany(entities);
@@ -86,7 +87,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         public void DeleteTransactions(string transactionId)
         {
             var collection = GetCollection();
-            var filter = MongoDbUtility.BuildFilter<MongoDbTransaction>(TransactionIdField, transactionId);
+            var filter = MongoDbUtility.BuildFilter<DbTransaction>(TransactionIdField, transactionId);
             collection.DeleteMany(filter);
         }
 
@@ -100,6 +101,17 @@ namespace PDS.Witsml.Server.Data.Transactions
         protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
         {
             return MongoDbUtility.BuildFilter<TObject>(idPropertyName, uri.ToString());
+        }
+
+        /// <summary>
+        /// Audits the entity. Override this method to adjust the audit record
+        /// before it is submitted to the database or to prevent the audit.
+        /// </summary>
+        /// <param name="auditHistory">The audit history.</param>
+        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
+        protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        {
+            // Excluding DbTransaction from audit history
         }
     }
 }
