@@ -299,6 +299,8 @@
     <Compile Include="Data\Messages\Message141ValidatorTests.generated.cs">
       <DependentUpon>Message141ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\MultiObject131TestBase.cs" />
+    <Compile Include="Data\MultiObject141TestBase.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapterAddTests.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapterGetTests.cs" />
