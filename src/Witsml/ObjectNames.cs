@@ -26,5 +26,10 @@ namespace PDS.Witsml
         private static readonly string Version131 = OptionsIn.DataVersion.Version131.Value;
         private static readonly string Version141 = OptionsIn.DataVersion.Version141.Value;
         private static readonly string Version200 = OptionsIn.DataVersion.Version200.Value;
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 ChangeLog.
+        /// </summary>
+        public static readonly ObjectName ChangeLog141 = new ObjectName(ObjectTypes.ChangeLog, Version141);
     }
 }

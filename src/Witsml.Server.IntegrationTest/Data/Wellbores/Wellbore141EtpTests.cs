@@ -33,7 +33,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     public partial class Wellbore141EtpTests
     {
         [TestMethod]
-        public async Task Wellbore131_DeleteObject_Cannot_Delete_Well_With_Child_Object()
+        public async Task Wellbore141_DeleteObject_Cannot_Delete_Well_With_Child_Object()
         {
             AddParents();
             await RequestSessionAndAssert();
