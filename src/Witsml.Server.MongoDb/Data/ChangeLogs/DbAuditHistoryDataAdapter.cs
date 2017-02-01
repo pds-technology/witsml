@@ -16,10 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.Framework;
@@ -78,6 +81,64 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             }
 
             return entities;
+        }
+
+        /// <summary>
+        /// Gets or creates the audit history for the changed entity.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI of the changed entity.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="changeType">Type of the change.</param>
+        /// <returns>A new or existing DbAuditHistory for the entity.</returns>
+        public DbAuditHistory GetAuditHistory<TObject>(EtpUri uri, TObject entity, ChangeInfoType changeType)
+        {
+            var uriLower = uri.Uri.ToLowerInvariant();
+            var auditHistory = GetQuery().FirstOrDefault(x => x.Uri == uriLower);
+            var changeInfo = $"{changeType:G} {uri.ObjectType}";
+
+            // Creating audit history entry
+            if (auditHistory == null)
+            {
+                var dataObject = entity as IDataObject;
+                var wellObject = entity as IWellObject;
+                var wellboreObject = entity as IWellboreObject;
+                var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
+
+                auditHistory = new DbAuditHistory
+                {
+                    ObjectType = uri.ObjectType,
+                    LastChangeInfo = changeInfo,
+                    LastChangeType = changeType,
+                    ChangeHistory = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory>(),
+                    NameWellbore = wellboreObject?.NameWellbore,
+                    UidWellbore = wellboreObject?.UidWellbore,
+                    NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell,
+                    UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
+                    NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
+                    UidObject = uri.ObjectId,
+                    Uri = uriLower
+                };
+
+                auditHistory.CommonData = auditHistory.CommonData.Create();
+            }
+            else // Updating existing entry
+            {
+                auditHistory.CommonData.DateTimeLastChange = DateTimeOffset.UtcNow;
+                auditHistory.LastChangeInfo = changeInfo;
+                auditHistory.LastChangeType = changeType;
+            }
+
+            // Append current change entry
+            auditHistory.ChangeHistory.Add(new Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory
+            {
+                Uid = Guid.NewGuid().ToString(),
+                ChangeInfo = auditHistory.LastChangeInfo,
+                ChangeType = auditHistory.LastChangeType,
+                DateTimeChange = auditHistory.CommonData.DateTimeLastChange
+            });
+
+            return auditHistory;
         }
 
         /// <summary>

@@ -27,6 +27,7 @@ using MongoDB.Driver.Linq;
 using PDS.Framework;
 using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data.ChangeLogs;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
@@ -56,7 +57,7 @@ namespace PDS.Witsml.Server.Data
 
             if (typeof(T) != typeof(DbAuditHistory))
             {
-                AuditHistoryAdapter = container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as MongoDbDataAdapter<DbAuditHistory>;
+                AuditHistoryAdapter = container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as DbAuditHistoryDataAdapter;
             }
         }
 
@@ -70,7 +71,7 @@ namespace PDS.Witsml.Server.Data
         /// Gets the audit history adapter.
         /// </summary>
         /// <value>The audit history adapter.</value>
-        protected MongoDbDataAdapter<DbAuditHistory> AuditHistoryAdapter { get; }
+        protected DbAuditHistoryDataAdapter AuditHistoryAdapter { get; }
 
         /// <summary>
         /// Gets a reference to the current <see cref="MongoTransaction"/> instance.
@@ -764,54 +765,13 @@ namespace PDS.Witsml.Server.Data
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
-            var uriLower = uri.Uri.ToLowerInvariant();
-            var auditHistory = AuditHistoryAdapter.GetQuery().FirstOrDefault(x => x.Uri == uriLower);
-            var changeInfo = $"{changeType:G} {uri.ObjectType}";
-            var exists = false;
-
-            // Creating audit history entry
-            if (auditHistory == null)
+            var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, entity, changeType);
+            var exists = string.IsNullOrWhiteSpace(auditHistory.Uid);
+            if (!exists)
             {
-                var dataObject = entity as IDataObject;
-                var wellObject = entity as IWellObject;
-                var wellboreObject = entity as IWellboreObject;
-                var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
-
-                auditHistory = new DbAuditHistory
-                {
-                    ObjectType = uri.ObjectType,
-                    LastChangeInfo = changeInfo,
-                    LastChangeType = changeType,
-                    ChangeHistory = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory>(),
-                    NameWellbore = wellboreObject?.NameWellbore,
-                    UidWellbore = wellboreObject?.UidWellbore,
-                    NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell,
-                    UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
-                    NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
-                    UidObject = uri.ObjectId,
-                    Uri = uriLower
-                };
-
                 auditHistory.Uid = auditHistory.NewUid();
                 auditHistory.Name = auditHistory.Uid;
-                auditHistory.CommonData = auditHistory.CommonData.Create();
             }
-            else // Updating existing entry
-            {
-                auditHistory.CommonData.DateTimeLastChange = DateTimeOffset.UtcNow;
-                auditHistory.LastChangeInfo = changeInfo;
-                auditHistory.LastChangeType = changeType;
-                exists = true;
-            }
-
-            // Append current change entry
-            auditHistory.ChangeHistory.Add(new Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory
-            {
-                Uid = Guid.NewGuid().ToString(),
-                ChangeInfo = auditHistory.LastChangeInfo,
-                ChangeType = auditHistory.LastChangeType,
-                DateTimeChange = auditHistory.CommonData.DateTimeLastChange
-            });
 
             AuditEntity(auditHistory, exists);
         }
