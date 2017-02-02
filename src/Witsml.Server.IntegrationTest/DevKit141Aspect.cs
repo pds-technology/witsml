@@ -24,7 +24,9 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Data.Trajectories;
 
@@ -303,6 +305,39 @@ namespace PDS.Witsml.Server
             };
 
             return well;
+        }
+
+        /// <summary>
+        /// Creates an empty changeLog for the object of the URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>An instance of <see cref="ChangeLog"/>.</returns>
+        public ChangeLog CreateChangeLog(EtpUri uri)
+        {
+            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            {
+                return new ChangeLog()
+                {
+                    UidObject = uri.ObjectId
+                };
+            }
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            {
+                return new ChangeLog()
+                {
+                    UidWell = uri.Parent.ObjectId,
+                    UidObject = uri.ObjectId
+                };
+            }
+            else
+            {
+                return new ChangeLog()
+                {
+                    UidWell = uri.Parent.Parent.ObjectId,
+                    UidWellbore = uri.Parent.ObjectId,
+                    UidObject = uri.ObjectId
+                };
+            }
         }
 
         public Well CreateFullWell()

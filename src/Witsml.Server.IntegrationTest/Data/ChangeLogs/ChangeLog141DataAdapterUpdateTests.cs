@@ -38,11 +38,9 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             Well.Operator = "Test Operator";
             DevKit.UpdateAndAssert(Well);
 
-            // Retrieve the well
-            var well = DevKit.GetAndAssert(Well);
-            var commonData = well.CommonData;
+            var result = DevKit.GetAndAssert(new Well() { Uid = Well.Uid });
 
-            AssertChangeLog(uid, commonData, expectedHistoryCount, expectedChangeType);
+            AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
     }
 }
