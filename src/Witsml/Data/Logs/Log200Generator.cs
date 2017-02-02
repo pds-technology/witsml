@@ -73,12 +73,15 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public Citation CreateCitation(string name)
         {
+            var date = DateTime.UtcNow;
+
             return new Citation()
             {
                 Title = Name(name),
                 Originator = typeof(DataGenerator).Name,
                 Format = typeof(DataGenerator).Assembly.FullName,
-                Creation = DateTime.UtcNow,
+                Creation = date,
+                LastUpdate = date
             };
         }
 
