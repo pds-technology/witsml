@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data
             DevKit = new DevKit131Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
+                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
                 .ToArray();
 
             Well = new Well
