@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Wells
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var result = DevKit.GetAndAssert<WellList, Well>(Well);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Update the Well141
+            Well.Name = "Change";
+            DevKit.UpdateAndAssert(Well);
+
+            var result = DevKit.GetAndAssert<WellList, Well>(Well);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Delete the Well141
+            DevKit.DeleteAndAssert(Well);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Well, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Messages
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Message141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            var result = DevKit.GetAndAssert<MessageList, Message>(Message);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Message141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            // Update the Message141
+            Message.Name = "Change";
+            DevKit.UpdateAndAssert(Message);
+
+            var result = DevKit.GetAndAssert<MessageList, Message>(Message);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Message141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            // Delete the Message141
+            DevKit.DeleteAndAssert(Message);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Message, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

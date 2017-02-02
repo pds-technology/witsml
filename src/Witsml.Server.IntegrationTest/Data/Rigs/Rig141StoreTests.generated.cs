@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Rigs
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Rig141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            var result = DevKit.GetAndAssert<RigList, Rig>(Rig);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Rig141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            // Update the Rig141
+            Rig.Name = "Change";
+            DevKit.UpdateAndAssert(Rig);
+
+            var result = DevKit.GetAndAssert<RigList, Rig>(Rig);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Rig141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            // Delete the Rig141
+            DevKit.DeleteAndAssert(Rig);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Rig, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

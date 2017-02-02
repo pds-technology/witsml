@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var result = DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            // Update the Wellbore141
+            Wellbore.Name = "Change";
+            DevKit.UpdateAndAssert(Wellbore);
+
+            var result = DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            // Delete the Wellbore141
+            DevKit.DeleteAndAssert(Wellbore);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Wellbore, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

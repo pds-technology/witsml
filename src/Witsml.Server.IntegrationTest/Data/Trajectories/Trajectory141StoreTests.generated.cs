@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Update the Trajectory141
+            Trajectory.Name = "Change";
+            DevKit.UpdateAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Delete the Trajectory141
+            DevKit.DeleteAndAssert(Trajectory);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Trajectory, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

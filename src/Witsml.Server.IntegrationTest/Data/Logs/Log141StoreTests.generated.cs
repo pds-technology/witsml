@@ -106,5 +106,50 @@ namespace PDS.Witsml.Server.Data.Logs
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var result = DevKit.GetAndAssert<LogList, Log>(Log);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Update the Log141
+            Log.Name = "Change";
+            DevKit.UpdateAndAssert(Log);
+
+            var result = DevKit.GetAndAssert<LogList, Log>(Log);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Delete the Log141
+            DevKit.DeleteAndAssert(Log);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Log, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

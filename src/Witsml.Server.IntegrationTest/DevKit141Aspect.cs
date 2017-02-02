@@ -726,6 +726,111 @@ namespace PDS.Witsml.Server
             DeleteAndAssert<LogList, Log>(log, errorCode, partialDelete);
         }
 
+        /// <summary>
+        /// Deletes the message and test the return code
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Message message, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<MessageList, Message>(message, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the trajectory and test the return code
+        /// </summary>
+        /// <param name="trajectory">The trajectory.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the rig and test the return code
+        /// </summary>
+        /// <param name="rig">The rig.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<RigList, Rig>(rig, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the wbGeometry and test the return code
+        /// </summary>
+        /// <param name="wbGeometry">The wbGeometry.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(StandAloneWellboreGeometry wbGeometry, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<WellboreGeometryList, StandAloneWellboreGeometry>(wbGeometry, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the attachment and test the return code
+        /// </summary>
+        /// <param name="attachment">The attachment.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Attachment attachment, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<AttachmentList, Attachment>(attachment, errorCode, partialDelete);
+        }
+
+        public void AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
+        {
+            var dataObject = entity as IDataObject;
+            var commonDataObject = entity as ICommonDataObject;
+            var commonData = commonDataObject?.CommonData;
+
+            // Assert that the entity is not null and has a UID
+            Assert.IsNotNull(dataObject?.Uid);
+
+            // Fetch the changeLog for the entity just added
+            var changeLogQuery = CreateChangeLog(dataObject.GetUri());
+            var changeLog = QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
+
+            var changeHistory = changeLog.ChangeHistory.LastOrDefault();
+
+            // Verify that we found a changeHistory for the latest change.
+            Assert.IsNotNull(changeHistory);
+
+            // Assert that the entity has CommonData with a DateTimeLastChange
+            // The SourceName of the change log MUST match the Source name of the entity
+            if (expectedChangeType != ChangeInfoType.delete)
+            {
+                Assert.IsNotNull(commonData);
+                Assert.IsTrue(commonData.DateTimeLastChange.HasValue);
+                Assert.AreEqual(commonData.SourceName, changeLog.SourceName);
+            }
+
+            // Verify that the LastChangeType exists and was an Add
+            Assert.IsTrue(changeLog.LastChangeType.HasValue);
+            Assert.AreEqual(expectedChangeType, changeLog.LastChangeType.Value);
+
+            // Verify that there is only one changeHistory
+            Assert.AreEqual(expectedHistoryCount, changeLog.ChangeHistory.Count);
+
+            // The LastChangeType of the changeLog MUST match the ChangeType of the last changeHistory added
+            Assert.AreEqual(changeLog.LastChangeType, changeHistory.ChangeType);
+
+            // The LastChangeInfo of the changeLog MUST match the ChangeInfo of the last changeHistory added
+            Assert.AreEqual(changeLog.LastChangeInfo, changeHistory.ChangeInfo);
+
+            // If the entity was deleted then we don't have a DateTimeLastChange to compare
+            if (expectedChangeType != ChangeInfoType.delete)
+            {
+                // Verify that the changeHistory has a DateTimeLastChange and it matches
+                //... the entity DateTimeLastChange
+                Assert.IsTrue(changeHistory.DateTimeChange.HasValue);
+                Assert.AreEqual(commonData.DateTimeLastChange.Value, changeHistory.DateTimeChange.Value);
+            }
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);

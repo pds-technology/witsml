@@ -109,5 +109,50 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
         }
+
+        [TestMethod]
+        public void WbGeometry141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            var result = DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void WbGeometry141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            // Update the WbGeometry141
+            WbGeometry.Name = "Change";
+            DevKit.UpdateAndAssert(WbGeometry);
+
+            var result = DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void WbGeometry141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            // Delete the WbGeometry141
+            DevKit.DeleteAndAssert(WbGeometry);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(WbGeometry, expectedHistoryCount, expectedChangeType);
+        }
     }
 }
