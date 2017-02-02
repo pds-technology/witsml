@@ -739,7 +739,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                AuditPartialDelete(uri, current);
+                AuditPartialDelete(uri, current, updates);
 
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
@@ -760,6 +760,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
         protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, updateFields);
         }
 
         /// <summary>
