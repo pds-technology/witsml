@@ -22,6 +22,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using LinqToQuerystring;
@@ -115,29 +116,32 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     ObjectType = uri.ObjectType,
                     LastChangeInfo = changeInfo,
                     LastChangeType = changeType,
-                    ChangeHistory = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory>(),
+                    ChangeHistory = new List<ChangeHistory>(),
+                    SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator,
                     NameWellbore = wellboreObject?.NameWellbore,
                     UidWellbore = wellboreObject?.UidWellbore,
                     NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell,
                     UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
                     NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
                     UidObject = uri.ObjectId,
-                    Uri = uriLower,
-                    SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator
+                    Uri = uriLower
                 };
 
                 auditHistory.CommonData = auditHistory.CommonData.Create();
-                auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(commonDataObject, abstractObject, changeType, updateFields);
             }
             else // Updating existing entry
             {
-                auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(commonDataObject, abstractObject, changeType, updateFields);
                 auditHistory.LastChangeInfo = changeInfo;
                 auditHistory.LastChangeType = changeType;
             }
 
+            auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(
+                commonDataObject?.CommonData?.DateTimeLastChange ?? 
+                (DateTimeOffset?)abstractObject?.Citation?.LastUpdate, 
+                changeType, updateFields);
+
             // Append current change entry
-            auditHistory.ChangeHistory.Add(new Energistics.DataAccess.WITSML141.ComponentSchemas.ChangeHistory
+            auditHistory.ChangeHistory.Add(new ChangeHistory
             {
                 Uid = Guid.NewGuid().ToString(),
                 ChangeInfo = auditHistory.LastChangeInfo,
@@ -208,22 +212,27 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             // Excluding DbAuditHistory from audit history
         }
 
-        private DateTimeOffset? GetDateTimeLastChange(ICommonDataObject commonDataObject, 
-            Energistics.DataAccess.WITSML200.AbstractObject abstractObject, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        private DateTimeOffset? GetDateTimeLastChange(DateTimeOffset? date, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
         {
-            if (updateFields != null && updateFields.ContainsKey(DateTimeLastChangeKey))
+            if (changeType == ChangeInfoType.delete)
             {
-                return DateTimeOffset.Parse(updateFields[DateTimeLastChangeKey].ToString());
-            }
-            else if (updateFields != null && updateFields.ContainsKey(CitationLastUpdateKey))
-            {
-                return DateTimeOffset.Parse(updateFields[CitationLastUpdateKey].ToString());
+                date = null;
             }
 
-            return changeType != ChangeInfoType.delete
-                    ? (commonDataObject?.CommonData?.DateTimeLastChange ??
-                       (DateTimeOffset?)abstractObject?.Citation?.LastUpdate)
-                    : DateTimeOffset.UtcNow;
+            if (changeType == ChangeInfoType.update && updateFields != null)
+            {
+                if (updateFields.ContainsKey(DateTimeLastChangeKey))
+                {
+                    date = DateTimeOffset.Parse(updateFields[DateTimeLastChangeKey].ToString());
+                }
+
+                if (updateFields.ContainsKey(CitationLastUpdateKey))
+                {
+                    date = DateTimeOffset.Parse(updateFields[CitationLastUpdateKey].ToString());
+                }
+            }
+
+            return date ?? DateTimeOffset.UtcNow;
         }
     }
 }
