@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 
@@ -27,13 +28,33 @@ namespace PDS.Witsml.Server.Data.Wells
     public partial class Well141DataProvider
     {
         /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(Well dataObject)
+        {
+            if (string.IsNullOrWhiteSpace(dataObject.TimeZone))
+                dataObject.TimeZone = GetTimeZoneOffset();
+        }
+
+        /// <summary>
         /// Sets additional default values for the specified data object and URI.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Well dataObject, EtpUri uri)
         {
-            dataObject.TimeZone = "Z";
+            dataObject.TimeZone = GetTimeZoneOffset();
+        }
+
+        /// <summary>
+        /// Gets the local time zone offset.
+        /// </summary>
+        /// <returns>The local time zone offset.</returns>
+        private string GetTimeZoneOffset()
+        {
+            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTimeOffset.Now).ToString();
+            return offset.Substring(0, offset.LastIndexOf(':'));
         }
     }
 }
