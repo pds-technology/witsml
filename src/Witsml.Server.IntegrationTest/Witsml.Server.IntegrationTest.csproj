@@ -199,6 +199,7 @@
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapterGetTests.cs" />
     <Compile Include="Data\Channels\ChannelDataExtensionsTests.cs" />
+    <Compile Include="Data\GrowingObjects\GrowingObject141DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterAddTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterGetTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterDeleteTests.cs" />
