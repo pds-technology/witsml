@@ -40,6 +40,9 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class DbAuditHistoryDataAdapter : MongoDbDataAdapter<DbAuditHistory>, IWitsml141Configuration
     {
+        private const string DateTimeLastChangeKey = "CommonData.DateTimeLastChange";
+        private const string CitationLastUpdate = "Citation.LastUpdate";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DbAuditHistoryDataAdapter" /> class.
         /// </summary>
@@ -90,13 +93,15 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         /// <param name="uri">The URI of the changed entity.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="changeType">Type of the change.</param>
+        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
         /// <returns>A new or existing DbAuditHistory for the entity.</returns>
-        public DbAuditHistory GetAuditHistory<TObject>(EtpUri uri, TObject entity, ChangeInfoType changeType)
+        public DbAuditHistory GetAuditHistory<TObject>(EtpUri uri, TObject entity, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
         {
             var uriLower = uri.Uri.ToLowerInvariant();
             var auditHistory = GetQuery().FirstOrDefault(x => x.Uri == uriLower);
             var changeInfo = $"{changeType:G} {uri.ObjectType}";
-
+            var commonDataObject = (entity as ICommonDataObject);
+            var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
 
             // Creating audit history entry
             if (auditHistory == null)
@@ -104,7 +109,6 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 var dataObject = entity as IDataObject;
                 var wellObject = entity as IWellObject;
                 var wellboreObject = entity as IWellboreObject;
-                var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
 
                 auditHistory = new DbAuditHistory
                 {
@@ -118,14 +122,16 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
                     NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
                     UidObject = uri.ObjectId,
-                    Uri = uriLower
+                    Uri = uriLower,
+                    SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator
                 };
 
                 auditHistory.CommonData = auditHistory.CommonData.Create();
+                auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(commonDataObject, abstractObject, changeType, updateFields);
             }
             else // Updating existing entry
             {
-                auditHistory.CommonData.DateTimeLastChange = DateTimeOffset.UtcNow;
+                auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(commonDataObject, abstractObject, changeType, updateFields);
                 auditHistory.LastChangeInfo = changeInfo;
                 auditHistory.LastChangeType = changeType;
             }
@@ -136,10 +142,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 Uid = Guid.NewGuid().ToString(),
                 ChangeInfo = auditHistory.LastChangeInfo,
                 ChangeType = auditHistory.LastChangeType,
-                // TODO: Set to entity's CommonData.DateTimeLastChange when CommonData interface is added to DevKit
                 DateTimeChange = auditHistory.CommonData.DateTimeLastChange
-                // TODO: Set to the entity's CommonData.SourceName when CommonData interface is added to DevKit
-                // SourceName = entity.CommonData.SourceName
             });
 
             return auditHistory;
@@ -203,6 +206,24 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
         {
             // Excluding DbAuditHistory from audit history
+        }
+
+        private DateTimeOffset? GetDateTimeLastChange(ICommonDataObject commonDataObject, 
+            Energistics.DataAccess.WITSML200.AbstractObject abstractObject, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        {
+            if (updateFields != null && updateFields.ContainsKey(DateTimeLastChangeKey))
+            {
+                return DateTimeOffset.Parse(updateFields[DateTimeLastChangeKey].ToString());
+            }
+            else if (updateFields != null && updateFields.ContainsKey(CitationLastUpdate))
+            {
+                return DateTimeOffset.Parse(updateFields[CitationLastUpdate].ToString());
+            }
+
+            return changeType != ChangeInfoType.delete
+                    ? (commonDataObject?.CommonData?.DateTimeLastChange ??
+                       (DateTimeOffset?)abstractObject?.Citation?.LastUpdate)
+                    : DateTimeOffset.UtcNow;
         }
     }
 }
