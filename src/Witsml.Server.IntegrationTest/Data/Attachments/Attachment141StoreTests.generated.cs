@@ -80,5 +80,50 @@ namespace PDS.Witsml.Server.Data.Attachments
             DevKit.DeleteAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment, isNotNull: false);
         }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_AddToStore_Creates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_UpdateInStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            // Update the Attachment141
+            Attachment.Name = "Change";
+            DevKit.UpdateAndAssert(Attachment);
+
+            var result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_DeleteFromStore_Updates_ChangeLog()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            // Delete the Attachment141
+            DevKit.DeleteAndAssert(Attachment);
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Attachment, expectedHistoryCount, expectedChangeType);
+        }
     }
 }
