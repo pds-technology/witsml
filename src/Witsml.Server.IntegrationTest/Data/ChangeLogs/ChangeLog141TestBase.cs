@@ -19,7 +19,6 @@
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
