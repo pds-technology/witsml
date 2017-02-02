@@ -39,8 +39,6 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
-        private const string _dateTimeLastChangeKey = "CommonData.DateTimeLastChange";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>

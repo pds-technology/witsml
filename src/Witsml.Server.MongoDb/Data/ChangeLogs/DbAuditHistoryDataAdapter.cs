@@ -41,7 +41,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
     public partial class DbAuditHistoryDataAdapter : MongoDbDataAdapter<DbAuditHistory>, IWitsml141Configuration
     {
         private const string DateTimeLastChangeKey = "CommonData.DateTimeLastChange";
-        private const string CitationLastUpdate = "Citation.LastUpdate";
+        private const string CitationLastUpdateKey = "Citation.LastUpdate";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbAuditHistoryDataAdapter" /> class.
@@ -215,9 +215,9 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             {
                 return DateTimeOffset.Parse(updateFields[DateTimeLastChangeKey].ToString());
             }
-            else if (updateFields != null && updateFields.ContainsKey(CitationLastUpdate))
+            else if (updateFields != null && updateFields.ContainsKey(CitationLastUpdateKey))
             {
-                return DateTimeOffset.Parse(updateFields[CitationLastUpdate].ToString());
+                return DateTimeOffset.Parse(updateFields[CitationLastUpdateKey].ToString());
             }
 
             return changeType != ChangeInfoType.delete
