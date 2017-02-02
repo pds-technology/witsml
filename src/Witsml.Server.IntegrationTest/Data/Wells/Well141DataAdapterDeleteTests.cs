@@ -722,5 +722,39 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
             Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
         }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Partial_Delete_Updates_ChangeLog()
+        {
+            var wellDatum = DevKit.WellDatum("CV", ElevCodeEnum.CV, "CV");
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "2.0", "ft");
+            wellDatum.ExtensionNameValue = new List<ExtensionNameValue> { ext1, ext2 };
+
+            Well.WellDatum = new List<WellDatum> { wellDatum };
+            Well.Country = "Country";
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var delete = @" <country/>
+                            <wellDatum uid=""" + wellDatum.Uid + @""">
+                                <code/>
+                                <extensionNameValue uid=""" + ext1.Uid + @"""/>
+                            </wellDatum>";
+
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var well = DevKit.GetAndAssert(Well);
+            Assert.IsNull(well.Country);
+            Assert.IsNull(well.WellDatum.First().Code);
+            Assert.AreEqual(1, well.WellDatum.First().ExtensionNameValue.Count);
+            Assert.IsNull(well.WellDatum.Find(e => e.Uid == ext1.Uid));
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(well, expectedHistoryCount, expectedChangeType);
+        }
     }
 }

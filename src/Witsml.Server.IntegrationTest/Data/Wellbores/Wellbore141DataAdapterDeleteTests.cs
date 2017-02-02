@@ -515,5 +515,44 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.ErrorDeletingSimpleContent, results.Result);
         }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_DeleteFromStore_Partial_Delete_Updates_ChangeLog()
+        {
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "2.0", "ft");
+            var commonData = new CommonData { Comments = "comments", ExtensionNameValue = new List<ExtensionNameValue> { ext1, ext2 } };
+
+            Wellbore.SuffixAPI = "suffixApi";
+            Wellbore.MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Datum = "abc", Value = 12.0 };
+            Wellbore.CommonData = commonData;
+
+            DevKit.AddAndAssert(Wellbore);
+
+            var delete = @" <suffixApi/>
+                            <MD datum = """"/>
+                            <commonData>
+                                <comments/>
+                                <extensionNameValue uid=""" + ext1.Uid + @"""/>
+                            </commonData>";
+
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellbore = DevKit.GetAndAssert(Wellbore);
+            Assert.IsNull(wellbore.SuffixAPI);
+            Assert.IsNull(wellbore.MD.Datum);
+            Assert.IsNull(wellbore.CommonData.Comments);
+            Assert.AreEqual(1, wellbore.CommonData.ExtensionNameValue.Count);
+            Assert.IsNull(wellbore.CommonData.ExtensionNameValue.Find(e => e.Uid == ext1.Uid));
+
+            var expectedHistoryCount = 2;
+            var expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(wellbore, expectedHistoryCount, expectedChangeType);
+        }
     }
 }
+
