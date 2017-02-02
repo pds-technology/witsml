@@ -39,6 +39,8 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private const string _dateTimeLastChangeKey = "CommonData.DateTimeLastChange";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -524,7 +526,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                AuditUpdate(uri, current);
+                AuditUpdate(uri, current, updates);
 
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
@@ -542,9 +544,10 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
         /// <param name="entity">The entity.</param>
-        protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity)
+        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
+        protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update);
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, updateFields);
         }
 
         /// <summary>
@@ -756,7 +759,8 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
         /// <param name="entity">The entity.</param>
-        protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity)
+        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
+        protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
         }
 
@@ -767,11 +771,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The URI.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="changeType">Type of the change.</param>
-        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType changeType)
+        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
+        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
-            var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, entity, changeType);
+            var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, entity, changeType, updateFields);
             var isNewEntry = string.IsNullOrWhiteSpace(auditHistory.Uid);
 
             if (isNewEntry)
