@@ -97,6 +97,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             var auditHistory = GetQuery().FirstOrDefault(x => x.Uri == uriLower);
             var changeInfo = $"{changeType:G} {uri.ObjectType}";
 
+
             // Creating audit history entry
             if (auditHistory == null)
             {
@@ -135,7 +136,10 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 Uid = Guid.NewGuid().ToString(),
                 ChangeInfo = auditHistory.LastChangeInfo,
                 ChangeType = auditHistory.LastChangeType,
+                // TODO: Set to entity's CommonData.DateTimeLastChange when CommonData interface is added to DevKit
                 DateTimeChange = auditHistory.CommonData.DateTimeLastChange
+                // TODO: Set to the entity's CommonData.SourceName when CommonData interface is added to DevKit
+                // SourceName = entity.CommonData.SourceName
             });
 
             return auditHistory;
