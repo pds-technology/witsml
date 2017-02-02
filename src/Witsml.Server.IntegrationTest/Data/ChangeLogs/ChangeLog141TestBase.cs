@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -26,14 +27,21 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 {
     public class ChangeLog141TestBase : MultiObject141TestBase
     {
-        protected void AssertChangeLog(string uid, CommonData commonData, int expectedHistoryCount, ChangeInfoType expectedChangeType)
+        protected void AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
         {
+            var dataObject = entity as IDataObject;
+            var commonDataObject = entity as ICommonDataObject;
+            var commonData = commonDataObject?.CommonData;
+
+            // Assert that the entity is not null and has a UID
+            Assert.IsNotNull(dataObject?.Uid);
+
             // Assert that the entity has CommonData with a DateTimeLastChange
             Assert.IsNotNull(commonData);
             Assert.IsTrue(commonData.DateTimeLastChange.HasValue);
 
             // Fetch the changeLog for the entity just added
-            var changeLogQuery = new ChangeLog() { UidObject = uid, ObjectType = ObjectTypes.Well };
+            var changeLogQuery = DevKit.CreateChangeLog(dataObject.GetUri());
             var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
 
             // TODO: Fetch the changeHistory using the entity's DateTimeLastChange

@@ -33,11 +33,26 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             var expectedHistoryCount = 1;
             var expectedChangeType = ChangeInfoType.add;
 
-            // Retrieve the well
-            var well = DevKit.GetAndAssert(Well);
-            var commonData = well.CommonData;
+            var result = DevKit.GetAndAssert(new Well() { Uid = Well.Uid });
 
-            AssertChangeLog(uid, commonData, expectedHistoryCount, expectedChangeType);
+            AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+        }
+
+        [TestMethod]
+        public void ChangeLog141DataAdapter_AddToStore_Log()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            DevKit.AddAndAssert(Log);
+
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+
+            var result = DevKit.GetAndAssert(new Log() { UidWell = Log.UidWell, UidWellbore = Log.UidWellbore, Uid = Log.Uid });
+
+            AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
     }
 }
