@@ -151,24 +151,30 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131DataAdapter_UpdateInStore_Prepend_Trajectory_Data_Set_ObjectGrowing_And_IsActive_State()
+        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Stations_Set_ObjectGrowing_And_IsActive_State()
         {
             AddParents();
 
-            // Add trajectory with stations
+            //Add trajectory
+            DevKit.AddAndAssert(Trajectory);
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            // Update trajectory with stations
             var stations = DevKit.TrajectoryStations(3, 5);
             Trajectory.TrajectoryStation = stations;
-            DevKit.AddAndAssert(Trajectory);
+            DevKit.UpdateAndAssert(Trajectory);
 
-            var result = DevKit.GetAndAssert(Trajectory);
+            result = DevKit.GetAndAssert(Trajectory);
+
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
 
             var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //update
+            //another update with station
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -193,58 +199,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Data_ExpireGrowingObjects()
-        {
-            AddParents();
-
-            // Add trajectory with stations
-            var stations = DevKit.TrajectoryStations(3, 5);
-            Trajectory.TrajectoryStation = stations;
-            DevKit.AddAndAssert(Trajectory);
-
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-
-            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
-            Assert.IsNotNull(station1);
-            station1.Azi.Value++;
-
-            //update
-            var newStation = new TrajectoryStation
-            {
-                Uid = "sta-4",
-                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 10 },
-                TypeTrajStation = station1.TypeTrajStation,
-                Azi = station1.Azi,
-            };
-
-            var update = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                TrajectoryStation = new List<TrajectoryStation> { newStation }
-            };
-
-            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
-            result = DevKit.GetAndAssert(Trajectory);
-
-            Assert.AreEqual(4, result.TrajectoryStation.Count);
-            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-
-            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
-            Thread.Sleep(GrowingTimeoutPeriod * 1000);
-
-            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
-
-            result = DevKit.GetAndAssert(Trajectory);
-
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-        }
-
-        [TestMethod]
-        public void Trajectory131DataAdapter_UpdateInStore_Update_Trajectory_Data_Unchanged_ObjectGrowing_State()
+        public void Trajectory131DataAdapter_UpdateInStore_Append_Trajectory_Stations_ExpireGrowingObjects()
         {
             AddParents();
 
@@ -282,6 +237,56 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Update_Trajectory_Station_Unchanged_ObjectGrowing_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update station
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-3",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(3, result.TrajectoryStation.Count);
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
