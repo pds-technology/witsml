@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public void Trajectory141DataAdapter_GetFromStore_Can_Get_Trajectory()
         {
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
        }
 
         [TestMethod]
         public void Trajectory141DataAdapter_AddToStore_Can_Add_Trajectory()
         {
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Can_Update_Trajectory()
         {
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_DeleteFromStore_Can_Delete_Trajectory()
         {
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -151,5 +159,37 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Trajectory, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Trajectory141
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Trajectory141
+            Trajectory.Name = "Change";
+            DevKit.UpdateAndAssert(Trajectory);
+
+            result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Trajectory141
+            DevKit.DeleteAndAssert(Trajectory);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Trajectory, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }

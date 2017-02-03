@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Attachments
         public void Attachment141DataAdapter_GetFromStore_Can_Get_Attachment()
         {
             AddParents();
+
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+
        }
 
         [TestMethod]
         public void Attachment141DataAdapter_AddToStore_Can_Add_Attachment()
         {
             AddParents();
+
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
         }
 
         [TestMethod]
         public void Attachment141DataAdapter_UpdateInStore_Can_Update_Attachment()
         {
             AddParents();
+
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.UpdateAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+
         }
 
         [TestMethod]
         public void Attachment141DataAdapter_DeleteFromStore_Can_Delete_Attachment()
         {
             AddParents();
+
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.DeleteAndAssert<AttachmentList, Attachment>(Attachment);
             DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -125,5 +133,37 @@ namespace PDS.Witsml.Server.Data.Attachments
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Attachment, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Attachment141
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Attachment141
+            Attachment.Name = "Change";
+            DevKit.UpdateAndAssert(Attachment);
+
+            result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Attachment141
+            DevKit.DeleteAndAssert(Attachment);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Attachment, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }

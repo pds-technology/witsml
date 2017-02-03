@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Log()
         {
             AddParents();
+
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log);
+
        }
 
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Can_Add_Log()
         {
             AddParents();
+
             DevKit.AddAndAssert<LogList, Log>(Log);
+
         }
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Update_Log()
         {
             AddParents();
+
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.UpdateAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log);
+
         }
 
         [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_Delete_Log()
         {
             AddParents();
+
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.DeleteAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -151,5 +159,37 @@ namespace PDS.Witsml.Server.Data.Logs
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Log, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Log141
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<LogList, Log>(Log);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Log141
+            Log.Name = "Change";
+            DevKit.UpdateAndAssert(Log);
+
+            result = DevKit.GetAndAssert<LogList, Log>(Log);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Log141
+            DevKit.DeleteAndAssert(Log);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Log, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }

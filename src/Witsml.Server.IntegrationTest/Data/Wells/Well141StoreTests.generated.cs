@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_GetFromStore_Can_Get_Well()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well);
+
        }
 
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Can_Add_Well()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellList, Well>(Well);
+
         }
 
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Can_Update_Well()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.UpdateAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well);
+
         }
 
         [TestMethod]
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_Well()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.DeleteAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -151,5 +159,37 @@ namespace PDS.Witsml.Server.Data.Wells
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Well, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Well141
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<WellList, Well>(Well);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Well141
+            Well.Name = "Change";
+            DevKit.UpdateAndAssert(Well);
+
+            result = DevKit.GetAndAssert<WellList, Well>(Well);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Well141
+            DevKit.DeleteAndAssert(Well);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Well, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }

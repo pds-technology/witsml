@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Rigs
         public void Rig141DataAdapter_GetFromStore_Can_Get_Rig()
         {
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig);
+
        }
 
         [TestMethod]
         public void Rig141DataAdapter_AddToStore_Can_Add_Rig()
         {
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
+
         }
 
         [TestMethod]
         public void Rig141DataAdapter_UpdateInStore_Can_Update_Rig()
         {
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.UpdateAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig);
+
         }
 
         [TestMethod]
         public void Rig141DataAdapter_DeleteFromStore_Can_Delete_Rig()
         {
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.DeleteAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -151,5 +159,37 @@ namespace PDS.Witsml.Server.Data.Rigs
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Rig, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Rig141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Rig141
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<RigList, Rig>(Rig);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Rig141
+            Rig.Name = "Change";
+            DevKit.UpdateAndAssert(Rig);
+
+            result = DevKit.GetAndAssert<RigList, Rig>(Rig);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Rig141
+            DevKit.DeleteAndAssert(Rig);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Rig, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }

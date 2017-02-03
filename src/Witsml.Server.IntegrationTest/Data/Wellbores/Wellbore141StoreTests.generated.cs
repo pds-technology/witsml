@@ -52,33 +52,41 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_GetFromStore_Can_Get_Wellbore()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+
        }
 
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_UpdateInStore_Can_Update_Wellbore()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.UpdateAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_Wellbore()
         {
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.DeleteAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore, isNotNull: false);
+
         }
 
         [TestMethod]
@@ -151,5 +159,37 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Wellbore, expectedHistoryCount, expectedChangeType);
         }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        {
+            AddParents();
+
+            // Add the Wellbore141
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            // Verify ChangeLog for Add
+            var result = DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+            var expectedHistoryCount = 1;
+            var expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Update the Wellbore141
+            Wellbore.Name = "Change";
+            DevKit.UpdateAndAssert(Wellbore);
+
+            result = DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+            expectedHistoryCount = 2;
+            expectedChangeType = ChangeInfoType.update;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            // Delete the Wellbore141
+            DevKit.DeleteAndAssert(Wellbore);
+
+            expectedHistoryCount = 3;
+            expectedChangeType = ChangeInfoType.delete;
+            DevKit.AssertChangeLog(Wellbore, expectedHistoryCount, expectedChangeType);
+        }
+
     }
 }
