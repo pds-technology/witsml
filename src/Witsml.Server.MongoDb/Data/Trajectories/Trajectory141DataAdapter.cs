@@ -31,7 +31,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     [Export141(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]
-    public partial class Trajectory141DataAdapter : IGrowingObjectDataAdapter
+    public partial class Trajectory141DataAdapter
     {
         /// <summary>
         /// Clears the trajectory stations.
@@ -162,16 +162,5 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 UpdateWellboreIsActive(uri, true);
             }
         }
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="trajectoryUri">The Trajectory URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive)
-        {
-            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(trajectoryUri.Version));
-            dataAdapter.UpdateIsActive(trajectoryUri.Parent, isActive);
-        }        
     }
 }

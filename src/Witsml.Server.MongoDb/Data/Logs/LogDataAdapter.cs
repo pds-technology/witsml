@@ -23,14 +23,11 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -60,15 +57,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <value>The channel data chunk adapter.</value>
         [Import]
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
-
-        /// <summary>
-        /// Gets or sets the database growing object adapter.
-        /// </summary>
-        /// <value>
-        /// The database growing object adapter.
-        /// </value>
-        [Import]
-        public IGrowingObjectDataProvider DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -246,35 +234,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Updates the object growing field of a logs.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
-        public void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
-        {
-            var entity = GetEntity(uri);
-
-            if (entity == null)
-            {
-                Logger.DebugFormat("Log not found with uri '{0}'.", uri);
-                return;
-            }
-
-            Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            // Join existing Transaction
-            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, entity.ToBsonDocument(), uri);
-            Transaction.Save();
-
-            // Update ObjectGrowing
-            var logHeaderUpdate = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);
-            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-
-            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
-        }
-
-        /// <summary>
         /// Deletes or partially updates the specified object by uid.
         /// </summary>
         /// <param name="parser">The query parser that specifies the object.</param>
@@ -373,6 +332,18 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Audits the update operation.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
+        protected override void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
+        {
+            // Overriding default behavior for growing object
+        }
+
+        /// <summary>
         /// Updates the log data and index range.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -381,8 +352,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
-
-            var rangeExtended = false;
 
             // Get Updated Log
             var current = GetEntity(uri);
@@ -397,6 +366,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexUnit = string.Empty;
             var updateIndexRanges = false;
             var checkOffset = true;
+            var rangeExtended = false;
 
             Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
@@ -432,11 +402,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 updateIndexRanges = true;
             }
 
+            UpdateDefinition<T> logHeaderUpdate = null;
+
             // Update index range
             if (updateIndexRanges)
             {
-                UpdateIndexRange(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended, false);
+                logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
+
+            UpdateGrowingObject(current, logHeaderUpdate, rangeExtended);
         }
 
         /// <summary>
@@ -667,14 +641,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
         /// <param name="indexUnit">The index unit.</param>
         /// <param name="offset">The offset.</param>
-        /// <param name="rangeExtended">if set to <c>true</c> an index range was extended beyond the min/max.</param>
         /// <param name="isDelete">True if for delete log data.</param>
-        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool rangeExtended, bool isDelete)
+        protected UpdateDefinition<T> GetIndexRangeUpdate(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+            
             var increasing = IsIncreasing(entity);
             UpdateDefinition<T> logHeaderUpdate = null;
 
@@ -694,30 +665,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 logHeaderUpdate = isTimeLog
                     ? UpdateDateTimeIndexRange(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, offset)
-                    : UpdateIndexRange(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, indexUnit);
+                    : GetIndexRangeUpdate(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, indexUnit);
             }
 
-            logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
-
-            var updateOjectGrowing = rangeExtended && WitsmlOperationContext.Current.Request.Function != Functions.AddToStore;
-
-            if (updateOjectGrowing)
-            {
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "ObjectGrowing", true);
-            }
-
-            if (logHeaderUpdate != null)
-            {
-                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
-            }
-
-            if (updateOjectGrowing)
-            {
-                // Update dbGrowingObject
-                DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
-                // Update Wellbore isActive
-                UpdateWellboreIsActive(uri, true);
-            }
+            return logHeaderUpdate;
         }
 
         /// <summary>
@@ -910,13 +861,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="entity">The data object.</param>
         /// <returns>The channel URI.</returns>
         protected abstract EtpUri GetChannelUri(TChild channel, T entity);
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected abstract void UpdateWellboreIsActive(EtpUri logUri, bool isActive);
 
         /// <summary>
         /// Gets the log data delimiter.
@@ -1412,8 +1356,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return rangeExtended;
         }
 
-
-        private UpdateDefinition<T> UpdateIndexRange(UpdateDefinition<T> logHeaderUpdate, int arrayIndex, Range<double?> range, bool increasing, bool isIndexCurve, string indexUnit)
+        private UpdateDefinition<T> GetIndexRangeUpdate(UpdateDefinition<T> logHeaderUpdate, int arrayIndex, Range<double?> range, bool increasing, bool isIndexCurve, string indexUnit)
         {
             object minIndex = null;
             object maxIndex = null;
@@ -1441,7 +1384,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "StartIndex", startIndex);
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "EndIndex", endIndex);
             }
-
 
             return logHeaderUpdate;
         }

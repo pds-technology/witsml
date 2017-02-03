@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     [Export141(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [Export141(ObjectTypes.Log, typeof(IGrowingObjectDataAdapter))]
-    public partial class Log141DataAdapter : IGrowingObjectDataAdapter
+    public partial class Log141DataAdapter
     {
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.
@@ -431,17 +431,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
-        {
-            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(logUri.Version));
-            dataAdapter.UpdateIsActive(logUri.Parent, isActive);
-        }
-
-        /// <summary>
         /// Converts a logCurveInfo to an index metadata record.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -576,7 +565,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges);
             }
 
-            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, false, true);
+            var logHeaderUpdate = GetIndexRangeUpdate(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
+            UpdateGrowingObject(current, logHeaderUpdate, false);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

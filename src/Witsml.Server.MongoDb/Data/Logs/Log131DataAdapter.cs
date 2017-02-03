@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [Export131(ObjectTypes.Log, typeof(IGrowingObjectDataAdapter))]
-    public partial class Log131DataAdapter : IGrowingObjectDataAdapter
+    public partial class Log131DataAdapter
     {
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.
@@ -406,6 +406,16 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="logUri">The Log URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
+        {
+            // There is not an IsActive in 1.3.1
+        }
+
+        /// <summary>
         /// Updates the common data.
         /// </summary>
         /// <param name="logHeaderUpdate">The log header update.</param>
@@ -548,7 +558,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges);
             }
 
-            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, false, true);
+            var logHeaderUpdate = GetIndexRangeUpdate(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
+            UpdateGrowingObject(current, logHeaderUpdate, false);
         }
 
         /// <summary>
@@ -560,16 +571,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override EtpUri GetChannelUri(LogCurveInfo channel, Log entity)
         {
             return channel.GetUri(entity);
-        }
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
-        {
-            
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

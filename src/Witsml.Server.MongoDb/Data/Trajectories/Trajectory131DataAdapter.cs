@@ -30,7 +30,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     [Export131(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]
-    public partial class Trajectory131DataAdapter : IGrowingObjectDataAdapter
+    public partial class Trajectory131DataAdapter
     {
         /// <summary>
         /// Clears the trajectory stations.
@@ -165,6 +165,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
         protected override void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive)
         {
+            // There is not an IsActive in 1.3.1
         }
     }
 }

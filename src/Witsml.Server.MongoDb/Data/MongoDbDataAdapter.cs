@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -28,6 +29,7 @@ using PDS.Framework;
 using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.ChangeLogs;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
@@ -37,7 +39,7 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="T">Type of the data object</typeparam>
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
-    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
+    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>, IGrowingObjectDataAdapter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
@@ -60,6 +62,15 @@ namespace PDS.Witsml.Server.Data
                 AuditHistoryAdapter = container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as DbAuditHistoryDataAdapter;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the database growing object adapter.
+        /// </summary>
+        /// <value>
+        /// The database growing object adapter.
+        /// </value>
+        [Import]
+        public IGrowingObjectDataProvider DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Gets the database provider used for accessing MongoDb.
@@ -546,6 +557,81 @@ namespace PDS.Witsml.Server.Data
         protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
             AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, updateFields);
+        }
+
+        /// <summary>
+        /// Determines whether [is object growing] [the specified entity].
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        ///   <c>true</c> if [is object growing] [the specified entity]; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool IsObjectGrowing(T entity)
+        {
+            return false;
+        }
+
+        void IGrowingObjectDataAdapter.UpdateObjectGrowing(EtpUri uri, bool isGrowing)
+        {
+            var current = GetEntity(uri);
+            UpdateGrowingObject(current, null, isGrowing);
+        }
+
+        /// <summary>
+        /// Updates the growing status.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="updates">The header update definition.</param>
+        /// <param name="objectGrowing">If the object is growing.</param>
+        protected virtual void UpdateGrowingObject(T entity, UpdateDefinition<T> updates, bool objectGrowing)
+        {
+            var wasGrowing = IsObjectGrowing(entity);
+            var dataObject = entity as IDataObject;
+            // TODO: Handle 2.0 GrowingStatus
+            var fields = MongoDbUtility.CreateUpdateFields<T>();
+            var uri = dataObject.GetUri();
+
+            if (wasGrowing != objectGrowing)
+            {
+                
+                Logger.Debug($"Updating Object Growing for URI: {uri}");
+                updates = MongoDbUtility.BuildUpdate(updates, "ObjectGrowing", objectGrowing);
+            }
+
+            // Update the header
+            if (updates != null)
+            {
+                // Join existing Transaction
+                Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, entity.ToBsonDocument(), uri);
+                Transaction.Save();
+
+                var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+                var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+                mongoUpdate.UpdateFields(filter, updates);
+            }
+
+            // Audit entity
+            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, fields);
+
+            // If the object is not currently growing do not update wellbore isActive
+            if (!objectGrowing) return;
+
+            // Update dbGrowingObject
+            DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
+            // Update Wellbore isActive
+            UpdateWellboreIsActive(uri, true);
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="logUri">The Log URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected virtual void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
+        {
+            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(logUri.Version));
+            dataAdapter.UpdateIsActive(logUri.Parent, isActive);
         }
 
         /// <summary>
