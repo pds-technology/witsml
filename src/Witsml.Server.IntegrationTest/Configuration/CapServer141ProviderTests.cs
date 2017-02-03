@@ -66,22 +66,44 @@ namespace PDS.Witsml.Server.Configuration
             Assert.IsTrue(capServerXml != string.Empty);
 
             var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<CapServers>(capServerXml).CapServer;
+            var defaultSettings = Properties.Settings.Default;
 
             Assert.AreEqual("1.4.1", capServerObject.ApiVers);
-            Assert.AreEqual(Properties.Settings.Default.DefaultServerName, capServerObject.Name, "Server Name");
-            Assert.AreEqual(Properties.Settings.Default.DefaultVendorName, capServerObject.Vendor, "Vendor");
-            Assert.AreEqual(Properties.Settings.Default.DefaultServerDescription, capServerObject.Description, "Server Description");
+            Assert.AreEqual(defaultSettings.DefaultServerName, capServerObject.Name, "Server Name");
+            Assert.AreEqual(defaultSettings.DefaultVendorName, capServerObject.Vendor, "Vendor");
+            Assert.AreEqual(defaultSettings.DefaultServerDescription, capServerObject.Description, "Server Description");
             Assert.AreEqual("1.4.1.1", capServerObject.SchemaVersion, "Schema Version");
-            Assert.AreEqual(Properties.Settings.Default.DefaultContactName, capServerObject.Contact.Name, "Contact Name");
-            Assert.AreEqual(Properties.Settings.Default.DefaultContactEmail, capServerObject.Contact.Email, "Contact Email");
-            Assert.AreEqual(Properties.Settings.Default.DefaultContactPhone, capServerObject.Contact.Phone, "Contact Phone");
+            Assert.AreEqual(defaultSettings.DefaultContactName, capServerObject.Contact.Name, "Contact Name");
+            Assert.AreEqual(defaultSettings.DefaultContactEmail, capServerObject.Contact.Email, "Contact Email");
+            Assert.AreEqual(defaultSettings.DefaultContactPhone, capServerObject.Contact.Phone, "Contact Phone");
 
             Assert.IsNotNull(capServerObject.MaxRequestLatestValues);
-            Assert.AreEqual(Properties.Settings.Default.MaxRequestLatestValues, capServerObject.MaxRequestLatestValues.Value, "maxRequestLatestValue");
+            Assert.AreEqual(defaultSettings.MaxRequestLatestValues, capServerObject.MaxRequestLatestValues.Value, "maxRequestLatestValue");
             Assert.IsNotNull(capServerObject.SupportUomConversion);
             Assert.IsTrue(!string.IsNullOrEmpty(capServerObject.CompressionMethod));
+            Assert.AreEqual(defaultSettings.ChangeDetectionPeriod, capServerObject.ChangeDetectionPeriod.GetValueOrDefault());
+            Assert.AreEqual(defaultSettings.IsCascadeDeleteEnabled, capServerObject.CascadedDelete);
 
             Assert.AreEqual(4, capServerObject.Function.Count, "Server Functions");
+        }
+
+        [TestMethod]
+        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_GrowingTimeoutPeriod()
+        {
+            var capServerObject = GetCapServerObject();
+
+            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
+            Assert.IsNotNull(updateInStore);
+
+            updateInStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        if (ObjectTypes.IsGrowingDataObject(dataObject.Value))
+                        {
+                            var propertyGrowingTimeoutPeriod = dataObject.Value.ToPascalCase() + "GrowingTimeoutPeriod";
+                            Assert.AreEqual(Properties.Settings.Default[propertyGrowingTimeoutPeriod], capServerObject.GrowingTimeoutPeriod.Find(t => t.DataObject == dataObject.Value).Value, propertyGrowingTimeoutPeriod);
+                        }
+                    });
         }
 
         [TestMethod]
