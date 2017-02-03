@@ -134,7 +134,11 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var data = putObject.DataObject.GetString();
-                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))                {                    var objectType = ObjectTypes.GetObjectType(uri.ObjectType, uri.Version);                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);                    data = WitsmlParser.ToXml(instance);                }                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
+                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))                {
+                    var objectType = OptionsIn.DataVersion.Version200.Equals(uri.Version)
+                        ? ObjectTypes.GetObjectType(uri.ObjectType, uri.Version)
+                        : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
+                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);                    data = WitsmlParser.ToXml(instance);                }                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.DataObject);
 
