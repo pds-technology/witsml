@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigList, Rig>(xml);
 
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigList, Rig>(xml);
 
@@ -173,7 +173,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<RigList, Rig>(updateXml);
 
@@ -189,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         public async Task Rig131_DeleteObject_Can_Delete_Rig()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Rig.GetUri();
@@ -211,9 +211,10 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigList, Rig>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

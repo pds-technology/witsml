@@ -296,7 +296,7 @@ namespace PDS.Witsml.Server
             var collection = Activator.CreateInstance<TList>();
 
             list.SetValue(collection, new List<TObject> { instance });
-            dataObject.SetXml(EnergisticsConverter.ObjectToXml(collection));
+            dataObject.SetString(EnergisticsConverter.ObjectToXml(collection));
 
             return dataObject;
         }
@@ -316,7 +316,7 @@ namespace PDS.Witsml.Server
                 }
             };
 
-            dataObject.SetXml(EnergisticsConverter.ObjectToXml(instance));
+            dataObject.SetString(EnergisticsConverter.ObjectToXml(instance));
 
             return dataObject;
         }

@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Log>(xml);
 
@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Log>(xml);
 
@@ -172,7 +172,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<Log>(updateXml);
 
@@ -188,7 +188,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public async Task Log200_DeleteObject_Can_Delete_Log()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Log.GetUri();
@@ -210,9 +210,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Log>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

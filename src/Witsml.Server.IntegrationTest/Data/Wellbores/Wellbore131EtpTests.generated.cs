@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellboreList, Wellbore>(xml);
 
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellboreList, Wellbore>(xml);
 
@@ -173,7 +173,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<WellboreList, Wellbore>(updateXml);
 
@@ -189,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public async Task Wellbore131_DeleteObject_Can_Delete_Wellbore()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Wellbore.GetUri();
@@ -211,9 +211,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellboreList, Wellbore>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

@@ -365,7 +365,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Verify that, if provided, domainObject is the LogCurveInfo for the channel.
             foreach (var curve in channels
                 .Where(channel => channel.DomainObject != null)
-                .Select(channel => channel.DomainObject.GetXml())
+                .Select(channel => channel.DomainObject.GetString())
                 .Select(EnergisticsConverter.XmlToObject<LogCurveInfo>))
             {
                 Assert.IsNotNull(curve, "DomainObject is not LogCurveInfo");

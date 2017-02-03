@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<AttachmentList, Attachment>(xml);
 
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<AttachmentList, Attachment>(xml);
 
@@ -173,7 +173,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<AttachmentList, Attachment>(updateXml);
 
@@ -189,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         public async Task Attachment141_DeleteObject_Can_Delete_Attachment()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Attachment.GetUri();
@@ -211,9 +211,10 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<AttachmentList, Attachment>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

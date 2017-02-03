@@ -27,3 +27,7 @@ using System.Reflection;
 [assembly: AssemblyVersion("2016.1.0.0")]
 [assembly: AssemblyFileVersion("2016.1.0.0")]
 [assembly: AssemblyInformationalVersion("2016.1.0.0")]
+
+#if DEBUG
+[assembly: System.Diagnostics.Debuggable(true, true)]
+#endif

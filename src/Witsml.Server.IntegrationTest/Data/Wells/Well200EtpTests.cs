@@ -16,6 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+using Energistics;
+using Energistics.DataAccess.WITSML200;
+using Energistics.Protocol;
+using Energistics.Protocol.Store;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
@@ -23,5 +30,35 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well200EtpTests
     {
+
+        [TestMethod]
+        public async Task Well200_PutObject_Add_Well_Without_Citation_Returns_Protocol_Exception()
+        {
+            AddParents();
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Well.GetUri();
+
+            // Try adding minimal Well without Citation
+            Well = new Well
+            {
+                Uuid = DevKit.Uid(),
+                SchemaVersion = "2.0"
+            };
+
+            var dataObject = CreateDataObject(uri, Well);
+            dataObject.Resource.Name = DevKit.Name("Well 20");
+
+            // Get Object
+            var args = await GetAndAssert(handler, uri);
+
+            // Check for message flag indicating No Data
+            Assert.IsNotNull(args?.Header);
+            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+
+            // Put Object
+            await PutAndAssert(handler, dataObject, EtpErrorCodes.InvalidObject);
+        }
     }
 }

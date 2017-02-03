@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigUtilization>(xml);
 
@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigUtilization>(xml);
 
@@ -172,7 +172,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<RigUtilization>(updateXml);
 
@@ -188,7 +188,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         public async Task RigUtilization200_DeleteObject_Can_Delete_RigUtilization()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = RigUtilization.GetUri();
@@ -210,9 +210,10 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<RigUtilization>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

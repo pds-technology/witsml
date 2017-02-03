@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Trajectory>(xml);
 
@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Trajectory>(xml);
 
@@ -172,7 +172,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<Trajectory>(updateXml);
 
@@ -188,7 +188,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public async Task Trajectory200_DeleteObject_Can_Delete_Trajectory()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Trajectory.GetUri();
@@ -210,9 +210,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<Trajectory>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

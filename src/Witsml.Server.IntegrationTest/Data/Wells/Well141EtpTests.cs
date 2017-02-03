@@ -117,7 +117,7 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 // Update data object XML
                 var xml = string.Format(templateXml, uuid, string.Empty);
-                dataObject.SetXml(xml);
+                dataObject.SetString(xml);
 
                 // Update resource URI
                 dataObject.Resource.Uri = EtpUris.Witsml141.Append(ObjectTypes.Well, uuid);

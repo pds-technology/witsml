@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
 
@@ -155,7 +155,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
 
@@ -176,7 +176,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<WbGeometryList, WbGeometry>(updateXml);
 
@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public async Task WbGeometry141_DeleteObject_Can_Delete_WbGeometry()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = WbGeometry.GetUri();
@@ -214,9 +214,10 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

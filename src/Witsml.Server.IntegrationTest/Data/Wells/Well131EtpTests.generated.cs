@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellList, Well>(xml);
 
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellList, Well>(xml);
 
@@ -173,7 +173,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var updateXml = args.Message.DataObject.GetXml();
+            var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<WellList, Well>(updateXml);
 
@@ -189,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public async Task Well131_DeleteObject_Can_Delete_Well()
         {
             AddParents();
-			await RequestSessionAndAssert();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Well.GetUri();
@@ -211,9 +211,10 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
-            var xml = args.Message.DataObject.GetXml();
+            var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WellList, Well>(xml);
+
             Assert.IsNotNull(result);
 
             // Delete Object

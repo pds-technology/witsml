@@ -66,13 +66,11 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             if (entity == null)
             {
-                dataObject.SetXml(null);
+                dataObject.SetString(null);
             }
             else
             {
-                var xml = WitsmlParser.ToXml(entity);
-                dataObject.SetXml(xml);
-            }
+                var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)                    ? Energistics.Common.EtpExtensions.Serialize(entity)                    : WitsmlParser.ToXml(entity);                dataObject.SetString(data);            }
 
             dataObject.Resource = new Resource()
             {
@@ -135,8 +133,8 @@ namespace PDS.Witsml.Server.Providers.Store
 
             try
             {
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, putObject.DataObject.GetXml(), null, null);
-
+                var data = putObject.DataObject.GetString();
+                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))                {                    var objectType = ObjectTypes.GetObjectType(uri.ObjectType, uri.Version);                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);                    data = WitsmlParser.ToXml(instance);                }                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.DataObject);
 
