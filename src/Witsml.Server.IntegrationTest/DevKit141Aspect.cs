@@ -808,11 +808,11 @@ namespace PDS.Witsml.Server
                 Assert.AreEqual(commonData.SourceName, changeLog.SourceName);
             }
 
-            // Verify that the LastChangeType exists and was an Add
+            // Verify that the LastChangeType exists and matches the expected changeType
             Assert.IsTrue(changeLog.LastChangeType.HasValue);
             Assert.AreEqual(expectedChangeType, changeLog.LastChangeType.Value);
 
-            // Verify that there is only one changeHistory
+            // Verify that there is changeHistory
             Assert.AreEqual(expectedHistoryCount, changeLog.ChangeHistory.Count);
 
             // The LastChangeType of the changeLog MUST match the ChangeType of the last changeHistory added
