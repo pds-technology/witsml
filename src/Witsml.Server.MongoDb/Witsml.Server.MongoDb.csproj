@@ -157,6 +157,7 @@
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
+    <Compile Include="Data\GrowingObjects\GrowingObjectDataAdapterBase.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.generated.cs">

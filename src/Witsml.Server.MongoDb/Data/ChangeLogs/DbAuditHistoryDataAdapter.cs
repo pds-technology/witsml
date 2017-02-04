@@ -140,16 +140,29 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 (DateTimeOffset?)abstractObject?.Citation?.LastUpdate, 
                 changeType, updateFields);
 
-            // Append current change entry
-            auditHistory.ChangeHistory.Add(new ChangeHistory
-            {
-                Uid = Guid.NewGuid().ToString(),
-                ChangeInfo = auditHistory.LastChangeInfo,
-                ChangeType = auditHistory.LastChangeType,
-                DateTimeChange = auditHistory.CommonData.DateTimeLastChange
-            });
+            // Update current ChangeHistory entry to match the ChangeLog header
+            var changeHistory = GetCurrentChangeHistory();
+            changeHistory.ChangeInfo = auditHistory.LastChangeInfo;
+            changeHistory.ChangeType = auditHistory.LastChangeType;
+            changeHistory.DateTimeChange = auditHistory.CommonData.DateTimeLastChange;
+
+            // Append current ChangeHistory entry
+            auditHistory.ChangeHistory.Add(changeHistory);
+
+            // Remove ChangeHistory entry from current context
+            WitsmlOperationContext.Current.ChangeHistory = null;
 
             return auditHistory;
+        }
+
+        /// <summary>
+        /// Gets or creates the change history entry for the current operation.
+        /// </summary>
+        /// <returns>The <see cref="ChangeHistory"/> entry for the current operation.</returns>
+        public ChangeHistory GetCurrentChangeHistory()
+        {
+            return WitsmlOperationContext.Current.ChangeHistory ??
+                   (WitsmlOperationContext.Current.ChangeHistory = new ChangeHistory { Uid = Guid.NewGuid().ToString() });
         }
 
         /// <summary>

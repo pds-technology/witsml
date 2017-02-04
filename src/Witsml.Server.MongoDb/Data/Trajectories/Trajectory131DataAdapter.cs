@@ -21,7 +21,6 @@ using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -32,15 +31,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [Export131(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]
     public partial class Trajectory131DataAdapter
     {
-        /// <summary>
-        /// Clears the trajectory stations.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        protected override void ClearTrajectoryStations(Trajectory entity)
-        {
-            entity.TrajectoryStation = null;
-        }
-
         /// <summary>
         /// Formats the station data based on query parameters.
         /// </summary>
@@ -83,7 +73,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The result data object.</param>
         /// <param name="header">The full header object.</param>
         /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
-        protected override bool QueryStationFile(Trajectory entity, Trajectory header)
+        protected override bool IsQueryingStationFile(Trajectory entity, Trajectory header)
         {
             return header.MDMin != null && entity.TrajectoryStation == null;
         }
@@ -144,18 +134,24 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Sets the object growing flag.
+        /// Clears the trajectory stations.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="isGrowing">Set to true if trajectory is growing, otherwise false.</param>        
-        protected override void SetObjectGrowing(Trajectory dataObject, bool isGrowing)
+        /// <param name="entity">The entity.</param>
+        protected override void ClearTrajectoryStations(Trajectory entity)
         {
-            if (!dataObject.ObjectGrowing.GetValueOrDefault() && isGrowing)
-            {
-                var uri = dataObject.GetUri();
-                dataObject.ObjectGrowing = true;
-                DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
-            }
+            entity.TrajectoryStation = null;
+        }
+
+        /// <summary>
+        /// Determines whether the objectGrowing flag is true for the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        ///   <c>true</c> if the objectGrowing flag is true for the specified entity; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool IsObjectGrowing(Trajectory entity)
+        {
+            return entity.ObjectGrowing.GetValueOrDefault();
         }
 
         /// <summary>
@@ -165,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
         protected override void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive)
         {
-            // There is not an IsActive in 1.3.1
+            // In WITSML v131, Wellbore does not have an isActive element.
         }
     }
 }

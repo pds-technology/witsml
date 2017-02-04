@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess;
@@ -30,7 +29,6 @@ using MongoDB.Driver.GridFS;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -40,7 +38,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TChild">The type of the child.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
-    public abstract class TrajectoryDataAdapter<T, TChild> : MongoDbDataAdapter<T> where T : IWellboreObject where TChild : IUniqueId
+    public abstract class TrajectoryDataAdapter<T, TChild> : GrowingObjectDataAdapterBase<T> where T : IWellboreObject where TChild : IUniqueId
     {
         /// <summary>
         /// The field to query Mongo File
@@ -124,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var uri = dataObject.GetUri();
 
-            if (UpdateStations(dataObject))
+            if (IsUpdatingStations(dataObject))
             {
                 UpdateTrajectoryWithStations(parser, dataObject, uri, true);
             }
@@ -134,6 +132,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     transaction.SetContext(uri);
                     UpdateEntity(parser, uri);
+                    UpdateGrowingObject(uri);
                     transaction.Commit();
                 }
             }
@@ -160,7 +159,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             if (parser.HasElements())
             {
-                if (DeleteStations(parser))
+                if (IsDeletingStations(parser))
                 {
                     PartialDeleteTrajectoryWithStations(parser, uri);
                 }
@@ -192,7 +191,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 transaction.SetContext(uri);
 
                 var current = GetEntity(uri);
-                var chunked = QueryStationFile(current, current);
+                var chunked = IsQueryingStationFile(current, current);
                 DeleteEntity(uri);
 
                 if (chunked)
@@ -328,7 +327,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var stations = GetTrajectoryStations(entity);
 
-            if (QueryStationFile(entity, header))
+            if (IsQueryingStationFile(entity, header))
             {
                 var uri = entity.GetUri();
                 stations = GetMongoFileStationData(uri);
@@ -428,7 +427,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The result data object.</param>
         /// <param name="header">The full header object.</param>
         /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
-        protected abstract bool QueryStationFile(T entity, T header);
+        protected abstract bool IsQueryingStationFile(T entity, T header);
 
         /// <summary>
         /// Sets the MD index ranges.
@@ -451,20 +450,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>The trajectory station collection.</returns>
         protected abstract List<TChild> GetTrajectoryStations(T dataObject);
 
-        /// <summary>
-        /// Sets the object growing flag.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="isGrowing">Set to true if trajectory is growing, otherwise false.</param>        
-        protected abstract void SetObjectGrowing(T dataObject, bool isGrowing);
-
-        private bool UpdateStations(T dataObject)
+        private bool IsUpdatingStations(T dataObject)
         {
             var stations = GetTrajectoryStations(dataObject);
             return stations.Any();
         }
 
-        private bool DeleteStations(WitsmlQueryParser parser)
+        private bool IsDeletingStations(WitsmlQueryParser parser)
         {
             var range = GetQueryIndexRange(parser);
             if (range.Start.HasValue || range.End.HasValue)
@@ -477,7 +469,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, T dataObject, EtpUri uri, bool merge = false)
         {
             var current = GetEntity(uri);
-            var chunked = QueryStationFile(current, current);
+            var chunked = IsQueryingStationFile(current, current);
             var appending = false;
 
             if (merge)
@@ -510,10 +502,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     DeleteMongoFile(bucket, uri);
                 }
 
-                SetObjectGrowing(dataObject, appending);
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
+
+                // TODO: Update current ChangeHistory entry
+                //var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+                UpdateGrowingObject(current, null, appending);
                 transaction.Commit();
             }
         }
@@ -521,7 +517,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
         {
             var current = GetEntity(uri);
-            var chunked = QueryStationFile(current, current);
+            var chunked = IsQueryingStationFile(current, current);
 
             if (chunked)
             {
@@ -545,6 +541,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(current, parser);
                 UpdateMongoFile(current, false);
                 ReplaceEntity(current, uri);
+                UpdateGrowingObject(uri);
                 transaction.Commit();
             }
         }

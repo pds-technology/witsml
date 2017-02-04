@@ -28,6 +28,7 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -39,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <typeparam name="TChild">The type of the child.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
-    public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
+    public abstract class LogDataAdapter<T, TChild> : GrowingObjectDataAdapterBase<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}" /> class.
@@ -332,18 +333,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Audits the update operation.
-        /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected override void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
-        {
-            // Overriding default behavior for growing object
-        }
-
-        /// <summary>
         /// Updates the log data and index range.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -410,7 +399,21 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            UpdateGrowingObject(current, logHeaderUpdate, rangeExtended);
+            // Only update object growing flag during UpdateInStore
+            if (WitsmlOperationContext.Current.Request.Function == Functions.UpdateInStore)
+            {
+                // Update current ChangeHistory entry
+                var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
+                changeHistory.ObjectGrowingState = rangeExtended || IsObjectGrowing(current);
+                changeHistory.UpdatedHeader = rangeExtended;
+
+                UpdateGrowingObject(current, logHeaderUpdate, rangeExtended);
+            }
+            else if (logHeaderUpdate != null)
+            {
+                UpdateGrowingObject(uri, logHeaderUpdate);
+            }
         }
 
         /// <summary>

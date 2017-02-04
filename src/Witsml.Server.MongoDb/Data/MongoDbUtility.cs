@@ -81,8 +81,8 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Creates a dictionary of common object property paths to update.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <returns>A dictionary of name/value pairs.</returns>
         public static Dictionary<string, object> CreateUpdateFields<T>()
         {
             if (typeof(IDataObject).IsAssignableFrom(typeof(T)))
@@ -96,6 +96,31 @@ namespace PDS.Witsml.Server.Data
             {
                 return new Dictionary<string, object> {
                     { "Citation.LastUpdate", DateTime.UtcNow.ToString("o") }
+                };
+            }
+
+            return new Dictionary<string, object>(0);
+        }
+
+        /// <summary>
+        /// Creates a dictionary of the object growing property path to update.
+        /// </summary>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <param name="isGrowing">The value to set the object growing flag.</param>
+        /// <returns>A dictionary of name/value pairs.</returns>
+        public static Dictionary<string, object> CreateObjectGrowingFields<T>(bool isGrowing)
+        {
+            if (typeof(IDataObject).IsAssignableFrom(typeof(T)))
+            {
+                return new Dictionary<string, object> {
+                    { "ObjectGrowing", isGrowing }
+                };
+            }
+
+            if (typeof(Witsml200.AbstractObject).IsAssignableFrom(typeof(T)))
+            {
+                return new Dictionary<string, object> {
+                    { "GrowingStatus", isGrowing ? Witsml200.ReferenceData.ChannelStatus.active : Witsml200.ReferenceData.ChannelStatus.inactive }
                 };
             }
 
@@ -139,13 +164,26 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updates">The updates.</param>
         /// <param name="field">The MongoDb field.</param>
         /// <param name="value">The value.</param>
-        /// <returns>The update.</returns>
+        /// <returns>The update definition.</returns>
         public static UpdateDefinition<T> BuildUpdate<T>(UpdateDefinition<T> updates, string field, object value)
         {
             if (updates == null)
                 return Builders<T>.Update.Set(field, value);
 
             return updates.Set(field, value);
+        }
+
+        /// <summary>
+        /// Builds the update for a collection of MongoDb fields.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updates">The updates.</param>
+        /// <param name="values">The dictionary of property paths and values.</param>
+        /// <returns>The update definition.</returns>
+        public static UpdateDefinition<T> BuildUpdate<T>(UpdateDefinition<T> updates, IDictionary<string, object> values)
+        {
+            values.ForEach(item => updates = BuildUpdate(updates, item.Key, item.Value));
+            return updates;
         }
 
         /// <summary>

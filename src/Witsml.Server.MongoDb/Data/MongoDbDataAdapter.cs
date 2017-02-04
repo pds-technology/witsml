@@ -18,9 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
+using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -29,7 +29,6 @@ using PDS.Framework;
 using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.ChangeLogs;
-using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
@@ -39,8 +38,10 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="T">Type of the data object</typeparam>
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
-    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>, IGrowingObjectDataAdapter
+    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private DbAuditHistoryDataAdapter _auditHistoryAdapter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -56,21 +57,7 @@ namespace PDS.Witsml.Server.Data
             DbCollectionName = dbCollectionName;
             IdPropertyName = idPropertyName;
             NamePropertyName = namePropertyName;
-
-            if (typeof(T) != typeof(DbAuditHistory))
-            {
-                AuditHistoryAdapter = container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as DbAuditHistoryDataAdapter;
-            }
         }
-
-        /// <summary>
-        /// Gets or sets the database growing object adapter.
-        /// </summary>
-        /// <value>
-        /// The database growing object adapter.
-        /// </value>
-        [Import]
-        public IGrowingObjectDataProvider DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Gets the database provider used for accessing MongoDb.
@@ -82,7 +69,10 @@ namespace PDS.Witsml.Server.Data
         /// Gets the audit history adapter.
         /// </summary>
         /// <value>The audit history adapter.</value>
-        protected DbAuditHistoryDataAdapter AuditHistoryAdapter { get; }
+        protected DbAuditHistoryDataAdapter AuditHistoryAdapter
+        {
+            get { return _auditHistoryAdapter ?? (_auditHistoryAdapter = Container.Resolve<IWitsmlDataAdapter<DbAuditHistory>>() as DbAuditHistoryDataAdapter); }            
+        }
 
         /// <summary>
         /// Gets a reference to the current <see cref="MongoTransaction"/> instance.
@@ -475,12 +465,10 @@ namespace PDS.Witsml.Server.Data
                 collection.InsertOne(entity);
 
                 var transaction = Transaction;
-                if (transaction == null) return;
-
-                AuditInsert(uri, entity);
-
                 transaction.Attach(MongoDbAction.Add, dbCollectionName, IdPropertyName, null, uri);
                 transaction.Save();
+
+                AuditInsert(uri, entity);
             }
             catch (MongoException ex)
             {
@@ -497,7 +485,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The entity.</param>
         protected virtual void AuditInsert<TObject>(EtpUri uri, TObject entity)
         {
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.add);
+            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.add);
         }
 
         /// <summary>
@@ -533,12 +521,10 @@ namespace PDS.Witsml.Server.Data
                 update.Update(current, uri, updates);
 
                 var transaction = Transaction;
-                if (transaction == null) return;
-
-                AuditUpdate(uri, current, updates);
-
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
+
+                AuditUpdate(uri, current, updates);
             }
             catch (MongoException ex)
             {
@@ -556,82 +542,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
         protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, updateFields);
-        }
-
-        /// <summary>
-        /// Determines whether [is object growing] [the specified entity].
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <returns>
-        ///   <c>true</c> if [is object growing] [the specified entity]; otherwise, <c>false</c>.
-        /// </returns>
-        protected virtual bool IsObjectGrowing(T entity)
-        {
-            return false;
-        }
-
-        void IGrowingObjectDataAdapter.UpdateObjectGrowing(EtpUri uri, bool isGrowing)
-        {
-            var current = GetEntity(uri);
-            UpdateGrowingObject(current, null, isGrowing);
-        }
-
-        /// <summary>
-        /// Updates the growing status.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="updates">The header update definition.</param>
-        /// <param name="objectGrowing">If the object is growing.</param>
-        protected virtual void UpdateGrowingObject(T entity, UpdateDefinition<T> updates, bool objectGrowing)
-        {
-            var wasGrowing = IsObjectGrowing(entity);
-            var dataObject = entity as IDataObject;
-            // TODO: Handle 2.0 GrowingStatus
-            var fields = MongoDbUtility.CreateUpdateFields<T>();
-            var uri = dataObject.GetUri();
-
-            if (wasGrowing != objectGrowing)
-            {
-                
-                Logger.Debug($"Updating Object Growing for URI: {uri}");
-                updates = MongoDbUtility.BuildUpdate(updates, "ObjectGrowing", objectGrowing);
-            }
-
-            // Update the header
-            if (updates != null)
-            {
-                // Join existing Transaction
-                Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, entity.ToBsonDocument(), uri);
-                Transaction.Save();
-
-                var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-
-                var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-                mongoUpdate.UpdateFields(filter, updates);
-            }
-
-            // Audit entity
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, fields);
-
-            // If the object is not currently growing do not update wellbore isActive
-            if (!objectGrowing) return;
-
-            // Update dbGrowingObject
-            DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
-            // Update Wellbore isActive
-            UpdateWellboreIsActive(uri, true);
-        }
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected virtual void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
-        {
-            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(logUri.Version));
-            dataAdapter.UpdateIsActive(logUri.Parent, isActive);
+            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.update, updateFields);
         }
 
         /// <summary>
@@ -670,12 +581,10 @@ namespace PDS.Witsml.Server.Data
                 collection.ReplaceOne(filter, entity);
 
                 var transaction = Transaction;
-                if (transaction == null) return;
-
-                AuditUpdate(uri, current);
-
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
+
+                AuditUpdate(uri, current);
             }
             catch (MongoException ex)
             {
@@ -756,8 +665,8 @@ namespace PDS.Witsml.Server.Data
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
 
+                // Check to make sure the document exists in the database
                 if (current == null) return;
-                AuditDelete(uri, current);
 
                 var transaction = Transaction;
                 if (transaction != null)
@@ -771,6 +680,8 @@ namespace PDS.Witsml.Server.Data
                     var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
                     collection.DeleteOne(filter);
                 }
+
+                AuditDelete(uri, current);
             }
             catch (MongoException ex)
             {
@@ -787,7 +698,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The entity.</param>
         protected virtual void AuditDelete<TObject>(EtpUri uri, TObject entity)
         {
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.delete);
+            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.delete);
         }
 
         /// <summary>
@@ -823,12 +734,10 @@ namespace PDS.Witsml.Server.Data
                 partialDelete.PartialDelete(current, uri, updates);
 
                 var transaction = Transaction;
-                if (transaction == null) return;
-
-                AuditPartialDelete(uri, current, updates);
-
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
+
+                AuditPartialDelete(uri, current, updates);
             }
             catch (MongoException ex)
             {
@@ -846,7 +755,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
         protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
         {
-            AuditEntity(uri, entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, updateFields);
+            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.update, updateFields);
         }
 
         /// <summary>
@@ -857,7 +766,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The entity.</param>
         /// <param name="changeType">Type of the change.</param>
         /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Witsml141.ReferenceData.ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 

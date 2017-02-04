@@ -179,7 +179,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override LogCurveInfo CreateLogCurveInfo(string mnemonic, string unit, string dataType, bool isTimeIndex, int columnIndex)
         {
             LogDataType logDataType;
-            var logDataTypeExists = Enum.TryParse<LogDataType>(dataType, out logDataType);
+            var logDataTypeExists = Enum.TryParse(dataType, out logDataType);
             logDataType = logDataTypeExists ? logDataType : LogDataType.@double;
 
             return new LogCurveInfo
@@ -189,6 +189,18 @@ namespace PDS.Witsml.Server.Data.Logs
                 TypeLogData = logDataType,
                 Unit = unit
             };
+        }
+
+        /// <summary>
+        /// Determines whether the objectGrowing flag is true for the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        ///   <c>true</c> if the objectGrowing flag is true for the specified entity; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool IsObjectGrowing(Log entity)
+        {
+            return entity.ObjectGrowing.GetValueOrDefault();
         }
 
         /// <summary>
