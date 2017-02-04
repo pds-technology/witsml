@@ -23,6 +23,7 @@ using System.Threading;
 using System.Web;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
+using Witsml141 = Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Transactions;
@@ -121,6 +122,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <value>The XML document.</value>
         public XDocument Document { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current change history entry.
+        /// </summary>
+        /// <value>The current change history.</value>
+        public Witsml141.ComponentSchemas.ChangeHistory ChangeHistory { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is cascade delete.
