@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                         DeleteEntity(item.Uri);
 
                         // Add wellbore uri of expired object to the list
-                        if(!wellboreUris.Contains(item.DataObject.WellboreUri))
+                        if (!wellboreUris.Contains(item.DataObject.WellboreUri))
                             wellboreUris.Add(item.DataObject.WellboreUri);
 
                         // Commit transaction

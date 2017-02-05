@@ -65,6 +65,13 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         public virtual void UpdateObjectGrowing(EtpUri uri, bool isObjectGrowing)
         {
             var current = GetEntity(uri);
+
+            if (current == null)
+            {
+                Logger.DebugFormat("Growing object not found with uri '{0}'", uri);
+                return;
+            }
+
             UpdateGrowingObject(current, null, isObjectGrowing);
         }
 

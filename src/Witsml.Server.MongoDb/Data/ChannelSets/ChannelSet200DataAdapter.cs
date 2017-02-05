@@ -213,6 +213,52 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         }
 
         /// <summary>
+        /// Adds <see cref="ChannelSet" /> to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
+        public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
+        {
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(dataObject.GetUri());
+
+                // Extract Data
+                var reader = ExtractDataReader(dataObject);
+
+                InsertEntity(dataObject);
+
+                if (reader == null)
+                {
+                    // Commit transaction and return
+                    transaction.Commit();
+                    return;
+                }
+
+                Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
+
+                var increasing = dataObject.IsIncreasing();
+                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
+
+                // Get current index information
+                var ranges = GetCurrentIndexRange(dataObject);
+                var indexCurve = dataObject.Index[0];
+                Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
+
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
+
+                // Add ChannelDataChunks
+                ChannelDataChunkAdapter.Add(reader);
+
+                // Update index range
+                UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
+
+                // Commit transaction
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
         /// Updates the specified <see cref="Log" /> instance in the store.
         /// </summary>
         /// <param name="parser">The update parser.</param>
@@ -290,47 +336,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
                 base.Delete(uri);
                 ChannelDataChunkAdapter.Delete(uri);
-
-                // Commit transaction
-                transaction.Commit();
-            }
-        }
-
-        /// <summary>
-        /// Adds <see cref="ChannelSet" /> to the data store.
-        /// </summary>
-        /// <param name="parser">The input template parser.</param>
-        /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
-        public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
-        {
-            using (var transaction = GetTransaction())
-            {
-                transaction.SetContext(dataObject.GetUri());
-
-                // Extract Data
-                var reader = ExtractDataReader(dataObject);
-
-                InsertEntity(dataObject);
-
-                if (reader == null) return;
-
-                Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
-
-                var increasing = dataObject.IsIncreasing();
-                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
-
-                // Get current index information
-                var ranges = GetCurrentIndexRange(dataObject);
-                var indexCurve = dataObject.Index[0];
-                Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
-
-                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
-
-                // Add ChannelDataChunks
-                ChannelDataChunkAdapter.Add(reader);
-
-                // Update index range
-                UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
 
                 // Commit transaction
                 transaction.Commit();
