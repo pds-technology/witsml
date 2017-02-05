@@ -208,30 +208,36 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            // TODO: Transaction support needed here
-            Logger.Debug($"Updating channel data for URI: {uri}");
-
-            // Capture primary index info when auto-creating data object
-            var indexInfo = Exists(uri) ? null : reader.Indices.FirstOrDefault();
-            var offset = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault()
-                ? reader.GetChannelIndexRange(0).Offset
-                : null;
-
-            // Ensure data object and parent data objects exist
-            var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            dataProvider.Ensure(uri);
-
-            if (indexInfo != null)
+            using (var transaction = GetTransaction())
             {
-                // Update data object with primary index info after it has been auto-created
-                UpdateIndexInfo(uri, indexInfo, offset);
+                transaction.SetContext(uri);
+                Logger.Debug($"Updating channel data for URI: {uri}");
+
+                // Capture primary index info when auto-creating data object
+                var indexInfo = Exists(uri) ? null : reader.Indices.FirstOrDefault();
+                var offset = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault()
+                    ? reader.GetChannelIndexRange(0).Offset
+                    : null;
+
+                // Ensure data object and parent data objects exist
+                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+                dataProvider.Ensure(uri);
+
+                if (indexInfo != null)
+                {
+                    // Update data object with primary index info after it has been auto-created
+                    UpdateIndexInfo(uri, indexInfo, offset);
+                }
+
+                // Ensure all logCurveInfo elements exist
+                UpdateLogCurveInfos(uri, reader, offset);
+
+                // Update channel data and index range
+                UpdateLogDataAndIndexRange(uri, new[] {reader});
+
+                // Commit transaction
+                transaction.Commit();
             }
-
-            // Ensure all logCurveInfo elements exist
-            UpdateLogCurveInfos(uri, reader, offset);
-
-            // Update channel data and index range
-            UpdateLogDataAndIndexRange(uri, new[] { reader });
         }
 
         /// <summary>
