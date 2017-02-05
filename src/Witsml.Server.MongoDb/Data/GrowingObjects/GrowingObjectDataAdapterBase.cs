@@ -87,11 +87,11 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         {
             var uri = GetUri(entity);
 
-            // Check to see if the object was already growing
-            if (!IsObjectGrowing(entity) && isObjectGrowing)
+            // Check to see if the object growing flag needs to be toggled
+            if (IsObjectGrowing(entity) != isObjectGrowing)
             {
                 Logger.Debug($"Updating object growing flag for URI: {uri}");
-                var flag = MongoDbUtility.CreateObjectGrowingFields<T>(true);
+                var flag = MongoDbUtility.CreateObjectGrowingFields<T>(isObjectGrowing);
                 updates = MongoDbUtility.BuildUpdate(updates, flag);
             }
 
@@ -126,8 +126,9 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             mongoUpdate.UpdateFields(filter, updates);
 
             // Join existing Transaction
-            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
-            Transaction.Save();
+            var transaction = Transaction;
+            transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
+            transaction.Save();
 
             // Audit entity
             AuditEntity(uri, current, Witsml141.ReferenceData.ChangeInfoType.update, fields);

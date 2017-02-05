@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using PDS.Witsml.Server.Data.GrowingObjects;
@@ -61,13 +62,22 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid, wellboreEntity.Name);
 
-            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, wellboreEntity.ToBsonDocument(), uri);
-            Transaction.Save();
-
             var filter = MongoDbUtility.GetEntityFilter<Wellbore>(uri);
+            var fields = MongoDbUtility.CreateUpdateFields<Wellbore>();
+
             var wellboreUpdate = MongoDbUtility.BuildUpdate<Wellbore>(null, "IsActive", isActive);
+            wellboreUpdate = MongoDbUtility.BuildUpdate(wellboreUpdate, fields);
+
             var mongoUpdate = new MongoDbUpdate<Wellbore>(Container, GetCollection(), null);
             mongoUpdate.UpdateFields(filter, wellboreUpdate);
+
+            // Join existing Transaction
+            var transaction = Transaction;
+            transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, wellboreEntity.ToBsonDocument(), uri);
+            transaction.Save();
+
+            // Audit entity
+            AuditEntity(uri, wellboreEntity, ChangeInfoType.update, fields);
         }
     }
 }
