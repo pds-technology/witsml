@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        public void Trajectory141DataAdapter_ChangeLog_Tracks_ChangeHistory_For_Add_Update_Delete()
         {
             AddParents();
 
@@ -189,6 +189,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
             expectedHistoryCount = 3;
             expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Trajectory, expectedHistoryCount, expectedChangeType);
+
+            // Re-add the same Trajectory141...
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            //... the same changeLog should be reused.
+            result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            expectedHistoryCount = 4;
+            expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
     }

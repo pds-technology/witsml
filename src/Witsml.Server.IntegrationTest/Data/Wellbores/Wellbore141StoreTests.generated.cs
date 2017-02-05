@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         [TestMethod]
-        public void Wellbore141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        public void Wellbore141DataAdapter_ChangeLog_Tracks_ChangeHistory_For_Add_Update_Delete()
         {
             AddParents();
 
@@ -189,6 +189,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
             expectedHistoryCount = 3;
             expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Wellbore, expectedHistoryCount, expectedChangeType);
+
+            // Re-add the same Wellbore141...
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            //... the same changeLog should be reused.
+            result = DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
+            expectedHistoryCount = 4;
+            expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
     }

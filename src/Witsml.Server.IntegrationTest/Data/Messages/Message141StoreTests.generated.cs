@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
         [TestMethod]
-        public void Message141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        public void Message141DataAdapter_ChangeLog_Tracks_ChangeHistory_For_Add_Update_Delete()
         {
             AddParents();
 
@@ -189,6 +189,15 @@ namespace PDS.Witsml.Server.Data.Messages
             expectedHistoryCount = 3;
             expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Message, expectedHistoryCount, expectedChangeType);
+
+            // Re-add the same Message141...
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            //... the same changeLog should be reused.
+            result = DevKit.GetAndAssert<MessageList, Message>(Message);
+            expectedHistoryCount = 4;
+            expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
     }

@@ -164,7 +164,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         }
 
         [TestMethod]
-        public void WbGeometry141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        public void WbGeometry141DataAdapter_ChangeLog_Tracks_ChangeHistory_For_Add_Update_Delete()
         {
             AddParents();
 
@@ -192,6 +192,15 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             expectedHistoryCount = 3;
             expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(WbGeometry, expectedHistoryCount, expectedChangeType);
+
+            // Re-add the same WbGeometry141...
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            //... the same changeLog should be reused.
+            result = DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            expectedHistoryCount = 4;
+            expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
     }

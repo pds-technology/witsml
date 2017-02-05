@@ -135,7 +135,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
         [TestMethod]
-        public void Attachment141DataAdapter_AddUpdateDelete_Adds_And_Updates_ChangeLog()
+        public void Attachment141DataAdapter_ChangeLog_Tracks_ChangeHistory_For_Add_Update_Delete()
         {
             AddParents();
 
@@ -163,6 +163,15 @@ namespace PDS.Witsml.Server.Data.Attachments
             expectedHistoryCount = 3;
             expectedChangeType = ChangeInfoType.delete;
             DevKit.AssertChangeLog(Attachment, expectedHistoryCount, expectedChangeType);
+
+            // Re-add the same Attachment141...
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            //... the same changeLog should be reused.
+            result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            expectedHistoryCount = 4;
+            expectedChangeType = ChangeInfoType.add;
+            DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
     }
