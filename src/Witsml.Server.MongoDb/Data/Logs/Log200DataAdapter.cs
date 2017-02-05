@@ -114,20 +114,28 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object to be added.</param>
         public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
-            // Add ChannelSets + data via the ChannelSet data adapter
-            foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
+            using (var transaction = GetTransaction())
             {
-                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
-                ChannelSetDataAdapter.Add(childParser, channelSet);
-            }
+                transaction.SetContext(dataObject.GetUri());
 
-            // Clear ChannelSet data properties
-            foreach (var channelSet in dataObject.ChannelSet)
-            {
-                channelSet.Data = null;
-            }
+                // Add ChannelSets + data via the ChannelSet data adapter
+                foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
+                {
+                    var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
+                    ChannelSetDataAdapter.Add(childParser, channelSet);
+                }
 
-            InsertEntity(dataObject);
+                // Clear ChannelSet data properties
+                foreach (var channelSet in dataObject.ChannelSet)
+                {
+                    channelSet.Data = null;
+                }
+
+                InsertEntity(dataObject);
+
+                // Commit transaction
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -137,15 +145,23 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
-            // Update ChannelSets + data via the ChannelSet data adapter
-            foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
+            using (var transaction = GetTransaction())
             {
-                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
-                ChannelSetDataAdapter.Update(childParser, channelSet);
-            }
+                transaction.SetContext(dataObject.GetUri());
 
-            var uri = GetUri(dataObject);
-            UpdateEntity(parser, uri);
+                // Update ChannelSets + data via the ChannelSet data adapter
+                foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
+                {
+                    var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
+                    ChannelSetDataAdapter.Update(childParser, channelSet);
+                }
+
+                var uri = GetUri(dataObject);
+                UpdateEntity(parser, uri);
+
+                // Commit transaction
+                transaction.Commit();
+            }
         }
 
         /// <summary>

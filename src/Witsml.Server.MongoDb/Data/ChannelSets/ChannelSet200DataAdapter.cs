@@ -219,12 +219,20 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, ChannelSet dataObject)
         {
-            var uri = dataObject.GetUri();
-            UpdateEntity(parser, uri);
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(dataObject.GetUri());
 
-            // Extract Data
-            var reader = ExtractDataReader(dataObject, GetEntity(uri));
-            UpdateChannelDataAndIndexRange(uri, reader);
+                var uri = dataObject.GetUri();
+                UpdateEntity(parser, uri);
+
+                // Extract Data
+                var reader = ExtractDataReader(dataObject, GetEntity(uri));
+                UpdateChannelDataAndIndexRange(uri, reader);
+
+                // Commit transaction
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -234,34 +242,40 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            // TODO: Transaction support needed here
-            Logger.Debug($"Updating channel data for URI: {uri}");
-
-            // Capture primary index info when auto-creating data object
-            var indexInfos = Exists(uri) ? null : reader.Indices;
-            var offset = reader.Indices.Take(1).Select(x => x.IsTimeIndex).FirstOrDefault()
-                ? reader.GetChannelIndexRange(0).Offset
-                : null;
-
-            // Ensure data object and parent data objects exist
-            var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            dataProvider.Ensure(uri);
-
-            // Only use the URI of the channelSet as it is a top level object
-            uri = EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, uri.ObjectId);
-            reader.Uri = uri.Uri;
-
-            if (indexInfos != null)
+            using (var transaction = GetTransaction())
             {
-                // Update data object with primary index info after it has been auto-created
-                UpdateIndexInfo(uri, indexInfos, offset);
+                transaction.SetContext(uri);
+                Logger.Debug($"Updating channel data for URI: {uri}");
+
+                // Capture primary index info when auto-creating data object
+                var indexInfos = Exists(uri) ? null : reader.Indices;
+                var offset = reader.Indices.Take(1).Select(x => x.IsTimeIndex).FirstOrDefault()
+                    ? reader.GetChannelIndexRange(0).Offset
+                    : null;
+
+                // Ensure data object and parent data objects exist
+                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+                dataProvider.Ensure(uri);
+
+                // Only use the URI of the channelSet as it is a top level object
+                uri = EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, uri.ObjectId);
+                reader.Uri = uri.Uri;
+
+                if (indexInfos != null)
+                {
+                    // Update data object with primary index info after it has been auto-created
+                    UpdateIndexInfo(uri, indexInfos, offset);
+                }
+
+                // Ensure all logCurveInfo elements exist
+                UpdateChannels(uri, reader, offset);
+
+                // Update channel data and index range
+                UpdateChannelDataAndIndexRange(uri, reader);
+
+                // Commit transaction
+                transaction.Commit();
             }
-
-            // Ensure all logCurveInfo elements exist
-            UpdateChannels(uri, reader, offset);
-
-            // Update channel data and index range
-            UpdateChannelDataAndIndexRange(uri, reader);
         }
 
         /// <summary>
@@ -270,8 +284,16 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            base.Delete(uri);
-            ChannelDataChunkAdapter.Delete(uri);
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(uri);
+
+                base.Delete(uri);
+                ChannelDataChunkAdapter.Delete(uri);
+
+                // Commit transaction
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -281,14 +303,19 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
         public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
         {
-            // Extract Data
-            var reader = ExtractDataReader(dataObject);
-
-            InsertEntity(dataObject);
-
-            if (reader != null)
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(dataObject.GetUri());
+
+                // Extract Data
+                var reader = ExtractDataReader(dataObject);
+
+                InsertEntity(dataObject);
+
+                if (reader == null) return;
+
                 Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
+
                 var increasing = dataObject.IsIncreasing();
                 var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
@@ -304,6 +331,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
                 // Update index range
                 UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
+
+                // Commit transaction
+                transaction.Commit();
             }
         }
 
