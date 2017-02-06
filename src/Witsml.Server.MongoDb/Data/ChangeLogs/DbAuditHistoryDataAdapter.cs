@@ -103,14 +103,13 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             var changeInfo = $"{changeType:G} {uri.ObjectType}";
             var commonDataObject = (entity as ICommonDataObject);
             var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
+            var dataObject = entity as IDataObject;
+            var wellObject = entity as IWellObject;
+            var wellboreObject = entity as IWellboreObject;
 
             // Creating audit history entry
             if (auditHistory == null)
             {
-                var dataObject = entity as IDataObject;
-                var wellObject = entity as IWellObject;
-                var wellboreObject = entity as IWellboreObject;
-
                 auditHistory = new DbAuditHistory
                 {
                     ObjectType = uri.ObjectType,
@@ -118,11 +117,8 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     LastChangeType = changeType,
                     ChangeHistory = new List<ChangeHistory>(),
                     SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator,
-                    NameWellbore = wellboreObject?.NameWellbore,
                     UidWellbore = wellboreObject?.UidWellbore,
-                    NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell,
                     UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
-                    NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title,
                     UidObject = uri.ObjectId,
                     Uri = uriLower
                 };
@@ -134,6 +130,11 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 auditHistory.LastChangeInfo = changeInfo;
                 auditHistory.LastChangeType = changeType;
             }
+
+            // Keep audit history name properties in sync with the entity name properties.
+            auditHistory.NameWellbore = wellboreObject?.NameWellbore;
+            auditHistory.NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell;
+            auditHistory.NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title;
 
             auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(
                 commonDataObject?.CommonData?.DateTimeLastChange ?? 
