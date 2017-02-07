@@ -416,46 +416,17 @@ namespace PDS.Witsml.Server.Data.Logs
             // If the function is add to store use default audit behavior
             if (currentFunction == Functions.AddToStore)
             {
-                var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-                var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-                var fields = MongoDbUtility.CreateUpdateFields<T>();
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, fields);
-                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+                if (logHeaderUpdate != null)
+                {
+                    var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+                    var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+                    mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+                }
                 return;
             }
 
             // During update or delete determine what type of changelog is needed
-            UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
-        }
-
-        private void UpdateChangeLog(T current, Functions currentFunction, Dictionary<string, Range<double?>> ranges, List<string> allUpdateMnemonics, bool isTimeLog, bool rangeExtended, bool hasData, string indexUnit, UpdateDefinition<T> logHeaderUpdate)
-        {
-            var isCurrentObjectGrowing = IsObjectGrowing(current);
-
-            // If the log is growing and data was appeneded then do not update change history
-            if (isCurrentObjectGrowing && rangeExtended)
-            {
-                UpdateGrowingObject(current, logHeaderUpdate, true);
-                return;
-            }
-
-            // Update current ChangeHistory entry
-            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-
-            // If the update has data update the change history for the mnemonics and ranges affected
-            if (hasData)
-            {
-                var minRange = ranges.Min(x => x.Value.Start);
-                var maxRange = ranges.Max(x => x.Value.End);
-                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
-                SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
-            }
-
-            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
-            changeHistory.UpdatedHeader = logHeaderUpdate != null;
-
-            var isNewObjectGrowing = rangeExtended ? (bool?) rangeExtended : null;
-            UpdateGrowingObject(current, logHeaderUpdate, isNewObjectGrowing);
+            UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, originalMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
         }
 
         /// <summary>
@@ -1489,6 +1460,51 @@ namespace PDS.Witsml.Server.Data.Logs
                 end = update.End.GetValueOrDefault();
 
             return new Range<double?>(start, end, update.Offset);
+        }
+
+        private void UpdateChangeLog(T current, Functions currentFunction, Dictionary<string, Range<double?>> ranges, List<string> allUpdateMnemonics, string[] originalMnemonics, bool isTimeLog, bool rangeExtended, bool hasData, string indexUnit, UpdateDefinition<T> logHeaderUpdate)
+        {
+            var isCurrentObjectGrowing = IsObjectGrowing(current);
+
+            // If the log is growing and data was appeneded then do not update change history
+            if (isCurrentObjectGrowing && rangeExtended)
+            {
+                UpdateGrowingObject(current, logHeaderUpdate, true);
+                return;
+            }
+
+            // Update current ChangeHistory entry
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+            // If the update has data update the change history for the mnemonics and ranges affected
+            if (hasData)
+            {
+                var minRange = ranges.Min(x => x.Value.Start);
+                var maxRange = ranges.Max(x => x.Value.End);
+                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
+                SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
+                var message = currentFunction == Functions.UpdateInStore ? "Updated data" : "Deleted Data";
+                changeHistory.ChangeInfo = message;
+            }
+            else
+            {
+                // Check to see if any curves were added or removed
+                var currentCurves = GetAllMnemonics(current.GetUri()).ToArray();
+                var addedCurves = originalMnemonics.Except(currentCurves).ToArray();
+                var deletedCurves = currentCurves.Except(originalMnemonics).ToArray();
+                var message = currentFunction == Functions.UpdateInStore
+                    ? $"The following curves were added: {string.Join(",", addedCurves)}"
+                    : $"The following curves were removed: {string.Join(",", deletedCurves)}";
+                changeHistory.ChangeInfo = currentFunction == Functions.UpdateInStore
+                    ? string.Join(",", addedCurves)
+                    : string.Join(",", deletedCurves);
+                changeHistory.Mnemonics = message;
+            }
+            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
+            changeHistory.UpdatedHeader = logHeaderUpdate != null;
+
+            var isNewObjectGrowing = rangeExtended ? (bool?)rangeExtended : null;
+            UpdateGrowingObject(current, logHeaderUpdate, isNewObjectGrowing);
         }
 
         private static void SetChangeHistoryIndexes(bool isTimeLog, string indexUnit, ChangeHistory changeHistory, double? minRange, double? maxRange)
