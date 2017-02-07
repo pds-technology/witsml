@@ -103,12 +103,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="dataObject">The data object to be added.</param>
         public override void Add(WitsmlQueryParser parser, T dataObject)
         {
+            var uri = dataObject.GetUri();
+
             using (var transaction = GetTransaction())
             {
-                transaction.SetContext(dataObject.GetUri());
+                transaction.SetContext(uri);
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 InsertEntity(dataObject);
+                UpdateGrowingObject(uri);
                 transaction.Commit();
             }
         }
@@ -505,9 +508,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
-
-                var isObjectGrowing = appending ? (bool?)appending : null;
-                UpdateGrowingObject(current, null, isObjectGrowing);
+                UpdateGrowingObject(current, appending);
                 transaction.Commit();
             }
         }
@@ -542,6 +543,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 UpdateGrowingObject(uri);
                 transaction.Commit();
             }
+        }
+
+        private void UpdateGrowingObject(T current, bool appending)
+        {
+            // If the object is growing and data was appeneded then do not update change history
+            if (IsObjectGrowing(current) && appending)
+            {
+                UpdateGrowingObject(current, null, true);
+                return;
+            }
+
+            // TODO: Update current ChangeHistory entry
+            //var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+            var isObjectGrowingToggled = appending ? true : (bool?)null;
+            UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
     }
 }

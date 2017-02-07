@@ -230,13 +230,14 @@ namespace PDS.Witsml.Server.Data.Logs
                     UpdateIndexInfo(uri, indexInfo, offset);
                 }
 
-                var channelList = GetAllMnemonics(uri);
+                // Get original mnemonics before updating logCurveInfo elements
+                var originalMnemonics = GetMnemonics(uri);
 
                 // Ensure all logCurveInfo elements exist
                 UpdateLogCurveInfos(uri, reader, offset);
 
                 // Update channel data and index range
-                UpdateLogDataAndIndexRange(uri, new[] { reader }, channelList.ToArray());
+                UpdateLogDataAndIndexRange(uri, new[] { reader }, originalMnemonics);
 
                 // Commit transaction
                 transaction.Commit();
@@ -366,17 +367,13 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateIndexRanges = false;
             var checkOffset = true;
             var rangeExtended = false;
-            var hasData = false;
 
             Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
             // Merge ChannelDataChunks
             foreach (var reader in readers)
             {
-                if (reader == null)
-                    continue;
-
-                hasData = true;
+                if (reader == null) continue;
                 var indexCurve = reader.Indices[0];
 
                 if (string.IsNullOrEmpty(indexUnit))
@@ -411,22 +408,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            var currentFunction = WitsmlOperationContext.Current.Request.Function;
-
-            // If the function is add to store use default audit behavior
-            if (currentFunction == Functions.AddToStore)
-            {
-                if (logHeaderUpdate != null)
-                {
-                    var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-                    var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-                    mongoUpdate.UpdateFields(filter, logHeaderUpdate);
-                }
-                return;
-            }
-
-            // During update or delete determine what type of changelog is needed
-            UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, originalMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
+            UpdateGrowingObject(current, logHeaderUpdate, ranges, originalMnemonics, indexUnit, isTimeLog, rangeExtended, updateIndexRanges);
         }
 
         /// <summary>
@@ -685,6 +667,20 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return logHeaderUpdate;
+        }
+
+        /// <summary>
+        /// Gets a collection of mnemonics for the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>A collection of mnemonics.</returns>
+        protected virtual string[] GetMnemonics(EtpUri uri)
+        {
+            var current = GetEntity(uri, "LogCurveInfo");
+
+            return current != null
+                ? GetLogCurves(current).Select(GetMnemonic).ToArray()
+                : new string[0];
         }
 
         /// <summary>
@@ -1462,12 +1458,12 @@ namespace PDS.Witsml.Server.Data.Logs
             return new Range<double?>(start, end, update.Offset);
         }
 
-        private void UpdateChangeLog(T current, Functions currentFunction, Dictionary<string, Range<double?>> ranges, List<string> allUpdateMnemonics, string[] originalMnemonics, bool isTimeLog, bool rangeExtended, bool hasData, string indexUnit, UpdateDefinition<T> logHeaderUpdate)
+        private void UpdateGrowingObject(T current, UpdateDefinition<T> logHeaderUpdate,
+            Dictionary<string, Range<double?>> ranges, string[] originalMnemonics,
+            string indexUnit, bool isTimeLog, bool rangeExtended, bool hasData)
         {
-            var isCurrentObjectGrowing = IsObjectGrowing(current);
-
-            // If the log is growing and data was appeneded then do not update change history
-            if (isCurrentObjectGrowing && rangeExtended)
+            // If the object is growing and data was appeneded then do not update change history
+            if (IsObjectGrowing(current) && rangeExtended)
             {
                 UpdateGrowingObject(current, logHeaderUpdate, true);
                 return;
@@ -1475,44 +1471,43 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Update current ChangeHistory entry
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            var currentFunction = WitsmlOperationContext.Current.Request.Function;
 
             // If the update has data update the change history for the mnemonics and ranges affected
             if (hasData)
             {
                 var minRange = ranges.Min(x => x.Value.Start);
                 var maxRange = ranges.Max(x => x.Value.End);
-                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
                 SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
-                var message = currentFunction == Functions.UpdateInStore ? "Updated data" : "Deleted Data";
-                changeHistory.ChangeInfo = message;
-            }
-            else
-            {
-                // Check to see if any curves were added or removed
-                if (originalMnemonics != null)
-                {
-                    var currentCurves = GetAllMnemonics(current.GetUri()).ToArray();
-                    var addedCurves = currentCurves.Except(originalMnemonics).ToArray();
-                    var deletedCurves = originalMnemonics.Except(currentCurves).ToArray();
+                var message = currentFunction == Functions.UpdateInStore ? "Data updated" : "Data deleted";
 
-                    if (addedCurves.Any() && currentFunction == Functions.UpdateInStore)
-                    {
-                        changeHistory.ChangeInfo = $"Curves added: {string.Join(",", addedCurves)}";
-                        changeHistory.Mnemonics = string.Join(",", addedCurves);
-                    }
-                    else if (deletedCurves.Any() && currentFunction == Functions.DeleteFromStore)
-                    {
-                        changeHistory.ChangeInfo = $"Curves removed: {string.Join(",", deletedCurves)}";
-                        changeHistory.Mnemonics = string.Join(",", deletedCurves);
-                    }
+                changeHistory.ChangeInfo = message;
+                changeHistory.Mnemonics = string.Join(",", ranges.Where(x => x.Value.Start.HasValue && x.Value.End.HasValue).Select(x => x.Key));
+            }
+            // Check to see if any curves were added or removed
+            else if (originalMnemonics != null)
+            {
+                var currentCurves = GetMnemonics(current.GetUri()).ToArray();
+                var addedCurves = currentCurves.Except(originalMnemonics).ToArray();
+                var deletedCurves = originalMnemonics.Except(currentCurves).ToArray();
+
+                if (addedCurves.Any() && currentFunction == Functions.UpdateInStore)
+                {
+                    changeHistory.ChangeInfo = $"Mnemonics added: {string.Join(",", addedCurves)}";
+                    changeHistory.Mnemonics = string.Join(",", addedCurves);
+                }
+                else if (deletedCurves.Any() && currentFunction == Functions.DeleteFromStore)
+                {
+                    changeHistory.ChangeInfo = $"Mnemonics removed: {string.Join(",", deletedCurves)}";
+                    changeHistory.Mnemonics = string.Join(",", deletedCurves);
                 }
             }
 
             // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
             changeHistory.UpdatedHeader = logHeaderUpdate != null;
 
-            var isNewObjectGrowing = rangeExtended ? (bool?)rangeExtended : null;
-            UpdateGrowingObject(current, logHeaderUpdate, isNewObjectGrowing);
+            var isObjectGrowingToggled = rangeExtended ? true : (bool?)null;
+            UpdateGrowingObject(current, logHeaderUpdate, isObjectGrowingToggled);
         }
 
         private static void SetChangeHistoryIndexes(bool isTimeLog, string indexUnit, ChangeHistory changeHistory, double? minRange, double? maxRange)
@@ -1539,15 +1534,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
                 }
             }
-        }
-
-        private List<string> GetAllMnemonics(EtpUri uri)
-        {
-            var current = GetEntity(uri, "LogCurveInfo");
-            var logCurves = GetLogCurves(current);
-            var channelList = new List<string>();
-            logCurves.ForEach(x => channelList.Add(GetMnemonic(x)));
-            return channelList;
         }
     }
 }

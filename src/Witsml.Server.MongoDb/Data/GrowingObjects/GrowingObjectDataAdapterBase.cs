@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 using MongoDB.Bson;
@@ -94,8 +93,12 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         protected virtual void UpdateGrowingObject(T entity, UpdateDefinition<T> updates, bool? isObjectGrowing = null)
         {
             var uri = GetUri(entity);
-
             var isCurrentObjectGrowing = IsObjectGrowing(entity);
+            var isAuditUpdate = !isObjectGrowing.GetValueOrDefault();
+
+            // Set change history object growing flag
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            changeHistory.ObjectGrowingState = isCurrentObjectGrowing;
 
             // Check to see if the object growing flag needs to be toggled
             if (isObjectGrowing.HasValue && isCurrentObjectGrowing != isObjectGrowing)
@@ -104,31 +107,16 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                 Logger.Debug($"Updating object growing flag for URI: {uri}; Value: {isObjectGrowing.Value}");
                 var flag = MongoDbUtility.CreateObjectGrowingFields<T>(isObjectGrowing.Value);
                 updates = MongoDbUtility.BuildUpdate(updates, flag);
+
+                // Only audit an append of data when first toggling object growing flag
+                changeHistory.ObjectGrowingState = isObjectGrowing;
+                isAuditUpdate = true;
             }
 
-            // Set change history object growing flag
-            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-            
-            // If the object growing is being set to true
-            if (isObjectGrowing.HasValue && isObjectGrowing.Value && !isCurrentObjectGrowing)
-            {
-                changeHistory.ObjectGrowingState = true;
-            }
-            // If the object growing is being set to true
-            else if (isObjectGrowing.HasValue && !isObjectGrowing.Value && isCurrentObjectGrowing)
-            {
-                changeHistory.ObjectGrowingState = false;
-            }
-            // Use the isObjectGrowing parameter
-            else
-            {
-                changeHistory.ObjectGrowingState = isObjectGrowing ?? isCurrentObjectGrowing;
-            }
-
-            UpdateGrowingObject(uri, updates);
+            UpdateGrowingObject(uri, updates, isAuditUpdate);
 
             // If the object is not currently growing do not update wellbore isActive
-            if (!isObjectGrowing.HasValue || !isObjectGrowing.Value) return;
+            if (!isObjectGrowing.GetValueOrDefault()) return;
 
             // Update dbGrowingObject timestamp
             DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
@@ -141,7 +129,8 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="updates">The header update definition.</param>
-        protected virtual void UpdateGrowingObject(EtpUri uri, UpdateDefinition<T> updates = null)
+        /// <param name="isAuditUpdate">if set to <c>true</c> audit the update.</param>
+        protected virtual void UpdateGrowingObject(EtpUri uri, UpdateDefinition<T> updates = null, bool isAuditUpdate = true)
         {
             var current = GetEntity(uri);
 
@@ -160,8 +149,14 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
             transaction.Save();
 
+            if (!isAuditUpdate) return;
+
+            var changeType = WitsmlOperationContext.Current.Request.Function == Functions.AddToStore
+                ? Witsml141.ReferenceData.ChangeInfoType.add
+                : Witsml141.ReferenceData.ChangeInfoType.update;
+
             // Audit entity
-            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.update);
+            AuditEntity(uri, changeType);
         }
 
         /// <summary>
@@ -173,6 +168,15 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         {
             var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(uri.Version));
             dataAdapter.UpdateIsActive(uri.Parent, isActive);
+        }
+
+        /// <summary>
+        /// Audits the insert operation.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        protected override void AuditInsert(EtpUri uri)
+        {
+            // Overriding default behavior for growing objects
         }
 
         /// <summary>

@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 transaction.SetContext(uri);
                 // Gather original mnemonics
-                var originalMnemonics = GetEntity(uri, "LogCurveInfo").LogCurveInfo.Select(x => x.Mnemonic).ToArray();
+                var originalMnemonics = GetMnemonics(uri);
                 // Update log header
                 UpdateEntity(parser, uri);
                 // Separate log header and log data
@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 transaction.SetContext(uri);
                 // Gather original mnemonics
-                var originalMnemonics = GetEntity(uri, "LogCurveInfo").LogCurveInfo.Select(x => x.Mnemonic).ToArray();
+                var originalMnemonics = GetMnemonics(uri);
                 // Remove previous log data
                 ChannelDataChunkAdapter.Delete(uri);
                 // Separate log header and log data

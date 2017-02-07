@@ -149,8 +149,8 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                 ? auditHistory.LastChangeInfo
                 : changeHistory.ChangeInfo;
 
-            changeHistory.ChangeInfo = message;
             auditHistory.LastChangeInfo = message;
+            changeHistory.ChangeInfo = message;
             changeHistory.ChangeType = auditHistory.LastChangeType;
             changeHistory.DateTimeChange = auditHistory.CommonData.DateTimeLastChange;
 
