@@ -42,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         {
         }
 
+        [Ignore]
         [TestMethod]
         public void MongoTransaction_Rollback_Nested_Transaction_When_Error_Before_UpdateIsActive()
         {
