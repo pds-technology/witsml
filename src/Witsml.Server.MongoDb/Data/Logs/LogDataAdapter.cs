@@ -1462,6 +1462,15 @@ namespace PDS.Witsml.Server.Data.Logs
             Dictionary<string, Range<double?>> ranges, string[] originalMnemonics,
             string indexUnit, bool isTimeLog, bool rangeExtended, bool hasData)
         {
+            var currentFunction = WitsmlOperationContext.Current.Request.Function;
+
+            // During insert only update the header
+            if (currentFunction == Functions.AddToStore)
+            {
+                UpdateGrowingObject(current.GetUri(), logHeaderUpdate);
+                return;
+            }
+
             // If the object is growing and data was appeneded then do not update change history
             if (IsObjectGrowing(current) && rangeExtended)
             {
@@ -1471,7 +1480,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Update current ChangeHistory entry
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-            var currentFunction = WitsmlOperationContext.Current.Request.Function;
 
             // If the update has data update the change history for the mnemonics and ranges affected
             if (hasData)
