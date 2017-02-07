@@ -758,7 +758,7 @@ namespace PDS.Witsml.Server.Data
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
-            var current = GetEntity(uri);
+            var current = GetEntity(uri, GetAuditProjectionPropertyNames());
             var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, current, changeType);
             var isNewEntry = string.IsNullOrWhiteSpace(auditHistory.Uid);
 
@@ -808,6 +808,15 @@ namespace PDS.Witsml.Server.Data
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the property names for projection of entity fields needed by DbAuditHistory.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string[] GetAuditProjectionPropertyNames()
+        {
+            return new[] {"Uid", "UidWell", "UidWellbore", "Name", "NameWell", "NameWellbore", "CommonData", "Citation"};
         }
     }
 }
