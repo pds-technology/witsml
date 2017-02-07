@@ -414,8 +414,15 @@ namespace PDS.Witsml.Server.Data.Logs
             var currentFunction = WitsmlOperationContext.Current.Request.Function;
 
             // If the function is add to store use default audit behavior
-            if (currentFunction == Functions.AddToStore) 
+            if (currentFunction == Functions.AddToStore)
+            {
+                var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+                var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+                var fields = MongoDbUtility.CreateUpdateFields<T>();
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, fields);
+                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
                 return;
+            }
 
             // During update or delete determine what type of changelog is needed
             UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
@@ -1512,7 +1519,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private List<string> GetAllMnemonics(EtpUri uri)
         {
-            var current = GetEntity(uri, "logCurveInfo");
+            var current = GetEntity(uri, "LogCurveInfo");
             var logCurves = GetLogCurves(current);
             var channelList = new List<string>();
             logCurves.ForEach(x => channelList.Add(GetMnemonic(x)));

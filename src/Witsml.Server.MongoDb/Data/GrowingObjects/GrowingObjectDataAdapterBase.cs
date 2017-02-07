@@ -122,13 +122,13 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             // Use the isObjectGrowing parameter
             else
             {
-                changeHistory.ObjectGrowingState = isObjectGrowing;
+                changeHistory.ObjectGrowingState = isObjectGrowing ?? isCurrentObjectGrowing;
             }
 
             UpdateGrowingObject(uri, updates);
 
             // If the object is not currently growing do not update wellbore isActive
-            if (isObjectGrowing.HasValue && !isObjectGrowing.Value) return;
+            if (!isObjectGrowing.HasValue || !isObjectGrowing.Value) return;
 
             // Update dbGrowingObject timestamp
             DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
@@ -159,9 +159,6 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             var transaction = Transaction;
             transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
             transaction.Save();
-
-            // Get updated entity
-            current = GetEntity(uri, "commonData");
 
             // Audit entity
             AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.update);
