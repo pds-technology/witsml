@@ -230,11 +230,13 @@ namespace PDS.Witsml.Server.Data.Logs
                     UpdateIndexInfo(uri, indexInfo, offset);
                 }
 
+                var channelList = GetAllMnemonics(uri);
+
                 // Ensure all logCurveInfo elements exist
                 UpdateLogCurveInfos(uri, reader, offset);
 
                 // Update channel data and index range
-                UpdateLogDataAndIndexRange(uri, new[] {reader});
+                UpdateLogDataAndIndexRange(uri, new[] { reader }, channelList.ToArray());
 
                 // Commit transaction
                 transaction.Commit();
@@ -344,8 +346,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="readers">The readers.</param>
+        /// <param name="originalMnemonics">The original mnemonics before the update or delete</param>
         /// <returns>true if any index ranges were extended beyond current min/max, false otherwise.</returns>
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, string[] originalMnemonics = null)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -1507,5 +1510,13 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        private List<string> GetAllMnemonics(EtpUri uri)
+        {
+            var current = GetEntity(uri, "logCurveInfo");
+            var logCurves = GetLogCurves(current);
+            var channelList = new List<string>();
+            logCurves.ForEach(x => channelList.Add(GetMnemonic(x)));
+            return channelList;
+        }
     }
 }
