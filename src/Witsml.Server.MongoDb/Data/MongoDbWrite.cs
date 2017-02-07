@@ -345,7 +345,7 @@ namespace PDS.Witsml.Server.Data
         /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
         protected void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
         {
-            Logger.DebugFormat($"Validating array element: {element.Name.LocalName}");
+            Logger.Debug($"Validating array element: {element.Name.LocalName}");
 
             if (isAdd)
             {

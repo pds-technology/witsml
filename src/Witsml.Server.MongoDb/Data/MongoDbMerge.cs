@@ -223,7 +223,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parentPath">The parent path.</param>
         protected override void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat($"Merge array elements: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Merge array elements: {parentPath} {propertyInfo?.Name}");
 
             if (MergeDelete && RemoveAll(elements))
             {

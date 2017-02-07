@@ -63,7 +63,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updates">The updates.</param>
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            Logger.DebugFormat($"Updating data object: {uri}");
+            Logger.Debug($"Updating data object: {uri}");
 
             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, IdPropertyName);
             Entity = entity;
@@ -191,7 +191,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parentPath">The parent path.</param>
         protected override void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat($"Updating array elements: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Updating array elements: {parentPath} {propertyInfo?.Name}");
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -279,7 +279,7 @@ namespace PDS.Witsml.Server.Data
 
         private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -334,7 +334,7 @@ namespace PDS.Witsml.Server.Data
                 return;
             }
 
-            Logger.DebugFormat($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
 
             var anyPropertyInfo = propertyInfo.PropertyType.GetProperties()
                 .First(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
@@ -386,8 +386,8 @@ namespace PDS.Witsml.Server.Data
 
             var filterJson = filter.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
             var updateJson = update.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
-            Logger.DebugFormat($"Detected update parameters: {updateJson}");
-            Logger.DebugFormat($"Detected update filters: {filterJson}");
+            Logger.Debug($"Detected update parameters: {updateJson}");
+            Logger.Debug($"Detected update filters: {filterJson}");
         }
     }
 }

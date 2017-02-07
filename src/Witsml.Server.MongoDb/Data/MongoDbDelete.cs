@@ -74,7 +74,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updates">The updates.</param>
         public void PartialDelete(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            Logger.DebugFormat($"Partial deleting data object: {uri}");
+            Logger.Debug($"Partial deleting data object: {uri}");
 
             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
             _entity = entity;
@@ -279,7 +279,7 @@ namespace PDS.Witsml.Server.Data
                 return;
             }
 
-            Logger.DebugFormat($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
 
             var anyPropertyInfo = propertyInfo.PropertyType.GetProperties()
                 .First(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
@@ -319,7 +319,7 @@ namespace PDS.Witsml.Server.Data
 
         private void PartialDeleteArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat($"Partial deleting array elements: {parentPath} {propertyInfo?.Name}");
+            Logger.Debug($"Partial deleting array elements: {parentPath} {propertyInfo?.Name}");
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -427,8 +427,8 @@ namespace PDS.Witsml.Server.Data
 
             var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
             var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-            Logger.DebugFormat($"Detected partial delete parameters: {updateJson}");
-            Logger.DebugFormat($"Detected partial delete filters: {filterJson}");
+            Logger.Debug($"Detected partial delete parameters: {updateJson}");
+            Logger.Debug($"Detected partial delete filters: {filterJson}");
         }
 
         /// <summary>

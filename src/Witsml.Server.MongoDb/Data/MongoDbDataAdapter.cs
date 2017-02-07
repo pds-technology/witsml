@@ -611,7 +611,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                Logger.DebugFormat($"Merging {dbCollectionName} MongoDb collection");
+                Logger.Debug($"Merging {dbCollectionName} MongoDb collection");
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var merge = new MongoDbMerge<TObject>(Container, collection, parser, IdPropertyName);

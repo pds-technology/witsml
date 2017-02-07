@@ -187,7 +187,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             using (var transaction = GetTransaction())
             {
-                Logger.DebugFormat($"Deleting Trajectory with uri '{uri}'.");
+                Logger.Debug($"Deleting Trajectory with uri '{uri}'.");
                 transaction.SetContext(uri);
 
                 var current = GetEntity(uri);
@@ -268,7 +268,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void UpdateMongoFile(T entity, bool deleteFile = true)
         {
             var uri = entity.GetUri();
-            Logger.DebugFormat($"Updating MongoDb Trajectory Stations files: {uri}");
+            Logger.Debug($"Updating MongoDb Trajectory Stations files: {uri}");
 
             var bucket = GetMongoFileBucket();
             var stations = GetTrajectoryStations(entity);
@@ -312,7 +312,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
         private void DeleteMongoFile(IGridFSBucket bucket, string fileId)
         {
-            Logger.DebugFormat($"Deleting MongoDb Channel Data file: {fileId}");
+            Logger.Debug($"Deleting MongoDb Channel Data file: {fileId}");
 
             var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileQueryField], fileId);
             var mongoFile = bucket.Find(filter).FirstOrDefault();
