@@ -85,27 +85,50 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         protected abstract bool IsObjectGrowing(T entity);
 
         /// <summary>
-        /// Updates the growing status for the specified growing object.
+        /// Updates the growing status for the specified growing object. If isObjectGrowing has a value it will update
+        /// the objectGrowing flag for the entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="updates">The header update definition.</param>
         /// <param name="isObjectGrowing">Is the object currently growing.</param>
-        protected virtual void UpdateGrowingObject(T entity, UpdateDefinition<T> updates, bool isObjectGrowing)
+        protected virtual void UpdateGrowingObject(T entity, UpdateDefinition<T> updates, bool? isObjectGrowing = null)
         {
             var uri = GetUri(entity);
 
+            var isCurrentObjectGrowing = IsObjectGrowing(entity);
+
             // Check to see if the object growing flag needs to be toggled
-            if (IsObjectGrowing(entity) != isObjectGrowing)
+            if (isObjectGrowing.HasValue && isCurrentObjectGrowing != isObjectGrowing)
             {
-                Logger.Debug($"Updating object growing flag for URI: {uri}");
-                var flag = MongoDbUtility.CreateObjectGrowingFields<T>(isObjectGrowing);
+                // Only allow DbGrowingObjectDataAdapter to set flag to false
+                Logger.Debug($"Updating object growing flag for URI: {uri}; Value: {isObjectGrowing.Value}");
+                var flag = MongoDbUtility.CreateObjectGrowingFields<T>(isObjectGrowing.Value);
                 updates = MongoDbUtility.BuildUpdate(updates, flag);
+            }
+
+            // Set change history object growing flag
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            
+            // If the object growing is being set to true
+            if (isObjectGrowing.HasValue && isObjectGrowing.Value && !isCurrentObjectGrowing)
+            {
+                changeHistory.ObjectGrowingState = true;
+            }
+            // If the object growing is being set to true
+            else if (isObjectGrowing.HasValue && !isObjectGrowing.Value && isCurrentObjectGrowing)
+            {
+                changeHistory.ObjectGrowingState = false;
+            }
+            // Use the isObjectGrowing parameter
+            else
+            {
+                changeHistory.ObjectGrowingState = isObjectGrowing;
             }
 
             UpdateGrowingObject(uri, updates);
 
             // If the object is not currently growing do not update wellbore isActive
-            if (!isObjectGrowing) return;
+            if (isObjectGrowing.HasValue && !isObjectGrowing.Value) return;
 
             // Update dbGrowingObject timestamp
             DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
@@ -136,6 +159,9 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             var transaction = Transaction;
             transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
             transaction.Save();
+
+            // Get updated entity
+            current = GetEntity(uri, "commonData");
 
             // Audit entity
             AuditEntity(uri, current, Witsml141.ReferenceData.ChangeInfoType.update, fields);

@@ -578,7 +578,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             var logHeaderUpdate = GetIndexRangeUpdate(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
-            UpdateGrowingObject(current, logHeaderUpdate, false);
+            UpdateGrowingObject(current, logHeaderUpdate);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

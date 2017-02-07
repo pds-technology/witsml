@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
@@ -362,6 +363,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateIndexRanges = false;
             var checkOffset = true;
             var rangeExtended = false;
+            var hasData = false;
 
             Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
@@ -371,6 +373,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (reader == null)
                     continue;
 
+                hasData = true;
                 var indexCurve = reader.Indices[0];
 
                 if (string.IsNullOrEmpty(indexUnit))
@@ -405,21 +408,44 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            // Only update object growing flag during UpdateInStore
-            if (WitsmlOperationContext.Current.Request.Function == Functions.UpdateInStore)
-            {
-                // Update current ChangeHistory entry
-                var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
-                changeHistory.ObjectGrowingState = rangeExtended || IsObjectGrowing(current);
-                changeHistory.UpdatedHeader = rangeExtended;
+            var currentFunction = WitsmlOperationContext.Current.Request.Function;
 
-                UpdateGrowingObject(current, logHeaderUpdate, rangeExtended);
-            }
-            else if (logHeaderUpdate != null)
+            // If the function is add to store use default audit behavior
+            if (currentFunction == Functions.AddToStore) 
+                return;
+
+            // During update or delete determine what type of changelog is needed
+            UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
+        }
+
+        private void UpdateChangeLog(T current, Functions currentFunction, Dictionary<string, Range<double?>> ranges, List<string> allUpdateMnemonics, bool isTimeLog, bool rangeExtended, bool hasData, string indexUnit, UpdateDefinition<T> logHeaderUpdate)
+        {
+            var isCurrentObjectGrowing = IsObjectGrowing(current);
+
+            // If the log is growing and data was appeneded then do not update change history
+            if (isCurrentObjectGrowing && rangeExtended)
             {
-                UpdateGrowingObject(uri, logHeaderUpdate);
+                UpdateGrowingObject(current, logHeaderUpdate, true);
+                return;
             }
+
+            // Update current ChangeHistory entry
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+            // If the update has data update the change history for the mnemonics and ranges affected
+            if (hasData)
+            {
+                var minRange = ranges.Min(x => x.Value.Start);
+                var maxRange = ranges.Max(x => x.Value.End);
+                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
+                SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
+            }
+
+            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
+            changeHistory.UpdatedHeader = logHeaderUpdate != null;
+
+            var isNewObjectGrowing = rangeExtended ? (bool?) rangeExtended : null;
+            UpdateGrowingObject(current, logHeaderUpdate, isNewObjectGrowing);
         }
 
         /// <summary>
@@ -1454,5 +1480,32 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return new Range<double?>(start, end, update.Offset);
         }
+
+        private static void SetChangeHistoryIndexes(bool isTimeLog, string indexUnit, ChangeHistory changeHistory, double? minRange, double? maxRange)
+        {
+            if (isTimeLog)
+            {
+                if (minRange.HasValue)
+                {
+                    changeHistory.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(minRange.Value));
+                }
+                if (maxRange.HasValue)
+                {
+                    changeHistory.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(maxRange.Value));
+                }
+            }
+            else
+            {
+                if (minRange.HasValue)
+                {
+                    changeHistory.StartIndex = new GenericMeasure(minRange.Value, indexUnit);
+                }
+                if (maxRange.HasValue)
+                {
+                    changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
+                }
+            }
+        }
+
     }
 }
