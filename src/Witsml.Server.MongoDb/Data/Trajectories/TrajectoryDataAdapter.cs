@@ -506,10 +506,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
 
-                // TODO: Update current ChangeHistory entry
-                //var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-
-                UpdateGrowingObject(current, null, appending);
+                var isObjectGrowing = appending ? (bool?)appending : null;
+                UpdateGrowingObject(current, null, isObjectGrowing);
                 transaction.Commit();
             }
         }

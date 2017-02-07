@@ -76,12 +76,14 @@ namespace PDS.Witsml.Server.Data.Logs
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(uri);
+                // Gather original mnemonics
+                var originalMnemonics = GetEntity(uri, "logCurveInfo").LogCurveInfo.Select(x => x.Mnemonic.Value).ToArray();
                 // Update log header
                 UpdateEntity(parser, uri);
                 // Separate log header and log data
                 var readers = ExtractDataReaders(dataObject, GetEntity(uri));
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(uri, readers);
+                UpdateLogDataAndIndexRange(uri, readers, originalMnemonics);
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
@@ -102,12 +104,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 transaction.SetContext(uri);
                 // Remove previous log data
                 ChannelDataChunkAdapter.Delete(uri);
+                // Gather original mnemonics
+                var originalMnemonics = GetEntity(uri, "logCurveInfo").LogCurveInfo.Select(x => x.Mnemonic.Value).ToArray();
                 // Separate log header and log data
                 var readers = ExtractDataReaders(dataObject);
                 // Replace log header
                 ReplaceEntity(dataObject, uri);
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(uri, readers);
+                UpdateLogDataAndIndexRange(uri, readers, originalMnemonics);
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
@@ -578,7 +582,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             var logHeaderUpdate = GetIndexRangeUpdate(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
-            UpdateGrowingObject(current, logHeaderUpdate, false);
+            UpdateGrowingObject(current, logHeaderUpdate);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)
