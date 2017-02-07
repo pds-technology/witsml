@@ -143,7 +143,14 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 
             // Update current ChangeHistory entry to match the ChangeLog header
             var changeHistory = GetCurrentChangeHistory();
-            changeHistory.ChangeInfo = auditHistory.LastChangeInfo;
+
+            // Use the message from the changeHistory if it was specfied
+            var message = string.IsNullOrWhiteSpace(changeHistory.ChangeInfo)
+                ? auditHistory.LastChangeInfo
+                : changeHistory.ChangeInfo;
+
+            changeHistory.ChangeInfo = message;
+            auditHistory.LastChangeInfo = message;
             changeHistory.ChangeType = auditHistory.LastChangeType;
             changeHistory.DateTimeChange = auditHistory.CommonData.DateTimeLastChange;
 

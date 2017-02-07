@@ -1489,17 +1489,25 @@ namespace PDS.Witsml.Server.Data.Logs
             else
             {
                 // Check to see if any curves were added or removed
-                var currentCurves = GetAllMnemonics(current.GetUri()).ToArray();
-                var addedCurves = originalMnemonics.Except(currentCurves).ToArray();
-                var deletedCurves = currentCurves.Except(originalMnemonics).ToArray();
-                var message = currentFunction == Functions.UpdateInStore
-                    ? $"The following curves were added: {string.Join(",", addedCurves)}"
-                    : $"The following curves were removed: {string.Join(",", deletedCurves)}";
-                changeHistory.ChangeInfo = currentFunction == Functions.UpdateInStore
-                    ? string.Join(",", addedCurves)
-                    : string.Join(",", deletedCurves);
-                changeHistory.Mnemonics = message;
+                if (originalMnemonics != null)
+                {
+                    var currentCurves = GetAllMnemonics(current.GetUri()).ToArray();
+                    var addedCurves = currentCurves.Except(originalMnemonics).ToArray();
+                    var deletedCurves = originalMnemonics.Except(currentCurves).ToArray();
+
+                    if (addedCurves.Any() && currentFunction == Functions.UpdateInStore)
+                    {
+                        changeHistory.ChangeInfo = $"Curves added: {string.Join(",", addedCurves)}";
+                        changeHistory.Mnemonics = string.Join(",", addedCurves);
+                    }
+                    else if (deletedCurves.Any() && currentFunction == Functions.DeleteFromStore)
+                    {
+                        changeHistory.ChangeInfo = $"Curves removed: {string.Join(",", deletedCurves)}";
+                        changeHistory.Mnemonics = string.Join(",", deletedCurves);
+                    }
+                }
             }
+
             // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
             changeHistory.UpdatedHeader = logHeaderUpdate != null;
 
