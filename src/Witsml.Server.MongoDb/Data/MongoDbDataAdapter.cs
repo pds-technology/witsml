@@ -816,7 +816,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns></returns>
         protected virtual string[] GetAuditProjectionPropertyNames()
         {
-            return new[] {"Uid", "UidWell", "UidWellbore", "Name", "NameWell", "NameWellbore", "CommonData", "Citation"};
+            return new[] {"Uid", "Uuid", "UidWell", "UidWellbore", "Name", "NameWell", "NameWellbore", "CommonData", "Citation"};
         }
     }
 }
