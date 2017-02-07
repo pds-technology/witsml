@@ -93,22 +93,6 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
-        /// Commits the transaction in MongoDb.
-        /// </summary>
-        public override void Commit()
-        {
-            _log.Debug($"Committing transaction for URI: {Uri}");
-
-            foreach (var transaction in Transactions.Where(t => t.Status == TransactionStatus.Pending && t.Action == MongoDbAction.Delete))
-            {
-                Delete(transaction);
-            }
-
-            ClearTransactions();
-            Committed = true;
-        }
-
-        /// <summary>
         /// Creates a transaction record and attach to the transaction.
         /// </summary>
         /// <param name="action">The MongoDb operation, e.g. add.</param>
@@ -156,6 +140,37 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
+        /// Commits the transaction in MongoDb.
+        /// </summary>
+        public override void Commit()
+        {
+            _log.Debug($"Committing transaction for URI: {Uri}");
+            var parent = Parent as MongoTransaction;
+
+            if (parent != null)
+            {
+                // Transfer transactions to parent transaction
+                Adapter.UpdateEntities(Id, parent.Id);
+                parent.Transactions.AddRange(Transactions);
+
+                // Prevent deletion of transactions
+                Transactions.Clear();
+            }
+            else
+            {
+                var pending = Transactions.Where(t => t.Status == TransactionStatus.Pending && t.Action == MongoDbAction.Delete);
+
+                foreach (var transaction in pending)
+                {
+                    Delete(transaction);
+                }
+            }
+
+            ClearTransactions();
+            Committed = true;
+        }
+
+        /// <summary>
         /// Initializes the transaction.
         /// </summary>
         protected override void Initialize()
@@ -169,10 +184,10 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         protected override void Rollback()
         {
-            var pending = Transactions.Where(t => t.Status == TransactionStatus.Pending).ToList();
-            if (!pending.Any()) return;
-
             _log.Debug($"Rolling back transaction for URI: {Uri}");
+
+            // Rollback transactions in reverse order
+            var pending = Transactions.Where(t => t.Status == TransactionStatus.Pending).Reverse();
 
             foreach (var transaction in pending)
             {

@@ -468,7 +468,7 @@ namespace PDS.Witsml.Server.Data
                 transaction.Attach(MongoDbAction.Add, dbCollectionName, IdPropertyName, null, uri);
                 transaction.Save();
 
-                AuditInsert(uri, entity);
+                AuditInsert(uri);
             }
             catch (MongoException ex)
             {
@@ -480,12 +480,10 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Audits the insert operation.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        protected virtual void AuditInsert<TObject>(EtpUri uri, TObject entity)
+        protected virtual void AuditInsert(EtpUri uri)
         {
-            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.add);
+            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.add);
         }
 
         /// <summary>
@@ -524,7 +522,7 @@ namespace PDS.Witsml.Server.Data
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
 
-                AuditUpdate(uri, current, updates);
+                AuditUpdate(uri);
             }
             catch (MongoException ex)
             {
@@ -536,13 +534,10 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Audits the update operation.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected virtual void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
+        protected virtual void AuditUpdate(EtpUri uri)
         {
-            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.update, updateFields);
+            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.update);
         }
 
         /// <summary>
@@ -584,7 +579,7 @@ namespace PDS.Witsml.Server.Data
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
 
-                AuditUpdate(uri, current);
+                AuditUpdate(uri);
             }
             catch (MongoException ex)
             {
@@ -668,6 +663,9 @@ namespace PDS.Witsml.Server.Data
                 // Check to make sure the document exists in the database
                 if (current == null) return;
 
+                // Audit before delete operation to capture current state
+                AuditDelete(uri);
+
                 var transaction = Transaction;
                 if (transaction != null)
                 {
@@ -680,8 +678,6 @@ namespace PDS.Witsml.Server.Data
                     var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
                     collection.DeleteOne(filter);
                 }
-
-                AuditDelete(uri, current);
             }
             catch (MongoException ex)
             {
@@ -693,12 +689,10 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Audits the delete operation.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        protected virtual void AuditDelete<TObject>(EtpUri uri, TObject entity)
+        protected virtual void AuditDelete(EtpUri uri)
         {
-            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.delete);
+            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.delete);
         }
 
         /// <summary>
@@ -737,7 +731,7 @@ namespace PDS.Witsml.Server.Data
                 transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
 
-                AuditPartialDelete(uri, current, updates);
+                AuditPartialDelete(uri);
             }
             catch (MongoException ex)
             {
@@ -749,28 +743,23 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Audits the partial delete operation.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected virtual void AuditPartialDelete<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
+        protected virtual void AuditPartialDelete(EtpUri uri)
         {
-            AuditEntity(uri, entity, Witsml141.ReferenceData.ChangeInfoType.update, updateFields);
+            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.update);
         }
 
         /// <summary>
         /// Audits the entity.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
         /// <param name="changeType">Type of the change.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected virtual void AuditEntity<TObject>(EtpUri uri, TObject entity, Witsml141.ReferenceData.ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        protected virtual void AuditEntity(EtpUri uri, Witsml141.ReferenceData.ChangeInfoType changeType)
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
-            var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, entity, changeType, updateFields);
+            var current = GetEntity(uri);
+            var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, current, changeType);
             var isNewEntry = string.IsNullOrWhiteSpace(auditHistory.Uid);
 
             if (isNewEntry)
@@ -792,11 +781,11 @@ namespace PDS.Witsml.Server.Data
         {
             if (isNewEntry)
             {
-                AuditHistoryAdapter?.Add(null, auditHistory);
+                AuditHistoryAdapter?.InsertEntity(auditHistory);
             }
             else
             {
-                AuditHistoryAdapter?.Replace(null, auditHistory);
+                AuditHistoryAdapter?.ReplaceEntity(auditHistory, auditHistory.GetUri());
             }
         }
 

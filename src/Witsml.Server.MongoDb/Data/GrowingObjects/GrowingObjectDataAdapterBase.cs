@@ -138,7 +138,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             transaction.Save();
 
             // Audit entity
-            AuditEntity(uri, current, Witsml141.ReferenceData.ChangeInfoType.update, fields);
+            AuditEntity(uri, Witsml141.ReferenceData.ChangeInfoType.update);
         }
 
         /// <summary>
@@ -155,11 +155,8 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <summary>
         /// Audits the update operation.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
-        protected override void AuditUpdate<TObject>(EtpUri uri, TObject entity, Dictionary<string, object> updateFields = null)
+        protected override void AuditUpdate(EtpUri uri)
         {
             // Overriding default behavior for growing objects
         }

@@ -39,11 +39,8 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
     [Export(typeof(IWitsmlDataAdapter<DbAuditHistory>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class DbAuditHistoryDataAdapter : MongoDbDataAdapter<DbAuditHistory>, IWitsml141Configuration
+    public class DbAuditHistoryDataAdapter : MongoDbDataAdapter<DbAuditHistory>, IWitsml141Configuration
     {
-        private const string DateTimeLastChangeKey = "CommonData.DateTimeLastChange";
-        private const string CitationLastUpdateKey = "Citation.LastUpdate";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DbAuditHistoryDataAdapter" /> class.
         /// </summary>
@@ -90,22 +87,21 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         /// <summary>
         /// Gets or creates the audit history for the changed entity.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI of the changed entity.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="changeType">Type of the change.</param>
-        /// <param name="updateFields">Update fields not yet modified in the entity object.</param>
         /// <returns>A new or existing DbAuditHistory for the entity.</returns>
-        public DbAuditHistory GetAuditHistory<TObject>(EtpUri uri, TObject entity, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        public DbAuditHistory GetAuditHistory(EtpUri uri, object entity, ChangeInfoType changeType)
         {
-            var uriLower = uri.Uri.ToLowerInvariant();
-            var auditHistory = GetQuery().FirstOrDefault(x => x.Uri == uriLower);
-            var changeInfo = $"{changeType:G} {uri.ObjectType}";
-            var commonDataObject = (entity as ICommonDataObject);
             var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
+            var commonDataObject = entity as ICommonDataObject;
             var dataObject = entity as IDataObject;
             var wellObject = entity as IWellObject;
             var wellboreObject = entity as IWellboreObject;
+
+            var uriLower = uri.Uri.ToLowerInvariant();
+            var changeInfo = $"{changeType:G} {uri.ObjectType}";
+            var auditHistory = GetQuery().FirstOrDefault(x => x.Uri == uriLower);
 
             // Creating audit history entry
             if (auditHistory == null)
@@ -115,6 +111,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     ObjectType = uri.ObjectType,
                     LastChangeInfo = changeInfo,
                     LastChangeType = changeType,
+                    CommonData = new CommonData(),
                     ChangeHistory = new List<ChangeHistory>(),
                     SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator,
                     UidWellbore = wellboreObject?.UidWellbore,
@@ -122,8 +119,6 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     UidObject = uri.ObjectId,
                     Uri = uriLower
                 };
-
-                auditHistory.CommonData = auditHistory.CommonData.Create();
             }
             else // Updating existing entry
             {
@@ -136,10 +131,15 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             auditHistory.NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell;
             auditHistory.NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title;
 
+            // Keep date/time of last change in sync with the entity
             auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(
                 commonDataObject?.CommonData?.DateTimeLastChange ?? 
                 (DateTimeOffset?)abstractObject?.Citation?.LastUpdate, 
-                changeType, updateFields);
+                changeType);
+
+            // Make sure date/time created matches first date/time last change
+            auditHistory.CommonData.DateTimeCreation = auditHistory.CommonData.DateTimeCreation ??
+                                                       auditHistory.CommonData.DateTimeLastChange;
 
             // Update current ChangeHistory entry to match the ChangeLog header
             var changeHistory = GetCurrentChangeHistory();
@@ -212,6 +212,8 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 
             return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore", "UidObject", "NameObject" }
+                : OptionsIn.ReturnElements.Requested.Equals(returnElements)
+                ? new List<string>()
                 : null;
         }
 
@@ -226,24 +228,17 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             // Excluding DbAuditHistory from audit history
         }
 
-        private DateTimeOffset? GetDateTimeLastChange(DateTimeOffset? date, ChangeInfoType changeType, Dictionary<string, object> updateFields = null)
+        /// <summary>
+        /// Gets the date time last change based on the current change type.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <param name="changeType">The type of change.</param>
+        /// <returns>The date time of last change.</returns>
+        private DateTimeOffset? GetDateTimeLastChange(DateTimeOffset? date, ChangeInfoType changeType)
         {
             if (changeType == ChangeInfoType.delete)
             {
                 date = null;
-            }
-
-            if (changeType == ChangeInfoType.update && updateFields != null)
-            {
-                if (updateFields.ContainsKey(DateTimeLastChangeKey))
-                {
-                    date = DateTimeOffset.Parse(updateFields[DateTimeLastChangeKey].ToString());
-                }
-
-                if (updateFields.ContainsKey(CitationLastUpdateKey))
-                {
-                    date = DateTimeOffset.Parse(updateFields[CitationLastUpdateKey].ToString());
-                }
             }
 
             return date ?? DateTimeOffset.UtcNow;

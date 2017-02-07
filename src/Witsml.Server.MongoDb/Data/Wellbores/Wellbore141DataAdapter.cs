@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             transaction.Save();
 
             // Audit entity
-            AuditEntity(uri, wellboreEntity, ChangeInfoType.update, fields);
+            AuditEntity(uri, ChangeInfoType.update);
         }
     }
 }

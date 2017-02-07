@@ -65,7 +65,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             transaction.Save();
 
             // Audit entity
-            AuditEntity(uri, wellboreEntity, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update, fields);
+            AuditEntity(uri, Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update);
         }
     }
 }

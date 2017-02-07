@@ -81,13 +81,30 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
+        /// Updates the entities.
+        /// </summary>
+        /// <param name="transactionId">The transaction identifier.</param>
+        /// <param name="newTransactionId">The new transaction identifier.</param>
+        public void UpdateEntities(string transactionId, string newTransactionId)
+        {
+            Logger.Debug($"Transferring transactions from Transaction ID: {transactionId} to {newTransactionId}");
+            var filter = MongoDbUtility.BuildFilter<DbTransaction>(TransactionIdField, transactionId);
+            var update = MongoDbUtility.BuildUpdate<DbTransaction>(null, TransactionIdField, newTransactionId);
+
+            var collection = GetCollection();
+            collection.UpdateMany(filter, update);
+        }
+
+        /// <summary>
         /// Deletes the transactions.
         /// </summary>
         /// <param name="transactionId">The tid.</param>
         public void DeleteTransactions(string transactionId)
         {
-            var collection = GetCollection();
+            Logger.Debug($"Deleting transactions for Transaction ID: {transactionId}");
             var filter = MongoDbUtility.BuildFilter<DbTransaction>(TransactionIdField, transactionId);
+
+            var collection = GetCollection();
             collection.DeleteMany(filter);
         }
 
