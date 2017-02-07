@@ -831,6 +831,20 @@ namespace PDS.Witsml.Server
             }
         }
 
+        public void AssertChangeLogNames(object entity)
+        {
+            var dataObject = entity as IDataObject;
+            var wellObject = entity as IWellObject;
+            var wellboreObject = entity as IWellboreObject;
+
+            var changeLogQuery = CreateChangeLog(dataObject.GetUri());
+            var changeLog = QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
+
+            Assert.AreEqual(wellObject?.NameWell, changeLog.NameWell);
+            Assert.AreEqual(wellboreObject?.NameWellbore, changeLog.NameWellbore);
+            Assert.AreEqual(dataObject?.Name, changeLog.NameObject);
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);

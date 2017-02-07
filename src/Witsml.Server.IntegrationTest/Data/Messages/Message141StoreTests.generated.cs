@@ -200,5 +200,28 @@ namespace PDS.Witsml.Server.Data.Messages
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Message141DataAdapter_ChangeLog_Syncs_Message_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Message141
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            // Assert that all Message names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Message);
+
+            // Update the Message141 names
+            Message.Name = "Change";
+            Message.NameWell = "Well Name Change";
+
+            Message.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(Message);
+
+            // Assert that all Message names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Message);
+        }
+
     }
 }

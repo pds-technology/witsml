@@ -200,5 +200,28 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_Syncs_Log_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Log141
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Assert that all Log names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Log);
+
+            // Update the Log141 names
+            Log.Name = "Change";
+            Log.NameWell = "Well Name Change";
+
+            Log.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(Log);
+
+            // Assert that all Log names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Log);
+        }
+
     }
 }

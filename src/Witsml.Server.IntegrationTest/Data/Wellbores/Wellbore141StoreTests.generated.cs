@@ -200,5 +200,26 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Wellbore141DataAdapter_ChangeLog_Syncs_Wellbore_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Wellbore141
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            // Assert that all Wellbore names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Wellbore);
+
+            // Update the Wellbore141 names
+            Wellbore.Name = "Change";
+            Wellbore.NameWell = "Well Name Change";
+
+            DevKit.UpdateAndAssert(Wellbore);
+
+            // Assert that all Wellbore names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Wellbore);
+        }
+
     }
 }

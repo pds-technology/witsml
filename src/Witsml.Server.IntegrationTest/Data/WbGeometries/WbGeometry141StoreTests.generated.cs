@@ -203,5 +203,28 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void WbGeometry141DataAdapter_ChangeLog_Syncs_WbGeometry_Name_Changes()
+        {
+            AddParents();
+
+            // Add the WbGeometry141
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            // Assert that all WbGeometry names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(WbGeometry);
+
+            // Update the WbGeometry141 names
+            WbGeometry.Name = "Change";
+            WbGeometry.NameWell = "Well Name Change";
+
+            WbGeometry.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(WbGeometry);
+
+            // Assert that all WbGeometry names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(WbGeometry);
+        }
+
     }
 }

@@ -174,5 +174,28 @@ namespace PDS.Witsml.Server.Data.Attachments
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Attachment141DataAdapter_ChangeLog_Syncs_Attachment_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Attachment141
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            // Assert that all Attachment names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Attachment);
+
+            // Update the Attachment141 names
+            Attachment.Name = "Change";
+            Attachment.NameWell = "Well Name Change";
+
+            Attachment.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(Attachment);
+
+            // Assert that all Attachment names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Attachment);
+        }
+
     }
 }

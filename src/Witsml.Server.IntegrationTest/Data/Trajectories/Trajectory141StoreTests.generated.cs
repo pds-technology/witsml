@@ -200,5 +200,28 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Trajectory141DataAdapter_ChangeLog_Syncs_Trajectory_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Trajectory141
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Assert that all Trajectory names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Trajectory);
+
+            // Update the Trajectory141 names
+            Trajectory.Name = "Change";
+            Trajectory.NameWell = "Well Name Change";
+
+            Trajectory.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(Trajectory);
+
+            // Assert that all Trajectory names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Trajectory);
+        }
+
     }
 }

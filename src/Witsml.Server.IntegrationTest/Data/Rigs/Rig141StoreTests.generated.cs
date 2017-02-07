@@ -200,5 +200,28 @@ namespace PDS.Witsml.Server.Data.Rigs
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
         }
 
+        [TestMethod]
+        public void Rig141DataAdapter_ChangeLog_Syncs_Rig_Name_Changes()
+        {
+            AddParents();
+
+            // Add the Rig141
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            // Assert that all Rig names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Rig);
+
+            // Update the Rig141 names
+            Rig.Name = "Change";
+            Rig.NameWell = "Well Name Change";
+
+            Rig.NameWellbore = "Wellbore Name Change";
+
+            DevKit.UpdateAndAssert(Rig);
+
+            // Assert that all Rig names match corresponding changeLog names
+            DevKit.AssertChangeLogNames(Rig);
+        }
+
     }
 }
