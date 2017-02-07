@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
@@ -229,11 +230,13 @@ namespace PDS.Witsml.Server.Data.Logs
                     UpdateIndexInfo(uri, indexInfo, offset);
                 }
 
+                var channelList = GetAllMnemonics(uri);
+
                 // Ensure all logCurveInfo elements exist
                 UpdateLogCurveInfos(uri, reader, offset);
 
                 // Update channel data and index range
-                UpdateLogDataAndIndexRange(uri, new[] {reader});
+                UpdateLogDataAndIndexRange(uri, new[] { reader }, channelList.ToArray());
 
                 // Commit transaction
                 transaction.Commit();
@@ -343,8 +346,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="readers">The readers.</param>
+        /// <param name="originalMnemonics">The original mnemonics before the update or delete</param>
         /// <returns>true if any index ranges were extended beyond current min/max, false otherwise.</returns>
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, string[] originalMnemonics = null)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -362,6 +366,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateIndexRanges = false;
             var checkOffset = true;
             var rangeExtended = false;
+            var hasData = false;
 
             Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
@@ -371,6 +376,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (reader == null)
                     continue;
 
+                hasData = true;
                 var indexCurve = reader.Indices[0];
 
                 if (string.IsNullOrEmpty(indexUnit))
@@ -405,21 +411,51 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            // Only update object growing flag during UpdateInStore
-            if (WitsmlOperationContext.Current.Request.Function == Functions.UpdateInStore)
-            {
-                // Update current ChangeHistory entry
-                var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
-                changeHistory.ObjectGrowingState = rangeExtended || IsObjectGrowing(current);
-                changeHistory.UpdatedHeader = rangeExtended;
+            var currentFunction = WitsmlOperationContext.Current.Request.Function;
 
-                UpdateGrowingObject(current, logHeaderUpdate, rangeExtended);
-            }
-            else if (logHeaderUpdate != null)
+            // If the function is add to store use default audit behavior
+            if (currentFunction == Functions.AddToStore)
             {
-                UpdateGrowingObject(uri, logHeaderUpdate);
+                var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+                var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+                var fields = MongoDbUtility.CreateUpdateFields<T>();
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, fields);
+                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+                return;
             }
+
+            // During update or delete determine what type of changelog is needed
+            UpdateChangeLog(current, currentFunction, ranges, allUpdateMnemonics, isTimeLog, rangeExtended, hasData, indexUnit, logHeaderUpdate);
+        }
+
+        private void UpdateChangeLog(T current, Functions currentFunction, Dictionary<string, Range<double?>> ranges, List<string> allUpdateMnemonics, bool isTimeLog, bool rangeExtended, bool hasData, string indexUnit, UpdateDefinition<T> logHeaderUpdate)
+        {
+            var isCurrentObjectGrowing = IsObjectGrowing(current);
+
+            // If the log is growing and data was appeneded then do not update change history
+            if (isCurrentObjectGrowing && rangeExtended)
+            {
+                UpdateGrowingObject(current, logHeaderUpdate, true);
+                return;
+            }
+
+            // Update current ChangeHistory entry
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+            // If the update has data update the change history for the mnemonics and ranges affected
+            if (hasData)
+            {
+                var minRange = ranges.Min(x => x.Value.Start);
+                var maxRange = ranges.Max(x => x.Value.End);
+                changeHistory.Mnemonics = string.Join(",", allUpdateMnemonics);
+                SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
+            }
+
+            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
+            changeHistory.UpdatedHeader = logHeaderUpdate != null;
+
+            var isNewObjectGrowing = rangeExtended ? (bool?) rangeExtended : null;
+            UpdateGrowingObject(current, logHeaderUpdate, isNewObjectGrowing);
         }
 
         /// <summary>
@@ -1453,6 +1489,41 @@ namespace PDS.Witsml.Server.Data.Logs
                 end = update.End.GetValueOrDefault();
 
             return new Range<double?>(start, end, update.Offset);
+        }
+
+        private static void SetChangeHistoryIndexes(bool isTimeLog, string indexUnit, ChangeHistory changeHistory, double? minRange, double? maxRange)
+        {
+            if (isTimeLog)
+            {
+                if (minRange.HasValue)
+                {
+                    changeHistory.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(minRange.Value));
+                }
+                if (maxRange.HasValue)
+                {
+                    changeHistory.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(maxRange.Value));
+                }
+            }
+            else
+            {
+                if (minRange.HasValue)
+                {
+                    changeHistory.StartIndex = new GenericMeasure(minRange.Value, indexUnit);
+                }
+                if (maxRange.HasValue)
+                {
+                    changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
+                }
+            }
+        }
+
+        private List<string> GetAllMnemonics(EtpUri uri)
+        {
+            var current = GetEntity(uri, "LogCurveInfo");
+            var logCurves = GetLogCurves(current);
+            var channelList = new List<string>();
+            logCurves.ForEach(x => channelList.Add(GetMnemonic(x)));
+            return channelList;
         }
     }
 }
