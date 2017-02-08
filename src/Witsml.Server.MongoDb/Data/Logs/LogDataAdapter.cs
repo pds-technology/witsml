@@ -420,7 +420,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             var affectedMnemonics = ranges.Where(x => x.Value.IsClosed()).Select(x => x.Key).ToArray();
-            var minRange  = IsIncreasing(current) ? updateStart : updateEnd;
+            var minRange = IsIncreasing(current) ? updateStart : updateEnd;
             var maxRange = IsIncreasing(current) ? updateEnd : updateStart;
 
             UpdateGrowingObject(current, logHeaderUpdate, originalMnemonics, affectedMnemonics, minRange, maxRange, indexUnit, isTimeLog, rangeExtended, updateIndexRanges);
