@@ -552,8 +552,16 @@ namespace PDS.Witsml.Server.Data.Logs
             delete.Direction = current.Direction;
 
             var indexRange = currentRanges[current.IndexCurve];
-            if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
+
+            var headerOnlyDeletion = !indexRange.Start.HasValue || !ToDeleteLogData(delete, parser);
+
+            // Audit if only the header is being updated
+            if (headerOnlyDeletion)
+            {
+                AuditPartialDeleteHeaderOnly(delete, parser);
+                UpdateGrowingObject(current, null);
                 return;
+            }
 
             TimeSpan? offset = null;
             var indexCurve = current.IndexCurve;

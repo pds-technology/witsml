@@ -187,5 +187,14 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         {
             // Overriding default behavior for growing objects
         }
+
+        /// <summary>
+        /// Audits the partial delete operation.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        protected override void AuditPartialDelete(EtpUri uri)
+        {
+            // Overriding default behavior for growing objects
+        }
     }
 }

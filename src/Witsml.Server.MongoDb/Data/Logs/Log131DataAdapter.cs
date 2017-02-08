@@ -546,8 +546,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var indexCurve = current.IndexCurve.Value;
             var indexRange = currentRanges[indexCurve];
-            if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
+
+            var headerOnlyDeletion = !indexRange.Start.HasValue || !ToDeleteLogData(delete, parser);
+
+            // Audit if only the header is being updated
+            if (headerOnlyDeletion)
+            {
+                AuditPartialDeleteHeaderOnly(delete, parser);
+                UpdateGrowingObject(current, null);
                 return;
+            }
 
             TimeSpan? offset = null;            
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic == indexCurve);

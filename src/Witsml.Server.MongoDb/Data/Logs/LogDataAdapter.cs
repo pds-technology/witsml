@@ -546,6 +546,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             foreach (var element in elements)
             {
+                // If there are no child elements other than mnemonic for the logCurveInfo then delete the data
                 if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
                     return true;
 
@@ -554,6 +555,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (uidAttribute != null)
                     continue;
 
+                // If only the indexes and mnemonic are specfied then delete the data
                 if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
                     return true;
             }
@@ -681,6 +683,28 @@ namespace PDS.Witsml.Server.Data.Logs
             return current != null
                 ? GetLogCurves(current).Select(GetMnemonic).ToArray()
                 : new string[0];
+        }
+
+        /// <summary>
+        /// Audits the partial delete of the objects header.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="parser">The witsml query parser.</param>
+        protected virtual void AuditPartialDeleteHeaderOnly(T log, WitsmlQueryParser parser)
+        {
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            changeHistory.UpdatedHeader = true;
+
+            if (!ToDeleteAllDataByMnemonic(parser)) return;
+            
+            var removeMnemonics = string.Join(",", GetLogCurves(log).Select(x => x.Uid));
+
+            // If the logCurveInfo didn't specifiy the UID then it will not remove the mnemonic
+            if (removeMnemonics.Length < 1)
+                return;
+
+            changeHistory.ChangeInfo = $"Mnemonics removed: {removeMnemonics}";
+            changeHistory.Mnemonics = removeMnemonics;
         }
 
         /// <summary>
@@ -1492,22 +1516,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 changeHistory.ChangeInfo = message;
                 changeHistory.Mnemonics = string.Join(",", ranges.Where(x => x.Value.Start.HasValue && x.Value.End.HasValue).Select(x => x.Key));
             }
-            // Check to see if any curves were added or removed
+            // Check to see if any curves were added
             else if (originalMnemonics != null)
             {
                 var currentCurves = GetMnemonics(current.GetUri()).ToArray();
                 var addedCurves = currentCurves.Except(originalMnemonics).ToArray();
-                var deletedCurves = originalMnemonics.Except(currentCurves).ToArray();
 
                 if (addedCurves.Any() && currentFunction == Functions.UpdateInStore)
                 {
                     changeHistory.ChangeInfo = $"Mnemonics added: {string.Join(",", addedCurves)}";
                     changeHistory.Mnemonics = string.Join(",", addedCurves);
-                }
-                else if (deletedCurves.Any() && currentFunction == Functions.DeleteFromStore)
-                {
-                    changeHistory.ChangeInfo = $"Mnemonics removed: {string.Join(",", deletedCurves)}";
-                    changeHistory.Mnemonics = string.Join(",", deletedCurves);
                 }
             }
 
@@ -1542,6 +1560,11 @@ namespace PDS.Witsml.Server.Data.Logs
                     changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
                 }
             }
+        }
+
+        private bool ToDeleteAllDataByMnemonic(WitsmlQueryParser parser)
+        {
+            return parser.Properties(parser.Element(), "logCurveInfo").All(e => (!e.HasElements && e.Attribute("uid") != null));
         }
     }
 }
