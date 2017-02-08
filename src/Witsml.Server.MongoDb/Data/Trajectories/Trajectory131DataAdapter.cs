@@ -21,6 +21,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -111,6 +112,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
             {
                 dataObject.MDMax = dataObject.TrajectoryStation.Last().MD;
             }            
+        }
+
+        /// <summary>
+        /// Gets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override Range<double?> GetIndexRange(Trajectory dataObject)
+        {
+            if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count == 0)
+                return new Range<double?>(null, null);
+
+            SortStationData(dataObject);
+
+            return new Range<double?>(dataObject.TrajectoryStation.First().MD.Value, dataObject.TrajectoryStation.Last().MD.Value);
         }
 
         /// <summary>
