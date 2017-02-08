@@ -367,6 +367,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateIndexRanges = false;
             var checkOffset = true;
             var rangeExtended = false;
+            var updateStart = 0.0;
+            var updateEnd = 0.0;
 
             Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
@@ -376,10 +378,19 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (reader == null) continue;
                 var indexCurve = reader.Indices[0];
 
+                // Find the start and end of the update
+                if (indexCurve.Start > updateStart)
+                    updateStart = indexCurve.Start;
+
+                if (indexCurve.End > updateEnd)
+                    updateEnd = indexCurve.End;
+
                 if (string.IsNullOrEmpty(indexUnit))
                 {
                     indexUnit = indexCurve.Unit;
                 }
+
+                // Need the minimum and maximum of the changes
 
                 updateMnemonics.Clear();
                 updateMnemonics.Add(indexCurve.Mnemonic);
@@ -408,7 +419,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            UpdateGrowingObject(current, logHeaderUpdate, ranges, originalMnemonics, indexUnit, isTimeLog, rangeExtended, updateIndexRanges);
+            var affectedMnemonics = ranges.Where(x => x.Value.IsClosed()).Select(x => x.Key).ToArray();
+            var minRange  = IsIncreasing(current) ? updateStart : updateEnd;
+            var maxRange = IsIncreasing(current) ? updateEnd : updateStart;
+
+            UpdateGrowingObject(current, logHeaderUpdate, originalMnemonics, affectedMnemonics, minRange, maxRange, indexUnit, isTimeLog, rangeExtended, updateIndexRanges);
         }
 
         /// <summary>
@@ -1483,7 +1498,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         private void UpdateGrowingObject(T current, UpdateDefinition<T> logHeaderUpdate,
-            Dictionary<string, Range<double?>> ranges, string[] originalMnemonics,
+            string[] originalMnemonics, string[] affectedMnemonics, double minRange, double maxRange,
             string indexUnit, bool isTimeLog, bool rangeExtended, bool hasData)
         {
             var currentFunction = WitsmlOperationContext.Current.Request.Function;
@@ -1505,16 +1520,17 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update current ChangeHistory entry
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
 
+            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
+            changeHistory.UpdatedHeader = logHeaderUpdate != null;
+
             // If the update has data update the change history for the mnemonics and ranges affected
             if (hasData)
             {
-                var minRange = ranges.Min(x => x.Value.Start);
-                var maxRange = ranges.Max(x => x.Value.End);
                 SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
                 var message = currentFunction == Functions.UpdateInStore ? "Data updated" : "Data deleted";
 
                 changeHistory.ChangeInfo = message;
-                changeHistory.Mnemonics = string.Join(",", ranges.Where(x => x.Value.Start.HasValue && x.Value.End.HasValue).Select(x => x.Key));
+                changeHistory.Mnemonics = string.Join(",", affectedMnemonics);
             }
             // Check to see if any curves were added
             else if (originalMnemonics != null)
@@ -1524,13 +1540,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 if (addedCurves.Any() && currentFunction == Functions.UpdateInStore)
                 {
+                    changeHistory.UpdatedHeader = true;
                     changeHistory.ChangeInfo = $"Mnemonics added: {string.Join(",", addedCurves)}";
                     changeHistory.Mnemonics = string.Join(",", addedCurves);
                 }
             }
-
-            // If any element other than objectGrowing is being updated in the header set UpdatedHeader flag
-            changeHistory.UpdatedHeader = logHeaderUpdate != null;
 
             var isObjectGrowingToggled = rangeExtended ? true : (bool?)null;
             UpdateGrowingObject(current, logHeaderUpdate, isObjectGrowingToggled);
