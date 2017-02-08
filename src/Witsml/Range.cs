@@ -269,5 +269,35 @@ namespace PDS.Witsml
 
             return range;
         }
+
+        /// <summary>
+        /// Determines whether the instance is closed.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <returns><c>true</c> if the specified range is closed; otherwise, <c>false</c>.</returns>
+        public static bool IsClosed(this Range<double?> range)
+        {
+            return range.Start.HasValue && range.End.HasValue;
+        }
+
+        /// <summary>
+        /// Determines whether the instance is open.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <returns><c>true</c> if the specified range is open; otherwise, <c>false</c>.</returns>
+        public static bool IsOpen(this Range<double?> range)
+        {
+            return (range.Start.HasValue && !range.End.HasValue) || (!range.Start.HasValue && range.End.HasValue);
+        }
+
+        /// <summary>
+        /// Determines whether this instance is empty.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <returns><c>true</c> if the specified range is empty; otherwise, <c>false</c>.</returns>
+        public static bool IsEmpty(this Range<double?> range)
+        {
+            return !range.Start.HasValue && !range.End.HasValue;
+        }
     }
 }
