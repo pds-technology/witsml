@@ -198,6 +198,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             expectedHistoryCount = 4;
             expectedChangeType = ChangeInfoType.add;
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
+
+            DevKit.AssertChangeHistoryTimesUnique(result);
         }
 
         [TestMethod]
