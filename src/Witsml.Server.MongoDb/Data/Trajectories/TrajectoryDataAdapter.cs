@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -135,7 +137,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     transaction.SetContext(uri);
                     UpdateEntity(parser, uri);
-                    UpdateGrowingObject(uri);
+                    UpdateGrowingObject(GetEntity(uri), true);               
                     transaction.Commit();
                 }
             }
@@ -172,6 +174,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     {
                         transaction.SetContext(uri);
                         PartialDeleteEntity(parser, uri);
+                        UpdateGrowingObject(GetEntity(uri), true);
                         transaction.Commit();
                     }                   
                 }               
@@ -441,10 +444,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected abstract void SetIndexRange(T dataObject, WitsmlQueryParser parser, bool force = true);
 
         /// <summary>
+        /// Gets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected abstract Range<double?> GetIndexRange(T dataObject);
+
+        /// <summary>
         /// Sorts the stations by MD.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected abstract void SortStationData(T dataObject);
+        protected abstract void SortStationData(T dataObject);        
 
         /// <summary>
         /// Gets the trajectory station.
@@ -473,7 +482,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var current = GetEntity(uri);
             var chunked = IsQueryingStationFile(current, current);
-            var appending = false;
+            var isAppending = false;
 
             if (merge)
             {
@@ -487,7 +496,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     .Select(x => x.Uid)
                     .ToArray();
 
-                appending = GetTrajectoryStations(dataObject)
+                isAppending = GetTrajectoryStations(dataObject)
                     .Any(x => !savedStations.ContainsIgnoreCase(x.Uid));
 
                 MergeEntity(current, parser);
@@ -508,7 +517,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
-                UpdateGrowingObject(current, appending);
+                UpdateGrowingObject(current, false, isAppending);
                 transaction.Commit();
             }
         }
@@ -540,24 +549,34 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(current, parser);
                 UpdateMongoFile(current, false);
                 ReplaceEntity(current, uri);
-                UpdateGrowingObject(uri);
+                UpdateGrowingObject(current);
                 transaction.Commit();
             }
         }
 
-        private void UpdateGrowingObject(T current, bool appending)
+        private void UpdateGrowingObject(T current, bool isHeaderUpdate = false, bool? isAppending = null)
         {
-            // If the object is growing and data was appeneded then do not update change history
-            if (IsObjectGrowing(current) && appending)
-            {
-                UpdateGrowingObject(current, null, true);
+            //currently growing
+            if (IsObjectGrowing(current))
+            {                
                 return;
             }
 
-            // TODO: Update current ChangeHistory entry
-            //var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
 
-            var isObjectGrowingToggled = appending ? true : (bool?)null;
+            //Currently not growing with header update
+            if (isHeaderUpdate)
+            {
+                changeHistory.UpdatedHeader = true;
+                UpdateGrowingObject(current.GetUri());
+                return;
+            }
+
+            //Currently not growing with stations updated/appended
+            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
+            var indexRange = GetIndexRange(current);
+            changeHistory.StartIndex = new GenericMeasure(indexRange.Start.GetValueOrDefault(), MeasuredDepthUom.m.ToString());
+            changeHistory.EndIndex = new GenericMeasure(indexRange.End.GetValueOrDefault(), MeasuredDepthUom.m.ToString());
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
     }
