@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Transactions
         {
         }
 
-        [Ignore]
         [TestMethod]
         public void MongoTransaction_Rollback_Nested_Transaction_When_Error_Before_UpdateIsActive()
         {
@@ -85,7 +84,6 @@ namespace PDS.Witsml.Server.Data.Transactions
             DevKit.AssertChangeLog(savedLog, 1, ChangeInfoType.add);
         }
 
-        [Ignore]
         [TestMethod]
         public void MongoTransaction_Rollback_Nested_Transaction_When_Error_After_Update()
         {
