@@ -23,6 +23,7 @@ using System.Threading;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Jobs;
@@ -377,6 +378,234 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Append_Update_Trajectory_Station_Set_ObjectGrowing_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //append station
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            station1.Azi.Value++;
+
+            //update station
+            var newStation2 = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation2 }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Trajectory141DataAdapter_ChangeLog_Tracks_ObjectGrowing_State()
+        {
+            AddParents();
+
+            // Add trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+
+            //update
+            var newStation = new TrajectoryStation
+            {
+                Uid = "sta-4",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 6.5 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+            var changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            Assert.AreEqual(4, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+
+            station1.Azi.Value++;
+
+            //update2
+            var newStation2 = new TrajectoryStation
+            {
+                Uid = "sta-5",
+                MD = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 10 },
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+            };
+
+            update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { newStation2 }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+            changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            Assert.AreEqual(5, result.TrajectoryStation.Count);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+
+            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Trajectory);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+            changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
+            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Trajectory141DataAdapter_ChangeLog_Tracks_Update_To_Trajectory_Header()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+            DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
+
+            Trajectory.ServiceCompany = "Test Company";
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            var changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.IsTrue(changeHistory.UpdatedHeader.GetValueOrDefault(), "updatedHeader");
+
+            // Update trajectory with stations
+            var stations = DevKit.TrajectoryStations(3, 5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.UpdateAndAssert(Trajectory);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+
+            //update header info
+            Trajectory.ServiceCompany = "Testing Company";
+            Trajectory.TrajectoryStation = null;
+            DevKit.UpdateAndAssert(Trajectory);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            changeHistory = GetAndAssertChangeLogHistory(result.GetUri());
+
+            //no changes to changelog
+            //todo: entity DateTimeLastChange doesn't match changeHistory DateTimeLastChange
+            //DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+        }
+
+        [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Error_443_Invalid_UOM()
         {
             // Add well and wellbore
@@ -554,6 +783,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
             stations[2].Uid = stations[3].Uid;
 
             DevKit.UpdateAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
+        }
+
+        private ChangeHistory GetAndAssertChangeLogHistory(EtpUri uri)
+        {
+            var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(DevKit.CreateChangeLog(uri));
+            var changeHistory = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(changeHistory);
+            return changeHistory;
         }
     }
 }
