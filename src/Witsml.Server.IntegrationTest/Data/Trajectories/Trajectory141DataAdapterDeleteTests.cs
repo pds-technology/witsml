@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Get trajectory
             DevKit.GetAndAssert(Trajectory);
-            
+
             // Delete trajectory
             var delete = DevKit.CreateQuery(Trajectory);
             DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(delete);
@@ -125,6 +125,140 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result = DevKit.GetAndAssert(Trajectory);
             Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start && s.MD.Value <= end);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_ChangeLog_Tracks_Partial_Delete_Trajectory_Header()
+        {
+            AddParents();
+
+            // Add trajectory without stations, add change history with objectGrowingState set to false
+            Trajectory.GridConUsed = new PlaneAngleMeasure { Uom = PlaneAngleUom.dega, Value = 90 };
+            Trajectory.MagDeclUsed = new PlaneAngleMeasure { Uom = PlaneAngleUom.dega, Value = 90 };
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsNotNull(result.GridConUsed);
+            DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
+
+            // Delete trajectory header element, add change history with updatedHeader set to true
+            var deleteXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, "<gridConUsed />");
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, deleteXml);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            var changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsTrue(changeHistory.UpdatedHeader.GetValueOrDefault(), "UpdatedHeader");
+            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            Assert.IsNull(changeHistory.StartIndex);
+            Assert.IsNull(changeHistory.EndIndex);
+
+            // Add new station when object is not growing, add change history with objectGrowingState set to true with start and end index
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
+            DevKit.UpdateAndAssert(Trajectory);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+            Assert.IsNotNull(changeHistory.StartIndex);
+            Assert.IsNotNull(changeHistory.EndIndex);
+            Assert.AreEqual(4, changeHistory.StartIndex.Value);
+            Assert.AreEqual(4, changeHistory.EndIndex.Value);
+
+            // Delete trajectory header element when object is growing, no entry to change log
+            deleteXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, "<magDeclUsed />");
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, deleteXml);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
+            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            //no changes to changelog
+            Assert.AreEqual(3, changeHistoryList.Count);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_ChangeLog_Tracks_Partial_Delete_Trajectory_Stations()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations, add change history with objectGrowingState set to false
+            var stations = DevKit.TrajectoryStations(3, 6);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            var result = DevKit.GetAndAssert(Trajectory);
+            DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
+
+            // Delete trajectory station when object not growing, add change history with objectGrowingState set to false with start and end index
+            var stationToDelete = Trajectory.TrajectoryStation.First();
+            var delete = @"<trajectoryStation uid=""" + stationToDelete.Uid + @"""></trajectoryStation>";
+            var queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryXml);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            var changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            Assert.IsNotNull(changeHistory.StartIndex);
+            Assert.IsNotNull(changeHistory.EndIndex);
+            Assert.AreEqual(7, changeHistory.StartIndex.Value);
+            Assert.AreEqual(8, changeHistory.EndIndex.Value);
+
+            // Add new station when object is not growing, add change history with objectGrowingState set to true with start and end index
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
+            Trajectory.TrajectoryStation.First().Uid = "Sta-4";
+            Trajectory.TrajectoryStation.First().MD.Value = 3;
+            DevKit.UpdateAndAssert(Trajectory);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            Assert.AreEqual(3, result.TrajectoryStation.Count);
+            DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
+            Assert.IsNotNull(changeHistory);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+            Assert.IsNotNull(changeHistory.StartIndex);
+            Assert.IsNotNull(changeHistory.EndIndex);
+            Assert.AreEqual(3, changeHistory.StartIndex.Value);
+            Assert.AreEqual(8, changeHistory.EndIndex.Value);
+
+            // Delete station when object is growing, no entry to change log
+            stationToDelete = Trajectory.TrajectoryStation.Last();
+            delete = @"<trajectoryStation uid=""" + stationToDelete.Uid + @"""></trajectoryStation>";
+            queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryXml);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
+            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+
+            //no changes to changelog
+            Assert.AreEqual(3, changeHistoryList.Count);
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
+            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            Assert.IsNotNull(changeHistory.StartIndex);
+            Assert.IsNotNull(changeHistory.EndIndex);
+            Assert.AreEqual(3, changeHistory.StartIndex.Value);
+            Assert.AreEqual(8, changeHistory.EndIndex.Value);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory uid")]

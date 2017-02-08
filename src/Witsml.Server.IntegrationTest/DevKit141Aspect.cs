@@ -845,6 +845,21 @@ namespace PDS.Witsml.Server
             Assert.AreEqual(dataObject?.Name, changeLog.NameObject);
         }
 
+        public List<ChangeHistory> GetAndAssertChangeLogHistory(EtpUri uri, bool returnLatestChangeHistoryOnly = true)
+        {
+            var changeLog = QueryAndAssert<ChangeLogList, ChangeLog>(CreateChangeLog(uri));
+            Assert.IsNotNull(changeLog.ChangeHistory);
+
+            if (returnLatestChangeHistoryOnly)
+            {
+                var changeHistory = changeLog.ChangeHistory.LastOrDefault();
+                Assert.IsNotNull(changeHistory);
+                return new List<ChangeHistory> { changeHistory };
+            }
+
+            return changeLog.ChangeHistory;
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
