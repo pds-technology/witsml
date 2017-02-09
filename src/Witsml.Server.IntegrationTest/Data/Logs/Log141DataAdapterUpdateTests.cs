@@ -2340,7 +2340,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(lastChange);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-15T15:35:42.0000040-05:00"),
                 DateTimeOffset.Parse("2016-04-15T15:38:42.0000600-05:00"));
-            Assert.AreEqual(Log.LogData.First().MnemonicList, lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(current), lastChange.Mnemonics);
 
             // Send 2nd update of data with some overlap
             updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
