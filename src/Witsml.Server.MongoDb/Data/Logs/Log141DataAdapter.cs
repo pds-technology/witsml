@@ -289,6 +289,16 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the index curve unit.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected override string GetIndexCurveUnit(Log log)
+        {
+            return GetLogCurve(log, log.IndexCurve).Unit;
+        }
+
+        /// <summary>
         /// Gets the units by column index.
         /// </summary>
         /// <param name="log">The log.</param>
@@ -566,7 +576,7 @@ namespace PDS.Witsml.Server.Data.Logs
             TimeSpan? offset = null;
             var indexCurve = current.IndexCurve;
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve);
-            
+
             if (DeleteAllLogData(current, delete, updatedRanges))
             {
                 ChannelDataChunkAdapter.Delete(uri);
@@ -574,6 +584,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     updatedRanges.Add(curve.Mnemonic.Value, new Range<double?>(null, null));
                 }
+
+                AuditPartialDelete(current, GetMnemonics(uri), indexRange.Start, indexRange.End);
             }
             else
             {               
@@ -587,6 +599,17 @@ namespace PDS.Witsml.Server.Data.Logs
                 var ranges = MergePartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
 
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges);
+
+                var affectedMnemonics = updatedRanges.Keys.Where(x => x != indexCurve).ToArray();
+
+                if (defaultDeleteRange.IsClosed())
+                {
+                    AuditPartialDelete(current, affectedMnemonics, defaultDeleteRange.Start, defaultDeleteRange.End);
+                }
+                else
+                {
+                    AuditPartialDelete(current, affectedMnemonics, updateRanges.Min(x => x.Value.Start), updateRanges.Max(x => x.Value.End));
+                }
             }
 
             var logHeaderUpdate = GetIndexRangeUpdate(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);

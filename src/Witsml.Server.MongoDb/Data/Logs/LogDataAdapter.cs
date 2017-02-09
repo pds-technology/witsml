@@ -418,7 +418,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            var affectedMnemonics = ranges.Where(x => x.Value.IsClosed()).Select(x => x.Key).ToArray();
+            // Only select non-index curves that were affected by the reader
+            var affectedMnemonics = ranges.Where(x =>
+                        allUpdateMnemonics.ContainsIgnoreCase(x.Key) && x.Key != GetIndexCurveMnemonic(current) &&
+                        x.Value.IsClosed()).Select(x => x.Key).ToArray();
+
             var minRange = IsIncreasing(current) ? updateStart : updateEnd;
             var maxRange = IsIncreasing(current) ? updateEnd : updateStart;
 
@@ -722,6 +726,38 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Audits the partial delete of the objects data.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="affectedMnemonics">The affected mnemonics.</param>
+        /// <param name="minRange">The minimum range.</param>
+        /// <param name="maxRange">The maximum range.</param>
+        protected virtual void AuditPartialDelete(T log, string[] affectedMnemonics, double? minRange, double? maxRange)
+        {
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+
+            var indexCurve = GetIndexCurveMnemonic(log);
+            var indexChannel = GetLogCurves(log).FirstOrDefault(l => GetMnemonic(l) == indexCurve);
+            var isTimeLog = IsTimeLog(log, true);
+
+            if (affectedMnemonics.Length < 1)
+                return;
+
+            var mnemonics = string.Join(",", affectedMnemonics);
+            changeHistory.ChangeInfo = $"Data deleted";
+            changeHistory.Mnemonics = mnemonics;
+
+            if (isTimeLog)
+            {
+                AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, minRange, maxRange);
+            }
+            else
+            {
+                AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, minRange, maxRange, GetIndexCurveUnit(log));
+            }
+        }
+
+        /// <summary>
         /// Gets the index type for the specified index information.
         /// </summary>
         /// <param name="indexInfo">The index information.</param>
@@ -811,6 +847,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="log">The log.</param>
         /// <returns></returns>
         protected abstract string GetIndexCurveMnemonic(T log);
+
+        /// <summary>
+        /// Gets the index curve unit.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract string GetIndexCurveUnit(T log);
 
         /// <summary>
         /// Gets the units by column index.
