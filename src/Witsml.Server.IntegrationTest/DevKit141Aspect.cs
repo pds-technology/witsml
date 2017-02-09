@@ -860,6 +860,22 @@ namespace PDS.Witsml.Server
             return changeLog.ChangeHistory;
         }
 
+        public void AssertChangeHistoryFlags(ChangeHistory changeHistory, bool updateHeaderTrue, bool objectGrowingTrue)
+        {
+            Assert.IsNotNull(changeHistory);
+            Assert.AreEqual(updateHeaderTrue, changeHistory.UpdatedHeader.GetValueOrDefault(), "updatedHeader");
+            Assert.AreEqual(objectGrowingTrue, changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+        }
+
+        public void AssertChangeHistoryIndexRange(ChangeHistory changeHistory, double startIndexRange, double endIndexRange)
+        {
+            Assert.IsNotNull(changeHistory);
+            Assert.IsNotNull(changeHistory.StartIndex);
+            Assert.IsNotNull(changeHistory.EndIndex);
+            Assert.AreEqual(startIndexRange, changeHistory.StartIndex.Value);
+            Assert.AreEqual(endIndexRange, changeHistory.EndIndex.Value);
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);

@@ -468,10 +468,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
             DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
-            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            AssertObjectGrowingStatus(result, wellboreResult, changeHistory, false);
 
             var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
             Assert.IsNotNull(station1);
@@ -501,10 +499,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             Assert.AreEqual(4, result.TrajectoryStation.Count);
-            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            AssertObjectGrowingStatus(result, wellboreResult, changeHistory, true);
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
 
             station1.Azi.Value++;
 
@@ -532,10 +528,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             Assert.AreEqual(5, result.TrajectoryStation.Count);
-            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            AssertObjectGrowingStatus(result, wellboreResult, changeHistory, true);
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
 
             //expire growing objects, add change history with object growing set to false
             WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
@@ -547,10 +541,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             wellboreResult = DevKit.GetAndAssert(Wellbore);
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
             DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
-            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            AssertObjectGrowingStatus(result, wellboreResult, changeHistory, false);
         }
 
         [TestMethod]
@@ -578,8 +570,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsTrue(changeHistory.UpdatedHeader.GetValueOrDefault(), "updatedHeader");
-            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
 
             // Update trajectory with stations, add change history with objectGrowingState set to true
             var stations = DevKit.TrajectoryStations(3, 6);
@@ -590,9 +581,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
-            Assert.IsNotNull(changeHistory);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 8);
 
             //update header info again when object is growing, no entry to change log
             Trajectory.ServiceCompany = "Testing Company again";
@@ -605,8 +595,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             //no changes to changelog
             Assert.AreEqual(3, changeHistoryList.Count);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
         }
 
         [TestMethod]
@@ -634,13 +624,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsNotNull(changeHistory);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(6.5, changeHistory.StartIndex.Value);
-            Assert.AreEqual(8, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 6.5, 6.5);
 
             // Update trajectory station agian with index change, add change history with objectGrowingState set to false with start and end index
             stationUpdate = Trajectory.TrajectoryStation.First();
@@ -653,13 +638,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
-            Assert.IsNotNull(changeHistory);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsFalse(changeHistory.ObjectGrowingState.GetValueOrDefault());
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(7, changeHistory.StartIndex.Value);
-            Assert.AreEqual(10, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 10, 10);
 
             // Add new station when object is not growing, add change history with objectGrowingState set to true with start and end index
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
@@ -671,13 +651,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             DevKit.AssertChangeLog(result, 4, ChangeInfoType.update);
-            Assert.IsNotNull(changeHistory);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(3, changeHistory.StartIndex.Value);
-            Assert.AreEqual(10, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 3, 3);
 
             // Update station, no entry to change log
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
@@ -692,12 +667,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // No changes to changelog
             Assert.AreEqual(4, changeHistoryList.Count);
             Assert.AreEqual(4, result.TrajectoryStation.Count);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(3, changeHistory.StartIndex.Value);
-            Assert.AreEqual(10, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 3, 3);
         }
 
         [TestMethod]
@@ -722,13 +693,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
 
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsNotNull(changeHistory);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(6, changeHistory.StartIndex.Value);
-            Assert.AreEqual(8, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 8);
 
             // Add new station when object is growing, no entry to change log
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
@@ -742,16 +708,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // No changes to changelog
             Assert.AreEqual(2, changeHistoryList.Count);
             Assert.AreEqual(4, result.TrajectoryStation.Count);
-            Assert.IsFalse(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
-            Assert.IsNotNull(changeHistory.StartIndex);
-            Assert.IsNotNull(changeHistory.EndIndex);
-            Assert.AreEqual(6, changeHistory.StartIndex.Value);
-            Assert.AreEqual(8, changeHistory.EndIndex.Value);
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 8);
         }
 
         [TestMethod]
-        [Ignore]
         public void Trajectory141DataAdapter_ChangeLog_Tracks_Update_To_Trajectory_Header_And_Stations()
         {
             // Add well and wellbore
@@ -776,9 +737,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
-            Assert.IsTrue(changeHistory.UpdatedHeader.GetValueOrDefault(), "updatedHeader");
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault(), "objectGrowingState");
-
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 4, 5);
 
             // Update header and add trajectory with station with object growing, no entry to change log
             Trajectory.ServiceCompany = "Testing Company";
@@ -795,8 +755,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(3, result.TrajectoryStation.Count);
             Assert.AreEqual(2, changeHistoryList.Count);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
-            Assert.IsTrue(changeHistory.UpdatedHeader.GetValueOrDefault());
-            Assert.IsTrue(changeHistory.ObjectGrowingState.GetValueOrDefault());
+            DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 4, 5);
         }
 
         [TestMethod]
@@ -977,6 +937,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
             stations[2].Uid = stations[3].Uid;
 
             DevKit.UpdateAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
+        }
+
+        private void AssertObjectGrowingStatus(Trajectory trajectory, Wellbore wellbore, ChangeHistory changeHistory, bool assertForTrue)
+        {
+            Assert.AreEqual(assertForTrue, trajectory.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.AreEqual(assertForTrue, wellbore.IsActive.GetValueOrDefault(), "IsActive");
+            Assert.AreEqual(assertForTrue, changeHistory.ObjectGrowingState.GetValueOrDefault());
         }
     }
 }
