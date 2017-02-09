@@ -444,16 +444,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <summary>
         /// Gets the MD index ranges.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
+        /// <param name="stations">The trajectory stations.</param>
         /// <param name="uom">The unit of measure.</param>
         /// <returns>The start and end index range.</returns>
-        protected abstract Range<double?> GetIndexRange(T dataObject, out string uom);
+        protected abstract Range<double?> GetIndexRange(List<TChild> stations, out string uom);
 
         /// <summary>
         /// Sorts the stations by MD.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        protected abstract void SortStationData(T dataObject);        
+        /// <param name="stations">The trajectory stations.</param>
+        protected abstract void SortStationData(List<TChild> stations);        
 
         /// <summary>
         /// Gets the trajectory station.
@@ -483,7 +483,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var current = GetEntity(uri);
             var chunked = IsQueryingStationFile(current, current);
             string uomIndex;
-            var rangeIn = GetIndexRange(dataObject, out uomIndex);
+            var rangeIn = GetIndexRange(GetTrajectoryStations(dataObject), out uomIndex);
             var isAppending = false;
 
             if (merge)
@@ -519,7 +519,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
-                UpdateGrowingObject(current, false, isAppending, rangeIn.Start, rangeIn.End, uomIndex);
+                UpdateGrowingObject(dataObject, false, isAppending, rangeIn.Start, rangeIn.End, uomIndex);
                 transaction.Commit();
             }
         }
@@ -527,10 +527,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
         {
             var current = GetEntity(uri);
-            string uomIndex;
-            //todo: get index range of station(s) being deleted
-            var rangeIn = GetIndexRange(current, out uomIndex);
-
+            
+            var stationsCurrent = new List<TChild>();
+            GetTrajectoryStations(current).ForEach(s => stationsCurrent.Add(s));
+            
             var chunked = IsQueryingStationFile(current, current);
 
             if (chunked)
@@ -542,6 +542,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             FilterStationData(current, parser);
             MergeEntity(current, parser, true);
 
+            string uomIndex;
+            var stationsAfterMerge = GetTrajectoryStations(current).Select(s=>s.Uid).ToArray();
+            var stationsDeleted = stationsCurrent.FindAll(s => !stationsAfterMerge.ContainsIgnoreCase(s.Uid));
+            var rangeIn = GetIndexRange(stationsDeleted, out uomIndex);
+            
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(uri);
@@ -562,7 +567,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
         private void UpdateGrowingObject(T current, bool isHeaderUpdateOnly, bool? isAppending = null, double? startIndex = null, double? endIndex = null, string indexUom = null)
         {
-            //currently growing
+            // Currently growing
             if (IsObjectGrowing(current))
             {                
                 return;
@@ -570,7 +575,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
 
-            //Currently not growing with header update
+            // Currently not growing with header update
             if (isHeaderUpdateOnly)
             {
                 changeHistory.UpdatedHeader = true;
@@ -578,9 +583,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 return;
             }
 
-            //Currently not growing with stations updated/appended/deleted
+            // Currently not growing with stations updated/appended/deleted
             var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
-            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex.GetValueOrDefault(), endIndex.GetValueOrDefault(), indexUom);
+            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex, endIndex, indexUom);
             changeHistory.UpdatedHeader = true;
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
