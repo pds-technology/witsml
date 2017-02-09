@@ -19,10 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -31,6 +30,7 @@ using MongoDB.Driver.GridFS;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
+using Witsml141 = Energistics.DataAccess.WITSML141;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -447,7 +447,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Gets the MD index ranges.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected abstract Range<double?> GetIndexRange(T dataObject);
+        /// <param name="uom">The unit of measure.</param>
+        /// <returns>The start and end index range.</returns>
+        protected abstract Range<double?> GetIndexRange(T dataObject, out string uom);
 
         /// <summary>
         /// Sorts the stations by MD.
@@ -482,6 +484,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var current = GetEntity(uri);
             var chunked = IsQueryingStationFile(current, current);
+            string uomIndex;
+            var rangeIn = GetIndexRange(dataObject, out uomIndex);
             var isAppending = false;
 
             if (merge)
@@ -517,7 +521,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
-                UpdateGrowingObject(current, false, isAppending);
+                UpdateGrowingObject(current, false, isAppending, rangeIn.Start, rangeIn.End, uomIndex);
                 transaction.Commit();
             }
         }
@@ -525,6 +529,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
         {
             var current = GetEntity(uri);
+            string uomIndex;
+            //todo: get index range of station(s) being deleted
+            var rangeIn = GetIndexRange(current, out uomIndex);
+
             var chunked = IsQueryingStationFile(current, current);
 
             if (chunked)
@@ -549,12 +557,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 SetIndexRange(current, parser);
                 UpdateMongoFile(current, false);
                 ReplaceEntity(current, uri);
-                UpdateGrowingObject(current);
+                UpdateGrowingObject(current, false, null, rangeIn.Start, rangeIn.End, uomIndex);
                 transaction.Commit();
             }
         }
 
-        private void UpdateGrowingObject(T current, bool isHeaderUpdate = false, bool? isAppending = null)
+        private void UpdateGrowingObject(T current, bool isHeaderUpdateOnly, bool? isAppending = null, double? startIndex = null, double? endIndex = null, string indexUom = null)
         {
             //currently growing
             if (IsObjectGrowing(current))
@@ -565,18 +573,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
 
             //Currently not growing with header update
-            if (isHeaderUpdate)
+            if (isHeaderUpdateOnly)
             {
                 changeHistory.UpdatedHeader = true;
                 UpdateGrowingObject(current.GetUri());
                 return;
             }
 
-            //Currently not growing with stations updated/appended
-            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
-            var indexRange = GetIndexRange(current);
-            changeHistory.StartIndex = new GenericMeasure(indexRange.Start.GetValueOrDefault(), MeasuredDepthUom.m.ToString());
-            changeHistory.EndIndex = new GenericMeasure(indexRange.End.GetValueOrDefault(), MeasuredDepthUom.m.ToString());
+            //Currently not growing with stations updated/appended/deleted
+            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;            
+            changeHistory.StartIndex = startIndex == null ? null : new Witsml141.ComponentSchemas.GenericMeasure(startIndex.GetValueOrDefault(), indexUom);
+            changeHistory.EndIndex = endIndex == null ? null : new Witsml141.ComponentSchemas.GenericMeasure(endIndex.GetValueOrDefault(), indexUom);
+            changeHistory.UpdatedHeader = true;
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
     }

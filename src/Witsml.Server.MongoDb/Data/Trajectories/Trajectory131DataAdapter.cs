@@ -118,14 +118,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Gets the MD index ranges.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected override Range<double?> GetIndexRange(Trajectory dataObject)
+        /// <param name="uom">The unit of measure.</param>
+        /// <returns>The start and end index range.</returns>
+        protected override Range<double?> GetIndexRange(Trajectory dataObject, out string uom)
         {
+            uom = string.Empty;
+
             if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count == 0)
                 return new Range<double?>(null, null);
 
             SortStationData(dataObject);
 
-            return new Range<double?>(dataObject.TrajectoryStation.First().MD.Value, dataObject.TrajectoryStation.Last().MD.Value);
+            var mdMin = dataObject.TrajectoryStation.First().MD;
+            var mdMax = dataObject.TrajectoryStation.Last().MD;
+            uom = mdMin?.Uom.ToString() ?? string.Empty;
+
+            return new Range<double?>(mdMin?.Value, mdMax?.Value);
         }
 
         /// <summary>
@@ -135,7 +143,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override void SortStationData(Trajectory dataObject)
         {
             // Sort stations by MD
-            dataObject.TrajectoryStation = dataObject.TrajectoryStation.OrderBy(x => x.MD.Value).ToList();
+            dataObject.TrajectoryStation = dataObject.TrajectoryStation.OrderBy(x => x.MD?.Value).ToList();
         }
 
         /// <summary>
