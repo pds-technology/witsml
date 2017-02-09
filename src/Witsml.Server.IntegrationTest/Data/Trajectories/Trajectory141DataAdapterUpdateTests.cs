@@ -220,7 +220,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            //Add trajectory
+            // Add trajectory
             DevKit.AddAndAssert(Trajectory);
             var result = DevKit.GetAndAssert(Trajectory);
             var wellboreResult = DevKit.GetAndAssert(Wellbore);
@@ -243,7 +243,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //another update with station
+            // Another update with station
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -291,7 +291,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //update
+            // Update
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -350,7 +350,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //update station
+            // Update station
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-3",
@@ -398,7 +398,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //append station
+            // Append station
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -426,7 +426,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             station1.Azi.Value++;
 
-            //update station
+            // Update station
             var newStation2 = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -475,7 +475,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(station1);
             station1.Azi.Value++;
 
-            //update with station, set change history object growing flag
+            // Update with station, set change history object growing flag
             var newStation = new TrajectoryStation
             {
                 Uid = "sta-4",
@@ -504,7 +504,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             station1.Azi.Value++;
 
-            //update2 with new station and object growing, no entry in change log 
+            // Update2 with new station and object growing, no entry in change log 
             var newStation2 = new TrajectoryStation
             {
                 Uid = "sta-5",
@@ -525,13 +525,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             result = DevKit.GetAndAssert(Trajectory);
             wellboreResult = DevKit.GetAndAssert(Wellbore);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+            var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
+            changeHistory = changeHistoryList.Last();
 
+            // No changes to change log
             Assert.AreEqual(5, result.TrajectoryStation.Count);
             AssertObjectGrowingStatus(result, wellboreResult, changeHistory, true);
-            DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            Assert.AreEqual(2, changeHistoryList.Count);
 
-            //expire growing objects, add change history with object growing set to false
+            // Expire growing objects, add change history with object growing set to false
             WitsmlSettings.TrajectoryGrowingTimeoutPeriod = GrowingTimeoutPeriod;
             Thread.Sleep(GrowingTimeoutPeriod * 1000);
 
@@ -560,7 +562,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
 
-            //update header info, add change history with updatedHeader set to true
+            // Update header info, add change history with updatedHeader set to true
             Trajectory.ServiceCompany = "Test Company";
             Trajectory.TrajectoryStation = null;
             DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
@@ -572,7 +574,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
             DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
 
-            // Update trajectory with stations, add change history with objectGrowingState set to true
+            // Update trajectory with stations, add change history with objectGrowingState and updateHeader set to true
             var stations = DevKit.TrajectoryStations(3, 6);
             Trajectory.TrajectoryStation = stations;
             DevKit.UpdateAndAssert(Trajectory);
@@ -584,7 +586,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
             DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 8);
 
-            //update header info again when object is growing, no entry to change log
+            // Update header info again when object is growing, no entry to change log
             Trajectory.ServiceCompany = "Testing Company again";
             Trajectory.TrajectoryStation = null;
             DevKit.UpdateAndAssert(Trajectory);
@@ -592,7 +594,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result = DevKit.GetAndAssert(Trajectory);
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
 
-            //no changes to changelog
+            // No changes to changelog
             Assert.AreEqual(3, changeHistoryList.Count);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
             changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
@@ -614,7 +616,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
 
-            // Update trajectory station, add change history with objectGrowingState set to false with start and end index
+            // Update trajectory station, add change history with objectGrowingState set to false and updateHeader set to true with start and end index
             var stationUpdate = Trajectory.TrajectoryStation.First();
             stationUpdate.MD.Value = 6.5;
             Trajectory.TrajectoryStation = new List<TrajectoryStation> { stationUpdate };
@@ -627,7 +629,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
             DevKit.AssertChangeHistoryIndexRange(changeHistory, 6.5, 6.5);
 
-            // Update trajectory station agian with index change, add change history with objectGrowingState set to false with start and end index
+            // Update trajectory station again with index change, add change history with objectGrowingState set to false and updateHeader set to true with start and end index
             stationUpdate = Trajectory.TrajectoryStation.First();
             stationUpdate.MD.Value = 10;
             stationUpdate.Azi = new PlaneAngleMeasure(10, PlaneAngleUom.dega);
@@ -641,7 +643,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
             DevKit.AssertChangeHistoryIndexRange(changeHistory, 10, 10);
 
-            // Add new station when object is not growing, add change history with objectGrowingState set to true with start and end index
+            // Add new station when object is not growing, add change history with objectGrowingState and updateHeader set to true with start and end index
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
             Trajectory.TrajectoryStation.First().Uid = "Sta-4";
             Trajectory.TrajectoryStation.First().MD.Value = 3;
@@ -661,8 +663,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.UpdateAndAssert(Trajectory);
 
             result = DevKit.GetAndAssert(Trajectory);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
+            changeHistory = changeHistoryList.Last();
 
             // No changes to changelog
             Assert.AreEqual(4, changeHistoryList.Count);
@@ -684,7 +686,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
 
-            // Update trajectory with stations, add change history with objectGrowingState set to true with start and end index
+            // Update trajectory with stations, add change history with objectGrowingState and updatedHeader set to true with start and end index
             var stations = DevKit.TrajectoryStations(3, 6);
             Trajectory.TrajectoryStation = stations;
             DevKit.UpdateAndAssert(Trajectory);
@@ -703,7 +705,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             result = DevKit.GetAndAssert(Trajectory);
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+            changeHistory = changeHistoryList.Last();
 
             // No changes to changelog
             Assert.AreEqual(2, changeHistoryList.Count);
@@ -727,7 +729,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLog(result, 1, ChangeInfoType.add);
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
 
-            //update header info and add stations, add change history with updatedHeader set to true and object growing to true with start/end index
+            // Update header info and add stations, add change history with updatedHeader set to true and object growing to true with start/end index
             Trajectory.ServiceCompany = "Test Company";
             Trajectory.TrajectoryStation = DevKit.TrajectoryGenerator.GenerationStations(2, 4);
             DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
@@ -748,10 +750,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.UpdateAndAssert(Trajectory);
 
             result = DevKit.GetAndAssert(Trajectory);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
+            changeHistory = changeHistoryList.Last();
 
-            //no changes to changelog
+            // No changes to changelog
             Assert.AreEqual(3, result.TrajectoryStation.Count);
             Assert.AreEqual(2, changeHistoryList.Count);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
