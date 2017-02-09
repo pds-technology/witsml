@@ -2434,7 +2434,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             DevKit.UpdateAndAssert(updateLog);
 
-            // Assert log is growing
+            // Assert log is not growing
             var log = DevKit.GetAndAssert(Log);
             Assert.IsFalse(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
 
@@ -2447,6 +2447,91 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:32:42.0000100-05:00"),
                 DateTimeOffset.Parse("2016-04-13T15:32:42.0020000-05:00"));
             DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_Track_Updating_Last_Existing_Row_While_Growing()
+        {
+            AddParents();
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Add("2016-04-13T15:31:42.0000123-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.2,31.2");
+            logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            DevKit.AddAndAssert(Log);
+
+            // Send update modifying the last row
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,0,0");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            // Assert log is not growing
+            var log = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:38:42.0000000-05:00"),
+                DateTimeOffset.Parse("2016-04-13T15:38:42.0000000-05:00"));
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+
+            // Send 3rd update of data appending
+            updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:39:42.0000000-05:00,0,0");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            // Assert log is growing
+            log = DevKit.GetAndAssert(Log);
+            Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            changeLog = DevKit.AssertChangeLog(log, 3, ChangeInfoType.update);
+            lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, true, true);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"),
+                DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"));
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+
+            // Send 4th update only modifying the last row again
+            updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:39:42.0000000-05:00,1,1");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            // Assert log is still growing
+            log = DevKit.GetAndAssert(Log);
+            Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            // Verify that a change history was made even though the object is growing
+            changeLog = DevKit.AssertChangeLog(log, 4, ChangeInfoType.update);
+            lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, true, true);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"),
+                DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"));
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
         }
 
         [TestMethod]

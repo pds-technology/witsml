@@ -1071,6 +1071,48 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_Track_Remove_Curve_From_Growing_Log()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 1, 1, 1);
+
+            DevKit.AddAndAssert(Log);
+
+            // Append data to toggle object growing
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            var logData = updateLog.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2,2,2");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            // Assert log is growing
+            var log = DevKit.GetAndAssert(Log);
+            Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            DeleteLog(Log, "<logCurveInfo uid=\"ROP\" />");
+
+            var logUpdated = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
+
+            // Fetch the changeLog for the entity just added
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 3, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+
+            DevKit.AssertChangeHistoryFlags(lastChange, false, true);
+            Assert.AreEqual("Mnemonics removed: ROP", lastChange.ChangeInfo);
+            DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
+        }
+
         [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
         public void Log141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
         {
