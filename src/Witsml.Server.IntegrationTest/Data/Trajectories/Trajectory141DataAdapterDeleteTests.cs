@@ -172,16 +172,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             result = DevKit.GetAndAssert(Trajectory);
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+            changeHistory = changeHistoryList.Last();
 
-            //no changes to changelog
+            // No changes to changelog
             Assert.AreEqual(3, changeHistoryList.Count);
             DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
             DevKit.AssertChangeHistoryIndexRange(changeHistory, 4, 4);
         }
 
         [TestMethod]
-        [Ignore]
         public void Trajectory141DataAdapter_ChangeLog_Tracks_Partial_Delete_Trajectory_Stations()
         {
             // Add well and wellbore
@@ -212,7 +211,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(2, result.TrajectoryStation.Count);
             DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
             DevKit.AssertChangeHistoryFlags(changeHistory, true, false);
-            //DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 6);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 6, 6);
 
             // Add new station when object is not growing, add change history with objectGrowingState set to true with start and end index
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 4);
@@ -226,23 +225,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(3, result.TrajectoryStation.Count);
             DevKit.AssertChangeLog(result, 3, ChangeInfoType.update);
             DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
-            //DevKit.AssertChangeHistoryIndexRange(changeHistory, 4, 4);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 3, 3);
 
-            // Delete station when object is growing, no entry to change log
-            stationToDelete = Trajectory.TrajectoryStation.Last();
-            delete = @"<trajectoryStation uid=""" + stationToDelete.Uid + @"""></trajectoryStation>";
+            // Delete stations when object is growing, no entry to change log
+            delete = @"<trajectoryStation />";
             queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryXml);
 
             result = DevKit.GetAndAssert(Trajectory);
             var changeHistoryList = DevKit.GetAndAssertChangeLogHistory(result.GetUri(), false);
-            changeHistory = DevKit.GetAndAssertChangeLogHistory(result.GetUri()).First();
+            changeHistory = changeHistoryList.Last();
 
-            //no changes to changelog
+            // No changes to changelog
             Assert.AreEqual(3, changeHistoryList.Count);
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            Assert.AreEqual(0, result.TrajectoryStation.Count);
             DevKit.AssertChangeHistoryFlags(changeHistory, true, true);
-            //DevKit.AssertChangeHistoryIndexRange(changeHistory, 4, 4);
+            DevKit.AssertChangeHistoryIndexRange(changeHistory, 3, 3);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory uid")]
