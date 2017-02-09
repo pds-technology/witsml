@@ -174,6 +174,43 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         }
 
         /// <summary>
+        /// Sets the change history depth indexes.
+        /// </summary>
+        /// <param name="changeHistory">The change history.</param>
+        /// <param name="minRange">The minimum range.</param>
+        /// <param name="maxRange">The maximum range.</param>
+        /// <param name="indexUnit">The index unit.</param>
+        public void SetChangeHistoryIndexes(ChangeHistory changeHistory, double? minRange, double? maxRange, string indexUnit)
+        {
+            if (minRange.HasValue)
+            {
+                changeHistory.StartIndex = new GenericMeasure(minRange.Value, indexUnit);
+            }
+            if (maxRange.HasValue)
+            {
+                changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
+            }
+        }
+
+        /// <summary>
+        /// Sets the change history time indexes.
+        /// </summary>
+        /// <param name="changeHistory">The change history.</param>
+        /// <param name="minRange">The minimum range.</param>
+        /// <param name="maxRange">The maximum range.</param>
+        public void SetChangeHistoryIndexes(ChangeHistory changeHistory, double? minRange, double? maxRange)
+        {
+            if (minRange.HasValue)
+            {
+                changeHistory.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(minRange.Value));
+            }
+            if (maxRange.HasValue)
+            {
+                changeHistory.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(maxRange.Value));
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

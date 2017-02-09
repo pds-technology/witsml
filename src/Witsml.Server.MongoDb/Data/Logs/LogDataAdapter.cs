@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
@@ -1526,7 +1525,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // If the update has data update the change history for the mnemonics and ranges affected
             if (hasData)
             {
-                SetChangeHistoryIndexes(isTimeLog, indexUnit, changeHistory, minRange, maxRange);
+                if (isTimeLog)
+                {
+                    AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, minRange, maxRange);
+                }
+                else
+                {
+                    AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, minRange, maxRange, indexUnit);
+                }
+
                 var message = currentFunction == Functions.UpdateInStore ? "Data updated" : "Data deleted";
 
                 changeHistory.ChangeInfo = message;
@@ -1548,32 +1555,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var isObjectGrowingToggled = rangeExtended ? true : (bool?)null;
             UpdateGrowingObject(current, logHeaderUpdate, isObjectGrowingToggled);
-        }
-
-        private static void SetChangeHistoryIndexes(bool isTimeLog, string indexUnit, ChangeHistory changeHistory, double? minRange, double? maxRange)
-        {
-            if (isTimeLog)
-            {
-                if (minRange.HasValue)
-                {
-                    changeHistory.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(minRange.Value));
-                }
-                if (maxRange.HasValue)
-                {
-                    changeHistory.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds(Convert.ToInt64(maxRange.Value));
-                }
-            }
-            else
-            {
-                if (minRange.HasValue)
-                {
-                    changeHistory.StartIndex = new GenericMeasure(minRange.Value, indexUnit);
-                }
-                if (maxRange.HasValue)
-                {
-                    changeHistory.EndIndex = new GenericMeasure(maxRange.Value, indexUnit);
-                }
-            }
         }
 
         private bool ToDeleteAllDataByMnemonic(WitsmlQueryParser parser)

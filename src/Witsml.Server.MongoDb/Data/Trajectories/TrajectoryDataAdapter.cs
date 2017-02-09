@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Resources;
 using System.Text;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -30,7 +29,6 @@ using MongoDB.Driver.GridFS;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
-using Witsml141 = Energistics.DataAccess.WITSML141;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -581,9 +579,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             }
 
             //Currently not growing with stations updated/appended/deleted
-            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;            
-            changeHistory.StartIndex = startIndex == null ? null : new Witsml141.ComponentSchemas.GenericMeasure(startIndex.GetValueOrDefault(), indexUom);
-            changeHistory.EndIndex = endIndex == null ? null : new Witsml141.ComponentSchemas.GenericMeasure(endIndex.GetValueOrDefault(), indexUom);
+            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
+            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex.GetValueOrDefault(), endIndex.GetValueOrDefault(), indexUom);
             changeHistory.UpdatedHeader = true;
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
