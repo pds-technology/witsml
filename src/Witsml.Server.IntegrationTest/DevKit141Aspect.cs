@@ -781,6 +781,19 @@ namespace PDS.Witsml.Server
             DeleteAndAssert<AttachmentList, Attachment>(attachment, errorCode, partialDelete);
         }
 
+        public void AssertChangeHistoryTimesUnique(object entity)
+        {
+            var dataObject = entity as IDataObject;
+            var changeLogQuery = CreateChangeLog(dataObject.GetUri());
+            var changeLog = QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
+
+            Assert.IsNotNull(changeLog);
+            Assert.IsNotNull(changeLog.ChangeHistory);
+
+            var dupCount = changeLog.ChangeHistory.GroupBy(c => c.DateTimeChange).Count(grp => grp.Count() > 1);
+            Assert.AreEqual(0, dupCount);
+        }
+
         public void AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
         {
             var dataObject = entity as IDataObject;

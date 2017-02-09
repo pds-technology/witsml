@@ -838,6 +838,32 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(18, curve2.MaxIndex.Value);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_remove_curve_with_changeLog()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            DevKit.AddAndAssert(Log);
+            DeleteLog(Log, "<logCurveInfo uid=\"ROP\" />");
+
+            var logUpdated = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
+
+            // Fetch the changeLog for the entity just added
+            var changeLogQuery = DevKit.CreateChangeLog(Log.GetUri());
+            var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
+            Assert.AreEqual(2, changeLog.ChangeHistory.Count);
+
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
+            Assert.IsTrue(lastChange.UpdatedHeader.GetValueOrDefault());
+            Assert.AreEqual("Mnemonics removed: ROP", lastChange.ChangeInfo);
+            Assert.AreEqual("ROP", lastChange.Mnemonics);
+        }
+
         [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
         public void Log141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
         {
