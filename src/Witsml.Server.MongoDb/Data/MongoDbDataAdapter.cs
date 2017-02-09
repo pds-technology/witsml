@@ -614,7 +614,8 @@ namespace PDS.Witsml.Server.Data
                 Logger.Debug($"Merging {dbCollectionName} MongoDb collection");
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var merge = new MongoDbMerge<TObject>(Container, collection, parser, IdPropertyName);
+                var ignored = GetIgnoredElementNamesForUpdate(parser);
+                var merge = new MongoDbMerge<TObject>(Container, collection, parser, IdPropertyName, ignored);
                 merge.MergeDelete = mergeDelete;
                 merge.Merge(entity);
             }
