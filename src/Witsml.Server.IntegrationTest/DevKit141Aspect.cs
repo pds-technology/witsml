@@ -794,7 +794,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual(0, dupCount);
         }
 
-        public void AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
+        public ChangeLog AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
         {
             var dataObject = entity as IDataObject;
             var commonDataObject = entity as ICommonDataObject;
@@ -842,6 +842,8 @@ namespace PDS.Witsml.Server
                 Assert.IsTrue(changeHistory.DateTimeChange.HasValue);
                 Assert.AreEqual(commonData.DateTimeLastChange.Value, changeHistory.DateTimeChange.Value);
             }
+
+            return changeLog;
         }
 
         public void AssertChangeLogNames(object entity)
@@ -887,6 +889,21 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(changeHistory.EndIndex);
             Assert.AreEqual(startIndexRange, changeHistory.StartIndex.Value);
             Assert.AreEqual(endIndexRange, changeHistory.EndIndex.Value);
+        }
+
+        public void AssertChangeHistoryIndexRange(ChangeHistory changeHistory, Timestamp startIndexRange, Timestamp endIndexRange)
+        {
+            Assert.IsNotNull(changeHistory);
+            Assert.IsNotNull(changeHistory.StartDateTimeIndex);
+            Assert.IsNotNull(changeHistory.EndDateTimeIndex);
+            Assert.AreEqual(startIndexRange.ToUnixTimeMicroseconds(), changeHistory.StartDateTimeIndex.GetValueOrDefault().ToUnixTimeMicroseconds());
+            Assert.AreEqual(endIndexRange.ToUnixTimeMicroseconds(), changeHistory.EndDateTimeIndex.GetValueOrDefault().ToUnixTimeMicroseconds());
+        }
+
+        public void AssertChangeLogMnemonics(string[] logMnemonics, string changeMnemonics)
+        {
+            var changLogMnemonics = changeMnemonics.Split(',').OrderBy((x => x)).ToArray();
+            CollectionAssert.AreEqual(logMnemonics, changLogMnemonics);
         }
 
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
@@ -970,6 +987,14 @@ namespace PDS.Witsml.Server
             };
 
             return AddAndAssert(well);
+        }
+
+        public string[] GetNonIndexMnemonics(Log log)
+        {
+            return log.LogCurveInfo.Where(x => x.Mnemonic.Value != log.IndexCurve)
+                    .Select(x => x.Mnemonic.Value)
+                    .OrderBy((x => x))
+                    .ToArray();
         }
     }
 }

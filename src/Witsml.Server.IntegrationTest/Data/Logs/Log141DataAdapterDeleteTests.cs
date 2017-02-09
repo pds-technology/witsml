@@ -839,7 +839,216 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_DeleteFromStore_remove_curve_with_changeLog()
+        public void Log141DataAdapter_ChangeLog_DeleteFromStore_Can_Delete_Increasing_Channels_Data_With_Default_And_Specific_Index_Range()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("17,17.1,17.2");
+            logData.Data.Add("18,18.1,18.2");
+
+            DevKit.AddAndAssert(Log);
+
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+            var curve1 = Log.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            var curve2 = Log.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+
+            var result = DevKit.GetAndAssert(Log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.AreEqual(13, curve.MinIndex.Value);
+                Assert.AreEqual(18, curve.MaxIndex.Value);
+            }
+
+            var delete = "<startIndex uom=\"" + indexCurve.Unit + "\">15</startIndex>" + Environment.NewLine +
+                "<logCurveInfo><mnemonic>" + curve1.Mnemonic.Value + "</mnemonic></logCurveInfo>" + Environment.NewLine +
+                "<logCurveInfo uid=\"" + curve2.Uid + "\">" + Environment.NewLine +
+                "<minIndex uom=\"" + indexCurve.Unit + "\">16</minIndex>" + Environment.NewLine +
+                "</logCurveInfo>";
+            DeleteLog(Log, delete);
+
+            result = DevKit.GetAndAssert(Log);
+
+            // Assert log data
+            resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            Assert.AreEqual("13,13.1,13.2", data[0]);
+            Assert.AreEqual("14,14.1,14.2", data[1]);
+            Assert.AreEqual("15,,15.2", data[2]);
+
+            // Assert Index
+            curve1 = result.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            Assert.AreEqual(14, curve1.MaxIndex.Value);
+            curve2 = result.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+            Assert.AreEqual(15, curve2.MaxIndex.Value);
+
+            // Assert ChangeLog
+            var changeLog = DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, 15, 18);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_DeleteFromStore_Partial_Delete_Open_EndIndex()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("17,17.1,17.2");
+            logData.Data.Add("18,18.1,18.2");
+
+            DevKit.AddAndAssert(Log);
+
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var delete = "<startIndex uom=\"" + indexCurve.Unit + "\">15</startIndex>";
+            DeleteLog(Log, delete);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            // Assert log data
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            Assert.AreEqual("13,13.1,13.2", data[0]);
+            Assert.AreEqual("14,14.1,14.2", data[1]);
+
+            // Assert Index
+            result.LogCurveInfo.ForEach(x => {
+                Assert.AreEqual(13, x.MinIndex.Value);
+                Assert.AreEqual(14, x.MaxIndex.Value);
+            });
+
+            // Assert ChangeLog
+            var changeLog = DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, 15, 18);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_DeleteFromStore_Partial_Delete_Open_Start()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("17,17.1,17.2");
+            logData.Data.Add("18,18.1,18.2");
+
+            DevKit.AddAndAssert(Log);
+
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var delete = "<endIndex uom=\"" + indexCurve.Unit + "\">15</endIndex>";
+            DeleteLog(Log, delete);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            // Assert log data
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            Assert.AreEqual("16,16.1,16.2", data[0]);
+            Assert.AreEqual("17,17.1,17.2", data[1]);
+            Assert.AreEqual("18,18.1,18.2", data[2]);
+
+            // Assert Index
+            result.LogCurveInfo.ForEach(x => {
+                Assert.AreEqual(16, x.MinIndex.Value);
+                Assert.AreEqual(18, x.MaxIndex.Value);
+            });
+
+            // Assert ChangeLog
+            var changeLog = DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, 13, 15);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_DeleteFromStore_Can_Delete_Range_For_Single_Mnemonic()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
+            for (var i = 0; i < 6; i++)
+            {
+                logData.Data.Add($"1{i},1{i}.1,1{i}.2");
+            }
+
+            DevKit.AddAndAssert(Log);
+
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var delete = "<logCurveInfo><mnemonic>" + Log.LogCurveInfo[1].Mnemonic.Value + "</mnemonic>" + Environment.NewLine +
+                "<minIndex uom=\"" + indexCurve.Unit + "\">12</minIndex>" + Environment.NewLine +
+                "<maxIndex uom=\"" + indexCurve.Unit + "\">13</maxIndex>" + Environment.NewLine +
+                "</logCurveInfo>";
+            DeleteLog(Log, delete);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            // Assert log data
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            for (var i = 0; i < 6; i++)
+            {
+                if (i != 2 && i != 3)
+                {
+                    Assert.AreEqual($"1{i},1{i}.1,1{i}.2", data[i]);
+                }
+                else
+                {
+                    Assert.AreEqual($"1{i},,1{i}.2", data[i]);
+                }
+            }
+
+            // Assert ChangeLog
+            var changeLog = DevKit.AssertChangeLog(result, 2, ChangeInfoType.update);
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, 12, 13);
+            DevKit.AssertChangeLogMnemonics(new[] { Log.LogCurveInfo[1].Mnemonic.Value }, lastChange.Mnemonics);
+        }
+        
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_Track_Remove_Curve()
         {
             AddParents();
 
@@ -852,16 +1061,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
 
             // Fetch the changeLog for the entity just added
-            var changeLogQuery = DevKit.CreateChangeLog(Log.GetUri());
-            var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
-            Assert.AreEqual(2, changeLog.ChangeHistory.Count);
-
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
             var lastChange = changeLog.ChangeHistory.LastOrDefault();
             Assert.IsNotNull(lastChange);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-            Assert.IsTrue(lastChange.UpdatedHeader.GetValueOrDefault());
+
+            DevKit.AssertChangeHistoryFlags(lastChange, true, false);
             Assert.AreEqual("Mnemonics removed: ROP", lastChange.ChangeInfo);
-            Assert.AreEqual("ROP", lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]

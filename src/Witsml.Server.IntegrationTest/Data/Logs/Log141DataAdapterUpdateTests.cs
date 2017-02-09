@@ -2263,7 +2263,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Append_DepthLog_Data_And_Expire_Changelog()
+        public void Log141DataAdapter_ChangeLog_Track_Append_DepthLog_Data_And_Expire()
         {
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
@@ -2274,16 +2274,12 @@ namespace PDS.Witsml.Server.Data.Logs
             var log = DevKit.GetAndAssert(Log);
             Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
 
-            var changeLog = GetChangeLog();
-            Assert.AreEqual(2, changeLog.ChangeHistory.Count);
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
 
             var lastChange = changeLog.ChangeHistory.LastOrDefault();
             Assert.IsNotNull(lastChange);
-            Assert.AreEqual(changeLog.LastChangeInfo, lastChange.ChangeInfo);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-
-            Assert.AreEqual(17, lastChange.StartIndex.Value);
-            Assert.AreEqual(22, lastChange.EndIndex.Value);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, 17, 22);
 
             update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(24, "m"), 6);
             DevKit.UpdateAndAssert(update);
@@ -2293,22 +2289,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
 
-            var current = DevKit.GetAndAssert(new Log() { Uid = Log.Uid, UidWell = Log.UidWell, UidWellbore = Log.UidWellbore });
-
             // Fetch the latest changeLog
-            changeLog = GetChangeLog();
-            Assert.AreEqual(3, changeLog.ChangeHistory.Count);
+            current = DevKit.GetAndAssert(Log);
+            changeLog = DevKit.AssertChangeLog(current, 3, ChangeInfoType.update);
 
             lastChange = changeLog.ChangeHistory.LastOrDefault();
             Assert.IsNotNull(lastChange);
-            Assert.AreEqual(changeLog.LastChangeInfo, lastChange.ChangeInfo);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-            Assert.IsFalse(lastChange.UpdatedHeader.GetValueOrDefault());
-            Assert.IsFalse(lastChange.ObjectGrowingState.GetValueOrDefault());
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Append_TimeLog_Data_And_Expire_Changelog()
+        public void Log141DataAdapter_ChangeLog_Track_Append_TimeLog_Data_And_Expire()
         {
             AddParents();
             Log.StartDateTimeIndex = new Timestamp();
@@ -2320,7 +2311,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,31.1,31.2");
             logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
 
-            DevKit.InitHeader(Log, LogIndexType.datetime, true);
+            DevKit.InitHeader(Log, LogIndexType.datetime);
 
             DevKit.AddAndAssert(Log);
 
@@ -2341,19 +2332,14 @@ namespace PDS.Witsml.Server.Data.Logs
             var log = DevKit.GetAndAssert(Log);
             Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
 
-            var changeLog = GetChangeLog();
-            Assert.AreEqual(2, changeLog.ChangeHistory.Count);
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
 
             var lastChange = changeLog.ChangeHistory.LastOrDefault();
+
             Assert.IsNotNull(lastChange);
-            Assert.AreEqual(changeLog.LastChangeInfo, lastChange.ChangeInfo);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-
-            var start = DateTimeOffset.Parse("2016-04-15T15:35:42.0000040-05:00");
-            Assert.AreEqual(start.ToUnixTimeMicroseconds(), lastChange.StartDateTimeIndex.ToUnixTimeMicroseconds());
-            var end = DateTimeOffset.Parse("2016-04-15T15:38:42.0000600-05:00");
-            Assert.AreEqual(end.ToUnixTimeMicroseconds(), lastChange.EndDateTimeIndex.ToUnixTimeMicroseconds());
-
+            DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-15T15:35:42.0000040-05:00"),
+                DateTimeOffset.Parse("2016-04-15T15:38:42.0000600-05:00"));
             Assert.AreEqual(Log.LogData.First().MnemonicList, lastChange.Mnemonics);
 
             // Send 2nd update of data with some overlap
@@ -2375,19 +2361,15 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
 
             // Fetch the latest changeLog
-            changeLog = GetChangeLog();
-            Assert.AreEqual(3, changeLog.ChangeHistory.Count);
-
+            current = DevKit.GetAndAssert(Log);
+            changeLog = DevKit.AssertChangeLog(current, 3, ChangeInfoType.update);
             lastChange = changeLog.ChangeHistory.LastOrDefault();
             Assert.IsNotNull(lastChange);
-            Assert.AreEqual(changeLog.LastChangeInfo, lastChange.ChangeInfo);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-            Assert.IsFalse(lastChange.UpdatedHeader.GetValueOrDefault());
-            Assert.IsFalse(lastChange.ObjectGrowingState.GetValueOrDefault());
+            DevKit.AssertChangeHistoryFlags(lastChange, false, false);
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Add_curve_with_changeLog()
+        public void Log141DataAdapter_ChangeLog_Track_Add_Curve()
         {
             AddParents();
 
@@ -2413,16 +2395,58 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
 
             // Fetch the changeLog for the entity just added
-            var changeLog = GetChangeLog();
-            Assert.AreEqual(2, changeLog.ChangeHistory.Count);
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
 
             var lastChange = changeLog.ChangeHistory.LastOrDefault();
             Assert.IsNotNull(lastChange);
             Assert.AreEqual(changeLog.LastChangeInfo, lastChange.ChangeInfo);
-            Assert.AreEqual(ChangeInfoType.update, lastChange.ChangeType);
-            Assert.IsTrue(lastChange.UpdatedHeader.GetValueOrDefault());
+            DevKit.AssertChangeHistoryFlags(lastChange, true, false);
             Assert.AreEqual("Mnemonics added: ROP", lastChange.ChangeInfo);
-            Assert.AreEqual(update.LogCurveInfo[0].Mnemonic.Value, lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(new[] { update.LogCurveInfo[0].Mnemonic.Value }, lastChange.Mnemonics);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_ChangeLog_Track_Add_Data_To_Middle_Of_Single_Mnemonic()
+        {
+            AddParents();
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Add("2016-04-13T15:31:42.0000123-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.2,31.2");
+            logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            DevKit.AddAndAssert(Log);
+
+            // Update
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = "TIME,ROP";
+            updateLog.LogData[0].UnitList = "s,m/h";
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:32:42.0000100-05:00,100");
+            logData.Data.Add("2016-04-13T15:32:42.0020000-05:00,100");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            // Assert log is growing
+            var log = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(log.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            var current = DevKit.GetAndAssert(Log);
+            var changeLog = DevKit.AssertChangeLog(current, 2, ChangeInfoType.update);
+
+            var lastChange = changeLog.ChangeHistory.LastOrDefault();
+
+            Assert.IsNotNull(lastChange);
+            DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:32:42.0000100-05:00"),
+                DateTimeOffset.Parse("2016-04-13T15:32:42.0020000-05:00"));
+            DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
         }
 
         [TestMethod]
@@ -2589,13 +2613,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return update;
         }
-
-        private ChangeLog GetChangeLog()
-        {
-            var changeLogQuery = DevKit.CreateChangeLog(Log.GetUri());
-            return DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
-        }
-
         #endregion
     }
 }
