@@ -608,7 +608,21 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
-                    AuditPartialDelete(current, affectedMnemonics, updateRanges.Min(x => x.Value.Start), updateRanges.Max(x => x.Value.End));
+                    // If full channels were deleted
+                    if (deletedChannels.Count > 0)
+                    {
+                        var minRange =
+                            channels.Where(x => deletedChannels.ContainsIgnoreCase(x.Mnemonic.Value))
+                                .Min(x => x.GetIndexRange(current.IsIncreasing(), isTimeLog).Start);
+                        var maxRange =
+                            channels.Where(x => deletedChannels.ContainsIgnoreCase(x.Mnemonic.Value))
+                                .Max(x => x.GetIndexRange(current.IsIncreasing(), isTimeLog).End);
+                        AuditPartialDelete(current, deletedChannels.ToArray(), minRange, maxRange, true);
+                    }
+                    else
+                    {
+                        AuditPartialDelete(current, affectedMnemonics, updateRanges.Min(x => x.Value.Start), updateRanges.Max(x => x.Value.End));
+                    }
                 }
             }
 

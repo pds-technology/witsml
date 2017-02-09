@@ -732,22 +732,19 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="affectedMnemonics">The affected mnemonics.</param>
         /// <param name="minRange">The minimum range.</param>
         /// <param name="maxRange">The maximum range.</param>
-        protected virtual void AuditPartialDelete(T log, string[] affectedMnemonics, double? minRange, double? maxRange)
+        /// <param name="deletedMnemonics">If full channels were deleted.</param>
+        protected virtual void AuditPartialDelete(T log, string[] affectedMnemonics, double? minRange, double? maxRange, bool deletedMnemonics = false)
         {
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
-
-            var indexCurve = GetIndexCurveMnemonic(log);
-            var indexChannel = GetLogCurves(log).FirstOrDefault(l => GetMnemonic(l) == indexCurve);
-            var isTimeLog = IsTimeLog(log, true);
 
             if (affectedMnemonics.Length < 1)
                 return;
 
             var mnemonics = string.Join(",", affectedMnemonics);
-            changeHistory.ChangeInfo = $"Data deleted";
+            changeHistory.ChangeInfo = deletedMnemonics ? $"Mnemonics removed: {mnemonics}" : "Data deleted";
             changeHistory.Mnemonics = mnemonics;
 
-            if (isTimeLog)
+            if (IsTimeLog(log, true))
             {
                 AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, minRange, maxRange);
             }
@@ -1429,13 +1426,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 var start = current.Start;
                 var end = current.End;
 
-                if ((update.Start.HasValue) && (!start.HasValue || !update.StartsAfter(start.Value, increasing)))
+                if ((update.Start.HasValue) && (!start.HasValue || !update.StartsAfter(start.Value, increasing, true)))
                 {
                     start = update.Start;
                     rangeExtended = true;
                 }
 
-                if ((update.End.HasValue) && (!end.HasValue || !update.EndsBefore(end.Value, increasing)))
+                if ((update.End.HasValue) && (!end.HasValue || !update.EndsBefore(end.Value, increasing, true)))
                 {
                     end = update.End;
                     rangeExtended = true;
