@@ -99,7 +99,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 return;
             }
 
-            SortStationData(dataObject);
+            SortStationData(dataObject.TrajectoryStation);
 
             var returnElements = parser.ReturnElements();
             var alwaysInclude = force ||
@@ -120,20 +120,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <summary>
         /// Gets the MD index ranges.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
+        /// <param name="stations">The trajectory stations.</param>
         /// <param name="uom">The unit of measure.</param>
         /// <returns>The start and end index range.</returns>
-        protected override Range<double?> GetIndexRange(Trajectory dataObject, out string uom)
+        protected override Range<double?> GetIndexRange(List<TrajectoryStation> stations, out string uom)
         {
             uom = string.Empty;
 
-            if(dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count == 0)
+            if(stations == null || stations.Count == 0)
                 return new Range<double?>(null,null);
 
-            SortStationData(dataObject);
+            SortStationData(stations);
 
-            var mdMin = dataObject.TrajectoryStation.First().MD;
-            var mdMax = dataObject.TrajectoryStation.Last().MD;
+            var mdMin = stations.First().MD;
+            var mdMax = stations.Last().MD;
             uom = mdMin?.Uom.ToString() ?? string.Empty;
 
             return new Range<double?>(mdMin?.Value, mdMax?.Value);            
@@ -142,11 +142,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <summary>
         /// Sorts the stations by MD.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        protected override void SortStationData(Trajectory dataObject)
+        /// <param name="stations">The trajectory stations.</param>
+        protected override void SortStationData(List<TrajectoryStation> stations)
         {
             // Sort stations by MD
-            dataObject.TrajectoryStation = dataObject.TrajectoryStation.OrderBy(x => x.MD?.Value).ToList();
+            stations.Sort((x, y) => (x.MD?.Value ?? -1).CompareTo(y.MD?.Value ?? -1));
         }
 
         /// <summary>
