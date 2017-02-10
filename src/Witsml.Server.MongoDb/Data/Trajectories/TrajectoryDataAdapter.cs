@@ -40,14 +40,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
     public abstract class TrajectoryDataAdapter<T, TChild> : GrowingObjectDataAdapterBase<T> where T : IWellboreObject where TChild : IUniqueId
     {
-        /// <summary>
-        /// The field to query Mongo File
-        /// </summary>
+        /// <summary>The field to query Mongo File</summary>
         private const string FileQueryField = "Uri";
 
-        /// <summary>
-        /// The file name
-        /// </summary>
+        /// <summary>The file name</summary>
         private const string FileName = "FileName";
 
         /// <summary>
@@ -84,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     var header = headers[x.GetUri()];
 
-                    //Query the trajectory stations
+                    // Query the trajectory stations
                     QueryTrajectoryStations(x, header, parser);
                 });
             }
@@ -209,6 +205,35 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Formats the trajectory station data.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>A collection of formatted trajectory stations.</returns>
+        protected virtual List<TChild> FormatStationData(T entity, WitsmlQueryParser parser)
+        {
+            var returnElements = parser.ReturnElements();
+            var stations = GetTrajectoryStations(entity);
+
+            if (OptionsIn.ReturnElements.All.Equals(returnElements) || !parser.IncludeTrajectoryStations())
+                return stations;
+
+            const string prefix = "TrajectoryStation.";
+
+            var fields = GetProjectionPropertyNames(parser)
+                .Where(x => x.StartsWith(prefix))
+                .Select(x => x.Substring(prefix.Length))
+                .ToList();
+
+            var stationParser = parser
+                .ForkProperties(ObjectTypes.TrajectoryStation, ObjectTypes.TrajectoryStation)
+                .FirstOrDefault();
+
+            var mapper = new DataObjectMapper<TChild>(Container, stationParser, fields);
+            return mapper.Map(stations);
+        }
+
+        /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
         /// <param name="parser">The WITSML parser.</param>
@@ -262,6 +287,126 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     "objectGrowing", "mdMn", "mdMx"
                 })
                 .ToList();
+        }
+
+        /// <summary>
+        /// Gets the query index range.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <returns>the index range for the query.</returns>
+        protected Range<double?> GetQueryIndexRange(WitsmlQueryParser parser)
+        {
+            if (parser == null)
+                return new Range<double?>(null, null);
+
+            var mdMn = parser.Properties("mdMn").FirstOrDefault()?.Value;
+            var mdMx = parser.Properties("mdMx").FirstOrDefault()?.Value;
+
+            if (string.IsNullOrEmpty(mdMn) && string.IsNullOrEmpty(mdMx))
+                return new Range<double?>(null, null);
+
+            if (string.IsNullOrEmpty(mdMn))
+                return new Range<double?>(null, double.Parse(mdMx));
+
+            return string.IsNullOrEmpty(mdMx)
+                ? new Range<double?>(double.Parse(mdMn), null)
+                : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
+        }
+
+        /// <summary>
+        /// check if md is within the range.
+        /// </summary>
+        /// <param name="md">The md.</param>
+        /// <param name="range">The range.</param>
+        /// <returns>True is md is within the range; false otherwise.</returns>
+        protected bool WithinRange(double md, Range<double?> range)
+        {
+            if (!range.Start.HasValue && !range.End.HasValue)
+                return false;
+
+            if (range.Start.HasValue)
+            {
+                return range.End.HasValue
+                    ? md >= range.Start.Value && md <= range.End.Value
+                    : md >= range.Start.Value;
+            }
+
+            return md <= range.End.Value;
+        }
+
+        /// <summary>
+        /// Clears the trajectory stations.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        protected abstract void ClearTrajectoryStations(T entity);
+
+        /// <summary>
+        /// Filters the station data based on query parameters.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="parser">The parser.</param>
+        protected abstract void FilterStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
+
+        /// <summary>
+        /// Filters the station data with the query structural range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The parser.</param>
+        protected abstract void FilterStationData(T entity, WitsmlQueryParser parser);
+
+        /// <summary>
+        /// Check if need to query mongo file for station data.
+        /// </summary>
+        /// <param name="entity">The result data object.</param>
+        /// <param name="header">The full header object.</param>
+        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
+        protected abstract bool IsQueryingStationFile(T entity, T header);
+
+        /// <summary>
+        /// Sets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="force">if set to <c>true</c> force the index range update.</param>
+        protected abstract void SetIndexRange(T dataObject, WitsmlQueryParser parser, bool force = true);
+
+        /// <summary>
+        /// Gets the MD index ranges.
+        /// </summary>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="uom">The unit of measure.</param>
+        /// <returns>The start and end index range.</returns>
+        protected abstract Range<double?> GetIndexRange(List<TChild> stations, out string uom);
+
+        /// <summary>
+        /// Sorts the stations by MD.
+        /// </summary>
+        /// <param name="stations">The trajectory stations.</param>
+        protected abstract void SortStationData(List<TChild> stations);        
+
+        /// <summary>
+        /// Gets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <returns>The trajectory station collection.</returns>
+        protected abstract List<TChild> GetTrajectoryStations(T dataObject);
+
+        private bool IsUpdatingStations(T dataObject)
+        {
+            var stations = GetTrajectoryStations(dataObject);
+            return stations.Any();
+        }
+
+        private bool IsDeletingStations(WitsmlQueryParser parser)
+        {
+            var range = GetQueryIndexRange(parser);
+
+            if (range.Start.HasValue || range.End.HasValue)
+                return true;
+
+            var element = parser.Element();
+            return element.Elements().Any(e => e.Name.LocalName == "trajectoryStation");
         }
 
         /// <summary>
@@ -327,20 +472,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             bucket.Delete(mongoFile.Id);
         }
 
-        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
-        {
-            var stations = GetTrajectoryStations(entity);
-
-            if (IsQueryingStationFile(entity, header))
-            {
-                var uri = entity.GetUri();
-                stations = GetMongoFileStationData(uri);
-            }
-
-            FormatStationData(entity, stations, parser);
-            SetIndexRange(entity, parser, false);
-        }
-
         private List<TChild> GetMongoFileStationData(string uri)
         {
             Logger.Debug("Getting MongoDb Trajectory Station files.");
@@ -359,139 +490,42 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return BsonSerializer.Deserialize<List<TChild>>(json);
         }
 
-        /// <summary>
-        /// Gets the query index range.
-        /// </summary>
-        /// <param name="parser">The parser.</param>
-        /// <returns>the index range for the query.</returns>
-        protected Range<double?> GetQueryIndexRange(WitsmlQueryParser parser)
+        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
         {
-            if (parser == null)
-                return new Range<double?>(null, null);
+            var stations = GetTrajectoryStations(entity);
+            var chunked = IsQueryingStationFile(entity, header);
 
-            var mdMn = parser.Properties("mdMn").FirstOrDefault()?.Value;
-            var mdMx = parser.Properties("mdMx").FirstOrDefault()?.Value;
-
-            if (string.IsNullOrEmpty(mdMn) && string.IsNullOrEmpty(mdMx))
-                return new Range<double?>(null, null);
-
-            if (string.IsNullOrEmpty(mdMn))
-                return new Range<double?>(null, double.Parse(mdMx));
-
-            return string.IsNullOrEmpty(mdMx)
-                ? new Range<double?>(double.Parse(mdMn), null)
-                : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
-        }
-
-        /// <summary>
-        /// check if md is within the range.
-        /// </summary>
-        /// <param name="md">The md.</param>
-        /// <param name="range">The range.</param>
-        /// <returns>True is md is within the range; false otherwise.</returns>
-        protected bool WithinRange(double md, Range<double?> range)
-        {
-            if (!range.Start.HasValue && !range.End.HasValue)
-                return false;
-
-            if (range.Start.HasValue)
+            if (chunked)
             {
-                return range.End.HasValue
-                    ? md >= range.Start.Value && md <= range.End.Value
-                    : md >= range.Start.Value;
+                var uri = entity.GetUri();
+                stations = GetMongoFileStationData(uri);
             }
 
-            return md <= range.End.Value;
-        }
+            FilterStationData(entity, stations, parser);
+            SetIndexRange(entity, parser, false);
 
-        /// <summary>
-        /// Clears the trajectory stations.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        protected abstract void ClearTrajectoryStations(T entity);
-
-        /// <summary>
-        /// Formats the station data based on query parameters.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="stations">The trajectory stations.</param>
-        /// <param name="parser">The parser.</param>
-        protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
-
-        /// <summary>
-        /// Filters the station data with the query structural range.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="parser">The parser.</param>
-        protected abstract void FilterStationData(T entity, WitsmlQueryParser parser);
-
-        /// <summary>
-        /// Check if need to query mongo file for station data.
-        /// </summary>
-        /// <param name="entity">The result data object.</param>
-        /// <param name="header">The full header object.</param>
-        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
-        protected abstract bool IsQueryingStationFile(T entity, T header);
-
-        /// <summary>
-        /// Sets the MD index ranges.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="parser">The parser.</param>
-        /// <param name="force">if set to <c>true</c> force the index range update.</param>
-        protected abstract void SetIndexRange(T dataObject, WitsmlQueryParser parser, bool force = true);
-
-        /// <summary>
-        /// Gets the MD index ranges.
-        /// </summary>
-        /// <param name="stations">The trajectory stations.</param>
-        /// <param name="uom">The unit of measure.</param>
-        /// <returns>The start and end index range.</returns>
-        protected abstract Range<double?> GetIndexRange(List<TChild> stations, out string uom);
-
-        /// <summary>
-        /// Sorts the stations by MD.
-        /// </summary>
-        /// <param name="stations">The trajectory stations.</param>
-        protected abstract void SortStationData(List<TChild> stations);        
-
-        /// <summary>
-        /// Gets the trajectory station.
-        /// </summary>
-        /// <param name="dataObject">The trajectory data object.</param>
-        /// <returns>The trajectory station collection.</returns>
-        protected abstract List<TChild> GetTrajectoryStations(T dataObject);
-
-        private bool IsUpdatingStations(T dataObject)
-        {
-            var stations = GetTrajectoryStations(dataObject);
-            return stations.Any();
-        }
-
-        private bool IsDeletingStations(WitsmlQueryParser parser)
-        {
-            var range = GetQueryIndexRange(parser);
-            if (range.Start.HasValue || range.End.HasValue)
-                return true;
-
-            var element = parser.Element();
-            return element.Elements().Any(e => e.Name.LocalName == "trajectoryStation");
+            if (chunked)
+            {
+                FormatStationData(entity, parser);
+            }
         }
 
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, T dataObject, EtpUri uri, bool merge = false)
         {
             var current = GetEntity(uri);
             var chunked = IsQueryingStationFile(current, current);
-            string uomIndex;
-            var rangeIn = GetIndexRange(GetTrajectoryStations(dataObject), out uomIndex);
+            var stations = GetTrajectoryStations(dataObject);
             var isAppending = false;
+
+            string uomIndex;
+            var rangeIn = GetIndexRange(stations, out uomIndex);
 
             if (merge)
             {
                 if (chunked)
                 {
-                    var stations = GetMongoFileStationData(uri);
-                    FormatStationData(current, stations);
+                    stations = GetMongoFileStationData(uri);
+                    FilterStationData(current, stations);
                 }
 
                 var savedStations = GetTrajectoryStations(current)
@@ -503,7 +537,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 MergeEntity(current, parser);
                 dataObject = current;
-
             }
 
             using (var transaction = GetTransaction())
@@ -527,24 +560,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
         {
             var current = GetEntity(uri);
-            
-            var stationsCurrent = new List<TChild>();
-            GetTrajectoryStations(current).ForEach(s => stationsCurrent.Add(s));
-            
+            var stationsCurrent = new List<TChild>(GetTrajectoryStations(current));
             var chunked = IsQueryingStationFile(current, current);
 
             if (chunked)
             {
                 var stations = GetMongoFileStationData(uri);
-                FormatStationData(current, stations);
+                FilterStationData(current, stations);
             }
 
             FilterStationData(current, parser);
             MergeEntity(current, parser, true);
 
-            string uomIndex;
-            var stationsAfterMerge = GetTrajectoryStations(current).Select(s=>s.Uid).ToArray();
+            var stationsAfterMerge = GetTrajectoryStations(current).Select(s => s.Uid).ToArray();
             var stationsDeleted = stationsCurrent.FindAll(s => !stationsAfterMerge.ContainsIgnoreCase(s.Uid));
+
+            string uomIndex;
             var rangeIn = GetIndexRange(stationsDeleted, out uomIndex);
             
             using (var transaction = GetTransaction())
@@ -574,19 +605,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
             }
 
             var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            changeHistory.UpdatedHeader = true;
 
-            // Currently not growing with header update
+            // Currently not growing with header only update
             if (isHeaderUpdateOnly)
             {
-                changeHistory.UpdatedHeader = true;
                 UpdateGrowingObject(current.GetUri());
                 return;
             }
 
+            // Currently not growing with start/end indexes changed
+            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex, endIndex, indexUom);
+
             // Currently not growing with stations updated/appended/deleted
             var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
-            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex, endIndex, indexUom);
-            changeHistory.UpdatedHeader = true;
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
     }

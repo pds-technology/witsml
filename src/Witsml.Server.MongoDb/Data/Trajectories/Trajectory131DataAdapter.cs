@@ -33,14 +33,26 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public partial class Trajectory131DataAdapter
     {
         /// <summary>
-        /// Formats the station data based on query parameters.
+        /// Formats the trajectory station data.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>A collection of formatted trajectory stations.</returns>
+        protected override List<TrajectoryStation> FormatStationData(Trajectory entity, WitsmlQueryParser parser)
+        {
+            entity.TrajectoryStation = base.FormatStationData(entity, parser);
+            return entity.TrajectoryStation;
+        }
+
+        /// <summary>
+        /// Filters the station data based on query parameters.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
-        protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
+        protected override void FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
         {
-            if (stations.Count == 0)
+            if (stations == null || stations.Count == 0)
                 return;
 
             var range = GetQueryIndexRange(parser);
