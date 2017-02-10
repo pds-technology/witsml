@@ -266,7 +266,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A list of element names.</returns>
         protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
-            var ignored = new List<string> {"mdMn", "mdMx"};
+            var ignored = new List<string> { "mdMn", "mdMx" };
 
             if (parser.IncludeTrajectoryStations())
                 ignored.Add("trajectoryStation");
@@ -281,12 +281,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A list of element names.</returns>
         protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
-            return GetIgnoredElementNamesForQuery(parser)
-                .Concat(new[]
-                {
-                    "objectGrowing", "mdMn", "mdMx"
-                })
-                .ToList();
+            return new List<string> { "mdMn", "mdMx", "objectGrowing" };
         }
 
         /// <summary>
