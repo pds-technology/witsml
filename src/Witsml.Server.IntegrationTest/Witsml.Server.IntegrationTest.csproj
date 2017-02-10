@@ -157,6 +157,7 @@
     <Compile Include="Data\Attachments\Attachment200ValidatorTests.generated.cs">
       <DependentUpon>Attachment200ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\ChangeLogs\ChangeLog141GetTests.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200EtpTests.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200EtpTests.generated.cs">
       <DependentUpon>ChannelSet200EtpTests.cs</DependentUpon>
@@ -774,4 +775,3 @@
   </Target>
   -->
 </Project>
-
