@@ -113,7 +113,6 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
                     LastChangeType = changeType,
                     CommonData = new CommonData(),
                     ChangeHistory = new List<ChangeHistory>(),
-                    SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator,
                     UidWellbore = wellboreObject?.UidWellbore,
                     UidWell = wellObject?.UidWell ?? wellboreObject?.UidWell,
                     UidObject = uri.ObjectId,
@@ -131,10 +130,8 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             auditHistory.NameWell = wellObject?.NameWell ?? wellboreObject?.NameWell;
             auditHistory.NameObject = dataObject?.Name ?? abstractObject?.Citation?.Title;
 
-            // Keep audit history source same property in sync
-            if (!string.IsNullOrWhiteSpace(commonDataObject?.CommonData?.SourceName) &&
-                auditHistory.SourceName != commonDataObject.CommonData.SourceName)
-                auditHistory.SourceName = commonDataObject.CommonData.SourceName;
+            // Keep audit history source name property in sync
+            auditHistory.SourceName = commonDataObject?.CommonData?.SourceName ?? abstractObject?.Citation?.Originator;
 
             // Keep date/time of last change in sync with the entity
             auditHistory.CommonData.DateTimeLastChange = GetDateTimeLastChange(
