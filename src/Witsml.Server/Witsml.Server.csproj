@@ -155,6 +155,8 @@
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />
     <Compile Include="Data\Common\IRecurringElementValidator.cs" />
     <Compile Include="Data\Common\TimestampedTimeZone141Validator.cs" />
+    <Compile Include="Data\DataObjectMapper.cs" />
+    <Compile Include="Data\DataObjectMappingContext.cs" />
     <Compile Include="Data\DataObjectValidationContext.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
@@ -413,4 +415,3 @@
   </Target>
   -->
 </Project>
-
