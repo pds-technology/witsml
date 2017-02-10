@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_GetFromStore_Can_Get_Wellbore()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
-
        }
 
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_UpdateInStore_Can_Update_Wellbore()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.UpdateAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_Wellbore()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.DeleteAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -222,6 +214,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Assert that all Wellbore names match corresponding changeLog names
             DevKit.AssertChangeLogNames(Wellbore);
         }
-
     }
 }

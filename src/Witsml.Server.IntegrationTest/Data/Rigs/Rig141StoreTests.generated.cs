@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Rigs
         public void Rig141DataAdapter_GetFromStore_Can_Get_Rig()
         {
             AddParents();
-
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig);
-
        }
 
         [TestMethod]
         public void Rig141DataAdapter_AddToStore_Can_Add_Rig()
         {
             AddParents();
-
             DevKit.AddAndAssert<RigList, Rig>(Rig);
-
         }
 
         [TestMethod]
         public void Rig141DataAdapter_UpdateInStore_Can_Update_Rig()
         {
             AddParents();
-
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.UpdateAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig);
-
         }
 
         [TestMethod]
         public void Rig141DataAdapter_DeleteFromStore_Can_Delete_Rig()
         {
             AddParents();
-
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             DevKit.DeleteAndAssert<RigList, Rig>(Rig);
             DevKit.GetAndAssert<RigList, Rig>(Rig, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -224,6 +216,5 @@ namespace PDS.Witsml.Server.Data.Rigs
             // Assert that all Rig names match corresponding changeLog names
             DevKit.AssertChangeLogNames(Rig);
         }
-
     }
 }

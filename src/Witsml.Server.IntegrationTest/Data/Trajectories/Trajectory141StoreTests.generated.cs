@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public void Trajectory141DataAdapter_GetFromStore_Can_Get_Trajectory()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
        }
 
         [TestMethod]
         public void Trajectory141DataAdapter_AddToStore_Can_Add_Trajectory()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Can_Update_Trajectory()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_DeleteFromStore_Can_Delete_Trajectory()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -225,5 +217,26 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AssertChangeLogNames(Trajectory);
         }
 
+        [TestMethod]
+        public void Trajectory141DataAdapter_Trajectory_ObjectGrowing_Not_Toggled_By_Client()
+        {
+            AddParents();
+
+            // Set the object growing flag to true
+            Trajectory.ObjectGrowing = true;
+
+            // Add the Trajectory141
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Assert Trajectory141 is not growing
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Trajectory ObjectGrowing");
+
+            DevKit.UpdateAndAssert(Trajectory);
+
+            // Assert Trajectory141 is not growing
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Trajectory ObjectGrowing");
+        }
     }
 }

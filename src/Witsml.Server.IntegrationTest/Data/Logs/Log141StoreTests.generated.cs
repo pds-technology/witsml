@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Log()
         {
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log);
-
        }
 
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Can_Add_Log()
         {
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
-
         }
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Update_Log()
         {
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.UpdateAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log);
-
         }
 
         [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_Delete_Log()
         {
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
             DevKit.DeleteAndAssert<LogList, Log>(Log);
             DevKit.GetAndAssert<LogList, Log>(Log, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -225,5 +217,26 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeLogNames(Log);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_Log_ObjectGrowing_Not_Toggled_By_Client()
+        {
+            AddParents();
+
+            // Set the object growing flag to true
+            Log.ObjectGrowing = true;
+
+            // Add the Log141
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Assert Log141 is not growing
+            var result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            DevKit.UpdateAndAssert(Log);
+
+            // Assert Log141 is not growing
+            result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+        }
     }
 }

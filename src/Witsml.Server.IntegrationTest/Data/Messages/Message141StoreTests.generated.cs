@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Messages
         public void Message141DataAdapter_GetFromStore_Can_Get_Message()
         {
             AddParents();
-
             DevKit.AddAndAssert<MessageList, Message>(Message);
             DevKit.GetAndAssert<MessageList, Message>(Message);
-
        }
 
         [TestMethod]
         public void Message141DataAdapter_AddToStore_Can_Add_Message()
         {
             AddParents();
-
             DevKit.AddAndAssert<MessageList, Message>(Message);
-
         }
 
         [TestMethod]
         public void Message141DataAdapter_UpdateInStore_Can_Update_Message()
         {
             AddParents();
-
             DevKit.AddAndAssert<MessageList, Message>(Message);
             DevKit.UpdateAndAssert<MessageList, Message>(Message);
             DevKit.GetAndAssert<MessageList, Message>(Message);
-
         }
 
         [TestMethod]
         public void Message141DataAdapter_DeleteFromStore_Can_Delete_Message()
         {
             AddParents();
-
             DevKit.AddAndAssert<MessageList, Message>(Message);
             DevKit.DeleteAndAssert<MessageList, Message>(Message);
             DevKit.GetAndAssert<MessageList, Message>(Message, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -224,6 +216,5 @@ namespace PDS.Witsml.Server.Data.Messages
             // Assert that all Message names match corresponding changeLog names
             DevKit.AssertChangeLogNames(Message);
         }
-
     }
 }

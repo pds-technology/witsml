@@ -106,5 +106,27 @@ namespace PDS.Witsml.Server.Data.Logs
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, version);
         }
+
+        [TestMethod]
+        public void Log131DataAdapter_Log_ObjectGrowing_Not_Toggled_By_Client()
+        {
+            AddParents();
+
+            // Set the object growing flag to true
+            Log.ObjectGrowing = true;
+
+            // Add the Log131
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            // Assert Log131 is not growing
+            var result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+
+            DevKit.UpdateAndAssert(Log);
+
+            // Assert Log131 is not growing
+            result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+        }
     }
 }

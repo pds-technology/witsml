@@ -52,41 +52,33 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_GetFromStore_Can_Get_Well()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well);
-
        }
 
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Can_Add_Well()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellList, Well>(Well);
-
         }
 
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Can_Update_Well()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.UpdateAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well);
-
         }
 
         [TestMethod]
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_Well()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.DeleteAndAssert<WellList, Well>(Well);
             DevKit.GetAndAssert<WellList, Well>(Well, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -201,6 +193,5 @@ namespace PDS.Witsml.Server.Data.Wells
 
             DevKit.AssertChangeHistoryTimesUnique(result);
         }
-
     }
 }

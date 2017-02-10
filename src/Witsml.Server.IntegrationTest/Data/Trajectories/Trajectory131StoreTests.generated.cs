@@ -106,5 +106,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var version = ObjectTypes.GetVersion(result.Root);
             Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, version);
         }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_Trajectory_ObjectGrowing_Not_Toggled_By_Client()
+        {
+            AddParents();
+
+            // Set the object growing flag to true
+            Trajectory.ObjectGrowing = true;
+
+            // Add the Trajectory131
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Assert Trajectory131 is not growing
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Trajectory ObjectGrowing");
+
+            DevKit.UpdateAndAssert(Trajectory);
+
+            // Assert Trajectory131 is not growing
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "Trajectory ObjectGrowing");
+        }
     }
 }

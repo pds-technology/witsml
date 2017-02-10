@@ -55,41 +55,33 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public void WbGeometry141DataAdapter_GetFromStore_Can_Get_WbGeometry()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
        }
 
         [TestMethod]
         public void WbGeometry141DataAdapter_AddToStore_Can_Add_WbGeometry()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
         }
 
         [TestMethod]
         public void WbGeometry141DataAdapter_UpdateInStore_Can_Update_WbGeometry()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
         }
 
         [TestMethod]
         public void WbGeometry141DataAdapter_DeleteFromStore_Can_Delete_WbGeometry()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.DeleteAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry, isNotNull: false);
-
         }
 
         [TestMethod]
@@ -227,6 +219,5 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             // Assert that all WbGeometry names match corresponding changeLog names
             DevKit.AssertChangeLogNames(WbGeometry);
         }
-
     }
 }
