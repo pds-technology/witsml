@@ -163,29 +163,62 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 // Based on the range of the updates, compute the range of the data chunk(s) 
                 //... so we can merge updates with existing data.
-                var existingRange = new Range<double?>(
-                    Range.ComputeRange(updateRange.Start.Value, rangeSize, increasing).Start,
-                    Range.ComputeRange(updateRange.End.Value, rangeSize, increasing).End
-                    );
+                var chunkRange = new Range<double?>(
+                      Range.ComputeRange(updateRange.Start.Value, rangeSize, increasing).Start,
+                      Range.ComputeRange(updateRange.End.Value, rangeSize, increasing).End
+                      );
 
                 // Get DataChannelChunk list from database for the computed range and URI
-                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, existingRange, increasing);
+                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, chunkRange, increasing);
                 var results = GetData(filter, increasing);
 
                 // Backup existing chunks for the transaction
                 AttachChunks(results);
 
+                // Check if reader overlaps existing data
+                var hasOverlap = false;
+                var existingRange = new Range<double?>();
+                var existingMnemonics = results.Count > 0 ? results[0]?.MnemonicList.Split(',') : new string[0];
+
+                if (results.Count > 0)
+                {
+                    existingRange = new Range<double?>(results.Min(x => x.Indices[0].Start), results.Max(x => x.Indices[0].End));
+                    hasOverlap = updateRange.Overlaps(existingRange, increasing);
+                }
+
                 try
                 {
-                    BulkWriteChunks(
-                        ToChunks(
-                            MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange, rangeSize)),
-                        reader.Uri,
-                        string.Join(",", reader.Mnemonics),
-                        string.Join(",", reader.Units),
-                        string.Join(",", reader.NullValues)
-                    );
-
+                    if (hasOverlap)
+                    {
+                        WriteRecordsToChunks(reader, MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange, rangeSize));
+                    }
+                    else
+                    {
+                        // If there is no existing data add reader records only
+                        if (results.Count == 0)
+                        {
+                            WriteRecordsToChunks(reader, reader.AsEnumerable());
+                        }
+                        // If there is only one chunk and the mnemonics match
+                        else if (existingMnemonics != null && existingMnemonics.OrderBy(t => t).SequenceEqual(reader.Mnemonics.OrderBy(t => t)) && results.Count == 1)
+                        {
+                            // If the update is before the existing range
+                            if (updateRange.EndsBefore(existingRange.Start.GetValueOrDefault(), increasing, true))
+                            {
+                                WriteRecordsToChunks(reader, reader.AsEnumerable().Concat(results.GetRecords()));
+                            }
+                            // If the update is after the existing range
+                            else if (updateRange.StartsAfter(existingRange.End.GetValueOrDefault(), increasing, true))
+                            {
+                                WriteRecordsToChunks(reader, results.GetRecords().Concat(reader.AsEnumerable()));
+                            }
+                        }
+                        // Resort to merging the records
+                        else
+                        {
+                            WriteRecordsToChunks(reader, MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange, rangeSize));
+                        }
+                    }
                     CreateChannelDataChunkIndex();
                 }
                 catch (FormatException ex)
@@ -199,6 +232,17 @@ namespace PDS.Witsml.Server.Data.Channels
                 Logger.ErrorFormat("Error when merging data: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
+        }
+
+        private void WriteRecordsToChunks(ChannelDataReader reader, IEnumerable<IChannelDataRecord> records)
+        {
+            BulkWriteChunks(
+                ToChunks(records),
+                reader.Uri,
+                string.Join(",", reader.Mnemonics),
+                string.Join(",", reader.Units),
+                string.Join(",", reader.NullValues)
+            );
         }
 
         private void AttachChunks(List<ChannelDataChunk> chunks)
