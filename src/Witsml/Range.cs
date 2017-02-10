@@ -299,5 +299,23 @@ namespace PDS.Witsml
         {
             return !range.Start.HasValue && !range.End.HasValue;
         }
+
+        /// <summary>
+        /// Determines whether this instance overlaps the compared range.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="compareRange">The compared range.</param>
+        /// <param name="increasing">If the range is increasing.</param>
+        /// <returns><c>true</c> if range overlaps the compared range; otherwise, <c>false</c>.</returns>
+        public static bool Overlaps(this Range<double?> range, Range<double?> compareRange, bool increasing)
+        {
+            if (range.EndsBefore(compareRange.Start.GetValueOrDefault(), increasing))
+                return false;
+
+            if (range.StartsAfter(compareRange.End.GetValueOrDefault(), increasing))
+                return false;
+
+            return true;
+        }
     }
 }
