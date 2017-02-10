@@ -22,6 +22,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             var queryIn = string.Format(QueryEmptyRootTemplate, "<changeLog />");
             var changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.LatestChangeOnly);
 
+            Assert.IsTrue(changeLogs.Count >= 4);
             changeLogs.ForEach(c => Assert.AreEqual(0, c.ChangeHistory.Count));
         }
 
@@ -103,6 +104,5 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 
             return changeLogs;
         }
-
     }
 }
