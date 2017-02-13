@@ -50,10 +50,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
-        protected override void FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
+        /// <returns>The count of trajectory stations after filtering.</returns>
+        protected override int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
         {
             if (stations == null || stations.Count == 0)
-                return;
+                return 0;
 
             var range = GetQueryIndexRange(parser);
 
@@ -64,6 +65,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 : range.End.HasValue
                     ? stations.Where(s => s.MD.Value <= range.End.Value).ToList()
                     : stations;
+
+            return entity.TrajectoryStation.Count;
         }
 
         /// <summary>

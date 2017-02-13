@@ -76,13 +76,24 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var headers = GetEntities(entities.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
 
+                var filtered = new List<T>();
+
                 entities.ForEach(x =>
                 {
                     var header = headers[x.GetUri()];
 
                     // Query the trajectory stations
-                    QueryTrajectoryStations(x, header, parser);
+                    var count = QueryTrajectoryStations(x, header, parser);
+
+                    // Check for data being returned
+                    if (count <= 0)
+                    {
+                        filtered.Add(x);
+                    }
                 });
+
+                // Remove headers with no data
+                filtered.ForEach(x => entities.Remove(x));
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
@@ -341,7 +352,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
-        protected abstract void FilterStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
+        /// <returns>The count of trajectory stations after filtering.</returns>
+        protected abstract int FilterStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
 
         /// <summary>
         /// Filters the station data with the query structural range.
@@ -485,7 +497,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return BsonSerializer.Deserialize<List<TChild>>(json);
         }
 
-        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
+        private int QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
         {
             var stations = GetTrajectoryStations(entity);
             var chunked = IsQueryingStationFile(entity, header);
@@ -496,13 +508,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 stations = GetMongoFileStationData(uri);
             }
 
-            FilterStationData(entity, stations, parser);
+            var count = FilterStationData(entity, stations, parser);
             SetIndexRange(entity, parser, false);
 
             if (chunked)
             {
                 FormatStationData(entity, parser);
             }
+
+            return count;
         }
 
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, T dataObject, EtpUri uri, bool merge = false)
