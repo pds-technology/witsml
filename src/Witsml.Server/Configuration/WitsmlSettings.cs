@@ -224,6 +224,11 @@ namespace PDS.Witsml.Server.Configuration
         public static int TrajectoryGrowingTimeoutPeriod = Properties.Settings.Default.TrajectoryGrowingTimeoutPeriod;
 
         /// <summary>
+        /// The default time zone.
+        /// </summary>
+        public static string DefaultTimeZone = Properties.Settings.Default.DefaultTimeZone;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

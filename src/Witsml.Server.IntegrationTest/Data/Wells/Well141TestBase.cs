@@ -28,6 +28,7 @@ namespace PDS.Witsml.Server.Data.Wells
         partial void AfterEachTest()
         {
             WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
+            WitsmlSettings.DefaultTimeZone = DevKitAspect.DefaultTimeZone;
         }
     }
 }

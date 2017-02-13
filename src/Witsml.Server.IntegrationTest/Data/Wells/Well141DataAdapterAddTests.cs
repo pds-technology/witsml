@@ -251,5 +251,14 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
             Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
         }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Can_Add_Well_With_Default_TimeZone_From_WitsmlSettings()
+        {
+            WitsmlSettings.DefaultTimeZone = DevKit.TimeZone;
+            Well.TimeZone = WitsmlSettings.DefaultTimeZone;
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+        }
     }
 }
