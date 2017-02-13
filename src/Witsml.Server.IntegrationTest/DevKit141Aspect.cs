@@ -902,7 +902,7 @@ namespace PDS.Witsml.Server
 
         public void AssertChangeLogMnemonics(string[] logMnemonics, string changeMnemonics)
         {
-            var changLogMnemonics = changeMnemonics.Split(',').OrderBy((x => x)).ToArray();
+            var changLogMnemonics = changeMnemonics.Split(',').ToArray();
             CollectionAssert.AreEqual(logMnemonics, changLogMnemonics);
         }
 
@@ -989,11 +989,17 @@ namespace PDS.Witsml.Server
             return AddAndAssert(well);
         }
 
+        public string[] GetMnemonics(Log log)
+        {
+            return log.LogCurveInfo
+                    .Select(x => x.Mnemonic.Value)
+                    .ToArray();
+        }
+
         public string[] GetNonIndexMnemonics(Log log)
         {
             return log.LogCurveInfo.Where(x => x.Mnemonic.Value != log.IndexCurve)
                     .Select(x => x.Mnemonic.Value)
-                    .OrderBy((x => x))
                     .ToArray();
         }
 

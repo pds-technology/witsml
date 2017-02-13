@@ -2340,7 +2340,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(lastChange);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-15T15:35:42.0000040-05:00"),
                 DateTimeOffset.Parse("2016-04-15T15:38:42.0000600-05:00"));
-            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(current), lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(current), lastChange.Mnemonics);
 
             // Send 2nd update of data with some overlap
             updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
@@ -2446,7 +2446,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(lastChange);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:32:42.0000100-05:00"),
                 DateTimeOffset.Parse("2016-04-13T15:32:42.0020000-05:00"));
-            DevKit.AssertChangeLogMnemonics(new[] { "ROP" }, lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(updateLog.LogData[0].MnemonicList.Split(','), lastChange.Mnemonics);
         }
 
         [TestMethod]
@@ -2486,7 +2486,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(lastChange);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:38:42.0000000-05:00"),
                 DateTimeOffset.Parse("2016-04-13T15:38:42.0000000-05:00"));
-            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(Log), lastChange.Mnemonics);
 
             // Send 3rd update of data appending
             updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
@@ -2508,7 +2508,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeHistoryFlags(lastChange, true, true);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"),
                 DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"));
-            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(Log), lastChange.Mnemonics);
 
             // Send 4th update only modifying the last row again
             updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
@@ -2531,7 +2531,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeHistoryFlags(lastChange, true, true);
             DevKit.AssertChangeHistoryIndexRange(lastChange, DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"),
                 DateTimeOffset.Parse("2016-04-13T15:39:42.0000000-05:00"));
-            DevKit.AssertChangeLogMnemonics(DevKit.GetNonIndexMnemonics(Log), lastChange.Mnemonics);
+            DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(Log), lastChange.Mnemonics);
         }
 
         [TestMethod]
