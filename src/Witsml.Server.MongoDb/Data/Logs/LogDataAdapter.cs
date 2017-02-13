@@ -69,36 +69,47 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
-            var logs = QueryEntities(parser);
+            var entities = QueryEntities(parser);
 
             if (parser.IncludeLogData())
             {
-                ValidateGrowingObjectDataRequest(parser, logs);
+                ValidateGrowingObjectDataRequest(parser, entities);
 
-                var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
+                var headers = GetEntities(entities.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
 
-                logs.ForEach(l =>
+                var filtered = new List<T>();
+
+                entities.ForEach(x =>
                 {
-                    var logHeader = logHeaders[l.GetUri()];
+                    var logHeader = headers[x.GetUri()];
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
                     // Query the log data
-                    QueryLogDataValues(l, logHeader, parser, mnemonics, context);
+                    var count = QueryLogDataValues(x, logHeader, parser, mnemonics, context);
 
-                    FormatLogHeader(l, mnemonics.Values.ToArray());
+                    FormatLogHeader(x, mnemonics.Values.ToArray());
+
+                    // Check for data being returned
+                    if (count <= 0)
+                    {
+                        filtered.Add(x);
+                    }
                 });
+
+                // Remove headers with no data
+                filtered.ForEach(x => entities.Remove(x));
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                logs.ForEach(l =>
+                entities.ForEach(l =>
                 {
                     var mnemonics = GetMnemonicList(l, parser);
                     FormatLogHeader(l, mnemonics.Values.ToArray());
                 });
             }
 
-            return logs;
+            return entities;
         }
 
         /// <summary>
@@ -1315,21 +1326,21 @@ namespace PDS.Witsml.Server.Data.Logs
             return new SortedDictionary<int, string>(nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue));
         }
 
-        private void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
+        private int QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
 
             if (mnemonics.Count <= 0)
             {
                 Logger.Warn("No mnemonics requested for log data query.");
-                return;
+                return 0;
             }
 
             if (context.MaxDataNodes <= 0 || context.MaxDataPoints <= 0)
             {
                 // Log why we are skipping.
                 Logger.Debug("Query Response maximum data nodes or data points has been reached.");
-                return;
+                return 0;
             }
 
             // Get the latest values request if one was supplied.
@@ -1363,6 +1374,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Update the response context growing object totals
             context.UpdateGrowingObjectTotals(count, keys.Length);
+
+            return count;
         }
 
         private Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
