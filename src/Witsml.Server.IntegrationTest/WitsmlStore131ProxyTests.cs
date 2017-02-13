@@ -373,7 +373,7 @@ namespace PDS.Witsml.Server
 
             // StartIndex and End Index above range
             LogList result = _devKit.QueryLogByRange(log1, -2, -1);
-            Assert.AreEqual(0, result.Log[0].LogData.Count);
+            Assert.AreEqual(0, result.Log.Count);
 
             // EndIndex on start of range
             result = _devKit.QueryLogByRange(log1, -2, 0);
@@ -418,7 +418,7 @@ namespace PDS.Witsml.Server
 
             // StartIndex and End Index below range
             result = _devKit.QueryLogByRange(log1, 10, 11);
-            Assert.AreEqual(0, result.Log[0].LogData.Count);
+            Assert.AreEqual(0, result.Log.Count);
         }
 
         [TestMethod]
@@ -479,7 +479,7 @@ namespace PDS.Witsml.Server
 
             // StartIndex is below end of range
             result = _devKit.QueryLogByRange(log1, 11, null);
-            Assert.AreEqual(0, result.Log[0].LogData.Count);
+            Assert.AreEqual(0, result.Log.Count);
         }
 
         [TestMethod]
@@ -501,7 +501,7 @@ namespace PDS.Witsml.Server
 
             // EndIndex is above range
             LogList result = _devKit.QueryLogByRange(log1, null, -1);
-            Assert.AreEqual(0, result.Log[0].LogData.Count);
+            Assert.AreEqual(0, result.Log.Count);
 
             // EndIndex is on start of range
             result = _devKit.QueryLogByRange(log1, null, 0);

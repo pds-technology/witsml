@@ -980,11 +980,13 @@ namespace PDS.Witsml.Server.Data.Logs
             Log.LogCurveInfo[2].NullValue = "-2222.2";
             Log.LogCurveInfo[4].NullValue = "-4444.4";
 
-            Log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
+            Log.LogData = DevKit.List(new LogData { Data = DevKit.List<string>() });
             var logData = Log.LogData.First();
             logData.Data.Clear();
+
             logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
             logData.UnitList = "ft,m/h,gAPI,gAPI,s";
+
             logData.Data.Add("1700.0, -1111.1,    17.2, -999.25, -4444.4");
             logData.Data.Add("1800.0,    18.1,    18.2, -999.25, -4444.4");
             logData.Data.Add("1900.0,    19.1,    19.2, -999.25,    19.4");
@@ -1000,11 +1002,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Query
             var query = DevKit.CreateLog(uidLog, null, Log.UidWell, null, Log.UidWellbore, null);
-            query.StartIndex = new GenericMeasure(1.0, "ft");
-            query.EndIndex = new GenericMeasure(2.0, "ft");
+            query.StartIndex = new GenericMeasure(1700.0, "ft");
+            query.EndIndex = new GenericMeasure(2300.0, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
-                OptionsIn.ReturnElements.All);
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
@@ -1014,8 +1015,10 @@ namespace PDS.Witsml.Server.Data.Logs
             // Result log header
             var logCurveInfoList = resultLog[0].LogCurveInfo;
             Assert.AreEqual(5, logCurveInfoList.Count());
+
             var lciMnemonics = logCurveInfoList.Select(x => x.Mnemonic.Value).ToArray();
-            Assert.IsFalse(lciMnemonics.Except(new List<string>() {"MD", "AAA", "BBB", "CCC", "DDD"}).Any());
+            Assert.IsFalse(lciMnemonics.Except(new[] { "MD", "AAA", "BBB", "CCC", "DDD" }).Any());
+
             Assert.AreEqual(1800.0, logCurveInfoList[1].MinIndex.Value);
             Assert.AreEqual(2300.0, logCurveInfoList[1].MaxIndex.Value);
             Assert.AreEqual(1700.0, logCurveInfoList[2].MinIndex.Value);
