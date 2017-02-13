@@ -78,6 +78,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var headers = GetEntities(entities.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
 
+                var isRangeQuery = parser.IsStructuralRangeQuery();
                 var filtered = new List<T>();
 
                 entities.ForEach(x =>
@@ -91,7 +92,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     FormatLogHeader(x, mnemonics.Values.ToArray());
 
                     // Check for data being returned
-                    if (count <= 0)
+                    if (isRangeQuery && count <= 0)
                     {
                         filtered.Add(x);
                     }
