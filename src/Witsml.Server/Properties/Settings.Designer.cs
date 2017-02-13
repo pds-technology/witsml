@@ -413,7 +413,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-06:00")]
         public string DefaultTimeZone {
             get {
                 return ((string)(this["DefaultTimeZone"]));

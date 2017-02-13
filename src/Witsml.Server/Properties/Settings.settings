@@ -132,7 +132,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="DefaultTimeZone" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">-06:00</Value>
     </Setting>
   </Settings>
 </SettingsFile>
