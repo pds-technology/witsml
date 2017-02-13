@@ -49,6 +49,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        [Ignore, Description("As of task #8996, default value is defined in Witsml settings for TimeZone")]
         public void WitsmlValidator_AddToStore_Error_409_Non_Conforming_Input_Template()
         {
             Well.TimeZone = null; // <-- Missing required TimeZone
