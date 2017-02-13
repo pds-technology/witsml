@@ -274,6 +274,19 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public Log CreateLog(Log log)
+        {
+            return new Log()
+            {
+                Uid = log.Uid,
+                Name = log.Name,
+                UidWell = log.UidWell,
+                NameWell = log.NameWell,
+                UidWellbore = log.UidWellbore,
+                NameWellbore = log.NameWellbore,
+            };
+        }
+
         public Well CreateTestWell()
         {
             var dateTimeSpud = DateTimeOffset.UtcNow;
