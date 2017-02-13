@@ -55,6 +55,7 @@ namespace PDS.Witsml.Server
         public static readonly int DefaultLogGrowingTimeoutPeriod = WitsmlSettings.LogGrowingTimeoutPeriod;
         public static readonly int DefaultTrajectoryGrowingTimeoutPeriod = WitsmlSettings.TrajectoryGrowingTimeoutPeriod;
         public static readonly int DefaultMudLogGrowingTimeoutPeriod = WitsmlSettings.MudLogGrowingTimeoutPeriod;
+        public static readonly string DefaultTimeZone = WitsmlSettings.DefaultTimeZone;
 
         public readonly string TimeZone = "-06:00";
 

@@ -410,5 +410,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((bool)(this["IsCascadeDeleteEnabled"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DefaultTimeZone {
+            get {
+                return ((string)(this["DefaultTimeZone"]));
+            }
+        }
     }
 }

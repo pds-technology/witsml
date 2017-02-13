@@ -19,6 +19,7 @@
 using System;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -48,13 +49,12 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         /// <summary>
-        /// Gets the local time zone offset.
+        /// Gets the time zone offset from Witsml settings.
         /// </summary>
-        /// <returns>The local time zone offset.</returns>
+        /// <returns>The time zone offset.</returns>
         private string GetTimeZoneOffset()
         {
-            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTimeOffset.Now).ToString();
-            return offset.Substring(0, offset.LastIndexOf(':'));
+            return WitsmlSettings.DefaultTimeZone;
         }
     }
 }

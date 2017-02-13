@@ -48,7 +48,6 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-        [Ignore, Description("As of task #8996, server provides default value for TimeZone")]
         [TestMethod]
         public void WitsmlValidator_AddToStore_Error_409_Non_Conforming_Input_Template()
         {
