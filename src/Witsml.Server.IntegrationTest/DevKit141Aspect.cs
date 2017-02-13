@@ -996,5 +996,61 @@ namespace PDS.Witsml.Server
                     .OrderBy((x => x))
                     .ToArray();
         }
+
+        public void AddListOfTrajectoriesToWellbore(List<Trajectory> trajectories, Wellbore wellbore)
+        {
+            trajectories.ForEach(x =>
+            {
+                x.UidWellbore = wellbore.Uid;
+                x.NameWellbore = wellbore.Name;
+                AddAndAssert(x);
+            });
+        }
+
+        public void AddListOfLogsToWellbore(List<Log> logs, Wellbore wellbore)
+        {
+            logs.ForEach(x =>
+            {
+                x.UidWellbore = wellbore.Uid;
+                x.NameWellbore = wellbore.Name;
+                AddAndAssert(x);
+            });
+        }
+
+        public List<Trajectory> GenerateTrajectories(string wellUid, string wellName, int numOfObjects, int numOfStations = 100)
+        {
+            var trajectories = new List<Trajectory>();
+            for (var i = 0; i < numOfObjects; i++)
+            {
+                var trajectory = new Trajectory
+                {
+                    Uid = Uid(),
+                    Name = Name(),
+                    UidWell = wellUid,
+                    NameWell = wellName,
+                    TrajectoryStation = TrajectoryGenerator.GenerationStations(numOfStations, 0)
+                };
+                trajectories.Add(trajectory);
+            }
+
+            return trajectories;
+        }
+
+        public List<Log> GenerateLogs(string wellUid, string wellName, LogIndexType indexType, int numOfObjects, int numOfRows = 1000)
+        {
+            var logs = new List<Log>();
+            for (var i = 0; i < numOfObjects; i++)
+            {
+                var log = CreateLog(Uid(), Name(), wellUid, wellName, string.Empty, string.Empty);
+                log.IndexType = indexType;
+                log.IndexCurve = "MD";
+                InitHeader(log, log.IndexType.GetValueOrDefault());
+                InitDataMany(log, string.Join(",", log.LogCurveInfo.Select(x => x.Mnemonic.Value)),
+                    string.Join(",", log.LogCurveInfo.Select(x => x.Unit)), numOfRows);
+                logs.Add(log);
+            }
+
+            return logs;
+        }
     }
 }
