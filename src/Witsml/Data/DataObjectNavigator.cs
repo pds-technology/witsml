@@ -406,6 +406,17 @@ namespace PDS.Witsml.Data
                 var value = ParseEnum(propertyType, propertyValue);
                 HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
+            else if (propertyType == typeof(bool))
+            {
+                propertyValue = propertyValue == "1"
+                    ? bool.TrueString
+                    : propertyValue == "0"
+                        ? bool.FalseString
+                        : propertyValue;
+
+                var value = Convert.ChangeType(propertyValue, propertyType);
+                HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
+            }
             else if (propertyType == typeof(DateTime))
             {
                 DateTime value;
