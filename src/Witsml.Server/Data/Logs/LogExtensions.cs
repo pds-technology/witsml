@@ -134,12 +134,21 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="function">The context function</param>
         /// <param name="delimiter">The data delimiter.</param>
         /// <param name="isTimeLog">Is the log a time log.</param>
+        /// <param name="mnemonicCount">The count of mnemonics.</param>
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
-        public static bool HasDuplicateIndexes(this List<string> logData, Functions function, string delimiter, bool isTimeLog)
+        public static bool HasDuplicateIndexes(this List<string> logData, Functions function, string delimiter, bool isTimeLog, int mnemonicCount)
         {
             var indexValues = new HashSet<double>();
             foreach (var row in logData)
             {
+                // Ensure row length matches expected length
+                var rowLength = row.Split(new[] { delimiter }, StringSplitOptions.None).Length;
+                if (rowLength != mnemonicCount)
+                {
+                    _log.Error($"Data points {rowLength} does not match number of channels {mnemonicCount}");
+                    throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                }
+
                 var value = row.Substring(0, row.IndexOf(delimiter, StringComparison.InvariantCulture));
                 if (isTimeLog)
                 {

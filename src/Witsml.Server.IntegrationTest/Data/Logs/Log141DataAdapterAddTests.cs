@@ -952,6 +952,20 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Invalid_Data_Rows()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            // Initialize data with only 1 data point in the
+            DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
+
+            DevKit.AddAndAssert(Log, ErrorCodes.ErrorRowDataCount);
+        }
+
         #region Helper Methods
 
         private Log GetLog(Log log)

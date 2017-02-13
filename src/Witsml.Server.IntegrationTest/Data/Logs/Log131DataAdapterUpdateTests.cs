@@ -430,6 +430,34 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Invalid_Data_Rows()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            // Initialize data 
+            DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5, 5, 5);
+
+            DevKit.AddAndAssert(Log);
+
+            var updateLog = new Log()
+            {
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore
+            };
+            DevKit.InitHeader(updateLog, LogIndexType.measureddepth);
+
+            // Initialize with invalid data 
+            DevKit.InitData(updateLog, DevKit.Mnemonics(updateLog), DevKit.Units(updateLog), 5);
+
+            // Update with invalid data
+            DevKit.UpdateAndAssert(updateLog, ErrorCodes.ErrorRowDataCount);
+        }
+
         #region Helper Functions
 
         private Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)

@@ -503,7 +503,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
                         {
-                            if (logData.Data.HasDuplicateIndexes(function, delimiter, logData.Data[0].IsFirstValueDateTime(delimiter)))
+                            if (logData.Data.HasDuplicateIndexes(function, delimiter, logData.Data[0].IsFirstValueDateTime(delimiter), mnemonics.Length))
                             {
                                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
                             }

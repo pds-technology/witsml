@@ -404,7 +404,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
 
             // Validate there are no duplicate indexes
-            if (logDatas.HasDuplicateIndexes(function, delimiter, logDatas[0].IsFirstValueDateTime())) 
+            if (logDatas.HasDuplicateIndexes(function, delimiter, logDatas[0].IsFirstValueDateTime(), logCurves.Count)) 
             {
                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
             }
