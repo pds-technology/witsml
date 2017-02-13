@@ -93,6 +93,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var logData = Log.LogData.FirstOrDefault();
             Assert.IsNotNull(logData);
 
+            logData.Data = new List<string> { "13.1, 14.1", "13.3, 14.3" };
+
             var mnemonics = logData.MnemonicList.Split(',');
             logData.MnemonicList = string.Join(",", mnemonics.Where(m => m != Log.IndexCurve));
 
@@ -599,8 +601,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(update, LogIndexType.measureddepth);
 
             var logData = update.LogData.First();
-            logData.Data.Add("13,13.1,13.2");
-            logData.Data.Add("14,14.1,");
+            logData.Data.Add("13.1,13.2");
+            logData.Data.Add("14.1,");
             var mnemonics = logData.MnemonicList.Split(',');
             logData.MnemonicList = string.Join(",", mnemonics.Where(m => m != Log.IndexCurve));
 
