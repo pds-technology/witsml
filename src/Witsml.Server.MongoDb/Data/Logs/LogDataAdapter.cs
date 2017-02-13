@@ -400,8 +400,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     indexUnit = indexCurve.Unit;
                 }
 
-                // Need the minimum and maximum of the changes
-
                 updateMnemonics.Clear();
                 updateMnemonics.Add(indexCurve.Mnemonic);
                 updateMnemonics.AddRange(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m)));
@@ -429,10 +427,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 logHeaderUpdate = GetIndexRangeUpdate(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, false);
             }
 
-            // Only select non-index curves that were affected by the reader
+            // Only select curves that were affected by the reader
             var affectedMnemonics = ranges.Where(x =>
-                        allUpdateMnemonics.ContainsIgnoreCase(x.Key) && x.Key != GetIndexCurveMnemonic(current) &&
-                        x.Value.IsClosed()).Select(x => x.Key).ToArray();
+                    allUpdateMnemonics.ContainsIgnoreCase(x.Key) &&
+                    x.Value.IsClosed())
+                .Select(x => x.Key)
+                .ToArray();
 
             var minRange = IsIncreasing(current) ? updateStart : updateEnd;
             var maxRange = IsIncreasing(current) ? updateEnd : updateStart;
