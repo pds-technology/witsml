@@ -419,6 +419,18 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Determines whether the query contains structural range criteria.
+        /// </summary>
+        /// <returns><c>true</c> if the query contains structural range elements; otherwise, <c>false</c>.</returns>
+        public bool IsStructuralRangeQuery()
+        {
+            return HasPropertyValue("startIndex") || HasPropertyValue("endIndex") ||
+                   HasPropertyValue("startDateTimeIndex") || HasPropertyValue("endDateTimeIndex") ||
+                   HasPropertyValue("mdMn") || HasPropertyValue("mdMx") ||
+                   HasPropertyValue("startMd") || HasPropertyValue("endMd");
+        }
+
+        /// <summary>
         /// Creates a Witsml query parser for the element.
         /// </summary>
         /// <param name="element">The element.</param>

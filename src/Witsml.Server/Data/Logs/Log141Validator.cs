@@ -432,19 +432,15 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             if (Context.Function != Functions.DeleteFromStore)
                 return null;
-            if (element.Name.LocalName != "logCurveInfo" || !DeleteChannelData(element))
+            if (element.Name.LocalName != "logCurveInfo" || !HasMnemonicElement(element))
                 throw new WitsmlException(ErrorCodes.MissingElementUidForDelete);
 
             return null;
         }
 
-        private bool DeleteChannelData(XElement element)
+        private bool HasMnemonicElement(XElement element)
         {
-            var fields = new List<string> { "mnemonic", "minDateTimeIndex", "maxDateTimeIndex", "minIndex", "maxIndex" };
-            if (!element.HasElements)
-                return false;
-
-            return element.Elements().All(e => fields.Contains(e.Name.LocalName));
+            return element.HasElements && element.Elements().Any(e => e.Name.LocalName.Equals("mnemonic"));
         }
 
         private bool DuplicateUid(IEnumerable<string> uids)
