@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -49,9 +50,10 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        [Ignore, Description("As of task #8996, default value is defined in Witsml settings for TimeZone")]
         public void WitsmlValidator_AddToStore_Error_409_Non_Conforming_Input_Template()
         {
+            WitsmlSettings.DefaultTimeZone = null;
+
             Well.TimeZone = null; // <-- Missing required TimeZone
             var response = DevKit.Add<WellList, Well>(Well);
 
