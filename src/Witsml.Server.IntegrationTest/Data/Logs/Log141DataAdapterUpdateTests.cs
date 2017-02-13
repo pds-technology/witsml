@@ -2534,6 +2534,110 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(Log), lastChange.Mnemonics);
         }
 
+        [Ignore]
+        [TestMethod, Description("Implements test60.py from the Energistics certification tests")]
+        public void Log141DataAdapter_ChangeLog_Tracks_Mnemonics_On_Update_While_Growing()
+        {
+            AddParents();
+
+            // Initialize log with 4 channels with 4 data rows.
+            Log.IndexType = LogIndexType.measureddepth;
+            Log.IndexCurve = "BDEP";
+            Log.Direction = LogIndexDirection.increasing;
+
+            Log.LogCurveInfo = new List<LogCurveInfo>
+            {
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo(Log.IndexCurve, "m"),
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo("CURVE1", "m/h"),
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo("CURVE2", "m/h"),
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo("CURVE3", "m/h")
+            };
+            DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log));
+            Log.LogData[0].Data.Add("0,0,0,0");
+            Log.LogData[0].Data.Add("1,1,1,1");
+            Log.LogData[0].Data.Add("2,2,2,2");
+            Log.LogData[0].Data.Add("4,4,4,4");
+
+            // Add the log and check the success
+            DevKit.AddAndAssert(Log);
+
+            // UpdateInStore to add a single datapoint to a curve to the existing curve range
+            var updateLog = DevKit.CreateLog(Log);
+            updateLog.LogData = new List<LogData>
+            {
+                new LogData()
+                {
+                    MnemonicList = "BDEP,CURVE1",
+                    UnitList = "m, m/h",
+                    Data = new List<string>()
+                }
+            };
+            updateLog.LogData[0].Data.Add("3,3");
+
+            DevKit.UpdateAndAssert(Log);
+
+            // Call DeleteFrom Store to delete a datapoint in a curve
+            var deleteLog = DevKit.CreateLog(Log);
+            deleteLog.StartIndex = new GenericMeasure(2, "m");
+            deleteLog.EndIndex = new GenericMeasure(2, "m");
+            deleteLog.LogCurveInfo = new List<LogCurveInfo>
+            {
+                new LogCurveInfo() { Mnemonic = new ShortNameStruct() {Value = "CURVE2"} }
+            };
+
+            DevKit.DeleteAndAssert(deleteLog, partialDelete: true);
+
+            // Call UpdateInStore to delete a datapoint in a curve
+            var partialDeleteLog = DevKit.CreateLog(Log);
+            partialDeleteLog.LogData = new List<LogData>
+            {
+                new LogData()
+                {
+                    MnemonicList = "BDEP,CURVE3",
+                    UnitList = "m, m/h",
+                    Data = new List<string>()
+                }
+            };
+            partialDeleteLog.LogData[0].Data.Add("1,1");
+            partialDeleteLog.LogData[0].Data.Add("4,4");
+
+            DevKit.UpdateAndAssert(partialDeleteLog);
+
+            var tenMinutesAgo = DateTimeOffset.UtcNow.AddSeconds(-600);
+            var changeLogQuery = DevKit.CreateChangeLog(Log.GetUri());
+            changeLogQuery.ChangeHistory = new List<ChangeHistory>
+            {
+                new ChangeHistory()
+                {
+                    DateTimeChange = tenMinutesAgo,
+                    ChangeType = ChangeInfoType.update
+                }
+            };
+
+            var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
+
+            // TODO: Uncomment when fixed => Task 9022: Fix - Filter recurring elements by the search criteria used for those elements
+            //Assert.AreEqual(3, changeLog.ChangeHistory.Count, "ChangeHistory results should only contain updates");
+            var history = changeLog.ChangeHistory;
+            var firstUpdateHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("BDEP,CURVE1"));
+            var partialDeleteHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("CURVE2"));
+            var secondUpdateHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("BDEP,CURVE3"));
+
+            Assert.AreEqual(ChangeInfoType.update, firstUpdateHistory?.ChangeType);
+            Assert.AreEqual(3, firstUpdateHistory?.StartIndex.Value);
+            Assert.AreEqual(3, firstUpdateHistory?.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < firstUpdateHistory?.DateTimeChange);
+
+            Assert.AreEqual(3, partialDeleteHistory?.StartIndex.Value);
+            Assert.AreEqual(3, partialDeleteHistory?.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < partialDeleteHistory?.DateTimeChange);
+
+            Assert.AreEqual(ChangeInfoType.update, secondUpdateHistory?.ChangeType);
+            Assert.AreEqual(1, secondUpdateHistory?.StartIndex.Value);
+            Assert.AreEqual(4, secondUpdateHistory?.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < secondUpdateHistory?.DateTimeChange);
+        }
+
         [TestMethod]
         public async Task Log141DataAdapter_UpdateInStore_Sparsely_Update_Log_Curves_With_Multiple_Threads()
         {
