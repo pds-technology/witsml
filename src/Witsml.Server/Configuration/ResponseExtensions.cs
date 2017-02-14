@@ -39,9 +39,23 @@ namespace PDS.Witsml.Server.Configuration
                 context.MaxReturnNodes = parser.MaxReturnNodes();
                 context.RequestLatestValues = parser.RequestLatestValues();
 
+                var objectMaxDataNodesGet = 0;
+                switch (context.ObjectType)
+                {
+                    case ObjectTypes.Log:
+                        objectMaxDataNodesGet = WitsmlSettings.LogMaxDataNodesGet;
+                        break;
+                    case ObjectTypes.Trajectory:
+                        objectMaxDataNodesGet = WitsmlSettings.TrajectoryMaxDataNodesGet;
+                        break;
+                    case ObjectTypes.MudLog:
+                        objectMaxDataNodesGet = WitsmlSettings.MudLogMaxDataNodesGet;
+                        break;
+                }
+
                 context.MaxDataNodes = context.MaxReturnNodes.HasValue
-                    ? Math.Min(context.MaxReturnNodes.Value, WitsmlSettings.LogMaxDataNodesGet)
-                    : WitsmlSettings.LogMaxDataNodesGet;
+                    ? Math.Min(context.MaxReturnNodes.Value, objectMaxDataNodesGet)
+                    : objectMaxDataNodesGet;
                 context.MaxDataPoints = WitsmlSettings.LogMaxDataPointsGet;
                 context.TotalMaxDataNodes = Math.Min(context.MaxDataNodes * parser.QueryCount, WitsmlSettings.LogMaxDataNodesGet);
 

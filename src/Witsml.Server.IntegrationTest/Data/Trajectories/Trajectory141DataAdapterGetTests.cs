@@ -293,7 +293,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var traj = DevKit.GetAndAssert(Trajectory);
+            short errorCode;
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(Trajectory, out errorCode, ObjectTypes.Trajectory, null,
+                OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Returning partial data.");
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(1, result.Count);
+
+            var traj = result[0];
             Assert.IsNotNull(traj);
             Assert.AreEqual(maxDataNodes, traj.TrajectoryStation.Count);
         }
