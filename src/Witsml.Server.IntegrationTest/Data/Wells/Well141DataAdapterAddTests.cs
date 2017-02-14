@@ -256,7 +256,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void WitsmlValidator_AddToStore_Can_Add_Well_With_Default_TimeZone_From_WitsmlSettings()
         {
             WitsmlSettings.DefaultTimeZone = DevKit.TimeZone;
-            Well.TimeZone = WitsmlSettings.DefaultTimeZone;
+            Well.TimeZone = null;
 
             DevKit.AddAndAssert<WellList, Well>(Well);
         }
