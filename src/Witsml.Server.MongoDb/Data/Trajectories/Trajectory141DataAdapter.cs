@@ -21,6 +21,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
@@ -50,8 +51,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="context">The query context.</param>
         /// <returns>The count of trajectory stations after filtering.</returns>
-        protected override int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
+        protected override int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null, IQueryContext context = null)
         {
             if (stations == null || stations.Count == 0)
                 return 0;
@@ -67,7 +69,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     : stations;
 
             if (entity.TrajectoryStation.Count > WitsmlSettings.TrajectoryMaxDataNodesGet)
+            {
+                Logger.Debug($"Truncating trajectory stations with {entity.TrajectoryStation.Count}.");
                 entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, WitsmlSettings.TrajectoryMaxDataNodesGet);
+                if(context != null)
+                    context.DataTruncated = true;
+            }
 
             return entity.TrajectoryStation.Count;
         }

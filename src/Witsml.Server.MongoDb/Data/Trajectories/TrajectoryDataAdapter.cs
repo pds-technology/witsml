@@ -27,6 +27,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
@@ -84,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     var header = headers[x.GetUri()];
 
                     // Query the trajectory stations
-                    var count = QueryTrajectoryStations(x, header, parser);
+                    var count = QueryTrajectoryStations(x, header, parser, context);
 
                     // Check for data being returned
                     if (isRangeQuery && count <= 0)
@@ -353,8 +354,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="context">The query context.</param>
         /// <returns>The count of trajectory stations after filtering.</returns>
-        protected abstract int FilterStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
+        protected abstract int FilterStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null, IQueryContext context = null);
 
         /// <summary>
         /// Filters the station data with the query structural range.
@@ -498,7 +500,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return BsonSerializer.Deserialize<List<TChild>>(json);
         }
 
-        private int QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
+        private int QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser, IQueryContext context)
         {
             var stations = GetTrajectoryStations(entity);
             var chunked = IsQueryingStationFile(entity, header);
@@ -509,7 +511,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 stations = GetMongoFileStationData(uri);
             }
 
-            var count = FilterStationData(entity, stations, parser);
+            var count = FilterStationData(entity, stations, parser, context);
             SetIndexRange(entity, parser, false);
 
             if (chunked)
