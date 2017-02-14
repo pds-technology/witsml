@@ -324,7 +324,16 @@ namespace PDS.Witsml.Server.Data.Logs
             if (filter != null)
             {
                 var indexCurveFilter = new RecurringElementFilter("LogCurveInfo.Mnemonic", "Equals($indexCurve)",
-                    (dataObject, instance) => GetMnemonic((TChild)instance).EqualsIgnoreCase(GetIndexCurveMnemonic((T)dataObject)));
+                    (dataObject, instance) =>
+                    {
+                        var log = (T) dataObject;
+                        var curve = (TChild) instance;
+
+                        var indexCurve = GetIndexCurveMnemonic(log);
+                        var mnemonic = GetMnemonic(curve);
+
+                        return mnemonic.EqualsIgnoreCase(indexCurve) || GetLogCurves(log).IndexOf(curve) == 0;
+                    });
 
                 var list = new List<RecurringElementFilter>(filter.Filters) { indexCurveFilter };
                 filters.Add(new RecurringElementFilter("LogCurveInfo", true, list.ToArray()));
