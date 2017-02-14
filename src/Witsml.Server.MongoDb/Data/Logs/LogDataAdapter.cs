@@ -299,7 +299,32 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();
             }
-        }        
+        }
+
+        /// <summary>
+        /// Filters the recurring elements within each data object returned by the specified query.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>The query results collection.</returns>
+        protected override List<T> FilterRecurringElements(MongoDbQuery<T> query)
+        {
+            var results = query.Execute();
+            var filters = query.Context.RecurringElementFilters;
+            var filter = filters.FirstOrDefault(x => x.PropertyPath.EqualsIgnoreCase(ObjectTypes.LogCurveInfo));
+
+            // If filtering by Mnemonic, need to be sure to include the index curve
+            if (filter != null)
+            {
+                var indexCurveFilter = new RecurringElementFilter("LogCurveInfo.Mnemonic", "Equals($indexCurve)",
+                    (dataObject, instance) => GetMnemonic((TChild)instance).EqualsIgnoreCase(GetIndexCurveMnemonic((T)dataObject)));
+
+                var list = new List<RecurringElementFilter>(filter.Filters) { indexCurveFilter };
+                filters.Add(new RecurringElementFilter("LogCurveInfo", true, list.ToArray()));
+                filters.Remove(filter);
+            }
+
+            return query.FilterRecurringElements(results);
+        }
 
         /// <summary>
         /// Gets a list of the property names to project during a query.

@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -53,6 +54,12 @@ namespace PDS.Witsml.Server.Data
             _collection = collection;
             _parser = parser;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the current property is a recurring element.
+        /// </summary>
+        /// <value><c>true</c> if the current property is a recurring element; otherwise, <c>false</c>.</value>
+        private bool IsRecurringElement => Context.ParentRecurringFilters.Any();
 
         /// <summary>
         /// Executes this MongoDb query.
@@ -109,6 +116,27 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Filters the recurring elements.
+        /// </summary>
+        /// <param name="entities">The entities.</param>
+        public List<T> FilterRecurringElements(List<T> entities)
+        {
+            // Skip if no recurring element filters were detected
+            if (!Context.RecurringElementFilters.Any())
+                return entities;
+
+            if (Logger.IsDebugEnabled)
+            {
+                var expression = string.Join(" AND ", Context.RecurringElementFilters.Select(x => x.Expression));
+                Logger.Debug("Detected recurring element filters: " + expression);
+            }
+
+            entities.ForEach(FilterRecurringElements);
+
+            return entities;
+        }
+
+        /// <summary>
         /// Navigates the uom attribute.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
@@ -126,6 +154,59 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Navigates the array element.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elements">The elements.</param>
+        /// <param name="childType">Type of the child.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
+        {
+            InitializeRecurringElementFilters(propertyPath);
+
+            base.NavigateArrayElementType(propertyInfo, elements, childType, element, propertyPath);
+
+            HandleRecurringElementFilters(propertyPath);
+        }
+
+        /// <summary>
+        /// Initializes the recurring element handler.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void InitializeRecurringElementHandler(PropertyInfo propertyInfo, string propertyPath)
+        {
+            Context.ParentFilters[propertyPath] = Context.Filters;
+            Context.Filters = new List<FilterDefinition<T>>();
+
+            if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                InitializeRecurringElementFilters(propertyPath, true);
+            }
+        }
+
+        /// <summary>
+        /// Handles the recurring elements.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void HandleRecurringElements(PropertyInfo propertyInfo, string propertyPath)
+        {
+            var filters = Context.ParentFilters[propertyPath];
+
+            if (Context.Filters.Any())
+            {
+                filters.Add(Builders<T>.Filter.Or(Context.Filters));
+            }
+
+            HandleRecurringElementFilters(propertyPath, true);
+
+            Context.Filters = filters;
+            Context.ParentFilters.Remove(propertyPath);
+        }
+
+        /// <summary>
         /// Handles the string value.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
@@ -135,6 +216,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyValue">The property value.</param>
         protected override void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
+            if (IsRecurringElement)
+            {
+                Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"EqualsIgnoreCase({propertyValue})",
+                    (dataObject, instance) => $"{propertyInfo.GetValue(instance)}".EqualsIgnoreCase(propertyValue)));
+            }
+
             Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
             AddProjectionProperty(propertyPath);
         }
@@ -152,10 +239,30 @@ namespace PDS.Witsml.Server.Data
         {
             if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
             {
+                if (IsRecurringElement)
+                {
+                    Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"GreaterThan({propertyValue})",
+                        (dataObject, instance) =>
+                        {
+                            var value = (DateTime?) propertyInfo.GetValue(instance);
+                            return value.HasValue && value.Value > dateTimeValue;
+                        }));
+                }
+
                 Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }
             else
             {
+                if (IsRecurringElement)
+                {
+                    Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"Equals({propertyValue})",
+                        (dataObject, instance) =>
+                        {
+                            var value = (DateTime?) propertyInfo.GetValue(instance);
+                            return value.HasValue && value.Value.Equals(dateTimeValue);
+                        }));
+                }
+
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, dateTimeValue));
             }
 
@@ -175,10 +282,30 @@ namespace PDS.Witsml.Server.Data
         {
             if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
             {
+                if (IsRecurringElement)
+                {
+                    Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"GreaterThan({propertyValue})",
+                        (dataObject, instance) =>
+                        {
+                            var value = (Timestamp?) propertyInfo.GetValue(instance);
+                            return value.HasValue && value.Value > timestampValue;
+                        }));
+                }
+
                 Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }
             else
             {
+                if (IsRecurringElement)
+                {
+                    Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"Equals({propertyValue})",
+                        (dataObject, instance) =>
+                        {
+                            var value = (Timestamp?) propertyInfo.GetValue(instance);
+                            return value.HasValue && value.Value.Equals(timestampValue);
+                        }));
+                }
+
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, timestampValue));
             }
 
@@ -196,6 +323,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="objectValue">The object value.</param>
         protected override void HandleObjectValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
+            if (IsRecurringElement)
+            {
+                Context.RecurringElementFilters.Add(new RecurringElementFilter(propertyPath, $"Equals({propertyValue})",
+                    (dataObject, instance) => Equals(propertyInfo.GetValue(instance), objectValue)));
+            }
+
             Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
             AddProjectionProperty(propertyPath);
         }
@@ -224,35 +357,6 @@ namespace PDS.Witsml.Server.Data
         protected override void HandleNaNValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             AddProjectionProperty(propertyPath);
-        }
-
-        /// <summary>
-        /// Initializes the recurring element handler.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="propertyPath">The property path.</param>
-        protected override void InitializeRecurringElementHandler(PropertyInfo propertyInfo, string propertyPath)
-        {
-            Context.ParentFilters[propertyPath] = Context.Filters;
-            Context.Filters = new List<FilterDefinition<T>>();
-        }
-
-        /// <summary>
-        /// Handles the recurring elements.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="propertyPath">The property path.</param>
-        protected override void HandleRecurringElements(PropertyInfo propertyInfo, string propertyPath)
-        {
-            var filters = Context.ParentFilters[propertyPath];
-
-            if (Context.Filters.Any())
-            {
-                filters.Add(Builders<T>.Filter.Or(Context.Filters));
-            }
-
-            Context.Filters = filters;
-            Context.ParentFilters.Remove(propertyPath);
         }
 
         /// <summary>
@@ -292,7 +396,7 @@ namespace PDS.Witsml.Server.Data
             if (Logger.IsDebugEnabled)
             {
                 var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                Logger.DebugFormat("Detected query filters: {0}", filterJson);
+                Logger.Debug($"Detected query filters: {filterJson}");
             }
 
             return resultFilter;
@@ -314,16 +418,16 @@ namespace PDS.Witsml.Server.Data
             }
             else
             {
-                // Log projection fields if debug is enabled
-                if (Logger.IsDebugEnabled)
-                {
-                    Logger.DebugFormat("Fields projected: {0}", string.Join(",", Context.Fields));
-                }
-
                 var projection = Builders<T>.Projection.Include(Context.Fields.First());
 
                 foreach (var field in Context.Fields.Skip(1))
                     projection = projection.Include(field);
+
+                if (Logger.IsDebugEnabled)
+                {
+                    var projectionJson = projection.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                    Logger.Debug($"Detected query projection: {projectionJson}");
+                }
 
                 return projection;
             }
@@ -339,6 +443,114 @@ namespace PDS.Witsml.Server.Data
                 return;
 
             Context.Fields.Add(propertyPath);
+        }
+
+        /// <summary>
+        /// Initializes the recurring element filters.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="isRecurringCriteria">if set to <c>true</c> is recurring criteria.</param>
+        private void InitializeRecurringElementFilters(string propertyPath, bool isRecurringCriteria = false)
+        {
+            Context.ParentRecurringFilters[propertyPath] = Context.RecurringElementFilters;
+
+            if (isRecurringCriteria)
+            {
+                Context.RecurringElementFilters = new List<RecurringElementFilter>();
+            }
+        }
+
+        /// <summary>
+        /// Handles the recurring element filters.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="isRecurringCriteria">if set to <c>true</c> is recurring criteria.</param>
+        private void HandleRecurringElementFilters(string propertyPath, bool isRecurringCriteria = false)
+        {
+            var recurringFilters = Context.ParentRecurringFilters[propertyPath];
+
+            if (Context.RecurringElementFilters.Any() && isRecurringCriteria)
+            {
+                var filters = Context.RecurringElementFilters.ToArray();
+                var filter = new RecurringElementFilter(propertyPath, true, filters);
+
+                recurringFilters.Add(filter);
+            }
+
+            Context.RecurringElementFilters = recurringFilters;
+            Context.ParentRecurringFilters.Remove(propertyPath);
+        }
+
+        /// <summary>
+        /// Filters the recurring elements.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        private void FilterRecurringElements(T entity)
+        {
+            var filters = Context.RecurringElementFilters;
+            filters.ForEach(filter => FilterRecurringElements(entity, entity, filter));
+        }
+
+        /// <summary>
+        /// Filters the recurring elements.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="instance">The instance.</param>
+        /// <param name="filter">The filter.</param>
+        /// <param name="parentPath">The parent path.</param>
+        private void FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string parentPath = null)
+        {
+            var propertyPath = !string.IsNullOrWhiteSpace(parentPath)
+                ? filter.PropertyPath.Substring(parentPath.Length + 1)
+                : filter.PropertyPath;
+
+            var type = instance.GetType();
+            var paths = propertyPath.Split(new[] {'.'}, 2);
+            var propertyName = paths.First();
+            var nestedPath = paths.Skip(1).FirstOrDefault() ?? string.Empty;
+
+            var propertyInfo = type.GetProperty(propertyName);
+            var propertyValue = propertyInfo.GetValue(instance);
+            var listValue = propertyValue as IList;
+
+            // Update parent path with current property name
+            parentPath = GetPropertyPath(parentPath, propertyName);
+
+            // Check if processing nested complex type
+            if (listValue == null)
+            {
+                if (propertyValue != null && !string.IsNullOrWhiteSpace(nestedPath))
+                {
+                    FilterRecurringElements(dataObject, propertyValue, filter, parentPath);
+                }
+
+                return;
+            }
+
+            // Process recurring element property
+            var filtered = new ArrayList();
+
+            foreach (var item in listValue)
+            {
+                if (item == null) continue;
+
+                // Check if nested properties need to be filtered
+                if (filter.Filters != null && !string.IsNullOrWhiteSpace(nestedPath))
+                {
+                    FilterRecurringElements(dataObject, item, filter, parentPath);
+                    continue;
+                }
+
+                // Check if recurring element doesn't meet criteria
+                if (!filter.Predicate(dataObject, item))
+                    filtered.Add(item);
+            }
+
+            // Remove filtered items from original list
+            foreach (var item in filtered)
+            {
+                listValue.Remove(item);
+            }
         }
     }
 }
