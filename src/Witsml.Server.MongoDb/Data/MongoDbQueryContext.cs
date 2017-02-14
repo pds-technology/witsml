@@ -39,6 +39,8 @@ namespace PDS.Witsml.Server.Data
             Function = Functions.GetFromStore;
             Filters = new List<FilterDefinition<T>>();
             ParentFilters = new Dictionary<string, List<FilterDefinition<T>>>();
+            RecurringElementFilters = new List<RecurringElementFilter>();
+            ParentRecurringFilters = new Dictionary<string, List<RecurringElementFilter>>();
         }
 
         /// <summary>
@@ -58,6 +60,18 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The parent filters.</value>
         public Dictionary<string, List<FilterDefinition<T>>> ParentFilters { get; }
+
+        /// <summary>
+        /// Gets or sets the recurring element filters.
+        /// </summary>
+        /// <value>The recurring element filters.</value>
+        public List<RecurringElementFilter> RecurringElementFilters { get; set; }
+
+        /// <summary>
+        /// Gets the parent recurring filters.
+        /// </summary>
+        /// <value>The parent recurring filters.</value>
+        public Dictionary<string, List<RecurringElementFilter>> ParentRecurringFilters { get; }
 
         /// <summary>
         /// Gets or sets the list of fields.
