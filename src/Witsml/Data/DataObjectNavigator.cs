@@ -62,15 +62,15 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
-        /// Gets or sets the composition container used for dependency injection.
-        /// </summary>
-        protected IContainer Container { get; }
-
-        /// <summary>
         /// Gets the context.
         /// </summary>
         /// <value>The context.</value>
-        protected TContext Context { get; }
+        public TContext Context { get; }
+
+        /// <summary>
+        /// Gets or sets the composition container used for dependency injection.
+        /// </summary>
+        protected IContainer Container { get; }
 
         /// <summary>
         /// Gets the logger.
