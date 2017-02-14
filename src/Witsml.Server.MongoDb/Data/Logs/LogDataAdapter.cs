@@ -69,11 +69,19 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
-            var entities = QueryEntities(parser);
+            var isRequestingData = parser.IncludeLogData();
+            
+            // If requesting data limit selection to Ids only for validation
+            var entities = isRequestingData
+                ? QueryEntities(parser.Clone(OptionsIn.ReturnElements.IdOnly))
+                : QueryEntities(parser);
 
-            if (parser.IncludeLogData())
+            if (isRequestingData)
             {
                 ValidateGrowingObjectDataRequest(parser, entities);
+
+                // Fetch using the projection fields
+                entities = QueryEntities(parser);
 
                 var headers = GetEntities(entities.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
