@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyPath">The property path.</param>
         /// <param name="expression">The expression.</param>
         /// <param name="predicate">The predicate.</param>
-        public RecurringElementFilter(string propertyPath, string expression, Func<object, bool> predicate)
+        public RecurringElementFilter(string propertyPath, string expression, Func<object, object, bool> predicate)
         {
             PropertyPath = propertyPath;
             Expression = $"{propertyPath}.{expression}";
@@ -53,11 +53,11 @@ namespace PDS.Witsml.Server.Data
             var junction = isRecurringCriteria ? " OR " : " AND ";
             Expression = "(" + string.Join(junction, filters.Select(x => x.Expression)) + ")";
 
-            Predicate = instance =>
+            Predicate = (dataObject, instance) =>
             {
                 return isRecurringCriteria
-                    ? filters.Any(x => x.Predicate(instance))
-                    : filters.All(x => x.Predicate(instance));
+                    ? filters.Any(x => x.Predicate(dataObject, instance))
+                    : filters.All(x => x.Predicate(dataObject, instance));
             };
         }
 
@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data
         /// Gets the predicate.
         /// </summary>
         /// <value>The predicate.</value>
-        public Func<object, bool> Predicate { get; }
+        public Func<object, object, bool> Predicate { get; }
 
         /// <summary>
         /// Gets the collection of filters.

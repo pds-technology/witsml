@@ -429,13 +429,24 @@ namespace PDS.Witsml.Server.Data
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
                 var query = new MongoDbQuery<T>(Container, GetCollection(), parser, fields, ignored);
-                return query.Execute();
+                return FilterRecurringElements(query);
             }
             catch (MongoException ex)
             {
                 Logger.ErrorFormat("Error querying {0} MongoDb collection: {1}", DbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Filters the recurring elements within each data object returned by the specified query.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>The query results collection.</returns>
+        protected virtual List<T> FilterRecurringElements(MongoDbQuery<T> query)
+        {
+            // NOTE: this method can be overridden to include additional context
+            return query.FilterRecurringElements(query.Execute());
         }
 
         /// <summary>
