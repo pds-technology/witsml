@@ -2534,9 +2534,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AssertChangeLogMnemonics(DevKit.GetMnemonics(Log), lastChange.Mnemonics);
         }
 
-        [Ignore]
         [TestMethod, Description("Implements test60.py from the Energistics certification tests")]
-        public void Log141DataAdapter_ChangeLog_Tracks_Mnemonics_On_Update_While_Growing()
+        public void Log141DataAdapter_ChangeLog_Tracks_Historical_Changes_To_Mnemonics()
         {
             AddParents();
 
@@ -2552,6 +2551,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 DevKit.LogGenerator.CreateDoubleLogCurveInfo("CURVE2", "m/h"),
                 DevKit.LogGenerator.CreateDoubleLogCurveInfo("CURVE3", "m/h")
             };
+            Log.LogCurveInfo.ForEach(x => x.TypeLogData = LogDataType.@int);
             DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log));
             Log.LogData[0].Data.Add("0,0,0,0");
             Log.LogData[0].Data.Add("1,1,1,1");
@@ -2574,7 +2574,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
             updateLog.LogData[0].Data.Add("3,3");
 
-            DevKit.UpdateAndAssert(Log);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Call DeleteFrom Store to delete a datapoint in a curve
             var deleteLog = DevKit.CreateLog(Log);
@@ -2619,17 +2619,17 @@ namespace PDS.Witsml.Server.Data.Logs
             // TODO: Uncomment when fixed => Task 9022: Fix - Filter recurring elements by the search criteria used for those elements
             //Assert.AreEqual(3, changeLog.ChangeHistory.Count, "ChangeHistory results should only contain updates");
             var history = changeLog.ChangeHistory;
-            var firstUpdateHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("BDEP,CURVE1"));
-            var partialDeleteHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("CURVE2"));
-            var secondUpdateHistory = history.FirstOrDefault(h => h.Mnemonics.Equals("BDEP,CURVE3"));
+            var firstUpdateHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("BDEP,CURVE1"));
+            var partialDeleteHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("CURVE2"));
+            var secondUpdateHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("BDEP,CURVE3"));
 
             Assert.AreEqual(ChangeInfoType.update, firstUpdateHistory?.ChangeType);
             Assert.AreEqual(3, firstUpdateHistory?.StartIndex.Value);
             Assert.AreEqual(3, firstUpdateHistory?.EndIndex.Value);
             Assert.IsTrue(tenMinutesAgo < firstUpdateHistory?.DateTimeChange);
 
-            Assert.AreEqual(3, partialDeleteHistory?.StartIndex.Value);
-            Assert.AreEqual(3, partialDeleteHistory?.EndIndex.Value);
+            Assert.AreEqual(2, partialDeleteHistory?.StartIndex.Value);
+            Assert.AreEqual(2, partialDeleteHistory?.EndIndex.Value);
             Assert.IsTrue(tenMinutesAgo < partialDeleteHistory?.DateTimeChange);
 
             Assert.AreEqual(ChangeInfoType.update, secondUpdateHistory?.ChangeType);
