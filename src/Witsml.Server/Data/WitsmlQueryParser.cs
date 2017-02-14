@@ -431,6 +431,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Clones the current instance with new options.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns>The Witsml query parser.</returns>
+        public WitsmlQueryParser Clone(string options)
+        {
+            return new WitsmlQueryParser(Root, ObjectType, options);
+        }
+
+        /// <summary>
         /// Creates a Witsml query parser for the element.
         /// </summary>
         /// <param name="element">The element.</param>
