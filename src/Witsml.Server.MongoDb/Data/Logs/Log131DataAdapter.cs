@@ -286,7 +286,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override string GetIndexCurveMnemonic(Log log)
         {
             //Logger.DebugFormat("Getting log index curve mnemonic: {0}", log.IndexCurve.Value);
-            return log.IndexCurve.Value;
+            return log?.IndexCurve?.Value;
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override string GetIndexCurveUnit(Log log)
         {
-            return GetLogCurve(log, log.IndexCurve.Value).Unit;
+            return GetLogCurve(log, log?.IndexCurve?.Value).Unit;
         }
 
         /// <summary>
