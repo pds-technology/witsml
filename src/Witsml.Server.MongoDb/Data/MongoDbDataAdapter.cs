@@ -556,9 +556,10 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The object to be replaced.</param>
         /// <param name="uri">The data object URI.</param>
-        protected void ReplaceEntity(T entity, EtpUri uri)
+        /// <param name="ignoreServerProperties">if set to <c>true</c> ignores server properties.</param>
+        protected void ReplaceEntity(T entity, EtpUri uri, bool ignoreServerProperties = true)
         {
-            ReplaceEntity(DbCollectionName, entity, uri);
+            ReplaceEntity(DbCollectionName, entity, uri, ignoreServerProperties);
         }
 
         /// <summary>
@@ -568,8 +569,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="entity">The object to be replaced.</param>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="ignoreServerProperties">if set to <c>true</c> ignores server properties.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void ReplaceEntity<TObject>(string dbCollectionName, TObject entity, EtpUri uri)
+        protected void ReplaceEntity<TObject>(string dbCollectionName, TObject entity, EtpUri uri, bool ignoreServerProperties = true)
         {
             try
             {
@@ -578,10 +580,18 @@ namespace PDS.Witsml.Server.Data
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
                 //var updates = MongoDbUtility.CreateUpdateFields<TObject>();
-                //var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
+                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(null, true);
 
-                //var update = new MongoDbUpdate<TObject>(Container, collection, parser, IdPropertyName, ignores);
-                //update.Update(current, uri, updates);
+                if (ignoreServerProperties)
+                {
+                    ignores.AddRange(GetIgnoredElementNamesForUpdate(null) ?? Enumerable.Empty<string>());
+                }
+
+                var mapper = new DataObjectMapper<TObject>(Container, null, ignores);
+                mapper.Map(current, entity);
+
+                // Update Last Change Date
+                AuditHistoryAdapter.SetDateTimeLastChange(entity);
 
                 var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
                 collection.ReplaceOne(filter, entity);
