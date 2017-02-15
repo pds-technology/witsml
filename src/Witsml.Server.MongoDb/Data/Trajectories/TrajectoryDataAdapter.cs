@@ -521,6 +521,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 stations = GetMongoFileStationData(uri);
             }
 
+            var query = new MongoDbQuery<T>(Container, GetCollection(), parser, null);
+            query.Navigate(OptionsIn.ReturnElements.IdOnly);
+            query.FilterRecurringElements(entity.AsList());
+
             var count = FilterStationData(entity, stations, parser, context);
             SetIndexRange(entity, parser, false);
 

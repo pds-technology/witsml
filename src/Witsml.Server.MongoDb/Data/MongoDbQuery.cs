@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value><c>true</c> if the current property is a recurring element; otherwise, <c>false</c>.</value>
         private bool IsRecurringElement => Context.ParentRecurringFilters.Any();
-
+        
         /// <summary>
         /// Executes this MongoDb query.
         /// </summary>
@@ -70,25 +70,13 @@ namespace PDS.Witsml.Server.Data
             Logger.DebugFormat("Executing query for {0}", _parser.ObjectType);
 
             var returnElements = _parser.ReturnElements();
-            var entities = new List<T>();
 
-            // Check if to project fields
-            Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
-                OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
-                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
-                OptionsIn.ReturnElements.StationLocationOnly.Equals(returnElements);
-
-            if (Context.Fields == null)
-                Context.Fields = new List<string>();
-
-            var element = _parser.Element();
-
-            // Navigate the root element and create filter and projection fields
-            Navigate(element);
+            Navigate(returnElements);
 
             // Build Mongo filter
             var filter = BuildFilter();
             var results = _collection.Find(filter ?? "{}");
+            var entities = new List<T>();
 
             // Format response using MongoDb projection, i.e. selecting specified fields only
             if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
@@ -134,6 +122,27 @@ namespace PDS.Witsml.Server.Data
             entities.ForEach(FilterRecurringElements);
 
             return entities;
+        }
+
+        /// <summary>
+        /// Navigates the root element.
+        /// </summary>
+        /// <param name="returnElements">The return elements.</param>
+        internal void Navigate(string returnElements)
+        {
+            // Check if to project fields
+            Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
+                OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
+                OptionsIn.ReturnElements.StationLocationOnly.Equals(returnElements);
+
+            if (Context.Fields == null)
+                Context.Fields = new List<string>();
+
+            var element = _parser.Element();
+
+            // Navigate the root element and create filter and projection fields
+            Navigate(element);
         }
 
         /// <summary>
