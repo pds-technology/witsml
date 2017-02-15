@@ -56,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -124,7 +124,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -211,7 +211,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -230,7 +230,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -257,7 +257,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations
+            // Add trajectory with stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
@@ -278,6 +278,52 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
             AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filters_Results_With_No_Data()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Query end range before the trajectory structure
+            var end = 9;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+
+            // Query start range after the trajectory structure
+            var start = 100;
+            query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+
+            // Query range outside the trajectory structure
+            start = 2;
+            end = 5;
+            query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
         }
 
         [TestMethod, Description("Tests GetFromStore on Trajectory is limited to MaxDataNodes")]
