@@ -68,68 +68,32 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Gets the data schema version.
         /// </summary>
-        /// <value>
-        /// The data schema version.
-        /// </value>
-        public override string DataSchemaVersion
-        {
-            get { return OptionsIn.DataVersion.Version131.Value; }
-        }
+        public override string DataSchemaVersion => OptionsIn.DataVersion.Version131.Value;
 
         /// <summary>
         /// Gets the wells.
         /// </summary>
-        /// <value>
-        /// The wells.
-        /// </value>
-        public IWitsmlQuery<Well> Wells
-        {
-            get { return CreateQuery<Well, WellList>(); }
-        }
+        public IWitsmlQuery<Well> Wells => CreateQuery<Well, WellList>();
 
         /// <summary>
         /// Gets the wellbores.
         /// </summary>
-        /// <value>
-        /// The wellbores.
-        /// </value>
-        public IWitsmlQuery<Wellbore> Wellbores
-        {
-            get { return CreateQuery<Wellbore, WellboreList>(); }
-        }
+        public IWitsmlQuery<Wellbore> Wellbores => CreateQuery<Wellbore, WellboreList>();
 
         /// <summary>
         /// Gets the rigs.
         /// </summary>
-        /// <value>
-        /// The rigs.
-        /// </value>
-        public IWitsmlQuery<Rig> Rigs
-        {
-            get { return CreateQuery<Rig, RigList>(); }
-        }
+        public IWitsmlQuery<Rig> Rigs => CreateQuery<Rig, RigList>();
 
         /// <summary>
         /// Gets the logs.
         /// </summary>
-        /// <value>
-        /// The logs.
-        /// </value>
-        public IWitsmlQuery<Log> Logs
-        {
-            get { return CreateQuery<Log, LogList>(); }
-        }
+        public IWitsmlQuery<Log> Logs => CreateQuery<Log, LogList>();
 
         /// <summary>
         /// Gets the trajectories.
         /// </summary>
-        /// <value>
-        /// The trajectories.
-        /// </value>
-        public IWitsmlQuery<Trajectory> Trajectories
-        {
-            get { return CreateQuery<Trajectory, TrajectoryList>(); }
-        }
+        public IWitsmlQuery<Trajectory> Trajectories => CreateQuery<Trajectory, TrajectoryList>();
 
         /// <summary>
         /// Gets all wells.
@@ -137,7 +101,9 @@ namespace PDS.Witsml.Linq
         /// <returns>The wells.</returns>
         public override IEnumerable<IDataObject> GetAllWells()
         {
-            return Wells.With(OptionsIn.ReturnElements.IdOnly)
+            return Wells
+                .With(OptionsIn.ReturnElements.Requested)
+                .Include(IncludeWitsmlQueryElements)
                 .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
         }
@@ -149,10 +115,52 @@ namespace PDS.Witsml.Linq
         /// <returns>The wellbores.</returns>
         public override IEnumerable<IWellObject> GetWellbores(EtpUri uri)
         {
-            return Wellbores.With(OptionsIn.ReturnElements.IdOnly)
+            return Wellbores
+                .With(OptionsIn.ReturnElements.Requested)
+                .Include(IncludeWitsmlQueryElements)
                 .Where(x => x.UidWell == uri.ObjectId)
                 .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
+        }
+
+        /// <summary>
+        /// Formats the WITSML query.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <param name="optionsIn">The options in.</param>
+        protected override IWitsmlQuery FormatWitsmlQuery(IWitsmlQuery query, params OptionsIn[] optionsIn)
+        {
+            if (!optionsIn.Contains(OptionsIn.ReturnElements.IdOnly))
+            {
+                return base.FormatWitsmlQuery(query, optionsIn);
+            }
+
+            return query
+                .With(OptionsIn.ReturnElements.Requested)
+                .Include(IncludeWitsmlQueryElements);
+        }
+
+        private void IncludeWitsmlQueryElements<T>(T template)
+        {
+            var dataObject = template as IDataObject;
+            var wellObject = template as IWellObject;
+            var wellboreObject = template as IWellboreObject;
+
+            if (wellboreObject != null)
+            {
+                wellboreObject.UidWellbore = string.Empty;
+                wellboreObject.NameWellbore = string.Empty;
+            }
+            if (wellObject != null)
+            {
+                wellObject.UidWell = string.Empty;
+                wellObject.NameWell = string.Empty;
+            }
+            if (dataObject != null)
+            {
+                dataObject.Uid = string.Empty;
+                dataObject.Name = string.Empty;
+            }
         }
     }
 }

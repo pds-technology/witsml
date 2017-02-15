@@ -31,17 +31,11 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Gets or sets the log query action.
         /// </summary>
-        /// <value>
-        /// The log query action.
-        /// </value>
         Action<Functions, string, string, string> LogQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the log response action.
         /// </summary>
-        /// <value>
-        /// The log response action.
-        /// </value>
         Action<Functions, string, string, string, string, short, string> LogResponse { get; set; }
 
         /// <summary>

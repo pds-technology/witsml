@@ -28,6 +28,13 @@ namespace PDS.Witsml.Linq
     public interface IWitsmlQuery : IQueryable
     {
         /// <summary>
+        /// Provides a callback that can be used to include specific elements in the query response.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IWitsmlQuery Include(Action<object> action);
+
+        /// <summary>
         /// Sets the options that will be passed in to the GetFromStore query.
         /// </summary>
         /// <param name="optionsIn"></param>

@@ -84,33 +84,21 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Gets the connection.
         /// </summary>
-        /// <value>
-        /// The connection.
-        /// </value>
         public WITSMLWebServiceConnection Connection { get; private set; }
 
         /// <summary>
         /// Gets the data schema version.
         /// </summary>
-        /// <value>
-        /// The data schema version.
-        /// </value>
         public abstract string DataSchemaVersion { get; }
 
         /// <summary>
         /// Gets or sets the log query action.
         /// </summary>
-        /// <value>
-        /// The log query action.
-        /// </value>
         public Action<Functions, string, string, string> LogQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the log response action.
         /// </summary>
-        /// <value>
-        /// The log response action.
-        /// </value>
         public Action<Functions, string, string, string, string, short, string> LogResponse { get; set; }
 
         /// <summary>
@@ -145,7 +133,7 @@ namespace PDS.Witsml.Linq
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>The wellbore objects of specified type.</returns>
-        public IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
+        public virtual IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
         {
             return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
         }
@@ -156,7 +144,7 @@ namespace PDS.Witsml.Linq
         /// <param name="objectType">Type of the object.</param>
         /// <param name="uri">The URI.</param>
         /// <returns>The header for the specified growing objects.</returns>
-        public IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
+        public virtual IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
             return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
         }
@@ -167,7 +155,7 @@ namespace PDS.Witsml.Linq
         /// <param name="objectType">Type of the object.</param>
         /// <param name="uri">The URI.</param>
         /// <returns>The object identifier.</returns>
-        public IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
+        public virtual IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
         {
             return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
         }
@@ -178,7 +166,7 @@ namespace PDS.Witsml.Linq
         /// <param name="objectType">Type of the object.</param>
         /// <param name="uri">The URI.</param>
         /// <returns>The object detail.</returns>
-        public IDataObject GetObjectDetails(string objectType, EtpUri uri)
+        public virtual IDataObject GetObjectDetails(string objectType, EtpUri uri)
         {
             return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.All).FirstOrDefault();
         }
@@ -190,7 +178,7 @@ namespace PDS.Witsml.Linq
         /// <param name="uri">The URI.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns>The object detail.</returns>
-        public IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
+        public virtual IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
         {
             return GetObjects<IDataObject>(objectType, uri, optionsIn).FirstOrDefault();
         }
@@ -203,7 +191,7 @@ namespace PDS.Witsml.Linq
         /// <param name="uri">The URI.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns></returns>
-        protected IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, params OptionsIn[] optionsIn) where T : IDataObject
+        protected virtual IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, params OptionsIn[] optionsIn) where T : IDataObject
         {
             var filters = new List<string>();
             var values = new List<object>();
@@ -230,10 +218,9 @@ namespace PDS.Witsml.Linq
             }
 
             var query = CreateWitsmlQuery(objectType);
+            query = FormatWitsmlQuery(query, optionsIn);
 
-            optionsIn.ForEach(x => query.With(x));
-
-            var result = query                
+            var result = query
                 .Where(string.Join(" && ", filters), values.ToArray())
                 .GetEnumerator();
 
@@ -245,6 +232,17 @@ namespace PDS.Witsml.Linq
             }
 
             return dataObjects.OrderBy(x => x.Name);
+        }
+
+        /// <summary>
+        /// Formats the WITSML query.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <param name="optionsIn">The options in.</param>
+        protected virtual IWitsmlQuery FormatWitsmlQuery(IWitsmlQuery query, params OptionsIn[] optionsIn)
+        {
+            optionsIn.ForEach(x => query.With(x));
+            return query;
         }
 
         /// <summary>

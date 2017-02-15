@@ -52,7 +52,7 @@ namespace PDS.Witsml.Linq
         }
 
         /// <summary>
-        /// WitsmlContext
+        /// Gets the context.
         /// </summary>
         public WitsmlContext Context { get; }
 
@@ -63,17 +63,17 @@ namespace PDS.Witsml.Linq
         public ILog Logger { get; }
 
         /// <summary>
-        /// Query
+        /// Gets the query.
         /// </summary>
         public TList Query { get; }
 
         /// <summary>
-        /// Options
+        /// Gets the options.
         /// </summary>
         public Dictionary<string, string> Options { get; }
 
         /// <summary>
-        /// Invoked during execution of the query , with the
+        /// Invoked during execution of the query, with the
         /// pre populated expression tree.
         /// </summary>
         /// <param name="expression">Target expression block</param>
@@ -84,7 +84,7 @@ namespace PDS.Witsml.Linq
 
             var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
             var objectType = ObjectTypes.GetObjectType<T>();
-            var xmlIn = WitsmlParser.ToXml(Query);
+            var xmlIn = EnergisticsConverter.ObjectToXml(Query); // WitsmlParser.ToXml(Query);
 
             Context.LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
@@ -146,6 +146,17 @@ namespace PDS.Witsml.Linq
         public IWitsmlQuery<T> With(OptionsIn optionsIn)
         {
             Options[optionsIn.Key] = optionsIn.Value;
+            return this;
+        }
+
+        /// <summary>
+        /// Provides a callback that can be used to include specific elements in the query response.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IWitsmlQuery IWitsmlQuery.Include(Action<object> action)
+        {
+            Include(x => action(x));
             return this;
         }
 
