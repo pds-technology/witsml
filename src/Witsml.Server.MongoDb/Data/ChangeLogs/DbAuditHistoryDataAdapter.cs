@@ -213,6 +213,26 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         }
 
         /// <summary>
+        /// Sets the date time last change for the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public void SetDateTimeLastChange(object entity)
+        {
+            var abstractObject = entity as Energistics.DataAccess.WITSML200.AbstractObject;
+            var commonDataObject = entity as ICommonDataObject;
+
+            if (commonDataObject != null)
+            {
+                commonDataObject.CommonData.DateTimeLastChange = DateTimeOffset.UtcNow;
+            }
+
+            if (abstractObject != null)
+            {
+                abstractObject.Citation.LastUpdate = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

@@ -561,7 +561,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
-                ReplaceEntity(dataObject, uri);
+                ReplaceEntity(dataObject, uri, false);
                 UpdateGrowingObject(dataObject, false, isAppending, rangeIn.Start, rangeIn.End, uomIndex);
                 transaction.Commit();
             }
@@ -600,7 +600,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 SetIndexRange(current, parser);
                 UpdateMongoFile(current, false);
-                ReplaceEntity(current, uri);
+                ReplaceEntity(current, uri, false);
                 UpdateGrowingObject(current, false, null, rangeIn.Start, rangeIn.End, uomIndex);
                 transaction.Commit();
             }

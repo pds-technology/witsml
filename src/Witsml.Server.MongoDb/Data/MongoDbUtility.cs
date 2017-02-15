@@ -132,12 +132,16 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <typeparam name="T">The data object type</typeparam>
         /// <param name="ignored">A custom list of elements to ignore.</param>
+        /// <param name="qualified">if set to <c>true</c> use qualified names.</param>
         /// <returns></returns>
-        public static List<string> CreateIgnoreFields<T>(IEnumerable<string> ignored)
+        public static List<string> CreateIgnoreFields<T>(IEnumerable<string> ignored, bool qualified = false)
         {
+            var prefixCommonData = qualified ? "CommonData." : string.Empty;
+            var prefixCitation = qualified ? "Citation." : string.Empty;
+
             var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
-                ? new List<string> { "dTimCreation", "dTimLastChange" }
-                : new List<string> { "Creation", "LastUpdate" };
+                ? new List<string> { $"{prefixCommonData}dTimCreation", $"{prefixCommonData}dTimLastChange" }
+                : new List<string> { $"{prefixCitation}Creation", $"{prefixCitation}LastUpdate" };
 
             return ignored == null ? creationTime : creationTime.Union(ignored).ToList();
         }
