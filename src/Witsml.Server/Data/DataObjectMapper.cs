@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server.Data
     {
         private readonly WitsmlQueryParser _parser;
         private readonly List<string> _fields;
+        private bool _isTargetCreated;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectMapper{T}" /> class.
@@ -59,18 +60,25 @@ namespace PDS.Witsml.Server.Data
         /// <returns></returns>
         public List<T> Map(IEnumerable<T> dataObjects)
         {
-            return dataObjects.Select(Map).ToList();
+            return dataObjects.Select(x => Map(x)).ToList();
         }
 
         /// <summary>
         /// Maps the specified data object.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
+        /// <param name="source">The source object.</param>
+        /// <param name="target">The target object.</param>
         /// <returns>A new data object instance.</returns>
-        public T Map(T dataObject)
+        public T Map(T source, T target = default(T))
         {
-            Context.Source = dataObject;
-            Context.Target = Activator.CreateInstance<T>();
+            Context.Source = source;
+            Context.Target = target;
+
+            if (Context.Target == null)
+            {
+                Context.Target = Activator.CreateInstance<T>();
+                _isTargetCreated = true;
+            }
 
             if (Context.Properties == null)
             {
@@ -216,12 +224,14 @@ namespace PDS.Witsml.Server.Data
 
             var propertyGroups = properties
                 .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Split(new[] {'.'}, 2))
+                .Select(x => x.Split(new[] { '.' }, 2))
                 .ToLookup(x => x.First(), x => x.Skip(1).FirstOrDefault());
 
             foreach (var propertyGroup in propertyGroups)
             {
-                var propertyInfo = propertyInfos.FirstOrDefault(x => x.Name.EqualsIgnoreCase(propertyGroup.Key));
+                var propertyInfo =
+                    propertyInfos.FirstOrDefault(x => x.Name.EqualsIgnoreCase(propertyGroup.Key)) ??
+                    GetPropertyInfoForAnElement(propertyInfos, propertyGroup.Key);
                 if (propertyInfo == null) continue;
 
                 var sourceValue = propertyInfo.GetValue(source);
@@ -233,7 +243,10 @@ namespace PDS.Witsml.Server.Data
 
                 if (childProperties.Any())
                 {
-                    targetValue = Activator.CreateInstance(propertyInfo.PropertyType);
+                    targetValue = _isTargetCreated
+                        ? Activator.CreateInstance(propertyInfo.PropertyType)
+                        : propertyInfo.GetValue(target);
+
                     var targetList = targetValue as IList;
 
                     // Nested complex types
@@ -241,18 +254,23 @@ namespace PDS.Witsml.Server.Data
                     {
                         MapProjectedProperties(sourceValue, targetValue, childProperties);
                         propertyInfo.SetValue(target, targetValue);
-                        return;
+                        continue;
                     }
 
                     var args = propertyInfo.PropertyType.GetGenericArguments();
                     var childType = args.FirstOrDefault() ?? propertyInfo.PropertyType.GetElementType();
-                    var sourceList = (IList) sourceValue;
+                    var sourceList = (IList)sourceValue;
 
                     // Recurring elements
                     foreach (var sourceItem in sourceList)
                     {
-                        var targetItem = Activator.CreateInstance(childType);
-                        targetList.Add(targetItem);
+                        var targetItem = sourceItem;
+
+                        if (_isTargetCreated)
+                        {
+                            targetItem = Activator.CreateInstance(childType);
+                            targetList.Add(targetItem);
+                        }
 
                         MapProjectedProperties(sourceItem, targetItem, childProperties);
                     }
