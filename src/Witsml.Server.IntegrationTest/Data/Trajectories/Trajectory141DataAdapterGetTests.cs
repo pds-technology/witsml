@@ -352,6 +352,78 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(traj);
             Assert.AreEqual(maxDataNodes, traj.TrajectoryStation.Count);
         }
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Returns_Data_Only_On_Chunked_Data()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxStationCount = 5;
+            WitsmlSettings.MaxStationCount = maxStationCount;
+
+            // Add trajectory with 1 station more than MaxDataNodes
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxStationCount + 1, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            short errorCode;
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(Trajectory, out errorCode, ObjectTypes.Trajectory, null,
+                OptionsIn.ReturnElements.DataOnly);
+
+            Assert.AreEqual((short)ErrorCodes.Success, errorCode, "Returned all data.");
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(1, result.Count);
+
+            var traj = result[0];
+            Assert.IsNotNull(traj);
+            Assert.AreEqual(maxStationCount + 1, traj.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Returns_Data_Only_Large_Trajectory()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with 1000 stations
+            var stationsLoaded = 100;
+            var added = false;
+            while (stationsLoaded <= 1000)
+            {
+                Trajectory.TrajectoryStation = DevKit.TrajectoryStations(100, stationsLoaded + 1);
+                Trajectory.TrajectoryStation.ForEach(x => x.Uid = DevKit.Uid());
+                if (added)
+                    DevKit.UpdateAndAssert(Trajectory);
+                else
+                    DevKit.AddAndAssert(Trajectory);
+                added = true;
+                stationsLoaded += 100;
+            }
+
+            // Get trajectory
+            short errorCode;
+            var trajectoryQuery = new Trajectory()
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore
+            };
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(
+                    trajectoryQuery, out errorCode, ObjectTypes.Trajectory, null,
+                    OptionsIn.ReturnElements.DataOnly);
+
+            Assert.AreEqual((short)ErrorCodes.Success, errorCode, "Returned all data.");
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(1, result.Count);
+
+            var traj = result[0];
+            Assert.IsNotNull(traj);
+            Assert.AreEqual(1000, traj.TrajectoryStation.Count);
+            traj.TrajectoryStation.ForEach(x => Assert.IsTrue(x.MD.Value > 0));
+            Assert.AreEqual(101, traj.TrajectoryStation.Min(x => x.MD.Value));
+            Assert.AreEqual(1100, traj.TrajectoryStation.Max(x => x.MD.Value));
+        }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
