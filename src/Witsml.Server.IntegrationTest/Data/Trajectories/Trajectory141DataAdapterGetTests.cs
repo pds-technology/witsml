@@ -281,7 +281,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod, Description("Tests GetFromStore on Trajectory is limited to MaxDataNodes")]
-        public void Trajectory141DataAdapter_UpdateInStore_Results_Are_Limited_To_MaxDataNodes()
+        public void Trajectory141DataAdapter_GetFromStore_Results_Are_Limited_To_MaxDataNodes()
         {
             // Add well and wellbore
             AddParents();
@@ -305,6 +305,34 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var traj = result[0];
             Assert.IsNotNull(traj);
             Assert.AreEqual(maxDataNodes, traj.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 5);
+            DevKit.AddAndAssert(Trajectory);
+
+            const int start = 9;
+            const int end = 10;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end },
+                TrajectoryStation = new List<TrajectoryStation> { Trajectory.TrajectoryStation.First() }
+            };
+
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
+
+            DevKit.AssertNames(result, Trajectory);
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
+            AssertTrajectoryStations(stations, result.TrajectoryStation);
         }
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)

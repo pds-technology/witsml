@@ -228,5 +228,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
+
+        [TestMethod]
+        public void Trajectory141Validator_GetFromStore_Error_475_Missing_Subset_When_Getting_Growing_Object()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert(Trajectory);
+
+            var trajectory2 = CreateTrajectory("Tra-2", "Tra-2", Trajectory);
+
+            DevKit.AddAndAssert(trajectory2);
+
+            var query = CreateTrajectory(null, null, Trajectory);
+
+            var result = DevKit.Get<TrajectoryList, Trajectory>(DevKit.List(query), ObjectTypes.Trajectory, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
+
+        private static Trajectory CreateTrajectory(string uid, string name, IWellboreObject trajectoryWellbore)
+        {
+            return new Trajectory { Uid = uid, Name = name, UidWell = trajectoryWellbore.UidWell, UidWellbore = trajectoryWellbore.UidWellbore, NameWell = trajectoryWellbore.NameWell, NameWellbore = trajectoryWellbore.NameWellbore };
+        }
     }
 }
