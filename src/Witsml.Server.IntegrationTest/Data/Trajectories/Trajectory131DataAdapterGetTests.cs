@@ -139,7 +139,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only()
+        public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only()
         {
             // Add well and wellbore
             AddParents();
