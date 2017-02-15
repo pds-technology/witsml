@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
@@ -108,6 +109,62 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 
             queryIn = string.Format(QueryEmptyRootTemplate, string.Format(dateAndObjectTypeFilter, ObjectTypes.Trajectory, datetimeLastChangeAfterTrajectory));
             GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 0);
+        }
+
+        [TestMethod]
+        public void ChangeLog141GetTests_GetFromStore_Query_ChangeLogs_With_Recurring_Filter()
+        {
+            DevKit.AddAndAssert(Well);
+
+            Well.Name = "Update";
+            DevKit.UpdateAndAssert(Well);
+
+            var now = DateTime.UtcNow;
+
+            Well.Name = "Update2";
+            DevKit.UpdateAndAssert(Well);
+
+            DevKit.DeleteAndAssert(new Well() { Uid = Well.Uid });
+
+            var changeTypeQuery = $"<changeLog uidObject=\"{Well.Uid}\">" + Environment.NewLine +
+                                  "<changeHistory>" + Environment.NewLine +
+                                  "<changeType>{0}</changeType>{1}" + Environment.NewLine +
+                                  "</changeHistory>" + Environment.NewLine +
+                                  "</changeLog>";
+
+            // Confirm add change history
+            var changeType = Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.add;
+            var queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, string.Empty));
+
+            var changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory.Count == 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory[0].ChangeType == changeType);
+
+            // Confirm update change history
+            changeType = Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update;
+            queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, string.Empty));
+
+            changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory.Count == 2);
+            Assert.IsTrue(changeLogs.First().ChangeHistory[0].ChangeType == changeType);
+            Assert.IsTrue(changeLogs.First().ChangeHistory[1].ChangeType == changeType);
+
+            // Confirm update change history for last change
+            changeType = Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.update;
+            var dTimLastChange = $"<dTimChange>{now:O}</dTimChange>";
+            queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, dTimLastChange));
+
+            changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory.Count == 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory[0].ChangeType == changeType);
+
+            // Confirm delete change history
+            changeType = Energistics.DataAccess.WITSML141.ReferenceData.ChangeInfoType.delete;
+            queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, string.Empty));
+
+            changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory.Count == 1);
+            Assert.IsTrue(changeLogs.First().ChangeHistory[0].ChangeType == changeType);
         }
 
         private List<ChangeLog> GetAndAssertChangeLog(string queryIn, OptionsIn optionsIn, int? expectedChangeLogCount = null)

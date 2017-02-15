@@ -2673,8 +2673,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var changeLog = DevKit.QueryAndAssert<ChangeLogList, ChangeLog>(changeLogQuery);
 
-            // TODO: Uncomment when fixed => Task 9022: Fix - Filter recurring elements by the search criteria used for those elements
-            //Assert.AreEqual(3, changeLog.ChangeHistory.Count, "ChangeHistory results should only contain updates");
+            Assert.AreEqual(3, changeLog.ChangeHistory.Count, "ChangeHistory results should only contain updates");
             var history = changeLog.ChangeHistory;
             var firstUpdateHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("BDEP,CURVE1"));
             var partialDeleteHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("CURVE2"));
