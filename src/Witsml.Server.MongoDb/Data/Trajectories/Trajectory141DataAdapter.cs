@@ -72,7 +72,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             {
                 Logger.Debug($"Truncating trajectory stations with {entity.TrajectoryStation.Count}.");
                 entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, WitsmlSettings.TrajectoryMaxDataNodesGet);
-                if(context != null)
+                if (context != null) 
                     context.DataTruncated = true;
             }
 
