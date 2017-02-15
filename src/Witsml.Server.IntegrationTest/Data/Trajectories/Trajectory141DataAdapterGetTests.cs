@@ -172,7 +172,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(trajectory2);
 
             var query = new Trajectory();
-            var results = DevKit.Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.All + ";" + OptionsIn.RequestPrivateGroupOnly.True);
+            var results = DevKit.Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly + ";" + OptionsIn.RequestPrivateGroupOnly.True);
             Assert.IsNotNull(results);
 
             var notPrivateGroupsTrajectory = results.Where(x =>
