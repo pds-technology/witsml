@@ -236,7 +236,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var returnElements = parser.ReturnElements();
             var stations = GetTrajectoryStations(entity);
 
-            if (OptionsIn.ReturnElements.All.Equals(returnElements) || !parser.IncludeTrajectoryStations())
+            if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) || 
+                !parser.IncludeTrajectoryStations()) 
                 return stations;
 
             const string prefix = "TrajectoryStation.";
