@@ -1969,18 +1969,75 @@ namespace PDS.Witsml.Server.Data.Logs
             Log.StartIndex = new GenericMeasure(5, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
-            var addedLog = DevKit.GetAndAssert(Log);
-            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault(), "IsActive");
+            // Query for objectGrowing is 0 (false)
+            var logQuery = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid, "<objectGrowing>0</objectGrowing>");
+
+            var logResult = DevKit.GetFromStore(ObjectTypes.Log, logQuery, string.Empty, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(logResult);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(logResult.XMLout);
+            Assert.IsNotNull(logList);
+
+            var log = logList.Log.FirstOrDefault();
+            Assert.IsNotNull(log);
+            Assert.IsFalse(log.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            // Query for isActive is 0 (false)
+            var wellboreQuery = GenerateWellboreIsActiveQuery(0);
+            var wellboreResult = DevKit.GetFromStore(ObjectTypes.Wellbore, wellboreQuery, string.Empty, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(wellboreResult);
+
+            var wellboreList = EnergisticsConverter.XmlToObject<WellboreList>(wellboreResult.XMLout);
+            Assert.IsNotNull(wellboreList);
+
+            var wellbore = wellboreList.Wellbore.FirstOrDefault();
+            Assert.IsNotNull(wellbore);
+            Assert.IsFalse(wellbore.IsActive.GetValueOrDefault(), "IsActive");
 
             var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
             DevKit.UpdateAndAssert(update);
 
-            var result = DevKit.GetAndAssert(Log);
-            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+            // Query for objectGrowing is 0 (false)
+            logQuery = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid, "<objectGrowing>0</objectGrowing>");
+            logResult = DevKit.GetFromStore(ObjectTypes.Log, logQuery, string.Empty, OptionsIn.ReturnElements.IdOnly);
+            Assert.IsNotNull(logResult);
 
-            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+            logList = EnergisticsConverter.XmlToObject<LogList>(logResult.XMLout);
+            Assert.IsNotNull(logList);
+            Assert.AreEqual(0, logList.Log.Count);
+
+            // Query for objectGrowing is 1 (true)
+            logQuery = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid, "<objectGrowing>1</objectGrowing>");
+            logResult = DevKit.GetFromStore(ObjectTypes.Log, logQuery, string.Empty, OptionsIn.ReturnElements.HeaderOnly);
+            Assert.IsNotNull(logResult);
+
+            logList = EnergisticsConverter.XmlToObject<LogList>(logResult.XMLout);
+            Assert.IsNotNull(logList);
+
+            log = logList.Log.FirstOrDefault();
+            Assert.IsNotNull(log);
+            Assert.IsTrue(log.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            // Query for isActive is 0 (false)
+            wellboreQuery = GenerateWellboreIsActiveQuery(0);
+            wellboreResult = DevKit.GetFromStore(ObjectTypes.Wellbore, wellboreQuery, string.Empty, OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(wellboreResult);
+
+            wellboreList = EnergisticsConverter.XmlToObject<WellboreList>(wellboreResult.XMLout);
+            Assert.IsNotNull(wellboreList);
+            Assert.AreEqual(0, wellboreList.Wellbore.Count);
+
+            // Query for isActive is 1 (true)
+            wellboreQuery = GenerateWellboreIsActiveQuery(1);
+            wellboreResult = DevKit.GetFromStore(ObjectTypes.Wellbore, wellboreQuery, string.Empty, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(wellboreResult);
+
+            wellboreList = EnergisticsConverter.XmlToObject<WellboreList>(wellboreResult.XMLout);
+            Assert.IsNotNull(wellboreList);
+
+            wellbore = wellboreList.Wellbore.FirstOrDefault();
+            Assert.IsNotNull(wellbore);
+            Assert.IsTrue(wellbore.IsActive.GetValueOrDefault(), "IsActive");
         }
 
         [TestMethod]
@@ -2829,6 +2886,14 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), numOfRows, factor, hasEmptyChannel: hasEmptyChannel);
 
             return update;
+        }
+
+        private string GenerateWellboreIsActiveQuery(int isActive)
+        {
+            return "<wellbores xmlns =\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                                $"<wellbore uidWell =\"{Log.UidWell}\" uid=\"{Log.UidWellbore}\">" + Environment.NewLine +
+                                $"<isActive>{isActive}</isActive>" + Environment.NewLine +
+                                "</wellbore></wellbores>";
         }
         #endregion
     }
