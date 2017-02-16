@@ -521,20 +521,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 stations = GetMongoFileStationData(uri);
             }
 
-            if (!parser.IsStructuralRangeQuery())
-            {
-                var query = new MongoDbQuery<T>(Container, GetCollection(), parser, null);
-                query.Navigate(OptionsIn.ReturnElements.IdOnly);
-                query.FilterRecurringElements(entity.AsList());
-            }
+            var ignored = parser.IsStructuralRangeQuery() ? new List<string> {"md"} : null;
+            var query = new MongoDbQuery<T>(Container, GetCollection(), parser, null, ignored);
+            query.Navigate(OptionsIn.ReturnElements.IdOnly.Value);
+            query.FilterRecurringElements(entity.AsList());
 
             var count = FilterStationData(entity, stations, parser, context);
             SetIndexRange(entity, parser, false);
-
-            if (chunked)
-            {
-                FormatStationData(entity, parser);
-            }
+            FormatStationData(entity, parser);
 
             return count;
         }
