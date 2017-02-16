@@ -261,7 +261,7 @@ namespace PDS.Witsml.Data
         /// <param name="propertyPath">The property path.</param>
         protected virtual void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
+            var textProperty = GetXmlTextProperty(elementType);
 
             if (textProperty != null)
             {
@@ -291,7 +291,7 @@ namespace PDS.Witsml.Data
                     }
                 }
 
-                NavigateProperty(propertyInfo, element, propertyType, propertyName, element.Value);
+                NavigateProperty(textProperty, element, propertyType, propertyName, element.Value);
             }
             else
             {
@@ -890,13 +890,23 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Gets the property with the <see cref="XmlTextAttribute"/> attribute defined, if any.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The <see cref="PropertyInfo"/> instance.</returns>
+        protected virtual PropertyInfo GetXmlTextProperty(Type type)
+        {
+            return type.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), true));
+        }
+
+        /// <summary>
         /// Determines whether the specified type has simple content.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns><c>true</c> if the type defines a type with simple content; otherwise, <c>false</c>.</returns>
         protected virtual bool HasSimpleContent(Type type)
         {
-            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), false));
+            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), true));
         }
 
         /// <summary>
@@ -906,7 +916,7 @@ namespace PDS.Witsml.Data
         /// <returns><c>true</c> if the type supports any XML elements; otherwise, <c>false</c>.</returns>
         protected virtual bool HasXmlAnyElement(Type type)
         {
-            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
+            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlAnyElementAttribute), true));
         }
 
         private bool IsNumeric(Type propertyType)
