@@ -425,6 +425,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(1100, traj.TrajectoryStation.Max(x => x.MD.Value));
         }
 
+        [Ignore]
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
         {
