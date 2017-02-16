@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -27,6 +28,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Xml.XPath;
 using PDS.Framework.Properties;
 
 namespace PDS.Framework
@@ -316,5 +318,30 @@ namespace PDS.Framework
 
             return null;
         }
-        /// <summary>        /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.        /// </summary>        /// <param name="element">The element.</param>        /// <returns>An <see cref="XmlElement"/> instance.</returns>        public static XmlElement ToXmlElement(this XElement element)        {            using (var reader = element.CreateReader())            {                var doc = new XmlDocument();                doc.Load(reader);                return doc.DocumentElement;            }        }    }
+        /// <summary>
+        /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>An <see cref="XmlElement"/> instance.</returns>
+        public static XmlElement ToXmlElement(this XElement element)
+        {
+            using (var reader = element.CreateReader())
+            {
+                var doc = new XmlDocument();
+                doc.Load(reader);
+                return doc.DocumentElement;
+            }
+        }
+
+        /// <summary>
+        /// Evaluates the specified XPath expression.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="resolver">The resolver.</param>
+        /// <returns>A collection of elements or attributes.</returns>
+        public static IEnumerable<object> Evaluate(this XDocument document, string expression, IXmlNamespaceResolver resolver)
+        {
+            return ((IEnumerable) document.XPathEvaluate(expression, resolver)).Cast<object>();
+        }    }
 }

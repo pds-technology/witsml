@@ -28,7 +28,7 @@ namespace PDS.Witsml.Data
     public class DataObjectTemplateTests
     {
         [TestMethod]
-        public void DataObjectTemplate_Create_Creates_Blank_Xml_Template_For_Well_131()
+        public void DataObjectTemplate_Create_Blank_Xml_Template_For_Well_131()
         {
             var template = new DataObjectTemplate();
             var xmlGeneric = template.Create<Witsml131.WellList>();
@@ -36,11 +36,12 @@ namespace PDS.Witsml.Data
 
             Console.WriteLine(xmlGeneric);
 
+            Assert.IsFalse(ReferenceEquals(xmlGeneric, xmlTyped));
             Assert.AreEqual(xmlGeneric.ToString(), xmlTyped.ToString());
         }
 
         [TestMethod]
-        public void DataObjectTemplate_Create_Creates_Blank_Xml_Template_For_Well_141()
+        public void DataObjectTemplate_Create_Blank_Xml_Template_For_Well_141()
         {
             var template = new DataObjectTemplate();
             var xmlGeneric = template.Create<Witsml141.WellList>();
@@ -48,11 +49,12 @@ namespace PDS.Witsml.Data
 
             Console.WriteLine(xmlGeneric);
 
+            Assert.IsFalse(ReferenceEquals(xmlGeneric, xmlTyped));
             Assert.AreEqual(xmlGeneric.ToString(), xmlTyped.ToString());
         }
 
         [TestMethod]
-        public void DataObjectTemplate_Create_Creates_Blank_Xml_Template_For_Well_200()
+        public void DataObjectTemplate_Create_Blank_Xml_Template_For_Well_200()
         {
             var template = new DataObjectTemplate();
             var xmlGeneric = template.Create<Witsml200.Well>();
@@ -60,7 +62,73 @@ namespace PDS.Witsml.Data
 
             Console.WriteLine(xmlGeneric);
 
+            Assert.IsFalse(ReferenceEquals(xmlGeneric, xmlTyped));
             Assert.AreEqual(xmlGeneric.ToString(), xmlTyped.ToString());
+        }
+
+        [TestMethod]
+        public void DataObjectTemplate_Create_Blank_Xml_Template_For_Log_200()
+        {
+            var template = new DataObjectTemplate();
+            var xmlGeneric = template.Create<Witsml200.Log>();
+            var xmlTyped = template.Create(typeof(Witsml200.Log));
+
+            Console.WriteLine(xmlGeneric);
+
+            Assert.IsFalse(ReferenceEquals(xmlGeneric, xmlTyped));
+            Assert.AreEqual(xmlGeneric.ToString(), xmlTyped.ToString());
+        }
+
+        [TestMethod]
+        public void DataObjectTemplate_Create_Header_Only_Template_For_Log_131()
+        {
+            var template = new DataObjectTemplate();
+            var document = template.Create<Witsml131.LogList>();
+
+            template.Remove(document, "//logData");
+
+            var xml = document.ToString();
+            Console.WriteLine(xml);
+
+            Assert.IsFalse(xml.Contains("logData"));
+        }
+
+        [TestMethod]
+        public void DataObjectTemplate_Remove_And_Ignore_Elements_For_Log_141()
+        {
+            var template = new DataObjectTemplate(new [] { "CommonData", "CustomData" });
+            var document = template.Create<Witsml141.LogList>();
+
+            template.Remove(document, "//logCurveInfo", "//logData");
+
+            var xml = document.ToString();
+            Console.WriteLine(xml);
+
+            Assert.IsFalse(xml.Contains("logCurveInfo"));
+            Assert.IsFalse(xml.Contains("logData"));
+            Assert.IsFalse(xml.Contains("commonData"));
+            Assert.IsFalse(xml.Contains("customData"));
+        }
+
+        [TestMethod]
+        public void DataObjectTemplate_Remove_And_Set_Element_Values_For_Log_141()
+        {
+            var template = new DataObjectTemplate(new[] { "CommonData", "CustomData" });
+            var document = template.Create<Witsml141.LogList>();
+
+            template
+                .Remove(document, "//startDateTimeIndex", "//endDateTimeIndex", "//logCurveInfo/*", "//logCurveInfo/@*", "//logParam")
+                .Set(document, "//startIndex", 0.0)
+                .Set(document, "//startIndex/@uom", "m")
+                .Set(document, "//endIndex", 100.5)
+                .Set(document, "//endIndex/@uom", "m");
+
+            var xml = document.ToString();
+            Console.WriteLine(xml);
+
+            Assert.IsTrue(xml.Contains("<startIndex uom=\"m\">0</startIndex>"));
+            Assert.IsTrue(xml.Contains("<endIndex uom=\"m\">100.5</endIndex>"));
+            Assert.IsTrue(xml.Contains("<logCurveInfo />"));
         }
     }
 }

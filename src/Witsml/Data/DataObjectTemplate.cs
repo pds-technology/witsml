@@ -17,15 +17,20 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Xml.XPath;
 using Energistics.DataAccess.Validation;
-using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
 namespace PDS.Witsml.Data
 {
@@ -34,11 +39,19 @@ namespace PDS.Witsml.Data
     /// </summary>
     public class DataObjectTemplate
     {
-        private static readonly IList<Type> _excludeTypes = new List<Type>();
+        private static readonly ConcurrentDictionary<Type, XDocument> _cache;
+        private static readonly IList<Type> _excluded;
+        private static readonly Regex _regex;
         private readonly List<string> _ignored;
+        private XmlNamespaceManager _manager;
+        private const string Prefix = "witsml";
 
         static DataObjectTemplate()
         {
+            _regex = new Regex(@"(?<selector>[//]+)?(?<namespace>[A-z0-9_]+:)?(?<element>[\@\*A-z0-9_\[\]]+)");
+            _cache = new ConcurrentDictionary<Type, XDocument>();
+            _excluded = new List<Type>();
+
             //Exclude<Witsml131.ComponentSchemas.CustomData>();
             Exclude<Witsml131.ComponentSchemas.DocumentInfo>();
 
@@ -50,7 +63,7 @@ namespace PDS.Witsml.Data
 
         private static void Exclude<TExclude>()
         {
-            _excludeTypes.Add(typeof(TExclude));
+            _excluded.Add(typeof(TExclude));
         }
 
         /// <summary>
@@ -73,15 +86,78 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
-        /// Creates the specified type.
+        /// Creates a blank XML template for the specified type.
         /// </summary>
         /// <param name="type">The data object type.</param>
         /// <returns>An <see cref="XDocument"/> template.</returns>
         public XDocument Create(Type type)
         {
+            var cached = _cache.GetOrAdd(type, CreateTemplate);
+            return new XDocument(cached);
+        }
+
+        /// <summary>
+        /// Sets the value of a node in the document using the specified XPath expression.
+        /// </summary>
+        /// <typeparam name="TValue">The type of the value.</typeparam>
+        /// <param name="document">The document.</param>
+        /// <param name="xpath">The xpath.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
+        public DataObjectTemplate Set<TValue>(XDocument document, string xpath, TValue value)
+        {
+            var manager = GetNamespaceManager(document.Root);
+            xpath = IncludeNamespacePrefix(xpath);
+
+            var node = document.Evaluate(xpath, manager).FirstOrDefault();
+            var attribute = node as XAttribute;
+
+            if (attribute != null)
+            {
+                attribute.Value = $"{value}";
+            }
+            else
+            {
+                var element = node as XElement;
+                element?.Add(value);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes nodes from the document using the specified XPath expressions.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpaths">The XPath expressions.</param>
+        /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
+        public DataObjectTemplate Remove(XDocument document, params string[] xpaths)
+        {
+            var manager = GetNamespaceManager(document.Root);
+
+            xpaths
+                .Select(IncludeNamespacePrefix)
+                .SelectMany(x => document.Evaluate(x, manager).ToArray())
+                .ForEach(RemoveElementOrAttribute);
+
+            return this;
+        }
+
+        private XmlNamespaceManager GetNamespaceManager(XNode node)
+        {
+            if (_manager != null) return _manager;
+            var navigator = node.CreateNavigator();
+
+            _manager = new XmlNamespaceManager(navigator.NameTable ?? new NameTable());
+            _manager.AddNamespace(Prefix, navigator.NamespaceURI);
+
+            return _manager;
+        }
+
+        private XDocument CreateTemplate(Type type)
+        {
             var xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
             var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-            var ns = XNamespace.Get(xmlType?.Namespace ?? xmlRoot.Namespace);
 
             var objectType = ObjectTypes.GetObjectType(type);
             var version = ObjectTypes.GetVersion(type);
@@ -97,10 +173,10 @@ namespace PDS.Witsml.Data
                 objectType = ObjectTypes.SingleToPlural(objectType);
             }
 
+            XNamespace ns = xmlType?.Namespace ?? xmlRoot.Namespace;
             var document = new XDocument(new XElement(ns + objectType));
 
             CreateTemplate(type, ns, document.Root);
-
             document.Root?.SetAttributeValue(attribute, version);
 
             return document;
@@ -108,7 +184,7 @@ namespace PDS.Witsml.Data
 
         private void CreateTemplate(Type objectType, XNamespace ns, XElement parent)
         {
-            if (objectType == null || _excludeTypes.Contains(objectType))
+            if (objectType == null || _excluded.Contains(objectType))
             {
                 return;
             }
@@ -119,7 +195,7 @@ namespace PDS.Witsml.Data
                 var xmlElement = property.GetCustomAttribute<XmlElementAttribute>();
 
                 if ((xmlAttribute == null && xmlElement == null) ||
-                    _excludeTypes.Contains(property.PropertyType) ||
+                    _excluded.Contains(property.PropertyType) ||
                     _ignored.Contains(xmlAttribute?.AttributeName) ||
                     _ignored.Contains(xmlElement?.ElementName) ||
                     IsIgnored(property))
@@ -173,6 +249,35 @@ namespace PDS.Witsml.Data
         {
             return property.GetCustomAttributes<XmlIgnoreAttribute>().Any()
                 || _ignored.Contains(property.Name);
+        }
+
+        private string IncludeNamespacePrefix(string expression)
+        {
+            var xpath = new StringBuilder();
+            var matches = _regex.Matches(expression);
+
+            foreach (Match match in matches)
+            {
+                var ns = match.Groups["namespace"].Value;
+                var element = match.Groups["element"].Value;
+
+                if (string.IsNullOrWhiteSpace(ns) && !element.StartsWith("@"))
+                {
+                    xpath.AppendFormat("{0}{1}:{2}", match.Groups["selector"].Value, Prefix, element);
+                }
+                else
+                {
+                    xpath.Append(match.Value);
+                }
+            }
+
+            return xpath.ToString();
+        }
+
+        private static void RemoveElementOrAttribute(object elementOrAttribute)
+        {
+            (elementOrAttribute as XElement)?.Remove();
+            (elementOrAttribute as XAttribute)?.Remove();
         }
     }
 }
