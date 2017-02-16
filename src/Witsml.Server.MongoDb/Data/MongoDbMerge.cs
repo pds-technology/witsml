@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyPath">The property path.</param>
         protected override void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
+            var textProperty = GetXmlTextProperty(elementType);
 
             if (textProperty != null)
             {

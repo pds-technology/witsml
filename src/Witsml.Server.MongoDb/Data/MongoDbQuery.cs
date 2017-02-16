@@ -507,7 +507,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="instance">The instance.</param>
         /// <param name="filter">The filter.</param>
         /// <param name="parentPath">The parent path.</param>
-        private void FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string parentPath = null)
+        private bool FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string parentPath = null)
         {
             var propertyPath = !string.IsNullOrWhiteSpace(parentPath)
                 ? filter.PropertyPath.Substring(parentPath.Length + 1)
@@ -528,12 +528,12 @@ namespace PDS.Witsml.Server.Data
             // Check if processing nested complex type
             if (listValue == null)
             {
-                if (propertyValue != null && !string.IsNullOrWhiteSpace(nestedPath))
+                if (propertyValue != null && !string.IsNullOrWhiteSpace(nestedPath) && !HasSimpleContent(propertyInfo.PropertyType))
                 {
-                    FilterRecurringElements(dataObject, propertyValue, filter, parentPath);
+                    return FilterRecurringElements(dataObject, propertyValue, filter, parentPath);
                 }
 
-                return;
+                return filter.Predicate(dataObject, propertyValue);
             }
 
             // Process recurring element property
@@ -544,9 +544,11 @@ namespace PDS.Witsml.Server.Data
                 if (item == null) continue;
 
                 // Check if nested properties need to be filtered
-                if (filter.Filters != null && !string.IsNullOrWhiteSpace(nestedPath))
+                if ((filter.Filters != null && !string.IsNullOrWhiteSpace(nestedPath)) || nestedPath.Contains('.'))
                 {
-                    FilterRecurringElements(dataObject, item, filter, parentPath);
+                    if (!FilterRecurringElements(dataObject, item, filter, parentPath))
+                        filtered.Add(item);
+
                     continue;
                 }
 
@@ -560,6 +562,8 @@ namespace PDS.Witsml.Server.Data
             {
                 listValue.Remove(item);
             }
+
+            return true;
         }
     }
 }
