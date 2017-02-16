@@ -196,6 +196,26 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Navigates the recurring elements.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elements">The elements.</param>
+        /// <param name="childType">Type of the child.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
+        {
+            elements.ForEach((value, index) =>
+            {
+                var propertyKey = $"{propertyPath}.{index}";
+                InitializeRecurringElementFilters(propertyKey);
+
+                NavigateElementType(propertyInfo, childType, value, propertyPath);
+
+                HandleRecurringElementFilters(propertyKey);
+            });
+        }
+
+        /// <summary>
         /// Handles the recurring elements.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
@@ -462,11 +482,7 @@ namespace PDS.Witsml.Server.Data
         private void InitializeRecurringElementFilters(string propertyPath, bool isRecurringCriteria = false)
         {
             Context.ParentRecurringFilters[propertyPath] = Context.RecurringElementFilters;
-
-            if (isRecurringCriteria)
-            {
-                Context.RecurringElementFilters = new List<RecurringElementFilter>();
-            }
+            Context.RecurringElementFilters = new List<RecurringElementFilter>();
         }
 
         /// <summary>
@@ -478,10 +494,10 @@ namespace PDS.Witsml.Server.Data
         {
             var recurringFilters = Context.ParentRecurringFilters[propertyPath];
 
-            if (Context.RecurringElementFilters.Any() && isRecurringCriteria)
+            if (Context.RecurringElementFilters.Any())
             {
                 var filters = Context.RecurringElementFilters.ToArray();
-                var filter = new RecurringElementFilter(propertyPath, true, filters);
+                var filter = new RecurringElementFilter(propertyPath, isRecurringCriteria, filters);
 
                 recurringFilters.Add(filter);
             }
