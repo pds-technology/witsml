@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Data.Trajectories;
 using PDS.Witsml.Server.Configuration;
@@ -442,7 +443,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 UidWellbore = Trajectory.UidWellbore,
                 MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
                 MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end },
-                TrajectoryStation = new List<TrajectoryStation> { Trajectory.TrajectoryStation.First() }
+                TrajectoryStation = new List<TrajectoryStation> { new TrajectoryStation { MD = new MeasuredDepthCoord { Value = 6, Uom = MeasuredDepthUom.m } } }
             };
 
             var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
