@@ -119,6 +119,7 @@
     <Compile Include="Data\Channels\IChannelDataRecord.cs" />
     <Compile Include="Data\Channels\IQueryContext.cs" />
     <Compile Include="Data\DataGenerator.cs" />
+    <Compile Include="Data\DataObjectTemplate.cs" />
     <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
@@ -214,4 +215,3 @@
   </Target>
   -->
 </Project>
-
