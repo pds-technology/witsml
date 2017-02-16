@@ -153,7 +153,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var commonData = new CommonData {PrivateGroupOnly = true};
+            var commonData = new CommonData { PrivateGroupOnly = true };
             Trajectory.CommonData = commonData;
 
             DevKit.AddAndAssert(Trajectory);
@@ -241,7 +241,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Uid = Trajectory.Uid,
                 UidWell = Trajectory.UidWell,
                 UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord {Uom = Trajectory141Generator.MdUom, Value = start}
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start }
             };
             var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
 
@@ -425,7 +425,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(1100, traj.TrajectoryStation.Max(x => x.MD.Value));
         }
 
-        [Ignore]
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
         {
