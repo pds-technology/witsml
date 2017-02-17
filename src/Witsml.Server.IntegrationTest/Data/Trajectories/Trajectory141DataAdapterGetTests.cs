@@ -467,13 +467,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(1, result.TrajectoryStation.Count);
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
 
             queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/><trajectoryStation uid=\"{secondStation.Uid}\"/>";
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
 
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
         }
@@ -490,15 +487,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = "<trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(1, result.TrajectoryStation.Count);
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
 
             queryIn = @"<trajectoryStation><typeTrajStation>magnetic MWD</typeTrajStation></trajectoryStation>
                         <trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
 
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-
-            Assert.AreEqual(3, result.TrajectoryStation.Count);
 
             AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
         }
@@ -530,7 +524,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                         $"<trajectoryStation uid=\"{secondStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
         }
 
@@ -548,11 +541,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(1, result.TrajectoryStation.Count);
-
-            var firstResultStation = result.TrajectoryStation.First();
-            Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
-            Assert.AreEqual(lastStation.MD.Value, firstResultStation.MD.Value);
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
 
@@ -570,12 +558,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = $"<trajectoryStation><location><wellCRS>{lastStation.Location.First().WellCRS.Value}</wellCRS></location></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
 
             var locations = result.TrajectoryStation.First().Location;
             Assert.AreEqual(1, locations.Count);
             Assert.AreEqual(lastStation.Location.First().WellCRS.Value, locations.First().WellCRS.Value);
-            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)

@@ -325,8 +325,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/><trajectoryStation uid=\"{fifthStation.Uid}\"/>";
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
-
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, fifthStation }, result.TrajectoryStation);
         }
 
@@ -349,8 +347,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                         <trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
 
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-
-            Assert.AreEqual(5, result.TrajectoryStation.Count);
 
             AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
         }
@@ -382,7 +378,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                         $"<trajectoryStation uid=\"{secondStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
             result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
         }
 
@@ -399,12 +394,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-
-            Assert.AreEqual(1, result.TrajectoryStation.Count);
-
-            var firstResultStation = result.TrajectoryStation.First();
-            Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
-            Assert.AreEqual(lastStation.MD.Value, firstResultStation.MD.Value);
 
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
