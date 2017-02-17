@@ -182,6 +182,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Sets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <returns>The trajectory.</returns>
+        protected override Trajectory SetTrajectoryStations(Trajectory dataObject, List<TrajectoryStation> stations)
+        {
+            dataObject.TrajectoryStation = stations;
+            return dataObject;
+        }
+
+        /// <summary>
         /// Clears the trajectory stations.
         /// </summary>
         /// <param name="entity">The entity.</param>

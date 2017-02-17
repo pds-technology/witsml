@@ -412,6 +412,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>The trajectory station collection.</returns>
         protected abstract List<TChild> GetTrajectoryStations(T dataObject);
 
+        /// <summary>
+        /// Sets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <returns>The trajectory.</returns>
+        protected abstract T SetTrajectoryStations(T dataObject, List<TChild> stations);
+
         private bool IsUpdatingStations(T dataObject)
         {
             var stations = GetTrajectoryStations(dataObject);
@@ -520,6 +528,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var uri = entity.GetUri();
                 stations = GetMongoFileStationData(uri);
             }
+
+            SetTrajectoryStations(entity, stations);
 
             var ignored = parser.IsStructuralRangeQuery() ? new List<string> {"md"} : null;
             var query = new MongoDbQuery<T>(Container, GetCollection(), parser, null, ignored);
