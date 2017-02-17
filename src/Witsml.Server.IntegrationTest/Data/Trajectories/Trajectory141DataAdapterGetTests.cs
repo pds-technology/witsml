@@ -535,7 +535,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        [Ignore]
         public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uom()
         {
             AddParents();
@@ -546,18 +545,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
             var lastStation = Trajectory.TrajectoryStation.Last();
 
-            var queryIn = "<trajectoryStation> <md uom=\"m\">20</md></trajectoryStation>";
+            var queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-            var firstResultStation = result.TrajectoryStation.First();
 
             Assert.AreEqual(1, result.TrajectoryStation.Count);
+
+            var firstResultStation = result.TrajectoryStation.First();
             Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
-            Assert.AreEqual(20, firstResultStation.MD.Value);
+            Assert.AreEqual(lastStation.MD.Value, firstResultStation.MD.Value);
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
 
         [TestMethod]
-        [Ignore]
         public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location()
         {
             AddParents();
@@ -568,11 +567,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
             var lastStation = Trajectory.TrajectoryStation.Last();
 
-            var queryIn = "<trajectoryStation><location><wellCRS>ED35</wellCRS></location></trajectoryStation>";
+            var queryIn = $"<trajectoryStation><location><wellCRS>{lastStation.Location.First().WellCRS.Value}</wellCRS></location></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-            var locations = result.TrajectoryStation.First().Location;
 
             Assert.AreEqual(1, result.TrajectoryStation.Count);
+
+            var locations = result.TrajectoryStation.First().Location;
             Assert.AreEqual(1, locations.Count);
             Assert.AreEqual(lastStation.Location.First().WellCRS.Value, locations.First().WellCRS.Value);
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);

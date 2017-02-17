@@ -387,7 +387,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        [Ignore]
         public void Trajectory131DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uom()
         {
             AddParents();
@@ -398,13 +397,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
             var lastStation = Trajectory.TrajectoryStation.Last();
 
-            var queryIn = "<trajectoryStation> <md uom=\"m\">20</md></trajectoryStation>";
+            var queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
-            var firstResultStation = result.TrajectoryStation.First();
 
             Assert.AreEqual(1, result.TrajectoryStation.Count);
+
+            var firstResultStation = result.TrajectoryStation.First();
             Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
-            Assert.AreEqual(20, firstResultStation.MD.Value);
+            Assert.AreEqual(lastStation.MD.Value, firstResultStation.MD.Value);
 
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
