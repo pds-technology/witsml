@@ -167,7 +167,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void DataObjectValidator_AddToStore_Error_464_Child_Uid_Not_Unique()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var datumKb = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "This is WellDatum");
             var datumSl = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL, "This is WellDatum");
             well.WellDatum = new List<WellDatum>() { datumKb, datumSl };
@@ -597,7 +598,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("When adding a new recurring element has nested recurring element with uom and value, uom should not be specified if there is no value")]
         public void WitsmlValidator_UpdateInStore_Error_446_Uom_Exist_Without_Value_Nested_Array_Element()
         {
-            Well = DevKit.CreateFullWell();
+            Well = DevKit.GetFullWell();
             Well.Uid = DevKit.Uid();
             Well.ReferencePoint = null;
             AddWell(Well, "Well3Test446");
@@ -629,7 +630,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void WitsmlValidator_UpdateInStore_Error_446_Uom_With_Null_Measure_Data()
         {
             // Add well
-            Well = DevKit.CreateFullWell();
+            Well = DevKit.GetFullWell();
             Well.Uid = DevKit.Uid();
             AddWell(Well, "Well4Test446");
 
@@ -650,7 +651,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void WitsmlValidator_UpdateInStore_Error_446_Uom_With_NaN_Measure_Data()
         {
             // Add well
-            Well = DevKit.CreateFullWell();
+            Well = DevKit.GetFullWell();
             Well.Uid = DevKit.Uid();
             AddWell(Well, "Well5Test446");
 

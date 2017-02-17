@@ -1,0 +1,166 @@
+<wells version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <well uid="058cae12-69b8-46cf-9ff1-70f75c52d325">
+    <name>Test Full Well - 170216-134235-558 </name>
+    <nameLegal>Company Legal Name</nameLegal>
+    <numLicense>Company License Number</numLicense>
+    <numGovt>Govt-Number</numGovt>
+    <dTimLicense>2001-05-15T13:20:00.0000000+00:00</dTimLicense>
+    <field>Big Field</field>
+    <country>US</country>
+    <state>TX</state>
+    <county>Montgomery</county>
+    <region>Region Name</region>
+    <district>District Name</district>
+    <block>Block Name</block>
+    <timeZone>-06:00</timeZone>
+    <operator>Operating Company</operator>
+    <operatorDiv>Division Name</operatorDiv>
+    <pcInterest uom="%">65</pcInterest>
+    <numAPI>123-543-987AZ</numAPI>
+    <statusWell>drilling</statusWell>
+    <purposeWell>exploration</purposeWell>
+    <fluidWell>water</fluidWell>
+    <dTimSpud>2001-05-31T08:15:00.0000000+00:00</dTimSpud>
+    <dTimPa>2001-07-15T15:30:00.0000000+00:00</dTimPa>
+    <wellheadElevation uom="ft">500</wellheadElevation>
+    <wellDatum uid="KB">
+      <name>Kelly Bushing</name>
+      <code>KB</code>
+      <elevation uom="ft" datum="SL">78.5</elevation>
+      <extensionNameValue uid="env1">
+        <name>env1</name>
+        <value uom="m">1</value>
+        <dataType>double</dataType>
+      </extensionNameValue>
+      <extensionNameValue uid="env2">
+        <name>env2</name>
+        <value uom="m">2</value>
+        <dataType>double</dataType>
+      </extensionNameValue>
+      <extensionNameValue uid="env3">
+        <name>env3</name>
+        <value uom="Euc">env3</value>
+        <dataType>unknown</dataType>
+      </extensionNameValue>
+    </wellDatum>
+    <wellDatum uid="SL">
+      <name>Sea Level</name>
+      <code>SL</code>
+      <datumName namingSystem="EPSG" code="5106">Caspian Sea</datumName>
+	  <horizontalLocation uid="hzLoc">
+          <wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+		  <easting uom="m">425353.84</easting>
+		  <northing uom="m">6623785.69</northing>
+		  <description>Location of well surface point in projected system.</description>
+		  <extensionNameValue uid="envHz">
+			<name>envHz</name>
+			<value uom="Euc">envHz</value>
+			<dataType>unknown</dataType>
+		  </extensionNameValue>
+	  </horizontalLocation>
+    </wellDatum>
+    <groundElevation uom="ft">250</groundElevation>
+    <waterDepth uom="ft">520</waterDepth>
+    <wellLocation uid="loc-1">
+      <wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+      <easting uom="m">425353.84</easting>
+      <northing uom="m">6623785.69</northing>
+      <description>Location of well surface point in projected system.</description>
+      <extensionNameValue uid="env4">
+        <name>env4</name>
+        <value uom="Euc">env4</value>
+        <dataType>unknown</dataType>
+      </extensionNameValue>
+      <extensionNameValue uid="env5">
+        <name>env5</name>
+        <value uom="m">5</value>
+        <dataType>double</dataType>
+      </extensionNameValue>
+    </wellLocation>
+    <referencePoint uid="SRP1">
+      <name>Slot Bay Centre</name>
+      <type>Site Reference Point</type>
+      <location uid="loc-1">
+        <wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+        <easting uom="m">425366.47</easting>
+        <northing uom="m">6623781.95</northing>
+	    <extensionNameValue uid="env6">
+		  <name>env6</name>
+		  <value uom="m">6</value>
+		  <dataType>double</dataType>
+	    </extensionNameValue>
+      </location>
+      <location uid="loc-2">
+        <wellCRS uidRef="localWell1">WellOneWSP</wellCRS>
+        <localX uom="m">12.63</localX>
+        <localY uom="m">-3.74</localY>
+        <description>Location of the Site Reference Point with respect to the well surface point</description>
+	    <extensionNameValue uid="env7">
+		  <name>env7</name>
+		  <value uom="m">7</value>
+		  <dataType>float</dataType>
+	    </extensionNameValue>
+      </location>
+	  <extensionNameValue uid="env8">
+	    <name>env8</name>
+	    <value uom="m">8</value>
+	    <dataType>double</dataType>
+	  </extensionNameValue>
+	  <extensionNameValue uid="env9">
+	    <name>env9</name>
+	    <value uom="m">9</value>
+	    <dataType>float</dataType>
+	  </extensionNameValue>
+    </referencePoint>
+    <referencePoint uid="WRP2">
+      <name>Sea Bed</name>
+      <type>Well Reference Point</type>
+      <elevation uom="ft" datum="SL">-118.4</elevation>
+      <measuredDepth uom="ft" datum="KB">173.09</measuredDepth>
+      <location uid="loc-1">
+        <wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+        <easting uom="m">425353.84</easting>
+        <northing uom="m">6623785.69</northing>
+      </location>
+      <location uid="loc-2">
+        <wellCRS uidRef="geog1">ED50</wellCRS>
+        <latitude uom="dega">59.743844</latitude>
+        <longitude uom="dega">1.67198083</longitude>
+      </location>
+    </referencePoint>
+    <wellCRS uid="geog1">
+      <name>ED50</name>
+      <geodeticCRS uidRef="4230">4230</geodeticCRS>
+      <description>ED50 system with EPSG code 4230.</description>
+	  <extensionNameValue uid="env10">
+	    <name>env10</name>
+	    <value uom="Euc">10</value>
+	    <dataType>string</dataType>
+	  </extensionNameValue>
+    </wellCRS>
+    <wellCRS uid="proj1">
+      <name>ED50 / UTM Zone 31N</name>
+      <mapProjectionCRS uidRef="23031">ED50 / UTM Zone 31N</mapProjectionCRS>
+	  <extensionNameValue uid="env10">
+	    <name>env11</name>
+	    <value uom="m">11</value>
+	    <dataType>double</dataType>
+	  </extensionNameValue>
+    </wellCRS>
+    <wellCRS uid="localWell1">
+      <name>WellOneWSP</name>
+      <localCRS>
+        <usesWellAsOrigin>true</usesWellAsOrigin>
+        <yAxisAzimuth uom="dega" northDirection="grid north">0</yAxisAzimuth>
+        <xRotationCounterClockwise>false</xRotationCounterClockwise>
+      </localCRS>
+    </wellCRS>
+    <commonData>
+      <dTimCreation>2017-02-16T19:42:36.3999749+00:00</dTimCreation>
+      <dTimLastChange>2017-02-16T20:08:39.2500094+00:00</dTimLastChange>
+      <itemState>plan</itemState>
+      <comments>These are the comments associated with the Well data object.</comments>
+      <defaultDatum uidRef="KB">Kelly Bushing</defaultDatum>
+    </commonData>
+  </well>
+</wells>
