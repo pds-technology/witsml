@@ -34,7 +34,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well131DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimLastChange()
         {
-            var well01 = DevKit.CreateFullWell();
+            var well01 = DevKit.GetFullWell();
+            well01.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
@@ -48,7 +49,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
 
-            var well02 = DevKit.CreateFullWell();
+            var well02 = DevKit.GetFullWell();
+            well02.Uid = DevKit.Uid();
             well02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
             response = DevKit.Add<WellList, Well>(well02);
 

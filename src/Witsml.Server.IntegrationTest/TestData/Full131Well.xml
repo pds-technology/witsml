@@ -1,0 +1,114 @@
+<wells xmlns="http://www.witsml.org/schemas/131" version="1.3.1.1">
+	<well uid="w-12">
+		<name>6507/7-A-42</name>
+		<nameLegal>Company Legal Name</nameLegal>
+		<numLicense>Company License Number</numLicense>
+		<numGovt>Govt-Number</numGovt>
+		<dTimLicense>2001-05-15T13:20:00.000</dTimLicense>
+		<field>Big Field</field>
+		<country>US</country>
+		<state>TX</state>
+		<county>Montgomery</county>
+		<region>Region Name</region>
+		<district>District Name</district>
+		<block>Block Name</block>
+		<timeZone>-06:00</timeZone>
+		<operator>Operating Company</operator>
+		<operatorDiv>Division Name</operatorDiv>
+		<pcInterest uom="%">65</pcInterest>
+		<numAPI>123-543-987AZ</numAPI>
+		<statusWell>drilling</statusWell>
+		<purposeWell>exploration</purposeWell>
+		<dTimSpud>2001-05-31T08:15:00.000</dTimSpud>
+		<dTimPa>2001-07-15T15:30:00.000</dTimPa>
+		<wellheadElevation uom="ft">500</wellheadElevation>
+		<wellDatum uid="KB" defaultMeasuredDepth="true" defaultVerticalDepth="true">
+			<name>Kelly Bushing</name>
+			<code>KB</code>
+			<elevation uom="ft" datum="SL">78.5</elevation>
+		</wellDatum>
+		<wellDatum uid="SL" defaultElevation="true">
+			<name>Sea Level</name>
+			<code>SL</code>
+		</wellDatum>
+		<groundElevation uom="ft">250</groundElevation>
+		<waterDepth uom="ft">520</waterDepth>
+		<wellLocation uid="loc-1">
+			<wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+			<easting uom="m">425353.84</easting>
+			<northing uom="m">6623785.69</northing>
+			<description>Location of well surface point in projected system.</description>
+		</wellLocation>
+		<referencePoint uid="SRP1">
+			<name>Slot Bay Centre</name>
+			<type>Site Reference Point</type>
+			<location uid="loc-1">
+				<wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+				<easting uom="m">425366.47</easting>
+				<northing uom="m">6623781.95</northing>
+			</location>
+			<location uid="loc-2">
+				<wellCRS uidRef="localWell1">WellOneWSP</wellCRS>
+				<localX uom="m">12.63</localX>
+				<localY uom="m">-3.74</localY>
+				<description>Location of the Site Reference Point with respect to the well surface point</description>
+			</location>
+		</referencePoint>
+		<referencePoint uid="WRP2">
+			<name>Sea Bed</name>
+			<type>Well Reference Point</type>
+			<elevation uom="ft" datum="SL">-118.40</elevation>
+			<measuredDepth uom="ft" datum="KB">173.09</measuredDepth>
+			<location uid="loc-1">
+				<wellCRS uidRef="proj1">ED50 / UTM Zone 31N</wellCRS>
+				<easting uom="m">425353.84</easting>
+				<northing uom="m">6623785.69</northing>
+			</location>
+			<location uid="loc-2">
+				<wellCRS uidRef="geog1">ED50</wellCRS>
+				<latitude uom="dega">59.743844</latitude>
+				<longitude uom="dega">1.67198083</longitude>
+			</location>
+		</referencePoint>
+		<wellCRS uid="geog1">
+			<name>ED50</name>
+			<geographic>
+				<nameCRS namingSystem="epsg" code="4230">ED50</nameCRS>
+				<geodeticDatumCode>ED50</geodeticDatumCode>
+				<xTranslation uom="m">-89.5</xTranslation>
+				<yTranslation uom="m">-93.8</yTranslation>
+				<zTranslation uom="m">-123.1</zTranslation>
+				<xRotation uom="seca">0</xRotation>
+				<yRotation uom="seca">0</yRotation>
+				<zRotation uom="seca">-0.156</zRotation>
+				<scaleFactor>1.200</scaleFactor>
+				<ellipsoidCode>INT24</ellipsoidCode>
+				<ellipsoidSemiMajorAxis uom="m">6378388</ellipsoidSemiMajorAxis>
+				<ellipsoidInverseFlattening>297.0</ellipsoidInverseFlattening>
+			</geographic>
+		</wellCRS>
+		<wellCRS uid="proj1">
+			<name>ED50 / UTM Zone 31N</name>
+			<mapProjection>
+				<nameCRS namingSystem="epsg" code="23031">ED50 / UTM Zone 31N</nameCRS>
+				<projectionCode>universal transverse Mercator</projectionCode>
+				<projectedFrom uidRef="geog1">ED50</projectedFrom>
+				<zone>31N</zone>
+			</mapProjection>
+		</wellCRS>
+		<wellCRS uid="localWell1">
+			<name>WellOneWSP</name>
+			<localCRS>
+				<usesWellAsOrigin>true</usesWellAsOrigin>
+				<yAxisAzimuth uom="dega" northDirection="grid north">0</yAxisAzimuth>
+				<xRotationCounterClockwise>false</xRotationCounterClockwise>
+			</localCRS>
+		</wellCRS>
+		<commonData>
+			<dTimCreation>2001-04-30T08:15:00.000</dTimCreation>
+			<dTimLastChange>2001-05-31T08:15:00.000</dTimLastChange>
+			<itemState>plan</itemState>
+			<comments>These are the comments associated with the Well data object.</comments>
+		</commonData>
+	</well>
+</wells>

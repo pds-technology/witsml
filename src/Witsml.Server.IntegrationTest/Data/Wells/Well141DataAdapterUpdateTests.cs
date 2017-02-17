@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Update_A_List_Element()
         {
             // Add well
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
             well.Uid = DevKit.Uid();
             DevKit.AddAndAssert(well);
             // Query well 
@@ -225,7 +225,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("Tests adding a nested array element, e.g. referencePoint.location with elements having uom attributes, e.g. latitude during update")]
         public void Well141DataAdapter_UpdateInStore_Add_Nested_Array_Element_With_Uom_Success()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var referencePoint = well.ReferencePoint;
             well.ReferencePoint = null;
             var response = DevKit.Add<WellList, Well>(well);

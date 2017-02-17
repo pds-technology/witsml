@@ -396,7 +396,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             if (result.Count == 0)
             {
-                var well = DevKit.CreateFullWell();
+                var well = DevKit.GetFullWell();
                 well.Uid = testUid;
                 var response = DevKit.Add<WellList, Well>(well);
 
@@ -413,7 +413,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_Different_Case()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -448,7 +449,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_MultiQueries_Same_Object_Returned()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -474,7 +476,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_MultiQueries_One_Query_Fails()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -497,7 +500,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimCreation()
         {
-            var well01 = DevKit.CreateFullWell();
+            var well01 = DevKit.GetFullWell();
+            well01.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
@@ -506,7 +510,8 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid01 = response.SuppMsgOut;
             var now = DateTimeOffset.UtcNow;
 
-            var well02 = DevKit.CreateFullWell();
+            var well02 = DevKit.GetFullWell();
+            well02.Uid = DevKit.Uid();
             response = DevKit.Add<WellList, Well>(well02);
 
             Assert.IsNotNull(response);
@@ -526,7 +531,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimLastChange()
         {
-            var well01 = DevKit.CreateFullWell();
+            var well01 = DevKit.GetFullWell();
+            well01.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
@@ -540,7 +546,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
 
-            var well02 = DevKit.CreateFullWell();
+            var well02 = DevKit.GetFullWell();
+            well02.Uid = DevKit.Uid();
             well02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
             response = DevKit.Add<WellList, Well>(well02);
 
@@ -580,7 +587,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Selection_Recurring_Items()
         {
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -599,7 +607,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStrore_Selection_Recurring_Items_Criteria_OR()
         {
-            var well01 = DevKit.CreateFullWell();
+            var well01 = DevKit.GetFullWell();
+            well01.Uid = DevKit.Uid();
             well01.WellDatum.RemoveAt(0);            
             var response = DevKit.Add<WellList, Well>(well01);
 
@@ -607,7 +616,8 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             var uid01 = response.SuppMsgOut;
 
-            var well02 = DevKit.CreateFullWell();
+            var well02 = DevKit.GetFullWell();
+            well02.Uid = DevKit.Uid();
             well02.WellDatum.RemoveAt(1);
             response = DevKit.Add<WellList, Well>(well02);
 
@@ -703,7 +713,8 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_GetFromStore_Can_Get_Uom_Data_OptionsIn_Requested()
         {
             // Add well
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -885,7 +896,8 @@ namespace PDS.Witsml.Server.Data.Wells
         private void Get_Measure_Data_With_Value(string measureDataValue)
         {
             // Add well
-            var well = DevKit.CreateFullWell();
+            var well = DevKit.GetFullWell();
+            well.Uid = DevKit.Uid();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);

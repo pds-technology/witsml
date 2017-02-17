@@ -36,7 +36,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_FullWell()
         {
-            Well = DevKit.CreateFullWell();
+            Well = DevKit.GetFullWell();
             Well.Uid = DevKit.Uid();
 
             // Add well
@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_FullWell_With_Case_Insensitive_Uid()
         {
             var uid = DevKit.Uid();
-            Well = DevKit.CreateFullWell();
+            Well = DevKit.GetFullWell();
             Well.Uid = "w" + uid;
 
             // Add well

@@ -353,110 +353,13 @@ namespace PDS.Witsml.Server
             }
         }
 
-        public Well CreateFullWell()
+        public Well GetFullWell()
         {
-            string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-            "<well>" + Environment.NewLine +
-            "<name>" + Name("Test Full Well") + " </name>" + Environment.NewLine +
-            "<nameLegal>Company Legal Name</nameLegal>" + Environment.NewLine +
-            "<numLicense>Company License Number</numLicense>" + Environment.NewLine +
-            "<numGovt>Govt-Number</numGovt>" + Environment.NewLine +
-            "<dTimLicense>2001-05-15T13:20:00Z</dTimLicense>" + Environment.NewLine +
-            "<field>Big Field</field>" + Environment.NewLine +
-            "<country>US</country>" + Environment.NewLine +
-            "<state>TX</state>" + Environment.NewLine +
-            "<county>Montgomery</county>" + Environment.NewLine +
-            "<region>Region Name</region>" + Environment.NewLine +
-            "<district>District Name</district>" + Environment.NewLine +
-            "<block>Block Name</block>" + Environment.NewLine +
-            "<timeZone>-06:00</timeZone>" + Environment.NewLine +
-            "<operator>Operating Company</operator>" + Environment.NewLine +
-            "<operatorDiv>Division Name</operatorDiv>" + Environment.NewLine +
-            "<pcInterest uom=\"%\">65</pcInterest>" + Environment.NewLine +
-            "<numAPI>123-543-987AZ</numAPI>" + Environment.NewLine +
-            "<statusWell>drilling</statusWell>" + Environment.NewLine +
-            "<purposeWell>exploration</purposeWell>" + Environment.NewLine +
-            "<fluidWell>water</fluidWell>" + Environment.NewLine +
-            "<dTimSpud>2001-05-31T08:15:00Z</dTimSpud>" + Environment.NewLine +
-            "<dTimPa>2001-07-15T15:30:00Z</dTimPa>" + Environment.NewLine +
-            "<wellheadElevation uom=\"ft\">500</wellheadElevation>" + Environment.NewLine +
-            "<wellDatum uid=\"KB\">" + Environment.NewLine +
-            "<name>Kelly Bushing</name>" + Environment.NewLine +
-            "<code>KB</code>" + Environment.NewLine +
-            "<elevation uom=\"ft\" datum=\"SL\">78.5</elevation>" + Environment.NewLine +
-            "</wellDatum>" + Environment.NewLine +
-            "<wellDatum uid=\"SL\">" + Environment.NewLine +
-            "<name>Sea Level</name>" + Environment.NewLine +
-            "<code>SL</code>" + Environment.NewLine +
-            "<datumName namingSystem=\"EPSG\" code=\"5106\">Caspian Sea</datumName>" + Environment.NewLine +
-            "</wellDatum>" + Environment.NewLine +
-            "<groundElevation uom=\"ft\">250</groundElevation>" + Environment.NewLine +
-            "<waterDepth uom=\"ft\">520</waterDepth>" + Environment.NewLine +
-            "<wellLocation uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425353.84</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623785.69</northing>" + Environment.NewLine +
-            "<description>Location of well surface point in projected system.</description>" + Environment.NewLine +
-            "</wellLocation>" + Environment.NewLine +
-            "<referencePoint uid=\"SRP1\">" + Environment.NewLine +
-            "<name>Slot Bay Centre</name>" + Environment.NewLine +
-            "<type>Site Reference Point</type>" + Environment.NewLine +
-            "<location uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425366.47</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623781.95</northing>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "<location uid=\"loc-2\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"localWell1\">WellOneWSP</wellCRS>" + Environment.NewLine +
-            "<localX uom=\"m\">12.63</localX>" + Environment.NewLine +
-            "<localY uom=\"m\">-3.74</localY>" + Environment.NewLine +
-            "<description>Location of the Site Reference Point with respect to the well surface point</description>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "</referencePoint>" + Environment.NewLine +
-            "<referencePoint uid=\"WRP2\">" + Environment.NewLine +
-            "<name>Sea Bed</name>" + Environment.NewLine +
-            "<type>Well Reference Point</type>" + Environment.NewLine +
-            "<elevation uom=\"ft\" datum=\"SL\">-118.4</elevation>" + Environment.NewLine +
-            "<measuredDepth uom=\"ft\" datum=\"KB\">173.09</measuredDepth>" + Environment.NewLine +
-            "<location uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425353.84</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623785.69</northing>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "<location uid=\"loc-2\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"geog1\">ED50</wellCRS>" + Environment.NewLine +
-            "<latitude uom=\"dega\">59.743844</latitude>" + Environment.NewLine +
-            "<longitude uom=\"dega\">1.67198083</longitude>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "</referencePoint>" + Environment.NewLine +
-            "<wellCRS uid=\"geog1\">" + Environment.NewLine +
-            "<name>ED50</name>" + Environment.NewLine +
-            "<geodeticCRS uidRef=\"4230\">4230</geodeticCRS>" + Environment.NewLine +
-            "<description>ED50 system with EPSG code 4230.</description>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<wellCRS uid=\"proj1\">" + Environment.NewLine +
-            "<name>ED50 / UTM Zone 31N</name>" + Environment.NewLine +
-            "<mapProjectionCRS uidRef=\"23031\">ED50 / UTM Zone 31N</mapProjectionCRS>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<wellCRS uid=\"localWell1\">" + Environment.NewLine +
-            "<name>WellOneWSP</name>" + Environment.NewLine +
-            "<localCRS>" + Environment.NewLine +
-            "<usesWellAsOrigin>true</usesWellAsOrigin>" + Environment.NewLine +
-            "<yAxisAzimuth uom=\"dega\" northDirection=\"grid north\">0</yAxisAzimuth>" + Environment.NewLine +
-            "<xRotationCounterClockwise>false</xRotationCounterClockwise>" + Environment.NewLine +
-            "</localCRS>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<commonData>" + Environment.NewLine +
-            "<dTimCreation>2016-03-07T22:53:59.249Z</dTimCreation>" + Environment.NewLine +
-            "<dTimLastChange>2016-03-07T22:53:59.249Z</dTimLastChange > " + Environment.NewLine +
-            "<itemState>plan</itemState>" + Environment.NewLine +
-            "<comments>These are the comments associated with the Well data object.</comments>" + Environment.NewLine +
-            "<defaultDatum uidRef=\"KB\">Kelly Bushing</defaultDatum>" + Environment.NewLine +
-            "</commonData>" + Environment.NewLine +
-            "</well>" + Environment.NewLine +
-            "</wells>";
+            var dataDir = new DirectoryInfo(@".\TestData").FullName;
+            var filePath = Path.Combine(dataDir, "Full141Well.xml");
 
-            WellList wells = EnergisticsConverter.XmlToObject<WellList>(wellXml);
+            var xmlin = File.ReadAllText(filePath);
+            var wells = EnergisticsConverter.XmlToObject<WellList>(xmlin);
             return wells.Items[0] as Well;
         }
 
