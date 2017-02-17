@@ -512,8 +512,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The entity.</param>
         private void FilterRecurringElements(T entity)
         {
-            var filters = Context.RecurringElementFilters;
-            filters.ForEach(filter => FilterRecurringElements(entity, entity, filter));
+            Context.RecurringElementFilters
+                .SelectMany(filter => filter.Filters)
+                .ForEach(filter => FilterRecurringElements(entity, entity, filter));
         }
 
         /// <summary>
@@ -541,10 +542,16 @@ namespace PDS.Witsml.Server.Data
             // Update parent path with current property name
             parentPath = GetPropertyPath(parentPath, propertyName);
 
+            // Check for null value which does not match the filter criteria
+            if (propertyValue == null)
+            {
+                return false;
+            }
+
             // Check if processing nested complex type
             if (listValue == null)
             {
-                if (propertyValue != null && !string.IsNullOrWhiteSpace(nestedPath) && !HasSimpleContent(propertyInfo.PropertyType))
+                if (!string.IsNullOrWhiteSpace(nestedPath) && !HasSimpleContent(propertyInfo.PropertyType))
                 {
                     return FilterRecurringElements(dataObject, propertyValue, filter, parentPath);
                 }
