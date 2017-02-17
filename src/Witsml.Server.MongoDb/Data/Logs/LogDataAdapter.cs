@@ -611,7 +611,7 @@ namespace PDS.Witsml.Server.Data.Logs
             else
             {
                 fields.Add("minIndex");
-                fields.Add("maxDIndex");
+                fields.Add("maxIndex");
             }
 
             var elements = parser.Properties(parser.Element(), "logCurveInfo");
