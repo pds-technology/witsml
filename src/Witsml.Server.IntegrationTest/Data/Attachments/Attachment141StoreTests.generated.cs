@@ -28,6 +28,8 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace PDS.Witsml.Server.Data.Attachments
 {
@@ -166,6 +168,49 @@ namespace PDS.Witsml.Server.Data.Attachments
             DevKit.AssertChangeLog(result, expectedHistoryCount, expectedChangeType);
 
             DevKit.AssertChangeHistoryTimesUnique(result);
+        }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_GetFromStore_Filter_ExtensionNameValue()
+        {
+            AddParents();
+
+            var extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var extensionName2 = DevKit.ExtensionNameValue("Ext-2", "2.0", "cm", PrimitiveType.@float);
+            extensionName2.MeasureClass = MeasureClass.Length;
+            var extensionName3 = DevKit.ExtensionNameValue("Ext-3", "3.0", "cm", PrimitiveType.unknown);
+
+            Attachment.CommonData = new CommonData()
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>()
+                {
+                    extensionName1, extensionName2, extensionName3
+                }
+            };
+
+            // Add the Attachment141
+            DevKit.AddAndAssert(Attachment);
+
+            // Query for first extension
+            var commonDataXml = "<commonData>" + Environment.NewLine +
+                                "<extensionNameValue uid=\"\">" + Environment.NewLine +
+                                "<name />{0}" + Environment.NewLine +
+                                "</extensionNameValue>" + Environment.NewLine +
+                                "</commonData>";
+
+            var extValueQuery = string.Format(commonDataXml, "<dataType>double</dataType>");
+            var queryXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid, extValueQuery);
+            DevKit.AssertCommonDataExtNameValue(extensionName1, queryXml);
+
+            // Query for second extension
+            extValueQuery = string.Format(commonDataXml, "<measureClass>length</measureClass>");
+            queryXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid, extValueQuery);
+            DevKit.AssertCommonDataExtNameValue(extensionName2, queryXml);
+
+            // Query for third extension
+            extValueQuery = string.Format(commonDataXml, "<dataType>unknown</dataType>");
+            queryXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid, extValueQuery);
+            DevKit.AssertCommonDataExtNameValue(extensionName3, queryXml);
         }
 
         [TestMethod]
