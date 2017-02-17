@@ -454,6 +454,130 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AssertTrajectoryStations(stations, result.TrajectoryStation);
         }
 
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(3, 1);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+            var secondStation = Trajectory.TrajectoryStation.First(s => s.Uid == "sta-2");
+
+            var queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/><trajectoryStation uid=\"{secondStation.Uid}\"/>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(3, 1);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+
+            var queryIn = "<trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = @"<trajectoryStation><typeTrajStation>magnetic MWD</typeTrajStation></trajectoryStation>
+                        <trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
+
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(3, result.TrajectoryStation.Count);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+            var secondStation = Trajectory.TrajectoryStation.Find(s => s.Uid == "sta-2");
+
+            var queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>tie in point</typeTrajStation> </trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(0, result.TrajectoryStation.Count);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>tie in point</typeTrajStation> </trajectoryStation>" +
+                        $"<trajectoryStation uid=\"{secondStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uom()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            DevKit.AddAndAssert(Trajectory);
+            var lastStation = Trajectory.TrajectoryStation.Last();
+
+            var queryIn = "<trajectoryStation> <md uom=\"m\">20</md></trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+            var firstResultStation = result.TrajectoryStation.First();
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
+            Assert.AreEqual(20, firstResultStation.MD.Value);
+            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
+            DevKit.AddAndAssert(Trajectory);
+            var lastStation = Trajectory.TrajectoryStation.Last();
+
+            var queryIn = "<trajectoryStation><location><wellCRS>ED35</wellCRS></location></trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+            var locations = result.TrajectoryStation.First().Location;
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            Assert.AreEqual(1, locations.Count);
+            Assert.AreEqual(lastStation.Location.First().WellCRS.Value, locations.First().WellCRS.Value);
+            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
+        }
+
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)
         {
             Assert.AreEqual(stations.Count, results.Count);

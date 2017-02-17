@@ -34,7 +34,8 @@ namespace PDS.Witsml.Data.Trajectories
         /// </summary>
         public const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
 
-        private const string StationUidPrefix = "sta-";      
+        private const string StationUidPrefix = "sta-";
+        private const string LocationUidPrefix = "loc-";
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
@@ -51,25 +52,27 @@ namespace PDS.Witsml.Data.Trajectories
         public List<TrajectoryStation> GenerationStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom, bool inCludeExtra = false)
         {
             var stations = new List<TrajectoryStation>();
-            var random = new Random(numOfStations*2);
+            var random = new Random(numOfStations * 2);
 
             for (var i = 0; i < numOfStations; i++)
             {
+                string uidPrefix = (i + 1).ToString();
                 var station = new TrajectoryStation
                 {
-                    Uid = StationUidPrefix + (i + 1),
+                    Uid = StationUidPrefix + uidPrefix,
                     TypeTrajStation = i == 0 ? TrajStationType.tieinpoint : TrajStationType.magneticMWD,
                     MD = new MeasuredDepthCoord { Uom = mdUom, Value = startMd },
                     Tvd = new WellVerticalDepthCoord() { Uom = tvdUom, Value = startMd == 0 ? 0 : startMd - 0.1 },
                     Azi = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
                     Incl = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
-                    DateTimeStn = DateTimeOffset.UtcNow
+                    DateTimeStn = DateTimeOffset.UtcNow,
+                    Location = new List<Location> { Location(LocationUidPrefix + 1, random.NextDouble(), "ED" + uidPrefix) }
                 };
 
                 if (inCludeExtra)
                 {
-                    station.Mtf = new PlaneAngleMeasure {Uom = angleUom, Value = random.NextDouble()};
-                    station.MDDelta = new LengthMeasure {Uom = LengthUom.m, Value = 0};
+                    station.Mtf = new PlaneAngleMeasure { Uom = angleUom, Value = random.NextDouble() };
+                    station.MDDelta = new LengthMeasure { Uom = LengthUom.m, Value = 0 };
                     station.StatusTrajStation = TrajStationStatus.position;
                 }
                 stations.Add(station);
@@ -77,6 +80,21 @@ namespace PDS.Witsml.Data.Trajectories
             }
 
             return stations;
+        }
+
+        /// <summary>
+        /// Trajectory station location.
+        /// </summary>
+        /// <returns></returns>
+        public Location Location(string uid, double coordinateValue, string wellCrsValue)
+        {
+            return new Location
+            {
+                Uid = uid,
+                WellCRS = new RefNameString { UidRef = "proj1", Value = wellCrsValue },
+                Easting = new LengthMeasure(coordinateValue * 5, LengthUom.m),
+                Northing = new LengthMeasure(coordinateValue * 12, LengthUom.m),
+            };
         }
     }
 }

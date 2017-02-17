@@ -20,9 +20,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Trajectories;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -276,6 +278,135 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 MDMax = new MeasuredDepthCoord { Uom = Trajectory131Generator.MdUom, Value = end }
             };
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 5);
+            DevKit.AddAndAssert(Trajectory);
+
+            const int start = 8;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = start },
+                TrajectoryStation = new List<TrajectoryStation> { new TrajectoryStation { MD = new MeasuredDepthCoord { Value = 6, Uom = MeasuredDepthUom.m } } }
+            };
+
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
+
+            DevKit.AssertNames(result, Trajectory);
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start).ToList();
+            AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 7);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+            var fifthStation = Trajectory.TrajectoryStation.First(s => s.Uid == "sta-5");
+
+            var queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"/><trajectoryStation uid=\"{fifthStation.Uid}\"/>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, fifthStation }, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 10);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+
+            var queryIn = "<trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = @"<trajectoryStation><typeTrajStation>magnetic MWD</typeTrajStation></trajectoryStation>
+                        <trajectoryStation><typeTrajStation>tie in point</typeTrajStation></trajectoryStation>";
+
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(5, result.TrajectoryStation.Count);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
+            var secondStation = Trajectory.TrajectoryStation.Find(s => s.Uid == "sta-2");
+
+            var queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>tie in point</typeTrajStation> </trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation }, result.TrajectoryStation);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(0, result.TrajectoryStation.Count);
+
+            queryIn = $"<trajectoryStation uid=\"{firstStation.Uid}\"> <typeTrajStation>tie in point</typeTrajStation> </trajectoryStation>" +
+                        $"<trajectoryStation uid=\"{secondStation.Uid}\"> <typeTrajStation>magnetic MWD</typeTrajStation> </trajectoryStation>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Trajectory131DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uom()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            DevKit.AddAndAssert(Trajectory);
+            var lastStation = Trajectory.TrajectoryStation.Last();
+
+            var queryIn = "<trajectoryStation> <md uom=\"m\">20</md></trajectoryStation>";
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+            var firstResultStation = result.TrajectoryStation.First();
+
+            Assert.AreEqual(1, result.TrajectoryStation.Count);
+            Assert.AreEqual(lastStation.Uid, firstResultStation.Uid);
+            Assert.AreEqual(20, firstResultStation.MD.Value);
+
+            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
         }
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)
