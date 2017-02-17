@@ -193,8 +193,9 @@ namespace PDS.Witsml.Data
             {
                 var xmlAttribute = property.GetCustomAttribute<XmlAttributeAttribute>();
                 var xmlElement = property.GetCustomAttribute<XmlElementAttribute>();
+                var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
 
-                if ((xmlAttribute == null && xmlElement == null) ||
+                if ((xmlAttribute == null && xmlElement == null && xmlArray == null) ||
                     _excluded.Contains(property.PropertyType) ||
                     _ignored.Contains(xmlAttribute?.AttributeName) ||
                     _ignored.Contains(xmlElement?.ElementName) ||
@@ -206,6 +207,17 @@ namespace PDS.Witsml.Data
                 {
                     var attribute = new XAttribute(xmlAttribute.AttributeName, string.Empty);
                     parent.Add(attribute);
+                    continue;
+                }
+
+                // Arrays
+                if (xmlArray != null)
+                {
+                    var xmlArrayItem = property.GetCustomAttribute<XmlArrayItemAttribute>();
+                    var array = new XElement(ns + xmlArray.ElementName,
+                                new XElement(ns + xmlArrayItem.ElementName));
+
+                    parent.Add(array);
                     continue;
                 }
 
