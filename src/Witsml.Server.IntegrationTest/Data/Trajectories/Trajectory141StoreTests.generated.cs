@@ -226,17 +226,59 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var extValueQuery = string.Format(commonDataXml, "<dataType>double</dataType>");
             var queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, extValueQuery);
-            DevKit.AssertCommonDataExtNameValue(extensionName1, queryXml);
+            var result = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryXml, null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var resultTrajectory = result[0];
+            Assert.IsNotNull(resultTrajectory);
+
+            var commonData = resultTrajectory.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.AreEqual(1, commonData.ExtensionNameValue.Count);
+
+            var env = commonData.ExtensionNameValue[0];
+            Assert.IsNotNull(env);
+            Assert.AreEqual(extensionName1.Uid, env.Uid);
+            Assert.AreEqual(extensionName1.Name, env.Name);
 
             // Query for second extension
             extValueQuery = string.Format(commonDataXml, "<measureClass>length</measureClass>");
             queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, extValueQuery);
-            DevKit.AssertCommonDataExtNameValue(extensionName2, queryXml);
+            result = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryXml, null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            resultTrajectory = result[0];
+            Assert.IsNotNull(resultTrajectory);
+
+            commonData = resultTrajectory.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.AreEqual(1, commonData.ExtensionNameValue.Count);
+
+            env = commonData.ExtensionNameValue[0];
+            Assert.IsNotNull(env);
+            Assert.AreEqual(extensionName2.Uid, env.Uid);
+            Assert.AreEqual(extensionName2.Name, env.Name);
 
             // Query for third extension
             extValueQuery = string.Format(commonDataXml, "<dataType>unknown</dataType>");
             queryXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, extValueQuery);
-            DevKit.AssertCommonDataExtNameValue(extensionName3, queryXml);
+            result = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryXml, null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            resultTrajectory = result[0];
+            Assert.IsNotNull(resultTrajectory);
+
+            commonData = resultTrajectory.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.AreEqual(1, commonData.ExtensionNameValue.Count);
+
+            env = commonData.ExtensionNameValue[0];
+            Assert.IsNotNull(env);
+            Assert.AreEqual(extensionName3.Uid, env.Uid);
+            Assert.AreEqual(extensionName3.Name, env.Name);
         }
 
         [TestMethod]

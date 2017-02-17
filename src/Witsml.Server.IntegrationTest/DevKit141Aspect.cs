@@ -822,25 +822,6 @@ namespace PDS.Witsml.Server
             CollectionAssert.AreEqual(logMnemonics, changLogMnemonics);
         }
 
-        public void AssertCommonDataExtNameValue(ExtensionNameValue expected, string queryXml)
-        {
-            var result = Query<WellList, Well>(ObjectTypes.Well, queryXml, null, OptionsIn.ReturnElements.Requested);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
-
-            var resultWell = result[0];
-            Assert.IsNotNull(resultWell);
-
-            var commonData = resultWell.CommonData;
-            Assert.IsNotNull(commonData);
-            Assert.AreEqual(1, commonData.ExtensionNameValue.Count);
-
-            var env = commonData.ExtensionNameValue[0];
-            Assert.IsNotNull(env);
-            Assert.AreEqual(expected.Uid, env.Uid);
-            Assert.AreEqual(expected.Name, env.Name);
-        }
-
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
