@@ -553,16 +553,25 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
             DevKit.AddAndAssert(Trajectory);
+
             var lastStation = Trajectory.TrajectoryStation.Last();
 
             var queryIn = $"<trajectoryStation><location><wellCRS>{lastStation.Location.First().WellCRS.Value}</wellCRS></location></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
+            // NOTE: this query will filter trajectoryStation/location elements, not trajectoryStation elements
+            //AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
 
-            var locations = result.TrajectoryStation.First().Location;
-            Assert.AreEqual(1, locations.Count);
-            Assert.AreEqual(lastStation.Location.First().WellCRS.Value, locations.First().WellCRS.Value);
+            var locations = result.TrajectoryStation
+                .Where(x => x.Location != null)
+                .SelectMany(x => x.Location)
+                .ToList();
+            Assert.AreEqual(1, locations.Count, "trajectoryStation/location count");
+
+            var location = locations.FirstOrDefault();
+            Assert.IsNotNull(location, "location");
+
+            Assert.AreEqual(lastStation.Location.First().WellCRS.Value, location.WellCRS.Value, "trajectoryStation/location/wellCRS");
         }
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)

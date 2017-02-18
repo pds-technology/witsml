@@ -147,6 +147,43 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Gets the property value from the specified object instance.
+        /// </summary>
+        /// <param name="instance">The object instance.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns>The property value.</returns>
+        public static object GetPropertyValue(this object instance, string propertyPath)
+        {
+            foreach (var propertyName in propertyPath.Split('.'))
+            {
+                if (instance == null) return null;
+
+                var type = instance.GetType();
+                var info = type.GetProperty(propertyName);
+
+                if (info == null) return null;
+
+                instance = info.GetValue(instance);
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        /// Gets the property value from the specified object instance.
+        /// </summary>
+        /// <typeparam name="T">The value type.</typeparam>
+        /// <param name="instance">The object instance.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns>The property value.</returns>
+        public static T GetPropertyValue<T>(this object instance, string propertyPath)
+        {
+            var propertyValue = instance.GetPropertyValue(propertyPath);
+            if (propertyValue == null) return default(T);
+            return (T)propertyValue;
+        }
+
+        /// <summary>
         /// Gets the description for the specified enumeration member.
         /// </summary>
         /// <param name="value">The enumeration value.</param>
