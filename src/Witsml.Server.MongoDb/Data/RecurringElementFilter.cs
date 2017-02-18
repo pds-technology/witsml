@@ -17,7 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -26,40 +28,51 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     public class RecurringElementFilter
     {
+        private readonly string _expression;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecurringElementFilter" /> class.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
+        public RecurringElementFilter(string propertyPath)
+        {
+            PropertyPath = propertyPath;
+            Filters = new List<RecurringElementFilter>();
+            Predicate = (dataObject, instance, filter) => Filters.All(x => x.Predicate(dataObject, instance, x));
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RecurringElementFilter" /> class.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="expression">The expression.</param>
         /// <param name="predicate">The predicate.</param>
-        public RecurringElementFilter(string propertyPath, string expression, Func<object, object, bool> predicate)
+        public RecurringElementFilter(string propertyPath, string expression, Func<object, object, RecurringElementFilter, bool> predicate)
         {
             PropertyPath = propertyPath;
-            Expression = $"{propertyPath}.{expression}";
             Predicate = predicate;
+            Filters = new List<RecurringElementFilter>(0);
+            _expression = $"{propertyPath}.{expression}";
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RecurringElementFilter" /> class.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="isRecurringCriteria">if set to <c>true</c> is recurring criteria.</param>
         /// <param name="filters">The collection of filters.</param>
-        public RecurringElementFilter(string propertyPath, bool isRecurringCriteria, params RecurringElementFilter[] filters)
+        public RecurringElementFilter(string propertyPath, params RecurringElementFilter[] filters)
         {
             PropertyPath = propertyPath;
-            Filters = filters;
-
-            var junction = isRecurringCriteria ? " OR " : " AND ";
-            Expression = "(" + string.Join(junction, filters.Select(x => x.Expression)) + ")";
-
-            Predicate = (dataObject, instance) =>
-            {
-                return isRecurringCriteria
-                    ? filters.Any(x => x.Predicate(dataObject, instance))
-                    : filters.All(x => x.Predicate(dataObject, instance));
-            };
+            Filters = new List<RecurringElementFilter>(filters);
+            Predicate = (dataObject, instance, filter) => Filters.Any(x => x.Predicate(dataObject, instance, x));
+            _expression = "(" + string.Join(" OR ", Filters.Select(x => x.Expression)) + ")";
         }
+
+        /// <summary>
+        /// Gets the expression.
+        /// </summary>
+        /// <value>The expression.</value>
+        public string Expression => ToString();
 
         /// <summary>
         /// Gets the property path.
@@ -68,21 +81,41 @@ namespace PDS.Witsml.Server.Data
         public string PropertyPath { get; }
 
         /// <summary>
-        /// Gets the expression.
-        /// </summary>
-        /// <value>The expression.</value>
-        public string Expression { get; }
-
-        /// <summary>
         /// Gets the predicate.
         /// </summary>
         /// <value>The predicate.</value>
-        public Func<object, object, bool> Predicate { get; }
+        public Func<object, object, RecurringElementFilter, bool> Predicate { get; }
 
         /// <summary>
         /// Gets the collection of filters.
         /// </summary>
         /// <value>The collection of filters.</value>
-        public RecurringElementFilter[] Filters { get; }
+        public List<RecurringElementFilter> Filters { get; }
+
+        /// <summary>
+        /// Gets or sets the collection of previous filters.
+        /// </summary>
+        /// <value>The collection of previous filters.</value>
+        public List<RecurringElementFilter> PreviousFilters { get; set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
+        public override string ToString()
+        {
+            return _expression ?? string.Join(" AND ", Filters.Select(x => x.Expression));
+        }
+
+        /// <summary>
+        /// Gets the property value from the specified object instance.
+        /// </summary>
+        /// <typeparam name="T">The value type.</typeparam>
+        /// <param name="instance">The object instance.</param>
+        /// <returns>The property value.</returns>
+        public T GetPropertyValue<T>(object instance)
+        {
+            return instance.GetPropertyValue<T>(PropertyPath);
+        }
     }
 }

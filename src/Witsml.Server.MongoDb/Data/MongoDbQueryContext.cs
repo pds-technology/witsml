@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data
             Filters = new List<FilterDefinition<T>>();
             ParentFilters = new Dictionary<string, List<FilterDefinition<T>>>();
             RecurringElementFilters = new List<RecurringElementFilter>();
-            ParentRecurringFilters = new Dictionary<string, List<RecurringElementFilter>>();
+            RecurringFilterStack = new Stack<RecurringElementFilter>();
         }
 
         /// <summary>
@@ -62,16 +62,22 @@ namespace PDS.Witsml.Server.Data
         public Dictionary<string, List<FilterDefinition<T>>> ParentFilters { get; }
 
         /// <summary>
-        /// Gets or sets the recurring element filters.
+        /// Gets or sets the current recurring filters.
         /// </summary>
-        /// <value>The recurring element filters.</value>
-        public List<RecurringElementFilter> RecurringElementFilters { get; set; }
+        /// <value>The current recurring filters.</value>
+        public List<RecurringElementFilter> CurrentRecurringFilters { get; set; }
 
         /// <summary>
-        /// Gets the parent recurring filters.
+        /// Gets the collection of recurring element filters.
         /// </summary>
-        /// <value>The parent recurring filters.</value>
-        public Dictionary<string, List<RecurringElementFilter>> ParentRecurringFilters { get; }
+        /// <value>The recurring element filters.</value>
+        public List<RecurringElementFilter> RecurringElementFilters { get; }
+
+        /// <summary>
+        /// Gets the recurring filter stack.
+        /// </summary>
+        /// <value>The recurring filter stack.</value>
+        public Stack<RecurringElementFilter> RecurringFilterStack { get; }
 
         /// <summary>
         /// Gets or sets the list of fields.

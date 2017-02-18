@@ -323,8 +323,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // If filtering by Mnemonic, need to be sure to include the index curve
             if (filter != null)
             {
-                var indexCurveFilter = new RecurringElementFilter("LogCurveInfo.Mnemonic", "Equals($indexCurve)",
-                    (dataObject, instance) =>
+                var propertyPath = filter.Filters.Select(x => x.PropertyPath).FirstOrDefault();
+                var indexCurveFilter = new RecurringElementFilter(propertyPath, "Equals($indexCurve)",
+                    (dataObject, instance, recurringFilter) =>
                     {
                         var log = (T) dataObject;
                         var curve = (TChild) instance;
@@ -336,7 +337,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     });
 
                 var list = new List<RecurringElementFilter>(filter.Filters) { indexCurveFilter };
-                filters.Add(new RecurringElementFilter("LogCurveInfo", true, list.ToArray()));
+                filters.Add(new RecurringElementFilter("LogCurveInfo", list.ToArray()));
                 filters.Remove(filter);
             }
 
