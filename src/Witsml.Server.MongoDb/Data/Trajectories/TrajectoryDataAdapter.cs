@@ -237,8 +237,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var stations = GetTrajectoryStations(entity);
 
             if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
-                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) || 
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
                 !parser.IncludeTrajectoryStations()) 
+                return stations;
+
+            var stationParser = parser
+                .ForkProperties(ObjectTypes.TrajectoryStation, ObjectTypes.TrajectoryStation)
+                .FirstOrDefault();
+
+            if (stationParser == null || (!stationParser.HasElements() && !stationParser.Element().HasAttributes))
                 return stations;
 
             const string prefix = "TrajectoryStation.";
@@ -247,10 +254,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 .Where(x => x.StartsWith(prefix))
                 .Select(x => x.Substring(prefix.Length))
                 .ToList();
-
-            var stationParser = parser
-                .ForkProperties(ObjectTypes.TrajectoryStation, ObjectTypes.TrajectoryStation)
-                .FirstOrDefault();
 
             var mapper = new DataObjectMapper<TChild>(Container, stationParser, fields);
             return mapper.Map(stations);
