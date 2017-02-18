@@ -44,7 +44,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
         private static readonly string _xmlInMeasureData =
             "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-            "   <well> uid=\"" + "{0}" + "\"" + Environment.NewLine +
+            "   <well uid=\"" + "{0}" + "\">" + Environment.NewLine +
             "     <name>" + "{1}" + "</name>" + Environment.NewLine +
             "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
             "     <wellheadElevation uom=\"ft\">{2}</wellheadElevation>" + Environment.NewLine +
@@ -723,7 +723,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                           "   <well uid=\"" + uid + "\">" + Environment.NewLine +
                            "     <name>" + well.Name + "</name>" + Environment.NewLine +
                            "    <pcInterest uom=\"" + well.PercentInterest.Uom + "\">" + "</pcInterest>" + Environment.NewLine +
                            "    <wellDatum uid=\"" + well.WellDatum[0].Uid + "\">" + Environment.NewLine +
