@@ -1131,7 +1131,6 @@ namespace PDS.Witsml.Server.Data.Wells
             returnWell = result.FirstOrDefault();
             AssertTestWell(well, returnWell);
         }
-        #endregion
 
         private Well QueryAndAssertWellDatum(ElevCodeEnum expectedDatumCode, string wellUid, Well query)
         {
@@ -1172,5 +1171,6 @@ namespace PDS.Witsml.Server.Data.Wells
 
             return result;
         }
+        #endregion
     }
 }
