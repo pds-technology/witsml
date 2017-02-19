@@ -27,6 +27,7 @@
       <name>Kelly Bushing</name>
       <code>KB</code>
       <elevation uom="ft" datum="SL">78.5</elevation>
+	  <datumCRS uidRef="geog1">ED50</datumCRS>
       <extensionNameValue uid="env1">
         <name>env1</name>
         <value uom="m">1</value>

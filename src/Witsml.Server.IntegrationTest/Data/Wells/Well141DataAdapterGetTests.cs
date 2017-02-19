@@ -872,6 +872,198 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(well.Name, wellListObject.Well[0].Name);
         }
 
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_String_Property()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum() { Name = "Kelly Bushing" }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_Enum_Property()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum() { Code = ElevCodeEnum.KB}
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_XmlText_In_Complext_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum() { DatumCRS = new RefNameString() { Value = "ED50"} }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_XmlText_In_Nested_Complext_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum()
+                    {
+                        HorizontalLocation = new Location(){ WellCRS = new RefNameString() { Value = "ED50 / UTM Zone 31N"} }
+                    }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.SL, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_XmlText_In_Recurring_In_Complext_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum()
+                    {
+                        HorizontalLocation = new Location()
+                        {
+                            ExtensionNameValue = new List<ExtensionNameValue>()
+                            {
+                                new ExtensionNameValue() { Value = new Extensionvalue() { Value = "envHz"} }
+                            }
+                        }
+                    }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.SL, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_XmlText_In_Recurring_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum()
+                    {
+                            ExtensionNameValue = new List<ExtensionNameValue>()
+                            {
+                                new ExtensionNameValue() { Value = new Extensionvalue() { Value = "2"} }
+                            }
+                    }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_Uid_In_Recurring_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum()
+                    {
+                            ExtensionNameValue = new List<ExtensionNameValue>()
+                            {
+                                new ExtensionNameValue() { Uid = "env2" }
+                            }
+                    }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_Primitive_In_Recurring_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+                WellDatum = new List<WellDatum>()
+                {
+                    new WellDatum()
+                    {
+                        ExtensionNameValue = new List<ExtensionNameValue>()
+                        {
+                            new ExtensionNameValue() { Name = new ExtensionName("env2")}
+                        }
+                    }
+                }
+            };
+
+            QueryAndAssertWellDatum(ElevCodeEnum.KB, wellUid, query);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Recurring_By_Primitive_In_Double_Recurring_Element()
+        {
+            var wellUid = DevKit.Uid();
+            var query = new Well
+            {
+                Uid = wellUid,
+
+                ReferencePoint = new List<ReferencePoint>()
+                {
+                    new ReferencePoint()
+                    {
+                        Location = new List<Location>()
+                        {
+                            new Location()
+                            {
+                                ExtensionNameValue = new List<ExtensionNameValue>()
+                                {
+                                    new ExtensionNameValue()
+                                    {
+                                        Name = new ExtensionName("env6")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            QueryAndAssertReferencePoint("SRP1", wellUid, query);
+        }
+
+        #region Private Methods
+
         private void AssertTestWell(Well expected, Well actual)
         {
             Assert.AreEqual(expected.Name, actual.Name);
@@ -939,5 +1131,46 @@ namespace PDS.Witsml.Server.Data.Wells
             returnWell = result.FirstOrDefault();
             AssertTestWell(well, returnWell);
         }
+
+        private Well QueryAndAssertWellDatum(ElevCodeEnum expectedDatumCode, string wellUid, Well query)
+        {
+            var well = DevKit.GetFullWell();
+            well.Uid = wellUid;
+            var response = DevKit.Add<WellList, Well>(well);
+            var expectedDatum = well.WellDatum.FirstOrDefault(w => w.Uid.Equals(expectedDatumCode.ToString()));
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            Assert.IsTrue(well.WellDatum.Count > 1);
+            Assert.IsNotNull(expectedDatum);
+
+
+            var result = DevKit.QueryAndAssert<WellList, Well>(query);
+            Assert.AreEqual(1, result.WellDatum.Count);
+            Assert.AreEqual(expectedDatum.Uid, result.WellDatum[0].Uid);
+
+            return result;
+        }
+
+        private Well QueryAndAssertReferencePoint(string expectedUid, string wellUid, Well query)
+        {
+            var well = DevKit.GetFullWell();
+            well.Uid = wellUid;
+            var response = DevKit.Add<WellList, Well>(well);
+            var expectedReferencePoint = well.ReferencePoint.FirstOrDefault(w => w.Uid.Equals(expectedUid));
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            Assert.IsTrue(well.ReferencePoint.Count > 1);
+            Assert.IsNotNull(expectedReferencePoint);
+
+
+            var result = DevKit.QueryAndAssert<WellList, Well>(query);
+            Assert.AreEqual(1, result.ReferencePoint.Count);
+            Assert.AreEqual(expectedReferencePoint.Uid, result.ReferencePoint[0].Uid);
+
+            return result;
+        }
+        #endregion
     }
 }
