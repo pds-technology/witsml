@@ -114,6 +114,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
+        /// <returns>
+        /// The data object instance.
+        /// </returns>
+        public override T Get(EtpUri uri, params string[] fields)
+        {            
+            var entity = GetEntity(uri, fields);
+            ClearTrajectoryStations(entity);
+
+            return entity;
+        }
+
+        /// <summary>
         /// Adds a data object to the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
