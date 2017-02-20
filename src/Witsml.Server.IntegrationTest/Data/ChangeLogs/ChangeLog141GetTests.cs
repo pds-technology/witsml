@@ -146,11 +146,15 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             changeType = ChangeInfoType.update;
             queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, string.Empty));
 
-            changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
+            changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.Requested, 1);
             changeHistories = changeLogs.First().ChangeHistory;
             Assert.AreEqual(2, changeHistories.Count);
             Assert.AreEqual(changeType, changeHistories[0].ChangeType);
             Assert.AreEqual(changeType, changeHistories[1].ChangeType);
+
+            // Ensure no other elements were returned
+            DevKit.AssertRequestedElements(changeHistories[0], new[] { "changeType" });
+            DevKit.AssertRequestedElements(changeHistories[1], new[] { "changeType" });
 
             // Confirm update change history for last change
             changeType = ChangeInfoType.update;

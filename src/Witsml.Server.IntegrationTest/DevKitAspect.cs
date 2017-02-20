@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -146,6 +147,39 @@ namespace PDS.Witsml.Server
                 Assert.IsNull(result.NameWell);
                 Assert.IsNull(result.NameWellbore);
             }
+        }
+
+        /// <summary>
+        /// Asserts that only the requested elements have values on the data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="requested">The requested elements.</param>
+        public void AssertRequestedElements(object dataObject, string[] requested)
+        {
+            var requestedProperties = new List<string>();
+            requested.ForEach(x =>
+            {
+                requestedProperties.Add(x);
+                requestedProperties.Add(x + "Specified");
+            });
+
+            var publicProperties = dataObject.GetType().GetProperties().Where(x => !requestedProperties.ContainsIgnoreCase(x.Name));
+            publicProperties.ForEach(x =>
+            {
+                var result = x.GetValue(dataObject, null);
+                if (result is bool)
+                {
+                    Assert.IsFalse((bool)result);
+                }
+                else if (result is IList)
+                {
+                    Assert.AreEqual(0, ((IList)result).Count);
+                }
+                else
+                {
+                    Assert.IsNull(result);
+                }
+            });
         }
 
         /// <summary>
