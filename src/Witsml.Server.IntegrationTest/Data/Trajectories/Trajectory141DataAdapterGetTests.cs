@@ -341,7 +341,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Get trajectory
             short errorCode;
-            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(Trajectory, out errorCode, ObjectTypes.Trajectory, null,
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(new Trajectory()
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore
+            }, out errorCode, ObjectTypes.Trajectory, null,
                 OptionsIn.ReturnElements.All);
 
             Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Returning partial data.");
@@ -367,7 +372,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Get trajectory
             short errorCode;
-            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(Trajectory, out errorCode, ObjectTypes.Trajectory, null,
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(new Trajectory()
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore
+            }, out errorCode, ObjectTypes.Trajectory, null,
                 OptionsIn.ReturnElements.DataOnly);
 
             Assert.AreEqual((short)ErrorCodes.Success, errorCode, "Returned all data.");
