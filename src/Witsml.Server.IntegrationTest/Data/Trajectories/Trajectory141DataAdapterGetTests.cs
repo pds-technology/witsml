@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -569,8 +568,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = $"<trajectoryStation><location><wellCRS>{lastStation.Location.First().WellCRS.Value}</wellCRS></location></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
-            // NOTE: this query will filter trajectoryStation/location elements, not trajectoryStation elements
-            //AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
+            AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
 
             var locations = result.TrajectoryStation
                 .Where(x => x.Location != null)
