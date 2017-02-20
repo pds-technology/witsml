@@ -27,6 +27,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Xml.XPath;
+using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -119,8 +120,32 @@ namespace PDS.Witsml.Data
             else
             {
                 var element = node as XElement;
-                element?.Add(value);
+
+                if (value is XElement)
+                    element?.ReplaceWith(value);
+                else
+                    element?.Add(value);
             }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a recurring element to the document using the specified XPath expression.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpath">The xpath.</param>
+        /// <param name="element">The element.</param>
+        /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
+        public DataObjectTemplate Push(XDocument document, string xpath, XElement element)
+        {
+            var manager = GetNamespaceManager(document.Root);
+            xpath = IncludeNamespacePrefix(xpath);
+
+            var last = document.Evaluate(xpath, manager)
+                .LastOrDefault() as XElement;
+
+            last?.AddAfterSelf(element);
 
             return this;
         }
@@ -168,7 +193,7 @@ namespace PDS.Witsml.Data
                 objectType = objectType.ToPascalCase();
                 attribute = "schemaVersion";
             }
-            else
+            else if (typeof(IEnergisticsCollection).IsAssignableFrom(type))
             {
                 objectType = ObjectTypes.SingleToPlural(objectType);
             }
@@ -177,7 +202,10 @@ namespace PDS.Witsml.Data
             var document = new XDocument(new XElement(ns + objectType));
 
             CreateTemplate(type, ns, document.Root);
-            document.Root?.SetAttributeValue(attribute, version);
+
+            // Set version attribute for top level data objects
+            if (document.Root != null && document.Root.Attributes(attribute).Any())
+                document.Root.SetAttributeValue(attribute, version);
 
             return document;
         }
