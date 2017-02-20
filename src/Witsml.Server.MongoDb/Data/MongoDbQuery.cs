@@ -540,6 +540,13 @@ namespace PDS.Witsml.Server.Data
             else // Otherwise add as root level filters
             {
                 Context.RecurringElementFilters.Add(filter);
+
+                // Stop processing if not handling a nested recurring element
+                if (next == null) return;
+
+                // Add filter for parent recurring element when nested recurring elements are filtered
+                Context.CurrentRecurringFilters.Add(new RecurringElementFilter(GetNestedPath(filter.PropertyPath), "Any()",
+                    (dataObject, instance, recurringFilter) => recurringFilter.GetPropertyValue<IList>(instance)?.Count > 0));
             }
         }
 
