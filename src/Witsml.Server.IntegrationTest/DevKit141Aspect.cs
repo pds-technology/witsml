@@ -221,6 +221,43 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public WellDatum WellDatum(
+            ElevCodeEnum code, string namePrefix, int totalKind, int kindStart, string kindPrefix,
+            WellVerticalCoordinateUom uomElevation, MeasuredDepthUom uomMeasuredDepth,
+            int elevation, int measuredDepth, string comment)
+        {
+            var datum = WellDatum($"{namePrefix}-{code.ToString()}", code, code.ToString());
+
+            datum.Elevation = new WellElevationCoord { Uom = uomElevation, Value = elevation };
+            datum.MeasuredDepth = new MeasuredDepthCoord { Uom = uomMeasuredDepth, Value = measuredDepth };
+            datum.Comment = comment;
+
+            // Add kind if necessary
+            if (totalKind <= 0) return datum;
+            datum.Kind = new List<string>();
+            Enumerable.Range(kindStart, totalKind).ForEach(k => datum.Kind.Add($"{kindPrefix}-{k}"));
+
+            return datum;
+        }
+
+        public List<WellDatum> WellDatums(
+            List<ElevCodeEnum> codes, int totalKind, int kindStart, string commonString,
+            WellVerticalCoordinateUom uomElevation, MeasuredDepthUom uomMeasuredDepth,
+            int elevationStart, int measuredDepthStart, int commentStart)
+        {
+            var datums = new List<WellDatum>();
+            codes.ForEach(c =>
+            {
+                datums.Add(
+                    WellDatum(c, commonString, totalKind, kindStart, $"kind-{commonString}", uomElevation, uomMeasuredDepth,
+                        elevationStart++, measuredDepthStart++, $"comment-{commonString}-{commentStart++}"));
+                kindStart += totalKind;
+            }
+            );
+
+            return datums;
+        }
+
         public WellCRS WellCRS(string uid, string name, string description = null)
         {
             return new WellCRS
@@ -318,6 +355,16 @@ namespace PDS.Witsml.Server
             };
 
             return well;
+        }
+
+        public Well CreateBaseWell(string namePrefix)
+        {
+            return new Well
+            {
+                Uid = Uid(),
+                Name = Name(namePrefix),
+                TimeZone = TimeZone
+            };
         }
 
         /// <summary>
