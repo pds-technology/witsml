@@ -409,5 +409,14 @@ namespace PDS.Witsml.Server
 
             return logCurveInfos.FirstOrDefault(c => c.Uid == uid);
         }
+
+        public string RandomString(int size)
+        {
+            var random = new Random();
+            const string input = "abcdefghijklmnopqrstuvwxyz0123456789";
+            var chars = Enumerable.Range(0, size)
+                                   .Select(x => input[random.Next(0, input.Length)]);
+            return new string(chars.ToArray());
+        }
     }
 }

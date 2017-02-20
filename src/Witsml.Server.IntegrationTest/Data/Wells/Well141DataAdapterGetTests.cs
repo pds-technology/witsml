@@ -50,7 +50,22 @@ namespace PDS.Witsml.Server.Data.Wells
             "     <wellheadElevation uom=\"ft\">{2}</wellheadElevation>" + Environment.NewLine +
             "   </well>" + Environment.NewLine +
             "</wells>";
-        
+
+        private string _commonString;
+        private string _kindPrefix;
+        private string _commentPrefix;
+        private string _namePrefix;
+
+        protected override void OnTestSetUp()
+        {
+            base.OnTestSetUp();
+
+            _commonString = DevKit.RandomString(5);
+            _kindPrefix = $"kind-{_commonString}";
+            _commentPrefix = $"comment-{_commonString}";
+            _namePrefix = $"{_commonString}";
+        }
+
         [TestMethod]
         public void Well141DataProvider_GetFromStore_Query_OptionsIn_requestObjectSelectionCapability()
         {
@@ -1062,6 +1077,289 @@ namespace PDS.Witsml.Server.Data.Wells
             QueryAndAssertReferencePoint("SRP1", wellUid, query);
         }
 
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Datum_Name()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+
+            /////////////////////////////
+            // Query by WellDatum Name //
+            /////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Name = $"{_namePrefix}-CF" }
+                }
+            };
+
+            // Expected results: 3 wells have a CF WellDatum (1 each)
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(3, results.Count);
+
+            results.ForEach(w =>
+            {
+                Assert.AreEqual(1, w.WellDatum.Count);
+                Assert.AreEqual(ElevCodeEnum.CF, w.WellDatum[0].Code);
+            });
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Datum_Name()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+
+            //////////////////////////////////////////////////////
+            // Query by Multiple WellDatum Names for "OR" query //
+            //////////////////////////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Name = $"{_namePrefix}-CF" },
+                    new WellDatum { Name = $"{_namePrefix}-CV" },
+                }
+            };
+
+            // Expected results: 3 wells have a CF and CV WellDatum (1 each)
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(3, results.Count);
+
+            results.ForEach(w =>
+            {
+                Assert.AreEqual(1, w.WellDatum.Count);
+                Assert.AreEqual(ElevCodeEnum.CF, w.WellDatum[0].Code);
+            });
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Datum_Name_And_Elevation()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+
+            /////////////////////////////////////////
+            // Query by WellDatum Name + Elevation //
+            /////////////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum
+                    {
+                        Name = $"{_namePrefix}-CF",
+                        Elevation = new WellElevationCoord
+                        {
+                            Uom = WellVerticalCoordinateUom.ft,
+                            Value = 6 // No CF at this elevation
+                        }
+                    }
+                }
+            };
+
+            // Expected results: 0 wells 
+            // 2 wells have a CF WellDatum with elevation in ft,
+            //... but those CF's are at elevations 2, 7 and 14
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Comment_Returns_2_Wells_1_Datum_Each()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var expectedComment = $"{_commentPrefix}-6";
+
+            ////////////////////////////////
+            // Query by WellDatum Comment //
+            ////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Comment = expectedComment }
+                }
+            };
+
+            // Expected results: 2 wells have a #6 Comment
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(2, results.Count);
+
+            results.ForEach(w =>
+            {
+                Assert.AreEqual(1, w.WellDatum.Count);
+                Assert.AreEqual(expectedComment, w.WellDatum[0].Comment);
+            });
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Comment_Returns_2_Wells_Different_Datum_Count()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var comment6 = $"{_commentPrefix}-6";
+            var comment7 = $"{_commentPrefix}-7";
+
+            ////////////////////////////////
+            // Query by WellDatum Comment //
+            ////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Comment = comment6 },
+                    new WellDatum { Comment = comment7 }
+                }
+            };
+
+            // Expected results: 2 wells have a #6 Comment, only 1 has #7 Comment
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(2, results.Count);
+
+            var well1 = results[0];
+            var well2 = results[1];
+
+            Assert.AreEqual(1, well1.WellDatum.Count); // #6
+            Assert.AreEqual(2, well2.WellDatum.Count); // #6 & #7
+
+            Assert.AreEqual(comment6, well1.WellDatum[0].Comment);
+            Assert.AreEqual(comment6, well2.WellDatum[0].Comment);
+            Assert.AreEqual(comment7, well2.WellDatum[1].Comment);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Comment_Returns_1_Well()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var comment11 = $"{_commentPrefix}-11";
+            var comment12 = $"{_commentPrefix}-12"; // No Well has #12
+
+            ////////////////////////////////
+            // Query by WellDatum Comment //
+            ////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Comment = comment11 },
+                    new WellDatum { Comment = comment12 }  // No Well has this
+                }
+            };
+
+            // Expected results: 1 well has a #11 Comment, NO well has #12 Comment
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var well1 = results[0];
+
+            Assert.AreEqual(1, well1.WellDatum.Count); // #11
+            Assert.AreEqual(comment11, well1.WellDatum[0].Comment);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Comment_Returns_No_Wells()
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var expectedComment = $"{_commentPrefix}-12";
+
+            ////////////////////////////////
+            // Query by WellDatum Comment //
+            ////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Comment = expectedComment }
+                }
+            };
+
+            // Expected results: 0 wells have a #12 Comment
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Kind_Returns_No_Wells()
+        {
+            TestAndAssertRecurrningByOneWellDatumKind("47", 0);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Kind_Returns_2_Wells()
+        {
+            TestAndAssertRecurrningByOneWellDatumKind("30", 2);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Kind_Returns_3_Wells()
+        {
+            TestAndAssertRecurrningByOneWellDatumKind("24", 3);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Datum_One_Kind_Returns_1_Well()
+        {
+            var kinds = new List<string> { "1", "2", "3" };
+            var expectedWellCount = 1;
+            var wellDatumCounts = new List<int> { 1 };
+
+            TestAndAssertRecurrningByMultiWellDatumOneKind(kinds, expectedWellCount, wellDatumCounts);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Datum_One_Kind_Returns_2_Wells()
+        {
+            var kinds = new List<string> { "7", "8", "9" };
+            var expectedWellCount = 2;
+            var wellDatumCounts = new List<int> { 2, 1 };
+
+            TestAndAssertRecurrningByMultiWellDatumOneKind(kinds, expectedWellCount, wellDatumCounts);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Multi_Datum_One_Kind_Returns_3_Wells()
+        {
+            var kinds = new List<string> { "1", "2", "25", "26", "34", "35" };
+            var expectedWellCount = 3;
+            var wellDatumCounts = new List<int> { 1, 1, 2 };
+
+            TestAndAssertRecurrningByMultiWellDatumOneKind(kinds, expectedWellCount, wellDatumCounts);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Kind_Returns_1_Wells()
+        {
+            var kinds = new List<string> { "1", "2", "3", "4" };
+            var expectedWellCount = 1;
+
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Unknown_Kinds_Returns_0_Wells()
+        {
+            var kinds = new List<string> { "50", "51" };
+            var expectedWellCount = 0;
+
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Known_Kinds_Returns_0_Wells()
+        {
+            var kinds = new List<string> { "1", "2", "3", "4", "5" }; // known kinds, all are not in a single datum
+            var expectedWellCount = 0;
+
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Kind_Returns_2_Wells()
+        {
+            var kinds = new List<string> { "24", "25", "26", "27" };
+            var expectedWellCount = 2;
+
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+        }
+
         #region Private Methods
 
         private void AssertTestWell(Well expected, Well actual)
@@ -1170,6 +1468,135 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(expectedReferencePoint.Uid, result.ReferencePoint[0].Uid);
 
             return result;
+        }
+
+        private void AddAndAssertMultiWellForRecurringTests()
+        {
+            var wellNamePrefix = "Get Recurring Test";
+            var well1 = DevKit.CreateBaseWell(wellNamePrefix);
+            var well2 = DevKit.CreateBaseWell(wellNamePrefix);
+            var well3 = DevKit.CreateBaseWell(wellNamePrefix);
+
+            var codes = new List<ElevCodeEnum>
+            {
+                ElevCodeEnum.SL,
+                ElevCodeEnum.CF,
+                ElevCodeEnum.CV,
+                ElevCodeEnum.DF,
+                ElevCodeEnum.GL,
+                ElevCodeEnum.KB
+            };
+
+            // Well1 - kind 1-24, elevation, depth and comments 1-6
+            well1.WellDatum = DevKit.WellDatums(
+                codes, 4, 1, _commonString, WellVerticalCoordinateUom.ft, MeasuredDepthUom.ft, 1, 1, 1);
+
+            // Well2 - kind 8-31, elevation, depth and comments 6-11
+            well2.WellDatum = DevKit.WellDatums(
+                codes, 4, 8, _commonString, WellVerticalCoordinateUom.m, MeasuredDepthUom.m, 6, 6, 6);
+
+            // Well3 - kind 24-47, elevation, depth and comments 13-18
+            well3.WellDatum = DevKit.WellDatums(
+                codes, 4, 24, _commonString, WellVerticalCoordinateUom.ft, MeasuredDepthUom.ft, 13, 13, 13);
+
+            DevKit.AddAndAssert(well1);
+            DevKit.AddAndAssert(well2);
+            DevKit.AddAndAssert(well3);
+        }
+
+        private void TestAndAssertRecurrningByOneWellDatumKind(string kindNumber, int expectedWellCount)
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var expectedKind = $"{_kindPrefix}-{kindNumber}";
+
+            /////////////////////////////
+            // Query by WellDatum Kind //
+            /////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Kind = new List<string> {expectedKind} }
+                }
+            };
+
+            // Expected results: expectedWellCount wells have a kindNumber Kind
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(expectedWellCount, results.Count);
+
+            if (expectedWellCount > 0)
+            {
+                results.ForEach(w =>
+                {
+                    Assert.AreEqual(1, w.WellDatum.Count);
+                    Assert.AreEqual(expectedKind, w.WellDatum[0].Kind[0]);
+                });
+            }
+        }
+
+        private void TestAndAssertRecurrningByMultiWellDatumOneKind(List<string> kinds, int expectedWellCount, List<int> wellDatumCounts)
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var expectedKinds = new List<string>();
+            kinds.ForEach(k => expectedKinds.Add($"{_kindPrefix}-{k}"));
+
+            ///////////////////////////////////////
+            // Query by Multi WellDatum One Kind //
+            ///////////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>()
+            };
+
+            expectedKinds.ForEach(k =>
+            {
+                queryByDatumName.WellDatum.Add(new WellDatum {Kind = new List<string> {k}});
+            });
+
+            // Expected results: expectedWellCount wells have a kindNumber Kind
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(expectedWellCount, results.Count);
+
+            for (var i = 0; i < expectedWellCount; i++)
+            {
+                Assert.AreEqual(wellDatumCounts[i], results[i].WellDatum.Count);
+            }
+        }
+
+        private void TestAndAssertRecurrningByOneWellDatumMultiKind(List<string> kinds, int expectedWellCount)
+        {
+            AddAndAssertMultiWellForRecurringTests();
+            var expectedKinds = new List<string>();
+            kinds.ForEach(k => expectedKinds.Add($"{_kindPrefix}-{k}"));
+
+            ///////////////////////////////////////////
+            // Query by One WellDatum Multiple Kinds //
+            ///////////////////////////////////////////
+            var queryByDatumName = new Well
+            {
+                WellDatum = new List<WellDatum>() { new WellDatum() { Kind = new List<string>()} }
+            };
+
+            expectedKinds.ForEach(k =>
+            {
+                queryByDatumName.WellDatum[0].Kind.Add(k);
+            });
+
+            // Expected results: expectedWellCount wells have a kindNumber Kind
+            var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(expectedWellCount, results.Count);
+
+            // All Kinds are in a single WellDatum.  If there is a match there should only be 1 WellDatum per well
+            //... that inclues all the expectedKinds
+            for (var i = 0; i < expectedWellCount; i++)
+            {
+                Assert.AreEqual(1, results[i].WellDatum.Count);
+
+                for (var j = 0; j < expectedKinds.Count; j++)
+                {
+                    Assert.AreEqual(expectedKinds[j], results[i].WellDatum[0].Kind[j]);
+                }
+            }
         }
         #endregion
     }
