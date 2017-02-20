@@ -1127,7 +1127,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             results.ForEach(w =>
             {
-                Assert.AreEqual(1, w.WellDatum.Count);
+                Assert.AreEqual(2, w.WellDatum.Count);
                 Assert.AreEqual(ElevCodeEnum.CF, w.WellDatum[0].Code);
             });
         }
@@ -1279,7 +1279,13 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Kind_Returns_No_Wells()
         {
-            TestAndAssertRecurrningByOneWellDatumKind("47", 0);
+            TestAndAssertRecurrningByOneWellDatumKind("48", 0);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_Kind_Returns_1_Wells()
+        {
+            TestAndAssertRecurrningByOneWellDatumKind("47", 1);
         }
 
         [TestMethod]
