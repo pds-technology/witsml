@@ -268,6 +268,75 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public Bop Bop(double pressure, double length, string manufacturer)
+        {
+            return new Bop
+            {
+                PresBopRating = new PressureMeasure {Uom = PressureUom.Pa, Value = 1},
+                SizeBopSys = new LengthMeasure {Uom = LengthUom.cm, Value = 20},
+                Manufacturer = manufacturer
+            };
+        }
+
+        public BopComponent BopComponent(string uid, BopType bopType, string descComp)
+        {
+            return new BopComponent
+            {
+                Uid = uid,
+                TypeBopComp = bopType,
+                DescComp = descComp
+            };
+        }
+
+        public List<BopComponent> BopComponents(int start, int total, BopType bopType, string prefix)
+        {
+            var bopList = new List<BopComponent>();
+
+            for (var i = start; i < (start + total); i++)
+            {
+                bopList.Add(BopComponent($"{prefix}-{i}", bopType, $"{prefix}-{i}"));
+            }
+
+            return bopList;
+        }
+
+        public NameTag NameTag(string uid, string name, string comment, NameTagNumberingScheme numberingScheme)
+        {
+            return new NameTag
+            {
+                Uid = uid,
+                Name = name,
+                Comment = comment,
+                NumberingScheme = numberingScheme
+            };
+        }
+
+        public List<NameTag> NameTags(int start, int total, string prefix, NameTagNumberingScheme numberingScheme)
+        {
+            var nameTags = new List<NameTag>();
+
+            for (var i = start; i < (start + total); i++)
+            {
+                nameTags.Add(NameTag($"{prefix}-{i}", $"{prefix}-{i}", $"{prefix}-{i}", numberingScheme));
+            }
+
+            return nameTags;
+        }
+
+        public Rig CreateRig(string rigNamePrefix, Wellbore wellbore, Bop bop = null)
+        {
+            return new Rig
+            {
+                Uid = Uid(),
+                Name = Name(rigNamePrefix),
+                UidWell = wellbore.UidWell,
+                NameWell = wellbore.NameWell,
+                UidWellbore = wellbore.Uid,
+                NameWellbore = wellbore.Name,
+                Bop = bop
+            };
+        }
+
         /// <summary>
         /// Generations trajectory station data.
         /// </summary>
