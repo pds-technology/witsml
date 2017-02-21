@@ -63,9 +63,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// </summary>
         /// <param name="parser">The query template parser.</param>
         /// <param name="context">The response context.</param>
-        /// <returns>
-        /// A collection of data objects retrieved from the data store.
-        /// </returns>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
         public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
             var isRequestingData = parser.IncludeTrajectoryStations();
@@ -118,13 +116,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <param name="fields">The requested fields.</param>
-        /// <returns>
-        /// The data object instance.
-        /// </returns>
+        /// <returns>The data object instance.</returns>
         public override T Get(EtpUri uri, params string[] fields)
         {            
             var entity = GetEntity(uri, fields);
-            ClearTrajectoryStations(entity);
+
+            if (entity != null)
+            {
+                ClearTrajectoryStations(entity);
+            }
 
             return entity;
         }
