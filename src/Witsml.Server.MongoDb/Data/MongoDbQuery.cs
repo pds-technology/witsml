@@ -23,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.Validation;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data;
@@ -188,6 +189,9 @@ namespace PDS.Witsml.Server.Data
         {
             Context.ParentFilters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
+
+            if(propertyInfo.GetCustomAttribute<RecurringElementAttribute>() == null)
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
 
             if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
             {
