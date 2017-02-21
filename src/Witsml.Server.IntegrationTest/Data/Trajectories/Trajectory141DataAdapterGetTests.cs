@@ -464,6 +464,55 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 20);
+            DevKit.AddAndAssert(Trajectory);
+
+            var queryIn = @"<trajectoryStation uid="""">
+                                <md uom=""""></md>
+                                <azi uom=""""></azi>
+                                <incl uom=""""></incl>
+                            </trajectoryStation>";
+
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
+            DevKit.AssertNames(result);
+
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Structural_Range()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            DevKit.AddAndAssert(Trajectory);
+
+            var startRange = 30;
+            var endRange = 35;
+            var queryIn = @"<mdMn uom=""m"">30</mdMn>
+                            <mdMx uom=""m"">35</mdMx>
+                            <trajectoryStation uid="""">
+                                <md uom=""""></md>
+                                <azi uom=""""></azi>
+                                <incl uom=""""></incl>
+                            </trajectoryStation>";
+
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            DevKit.AssertNames(result);
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= startRange && s.MD.Value <= endRange).ToList();
+            Assert.IsNotNull(stations);
+            Assert.AreEqual(stations.Count, result.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid()
         {
             AddParents();
