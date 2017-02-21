@@ -1600,6 +1600,8 @@ namespace PDS.Witsml.Server.Data.Wells
             };
             wd.Kind = expectedKinds;
 
+            queryByDatumName.WellDatum.Add(wd);
+
             // Expected results: expectedWellCount wells have a kindNumber Kind
             var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
             Assert.AreEqual(expectedWellCount, results.Count);
@@ -1608,12 +1610,11 @@ namespace PDS.Witsml.Server.Data.Wells
             //... that inclues all the expectedKinds
             for (var i = 0; i < expectedWellCount; i++)
             {
-                Assert.AreEqual(1, results[i].WellDatum.Count);
+                Assert.AreEqual(expectedDatumCount, results[i].WellDatum.Count);
 
                 for (var j = 0; j < expectedKinds.Count; j++)
                 {
-                    Assert.AreEqual(expectedDatumCount, results[i].WellDatum.Count);
-                    results[i].WellDatum[0].Kind.ForEach(x => expectedKinds.ContainsIgnoreCase(x));
+                    results[i].WellDatum[0].Kind.ForEach(x => Assert.IsTrue(expectedKinds.ContainsIgnoreCase(x)));
                 }
             }
         }
