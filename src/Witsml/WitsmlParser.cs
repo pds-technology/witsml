@@ -166,8 +166,9 @@ namespace PDS.Witsml
         /// Serialize WITSML query results to XML and remove empty elements and xsi:nil attributes.
         /// </summary>
         /// <param name="obj">The object.</param>
+        /// <param name="nilOnly">if set to <c>true</c> only elements with nil="true" are removed.</param>
         /// <returns>The serialized XML string.</returns>
-        public static string ToXml(object obj)
+        public static string ToXml(object obj, bool nilOnly = false)
         {
             _log.Debug("Serializing object to XML.");
 
@@ -181,7 +182,7 @@ namespace PDS.Witsml
 
             foreach (var element in root.Elements())
             {
-                RemoveEmptyElements(element);
+                RemoveEmptyElements(element, nilOnly);
             }
 
             return root.ToString(SaveOptions.OmitDuplicateNamespaces);
@@ -191,12 +192,13 @@ namespace PDS.Witsml
         /// Removes the empty descendant nodes from the specified element.
         /// </summary>
         /// <param name="element">The element.</param>
-        public static void RemoveEmptyElements(XElement element)
+        /// <param name="nilOnly">if set to <c>true</c> only elements with nil="true" are removed.</param>
+        public static void RemoveEmptyElements(XElement element, bool nilOnly = false)
         {
             _log.Debug("Removing empty elements.");
 
             Func<XElement, bool> predicate = e => e.Attributes(Xsi("nil")).Any() || 
-                (string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements);
+                (string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements && !nilOnly);
 
             while (element.Descendants().Any(predicate))
             {

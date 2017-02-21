@@ -84,7 +84,7 @@ namespace PDS.Witsml.Linq
 
             var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
             var objectType = ObjectTypes.GetObjectType<T>();
-            var xmlIn = EnergisticsConverter.ObjectToXml(Query); // WitsmlParser.ToXml(Query);
+            var xmlIn = WitsmlParser.ToXml(Query, true);
 
             Context.LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
