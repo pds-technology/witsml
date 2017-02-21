@@ -119,9 +119,9 @@ namespace PDS.Witsml.Server.Data
                 Logger.Debug("Detected recurring element filters: " + expression);
             }
 
-            entities.ForEach(FilterRecurringElements);
-
-            return entities;
+            return entities
+                .Where(x => !FilterRecurringElements(x))
+                .ToList();
         }
 
         /// <summary>
@@ -399,6 +399,7 @@ namespace PDS.Witsml.Server.Data
         protected override bool IsIgnored(string elementName, string parentPath = null)
         {
             var ignored = base.IsIgnored(elementName, parentPath);
+
             if (ignored && (OptionsIn.ReturnElements.Requested.Equals(_parser.ReturnElements()) || OptionsIn.ReturnElements.DataOnly.Equals(_parser.ReturnElements())))
                 Context.Fields.Add(parentPath);
 
@@ -554,10 +555,10 @@ namespace PDS.Witsml.Server.Data
         /// Filters the recurring elements.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        private void FilterRecurringElements(T entity)
+        private bool FilterRecurringElements(T entity)
         {
-            Context.RecurringElementFilters
-                .ForEach(filter => FilterRecurringElements(entity, entity, filter, filter.PropertyPath));
+            return Context.RecurringElementFilters
+                .Aggregate(true, (current, filter) => FilterRecurringElements(entity, entity, filter, filter.PropertyPath) && current);
         }
 
         /// <summary>
@@ -567,7 +568,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="instance">The instance.</param>
         /// <param name="filter">The filter.</param>
         /// <param name="propertyPath">The property path.</param>
-        private void FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string propertyPath)
+        private bool FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string propertyPath)
         {
             var propertyNames = propertyPath.Split('.');
             IList recurringElementList = null;
@@ -575,31 +576,32 @@ namespace PDS.Witsml.Server.Data
             // Find recurring element list(s) in property path
             for (var i=0; i < propertyNames.Length; i++)
             {
-                if (instance == null) return;
+                // Stop processing if the object instance is null
+                if (instance == null) return false;
 
                 // Process nested recurring elements
                 if (recurringElementList != null)
                 {
                     var nestedPath = string.Join(".", propertyNames.Skip(i));
 
-                    foreach (var recurringItem in recurringElementList)
-                        FilterRecurringElements(dataObject, recurringItem, filter, nestedPath);
-
-                    return;
+                    return recurringElementList.Cast<object>()
+                        .Aggregate(true, (current, recurringItem) => FilterRecurringElements(dataObject, recurringItem, filter, nestedPath) && current);
                 }
 
                 var propertyType = instance.GetType();
                 var propertyName = propertyNames[i];
                 var propertyInfo = propertyType.GetProperty(propertyName);
 
-                if (propertyInfo == null) return;
+                // Stop processing if the property was not found
+                if (propertyInfo == null) return false;
 
+                // Get the current property value
                 instance = propertyInfo.GetValue(instance);
                 recurringElementList = instance as IList;
             }
 
-            // Stop processing if list is null
-            if (recurringElementList == null) return;
+            // Stop processing if the list is null
+            if (recurringElementList == null) return false;
 
             // Process recurring elements
             var filteredItems = new ArrayList();
@@ -616,15 +618,19 @@ namespace PDS.Witsml.Server.Data
             {
                 recurringElementList.Remove(item);
             }
+
+            return recurringElementList.Count <= 0;
         }
 
         private string GetNestedPath(string propertyPath)
         {
             var filter = Context.RecurringFilterStack.Peek();
 
-            return propertyPath.StartsWith(filter.PropertyPath + ".")
-                ? propertyPath.Substring(filter.PropertyPath.Length + 1)
-                : propertyPath;
+            return propertyPath.EqualsIgnoreCase(filter.PropertyPath)
+                ? RecurringElementFilter.Self
+                : propertyPath.StartsWith(filter.PropertyPath + ".")
+                    ? propertyPath.Substring(filter.PropertyPath.Length + 1)
+                    : propertyPath;
         }
     }
 }

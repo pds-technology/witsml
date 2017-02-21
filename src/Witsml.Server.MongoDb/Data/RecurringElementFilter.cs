@@ -30,6 +30,9 @@ namespace PDS.Witsml.Server.Data
     {
         private readonly string _expression;
 
+        /// <summary>The $self property identifier.</summary>
+        public const string Self = "$self";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RecurringElementFilter" /> class.
         /// </summary>
@@ -115,7 +118,9 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The property value.</returns>
         public T GetPropertyValue<T>(object instance)
         {
-            return instance.GetPropertyValue<T>(PropertyPath);
+            return Self.Equals(PropertyPath)
+                ? (T) instance
+                : instance.GetPropertyValue<T>(PropertyPath);
         }
     }
 }
