@@ -1348,23 +1348,29 @@ namespace PDS.Witsml.Server.Data.Wells
             TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
         }
 
-        [TestMethod]
-        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Known_Kinds_Returns_0_Wells()
-        {
-            var kinds = new List<string> { "1", "2", "3", "4", "5" }; // known kinds, all are not in a single datum
-            var expectedWellCount = 0;
 
-            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Known_Kinds_Returns_1_Well()
+        {
+            var kinds = new List<string> { "1", "2", "3", "4", "5" };
+            var expectedWellCount = 1;
+            var expectedWellDatumCount = 2;
+
+            // The query will find two wellDatums matching the criteria on one well
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount, expectedWellDatumCount);
         }
 
         [TestMethod]
-        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Kind_Returns_2_Wells()
+        public void Well141DataAdapter_GetFromStore_Multi_Well_Recurring_By_One_Datum_Multi_Kind_Returns_3_Wells()
         {
             var kinds = new List<string> { "24", "25", "26", "27" };
-            var expectedWellCount = 2;
+            var expectedWellCount = 3;
+            var expectedWellDatumCount = 1;
 
-            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount);
+            // The query will find one wellDatum matching the criteria on three wells
+            TestAndAssertRecurrningByOneWellDatumMultiKind(kinds, expectedWellCount, expectedWellDatumCount);
         }
+
 
         #region Private Methods
 
@@ -1554,10 +1560,14 @@ namespace PDS.Witsml.Server.Data.Wells
                 WellDatum = new List<WellDatum>()
             };
 
-            expectedKinds.ForEach(k =>
+            var wd = new WellDatum
             {
-                queryByDatumName.WellDatum.Add(new WellDatum {Kind = new List<string> {k}});
-            });
+                Kind = new List<string>()
+            };
+            wd.Kind = expectedKinds;
+
+            queryByDatumName.WellDatum.Add(wd);
+
 
             // Expected results: expectedWellCount wells have a kindNumber Kind
             var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
@@ -1569,8 +1579,9 @@ namespace PDS.Witsml.Server.Data.Wells
             }
         }
 
-        private void TestAndAssertRecurrningByOneWellDatumMultiKind(List<string> kinds, int expectedWellCount)
+        private void TestAndAssertRecurrningByOneWellDatumMultiKind(List<string> kinds, int expectedWellCount, int expectedDatumCount = 0)
         {
+            expectedDatumCount = expectedDatumCount == 0 ? expectedWellCount : expectedDatumCount;
             AddAndAssertMultiWellForRecurringTests();
             var expectedKinds = new List<string>();
             kinds.ForEach(k => expectedKinds.Add($"{_kindPrefix}-{k}"));
@@ -1580,13 +1591,14 @@ namespace PDS.Witsml.Server.Data.Wells
             ///////////////////////////////////////////
             var queryByDatumName = new Well
             {
-                WellDatum = new List<WellDatum>() { new WellDatum() { Kind = new List<string>()} }
+                WellDatum = new List<WellDatum>()
             };
 
-            expectedKinds.ForEach(k =>
+            var wd = new WellDatum
             {
-                queryByDatumName.WellDatum[0].Kind.Add(k);
-            });
+                Kind = new List<string>()
+            };
+            wd.Kind = expectedKinds;
 
             // Expected results: expectedWellCount wells have a kindNumber Kind
             var results = DevKit.Query<WellList, Well>(queryByDatumName, ObjectTypes.GetObjectType<WellList>(), null, OptionsIn.ReturnElements.All);
@@ -1600,7 +1612,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
                 for (var j = 0; j < expectedKinds.Count; j++)
                 {
-                    Assert.AreEqual(expectedKinds[j], results[i].WellDatum[0].Kind[j]);
+                    Assert.AreEqual(expectedDatumCount, results[i].WellDatum.Count);
+                    results[i].WellDatum[0].Kind.ForEach(x => expectedKinds.ContainsIgnoreCase(x));
                 }
             }
         }
