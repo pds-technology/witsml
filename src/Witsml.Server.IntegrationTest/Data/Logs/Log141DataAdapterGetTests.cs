@@ -2200,7 +2200,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log131DataAdapter_GetFromStore_Recurring_By_LogParam()
+        public void Log141DataAdapter_GetFromStore_Recurring_By_LogParam()
         {
             AddParents();
 
