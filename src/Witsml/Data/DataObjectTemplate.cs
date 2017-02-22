@@ -98,6 +98,21 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Creates a clone of the node in the document using the specified XPath expression.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpath">The xpath.</param>
+        /// <returns>A new <see cref="XDocument"/> instance.</returns>
+        public XDocument Clone(XDocument document, string xpath)
+        {
+            var manager = GetNamespaceManager(document.Root);
+            xpath = IncludeNamespacePrefix(xpath);
+
+            var node = document.XPathSelectElement(xpath, manager);
+            return node == null ? null : new XDocument(node);
+        }
+
+        /// <summary>
         /// Sets the value of a node in the document using the specified XPath expression.
         /// </summary>
         /// <typeparam name="TValue">The type of the value.</typeparam>
@@ -121,10 +136,18 @@ namespace PDS.Witsml.Data
             {
                 var element = node as XElement;
 
+                if (element == null)
+                    return this;
+
                 if (value is XElement)
-                    element?.ReplaceWith(value);
+                {
+                    element.ReplaceWith(value);
+                }
                 else
-                    element?.Add(value);
+                {
+                    element.RemoveNodes();
+                    element.Add(value);
+                }
             }
 
             return this;

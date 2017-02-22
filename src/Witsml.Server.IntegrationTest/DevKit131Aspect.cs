@@ -95,6 +95,18 @@ namespace PDS.Witsml.Server
             InitData(log, Mnemonics(log), Units(log));
         }
 
+        /// <summary>
+        /// Creates the double log curve information.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit, short index)
+        {
+            return LogGenerator.CreateDoubleLogCurveInfo(name, unit, index);
+        }
+
         public void InitData(Log log, string mnemonics, string units, params object[] values)
         {
             if (log.LogData == null)
@@ -195,6 +207,19 @@ namespace PDS.Witsml.Server
                 NameWell = nameWell,
                 UidWellbore = uidWellbore,
                 NameWellbore = nameWellbore,
+            };
+        }
+
+        public Log CreateLog(Log log)
+        {
+            return new Log()
+            {
+                Uid = log.Uid,
+                Name = log.Name,
+                UidWell = log.UidWell,
+                NameWell = log.NameWell,
+                UidWellbore = log.UidWellbore,
+                NameWellbore = log.NameWellbore,
             };
         }
 

@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
@@ -73,6 +74,8 @@ namespace PDS.Witsml.Server
 
             Proxy = new WITSMLWebServiceConnection(ConnectionUrl, version);
             Proxy.Timeout *= 5;
+
+            Template = new DataObjectTemplate();
         }
 
         public IContainer Container { get; }
@@ -83,6 +86,8 @@ namespace PDS.Witsml.Server
         public WITSMLWebServiceConnection Proxy { get; }
 
         public WitsmlStore Store { get; }
+
+        public DataObjectTemplate Template { get; }
 
         public abstract string DataSchemaVersion { get; }
 
@@ -449,6 +454,22 @@ namespace PDS.Witsml.Server
 
             typeIn = wmlTypeIn ?? objectType;
             queryIn = EnergisticsConverter.ObjectToXml(list); // WitsmlParser.ToXml(list);
+        }
+
+        public void SetDocumentUids<T>(T dataObject, XDocument document)
+        {
+            if (dataObject is IDataObject)
+            {
+                Template.Set(document, "//@uid", ((IDataObject)dataObject).Uid);
+            }
+            if (dataObject is IWellObject)
+            {
+                Template.Set(document, "//@uidWell", ((IWellObject)dataObject).UidWell);
+            }
+            if (dataObject is IWellboreObject)
+            {
+                Template.Set(document, "//@uidWellbore", ((IWellboreObject)dataObject).UidWellbore);
+            }
         }
 
         public IUniqueId GetLogCurveInfoByUid(IEnumerable<IUniqueId> logCurveInfos, string uid)

@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -2091,7 +2092,152 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(510, logData[0].Data.Count);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Recurring_By_AxisDefinition()
+        {
+            AddParents();
+
+            // Create a log with a 16 count arrayCurve1
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("arrayCurve", "unitless"));
+            var arrayCurve1 = Log.LogCurveInfo.First(x => x.Mnemonic.Value == "arrayCurve");
+            arrayCurve1.AxisDefinition = new List<AxisDefinition>()
+            {
+                new AxisDefinition()
+                {
+                    Uid = DevKit.Uid(),
+                    Order = 1,
+                    Count = 16,
+                    DoubleValues = "1 2"
+                }
+            };
+
+            DevKit.AddAndAssert(Log);
+
+            // Create a log with a 64 count arrayCurve2
+            var log2 = DevKit.CreateLog(Log);
+            log2.Uid = DevKit.Uid();
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("arrayCurve2", "g/cm3"));
+            var arrayCurve2 = log2.LogCurveInfo.First(x => x.Mnemonic.Value == "arrayCurve2");
+            arrayCurve2.AxisDefinition = new List<AxisDefinition>()
+            {
+                new AxisDefinition()
+                {
+                    Uid = DevKit.Uid(),
+                    Order = 1,
+                    Count = 64,
+                    DoubleValues = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64"
+                }
+                ,
+                new AxisDefinition()
+                {
+                    Uid = DevKit.Uid(),
+                    Order = 2,
+                    Count = 64,
+                }
+            };
+
+            DevKit.AddAndAssert(log2);
+
+            // Create another log with a 64 count arrayCurve2
+            var log3 = DevKit.CreateLog(Log);
+            log3.Uid = DevKit.Uid();
+            DevKit.InitHeader(log3, LogIndexType.measureddepth);
+            log3.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("arrayCurve2", "g/cm3"));
+            var arrayCurve3 = log3.LogCurveInfo.First(x => x.Mnemonic.Value == "arrayCurve2");
+            arrayCurve3.AxisDefinition = new List<AxisDefinition>()
+            {
+                new AxisDefinition()
+                {
+                    Uid = DevKit.Uid(),
+                    Order = 1,
+                    Count = 64,
+                    DoubleValues = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64"
+                }
+            };
+
+            DevKit.AddAndAssert(log3);
+
+            // Query for log 1
+            var objectTemplate = CreateLogTemplateQuery(Log);
+
+            // Set the count element value to 16
+            DevKit.Template.Set(objectTemplate, "//count", 16);
+
+            var result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertAxisDefintion(Log, arrayCurve1, result.XMLout);
+
+            // Create a new log template
+            objectTemplate = CreateLogTemplateQuery();
+
+            // Set the count element value to 64
+            DevKit.Template.Set(objectTemplate, "//count", 64);
+
+            result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertAxisDefintion(log2, arrayCurve2, result.XMLout);
+            AssertAxisDefintion(log3, arrayCurve3, result.XMLout);
+
+            // Create a new log template
+            objectTemplate = CreateLogTemplateQuery();
+
+            // Query for logs that contain curve ROP or arrayCurve2
+            DevKit.Template.Set(objectTemplate, "//mnemonic", "ROP");
+
+            var lci = DevKit.Template.Clone(objectTemplate, "//logCurveInfo");
+            DevKit.Template.Set(lci, "//mnemonic", arrayCurve2.Mnemonic.Value);
+            DevKit.Template.Push(objectTemplate, "//logCurveInfo", lci.Root);
+
+            result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertAxisDefintion(log2, arrayCurve2, result.XMLout, 3);
+            AssertAxisDefintion(log3, arrayCurve3, result.XMLout, 3);
+        }
+
         #region Helper Methods
+
+        private XDocument CreateLogTemplateQuery(Log log = null, bool includeData = false)
+        {
+            var document = DevKit.Template.Create<LogList>();
+
+            Assert.IsNotNull(document);
+            Assert.IsNotNull(document.Root);
+
+            // Remove log data
+            if (!includeData)
+                DevKit.Template.Remove(document, "//logData");
+
+            // If log is not null set the UIDs
+            if (log != null)
+                DevKit.SetDocumentUids(log, document);
+
+            return document;
+        }
+
+        private void AssertAxisDefintion(Log expectedLog, LogCurveInfo expectedCurve, string xmlOut, int expectedCurveCount = 2)
+        {
+            var logList = EnergisticsConverter.XmlToObject<LogList>(xmlOut);
+            Assert.IsNotNull(logList);
+            Assert.IsTrue(logList.Log.Count > 0);
+
+            var log = logList.Log.FirstOrDefault(x => x.Uid == expectedLog.Uid);
+            Assert.IsNotNull(log);
+            Assert.AreEqual(expectedCurveCount, log.LogCurveInfo.Count);
+
+            var logCurveInfo = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value == expectedCurve.Mnemonic.Value);
+            Assert.IsNotNull(logCurveInfo);
+            Assert.IsTrue(logCurveInfo.AxisDefinition.Count > 0);
+
+            var axisDef = logCurveInfo.AxisDefinition.FirstOrDefault(x => x.Uid == expectedCurve.AxisDefinition[0].Uid);
+            Assert.IsNotNull(axisDef);
+            Assert.AreEqual(expectedCurve.AxisDefinition[0].Count, axisDef.Count);
+            Assert.AreEqual(expectedCurve.AxisDefinition[0].DoubleValues, axisDef.DoubleValues);
+        }
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
         {
