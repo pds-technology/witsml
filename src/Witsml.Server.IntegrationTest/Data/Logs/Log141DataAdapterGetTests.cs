@@ -2199,6 +2199,144 @@ namespace PDS.Witsml.Server.Data.Logs
             AssertAxisDefintion(log3, arrayCurve3, result.XMLout, 3);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_Recurring_By_LogParam()
+        {
+            AddParents();
+
+            // Create a log with a 2 logParams
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.LogParam = new List<IndexedObject>()
+            {
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param1",
+                    Index = 1,
+                    Name = "Test1",
+                    Uom = "m",
+                    Value = "11.0"
+                },
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param2",
+                    Index = 2,
+                    Name = "Test2",
+                    Uom = "m",
+                    Value = "12.0"
+                }
+            };
+
+            DevKit.AddAndAssert(Log);
+
+            // Create a log with a 2 logParams
+            var log2 = DevKit.CreateLog(Log);
+            log2.Uid = DevKit.Uid();
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            log2.LogParam = new List<IndexedObject>()
+            {
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param3",
+                    Index = 1,
+                    Name = "Test3",
+                    Uom = "m",
+                    Value = "13.0"
+                },
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param2",
+                    Index = 2,
+                    Name = "Test2",
+                    Uom = "m",
+                    Value = "12.0"
+                }
+            };
+
+            DevKit.AddAndAssert(log2);
+
+            // Create a log with a 2 logParams
+            var log3 = DevKit.CreateLog(Log);
+            log3.Uid = DevKit.Uid();
+            DevKit.InitHeader(log3, LogIndexType.measureddepth);
+            log3.LogParam = new List<IndexedObject>()
+            {
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param3",
+                    Index = 1,
+                    Name = "Test3",
+                    Uom = "m",
+                    Value = "13.0"
+                },
+                new IndexedObject()
+                {
+                    Uid = DevKit.Uid(),
+                    Description = "test param4",
+                    Index = 2,
+                    Name = "Test4",
+                    Uom = "m",
+                    Value = "14.0"
+                }
+            };
+
+            DevKit.AddAndAssert(log3);
+
+            var logParam1 = Log.LogParam.FirstOrDefault(x => x.Name == "Test1");
+            var logParam2 = Log.LogParam.FirstOrDefault(x => x.Name == "Test2");
+            var logParam3 = log3.LogParam.FirstOrDefault(x => x.Name == "Test3");
+            var logParam4 = log3.LogParam.FirstOrDefault(x => x.Name == "Test4");
+
+            Assert.IsNotNull(logParam1);
+            Assert.IsNotNull(logParam2);
+            Assert.IsNotNull(logParam3);
+            Assert.IsNotNull(logParam4);
+
+            // Query for log 1
+            var objectTemplate = CreateLogTemplateQuery(Log);
+
+            // Set the param value to test1
+            DevKit.Template.Set(objectTemplate, "//logParam/@name", logParam1.Name);
+
+            var result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertLogParam(Log, logParam1, result.XMLout);
+
+            // Query for logs that have logParam2
+            objectTemplate = CreateLogTemplateQuery();
+
+            // Set the param value to test1
+            DevKit.Template.Set(objectTemplate, "//logParam/@name", logParam2.Name);
+
+            result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertLogParam(Log, logParam2, result.XMLout);
+            AssertLogParam(log2, logParam2, result.XMLout);
+
+            // Query for logs that have logParams with the value of 13.0 or 14.0
+            objectTemplate = CreateLogTemplateQuery();
+
+            // Set the param value to test1
+            var logParam = DevKit.Template.Clone(objectTemplate, "//logParam");
+            DevKit.Template.Set(logParam, "//logParam", logParam4.Value);
+            DevKit.Template.Push(objectTemplate, "//logParam", logParam.Root);
+
+            DevKit.Template.Set(objectTemplate, "//logParam", logParam3.Value);
+
+            result = DevKit.GetFromStore(ObjectTypes.Log, objectTemplate.ToString(), null, OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            AssertLogParam(log2, logParam3, result.XMLout);
+            AssertLogParam(log3, logParam3, result.XMLout);
+            AssertLogParam(log3, logParam4, result.XMLout);
+        }
+
         #region Helper Methods
 
         private XDocument CreateLogTemplateQuery(Log log = null, bool includeData = false)
@@ -2237,6 +2375,23 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(axisDef);
             Assert.AreEqual(expectedCurve.AxisDefinition[0].Count, axisDef.Count);
             Assert.AreEqual(expectedCurve.AxisDefinition[0].DoubleValues, axisDef.DoubleValues);
+        }
+
+        private static void AssertLogParam(Log expectedLog, IndexedObject expectedLogParam, string xmlOut)
+        {
+            var logList = EnergisticsConverter.XmlToObject<LogList>(xmlOut);
+            Assert.IsNotNull(logList);
+            Assert.IsTrue(logList.Log.Count > 0);
+
+            var log = logList.Log.FirstOrDefault(x => x.Uid == expectedLog.Uid);
+            Assert.IsNotNull(log);
+
+            var logParam = log.LogParam.FirstOrDefault(x => x.Name == expectedLogParam.Name);
+            Assert.IsNotNull(logParam);
+            Assert.AreEqual(expectedLogParam.Value, logParam.Value);
+            Assert.AreEqual(expectedLogParam.Uom, logParam.Uom);
+            Assert.AreEqual(expectedLogParam.Description, logParam.Description);
+            Assert.AreEqual(expectedLogParam.Index, logParam.Index);
         }
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
