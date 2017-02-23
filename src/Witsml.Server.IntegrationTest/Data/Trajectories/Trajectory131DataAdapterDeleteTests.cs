@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_All_Stations()
+        public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Stations()
         {
             // Add well and wellbore
             AddParents();
@@ -91,13 +91,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
 
-            // Delete all trajectory stations
-            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, "<trajectoryStation />");
+            // Delete trajectory stations
+            var stations = Trajectory.TrajectoryStation;
+            var queryIn = $"<trajectoryStation uid=\"{stations.First().Uid}\"/> <trajectoryStation uid=\"{stations.Last().Uid}\"/>";
+            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, queryIn);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
 
             // Assert delete results
             result = DevKit.GetAndAssert(Trajectory);
-            Assert.IsFalse(result.TrajectoryStation.Any());
+            Assert.AreEqual(2, result.TrajectoryStation.Count);
         }
 
         [TestMethod]
