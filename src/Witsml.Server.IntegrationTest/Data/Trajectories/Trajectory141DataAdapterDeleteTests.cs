@@ -107,16 +107,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 0);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(30, 0);
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
             var result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
 
-            // Delete all trajectory stations
-            const int start = 5;
-            const int end = 8;
+            // Delete all trajectory stations with start and end
+            int start = 5;
+            int end = 8;
             var delete = "<mdMn uom=\"m\">" + start + "</mdMn><mdMx uom=\"m\">" + end + "</mdMx>";
             var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
@@ -124,6 +124,28 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Assert delete results
             result = DevKit.GetAndAssert(Trajectory);
             Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start && s.MD.Value <= end);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Delete all trajectory stations with mdMn
+            start = 20;
+            delete = $"<mdMn uom=\"m\">{start}</mdMn>";
+            queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Delete all trajectory stations with mdMx
+            end = 10;
+            delete = $"<mdMx uom=\"m\">{end}</mdMx>";
+            queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value <= end);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
         }
 
@@ -251,7 +273,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, string.Empty, string.Empty);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.DataObjectUidMissing);
         }
-
+       
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory station uid")]
         public void Log141DataAdapter_DeleteFromStore_Error_448_Delete_Without_Specifing_Station_UID()
         {
