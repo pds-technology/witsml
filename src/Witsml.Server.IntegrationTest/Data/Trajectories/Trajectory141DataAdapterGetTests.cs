@@ -480,8 +480,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
             DevKit.AssertNames(result);
 
-            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
         }
 
         [TestMethod]
@@ -505,11 +505,78 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
 
             DevKit.AssertNames(result);
-            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+            Assert.IsNotNull(result.MDMin);
+            Assert.IsNotNull(result.MDMax);
+            Assert.AreEqual(30, result.MDMin.Value);
+            Assert.AreEqual(35, result.MDMax.Value);
 
             var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= startRange && s.MD.Value <= endRange).ToList();
             Assert.IsNotNull(stations);
             Assert.AreEqual(stations.Count, result.TrajectoryStation.Count);
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            DevKit.AddAndAssert(Trajectory);
+
+            var queryIn = @"<mdMn uom=""""></mdMn>
+                            <mdMx uom=""""></mdMx>
+                            <trajectoryStation uid="""">
+                                <md uom=""""></md>
+                                <azi uom=""""></azi>
+                                <incl uom=""""></incl>
+                            </trajectoryStation>";
+
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            DevKit.AssertNames(result);
+            Assert.IsNotNull(result.MDMin);
+            Assert.IsNotNull(result.MDMax);
+
+            var stations = Trajectory.TrajectoryStation;
+            Assert.IsNotNull(stations);
+            Assert.IsTrue(result.TrajectoryStation.Count >= 15);
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            DevKit.AddAndAssert(Trajectory);
+
+            var emptyString = string.Empty;
+            var requestedQuery = @" 
+                                    <name />
+                                    <objectGrowing />
+                                    <commonData />
+                                    <mdMn uom=""""></mdMn> 
+                                    <mdMx uom=""""></mdMx>";
+
+            var queryIn = string.Format(BasicXMLTemplate, emptyString, emptyString, emptyString, requestedQuery);
+
+            var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null,
+                OptionsIn.ReturnElements.Requested);
+            Assert.IsTrue(results.Count > 0);
+
+            var resultTrajectory = results.Where(t => t.Uid == Trajectory.Uid).ToList();
+            Assert.AreEqual(1, resultTrajectory.Count);
+            Assert.IsNotNull(resultTrajectory[0]);
+            var trajectory = resultTrajectory[0];
+            Assert.AreEqual(0, trajectory.TrajectoryStation.Count);
+            DevKit.AssertRequestedElements(trajectory, new[] { "mdMin", "mdMax", "uid", "uidWell", "uidWellbore", "name", "objectGrowing", "commonData" });
+            Assert.IsNotNull(trajectory.MDMax, trajectory.Name);
+            Assert.IsNotNull(trajectory.MDMin);
+            Assert.IsNotNull(trajectory.Name);
+            Assert.IsNotNull(trajectory.CommonData);
+            Assert.IsNotNull(trajectory.ObjectGrowing);
         }
 
         [TestMethod]
