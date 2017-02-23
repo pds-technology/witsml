@@ -586,7 +586,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uom()
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value()
         {
             AddParents();
 
