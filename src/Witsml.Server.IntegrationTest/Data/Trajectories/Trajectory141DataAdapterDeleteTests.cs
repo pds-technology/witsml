@@ -275,7 +275,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, string.Empty, string.Empty);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.DataObjectUidMissing);
-        }       
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_DeleteFromStore_Error_417_Delete_With_Empty_UOM_Attribute()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 1);
+            DevKit.AddAndAssert(Trajectory);
+
+            //empty uom in header
+            var delete = "<magDeclUsed uom=\"\">1</magDeclUsed>";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.EmptyUomSpecified);
+
+            //empty uom in station
+            var firstStation = Trajectory.TrajectoryStation.First();
+            delete = $"<trajectoryStation uid=\"{firstStation.Uid}\"><tvd uom=\"\">1</tvd></trajectoryStation>";
+            queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.EmptyUomSpecified);
+        }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory station uid")]
         public void Log141DataAdapter_DeleteFromStore_Error_416_Delete_Without_Specifing_Station_UID()

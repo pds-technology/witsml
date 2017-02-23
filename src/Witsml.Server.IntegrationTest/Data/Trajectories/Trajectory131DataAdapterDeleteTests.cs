@@ -22,6 +22,7 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -168,6 +169,73 @@ namespace PDS.Witsml.Server.Data.Trajectories
             resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
             Assert.IsNotNull(resultStation3);
             Assert.IsNull(resultStation3.MDDelta);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_DeleteFromStore_Error_417_Delete_With_Empty_UOM_Attribute()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 1);
+            DevKit.AddAndAssert(Trajectory);
+
+            //empty uom in header
+            var delete = "<magDeclUsed uom=\"\">1</magDeclUsed>";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.EmptyUomSpecified);
+
+            //empty uom in station
+            var firstStation = Trajectory.TrajectoryStation.First();
+            delete = $"<trajectoryStation uid=\"{firstStation.Uid}\"><tvd uom=\"\">1</tvd></trajectoryStation>";
+            queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.EmptyUomSpecified);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_DeleteFromStore_Error_456_Exceed_MaxDataNodes()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 2;
+            WitsmlSettings.TrajectoryMaxDataNodesDelete = maxDataNodes;
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            var stations = Trajectory.TrajectoryStation;
+            var station1 = stations[0];
+            var station2 = stations[1];
+            var station3 = stations[2];
+
+            // Delete trajectory stations and elements
+            var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station2.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station3.Uid + "\" />";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.MaxDataExceeded);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_DeleteFromStore_Error_464_Duplicate_Station_UIDs()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 2;
+            WitsmlSettings.TrajectoryMaxDataNodesDelete = maxDataNodes;
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            var stations = Trajectory.TrajectoryStation;
+            var station1 = stations[0];
+
+            // Delete trajectory stations and elements
+            var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station1.Uid + "\" />";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.ChildUidNotUnique);
         }
     }
 }
