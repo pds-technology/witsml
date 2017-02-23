@@ -537,5 +537,14 @@ namespace PDS.Witsml.Server
                 Code = code,
             };
         }
+
+        public IndexedObject IndexedObject(int id, short index) => new IndexedObject()
+        {
+            Description = $"Test param{id}",
+            Index = index,
+            Name = $"Test{id}",
+            Uom = "m",
+            Value = $"1{id}.0"
+        };
     }
 }

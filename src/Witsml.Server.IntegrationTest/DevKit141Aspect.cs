@@ -1082,5 +1082,15 @@ namespace PDS.Witsml.Server
 
             return logs;
         }
+
+        public IndexedObject IndexedObject(int id, short index) => new IndexedObject()
+        {
+            Uid = Uid(),
+            Description = $"Test param{id}",
+            Index = index,
+            Name = $"Test{id}",
+            Uom = "m",
+            Value = $"1{id}.0"
+        };
     }
 }

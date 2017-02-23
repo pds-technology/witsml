@@ -206,22 +206,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
             Log.LogParam = new List<IndexedObject>()
             {
-                new IndexedObject()
-                {
-                    Description = "test param1",
-                    Index = 1,
-                    Name = "Test1",
-                    Uom = "m",
-                    Value = "11.0"
-                },
-                new IndexedObject()
-                {
-                    Description = "test param2",
-                    Index = 2,
-                    Name = "Test2",
-                    Uom = "m",
-                    Value = "12.0"
-                }
+                DevKit.IndexedObject(1, 1),
+                DevKit.IndexedObject(2, 2)
             };
 
             DevKit.AddAndAssert(Log);
@@ -232,22 +218,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(log2, LogIndexType.measureddepth);
             log2.LogParam = new List<IndexedObject>()
             {
-                new IndexedObject()
-                {
-                    Description = "test param3",
-                    Index = 1,
-                    Name = "Test3",
-                    Uom = "m",
-                    Value = "13.0"
-                },
-                new IndexedObject()
-                {
-                    Description = "test param2",
-                    Index = 2,
-                    Name = "Test2",
-                    Uom = "m",
-                    Value = "12.0"
-                }
+                DevKit.IndexedObject(3, 1),
+                DevKit.IndexedObject(2, 2)
             };
 
             DevKit.AddAndAssert(log2);
@@ -258,22 +230,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(log3, LogIndexType.measureddepth);
             log3.LogParam = new List<IndexedObject>()
             {
-                new IndexedObject()
-                {
-                    Description = "test param3",
-                    Index = 1,
-                    Name = "Test3",
-                    Uom = "m",
-                    Value = "13.0"
-                },
-                new IndexedObject()
-                {
-                    Description = "test param4",
-                    Index = 2,
-                    Name = "Test4",
-                    Uom = "m",
-                    Value = "14.0"
-                }
+                DevKit.IndexedObject(3, 1),
+                DevKit.IndexedObject(4, 2)
             };
 
             DevKit.AddAndAssert(log3);
