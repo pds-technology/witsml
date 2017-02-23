@@ -594,12 +594,21 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
             DevKit.AddAndAssert(Trajectory);
+            var firstStation = Trajectory.TrajectoryStation.First();
             var lastStation = Trajectory.TrajectoryStation.Last();
 
             var queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
             var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
 
             AssertTrajectoryStations(new List<TrajectoryStation> { lastStation }, result.TrajectoryStation);
+
+            firstStation.MD = lastStation.MD;
+            DevKit.UpdateAndAssert(Trajectory);
+
+            queryIn = $"<trajectoryStation> <md uom=\"m\">{lastStation.MD.Value}</md></trajectoryStation>";
+            result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn);
+
+            AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, lastStation }, result.TrajectoryStation);
         }
 
         [TestMethod]
