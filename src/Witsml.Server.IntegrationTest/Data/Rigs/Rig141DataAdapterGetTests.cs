@@ -48,7 +48,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
         [TestMethod]
-        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufaturers_Returns_0_Rigs()
+        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufacturers_Returns_0_Rigs()
         {
             AddAndAssertMultiRigForRecurringTests();
 
@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
         [TestMethod]
-        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufaturers_Returns_2_Rigs()
+        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufacturers_Returns_2_Rigs()
         {
             AddAndAssertMultiRigForRecurringTests();
 
@@ -72,7 +72,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
         [TestMethod]
-        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufaturers_Returns_3_Rigs()
+        public void Rig141DataProvider_GetFromStore_By_Multiple_Bop_Manufacturers_Returns_3_Rigs()
         {
             AddAndAssertMultiRigForRecurringTests();
 
@@ -182,13 +182,13 @@ namespace PDS.Witsml.Server.Data.Rigs
             QueryAndAssertOneBopComponentOneNameTagMultiElements(2, "5", "5");
         }
 
-        #region Private Mthods
+        #region Private Methods
 
         private void QueryAndAssertOneNameTagMultiElements(int expectedRigCount, string nameNumber, string commentNumber,
             NameTagNumberingScheme numberingScheme)
         {
             var nameCommentNumbers = new List<Tuple<string, string>>() { new Tuple<string, string>(nameNumber, commentNumber) };
-            QueryAndAssertMultiNameTagMultiElements(expectedRigCount, 1, nameCommentNumbers, NameTagNumberingScheme.SerialNumber);
+            QueryAndAssertMultiNameTagMultiElements(expectedRigCount, 1, nameCommentNumbers, numberingScheme);
         }
 
         private void QueryAndAssertMultiNameTagMultiElements(int expectedRigCount, int expectedNameCount, List<Tuple<string, string>> nameCommentNumbers, NameTagNumberingScheme numberingScheme)
