@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "mdMn", "mdMx"
             };
 
-            if (Context.Function != Functions.AddToStore && Context.Function != Functions.UpdateInStore)
+            if (Context.Function != Functions.AddToStore && Context.Function != Functions.UpdateInStore && Context.Function != Functions.DeleteFromStore)
                 Context.Ignored.Add("trajectoryStation");
         }
 
@@ -142,15 +142,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
             if (stations.Any(s => s.Uid != null && string.IsNullOrWhiteSpace(s.Uid)))
             {
                 yield return
-                    new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] {"TrajectoryStation", "Uid"});
+                    new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
             }
             else if (stations.HasDuplicateUids())
             {
-                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] {"TrajectoryStation", "Uid"});
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
             }
             else if (Context.Function.IsDataNodesValid(ObjectTypes.GetObjectType(DataObject), stations.Count))
             {
-                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"TrajectoryStation"});
+                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
             }
         }
     }
