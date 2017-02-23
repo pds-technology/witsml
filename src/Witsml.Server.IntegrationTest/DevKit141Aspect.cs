@@ -382,15 +382,7 @@ namespace PDS.Witsml.Server
 
         public Log CreateLog(Log log)
         {
-            return new Log()
-            {
-                Uid = log.Uid,
-                Name = log.Name,
-                UidWell = log.UidWell,
-                NameWell = log.NameWell,
-                UidWellbore = log.UidWellbore,
-                NameWellbore = log.NameWellbore,
-            };
+            return CreateLog(log.Uid, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
         }
 
         public Well CreateTestWell()
