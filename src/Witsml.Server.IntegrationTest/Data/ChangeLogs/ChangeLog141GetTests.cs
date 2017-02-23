@@ -115,12 +115,14 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
         [TestMethod]
         public void ChangeLog141GetTests_GetFromStore_Query_ChangeLogs_With_Recurring_Filter()
         {
+            var addTime = DateTime.UtcNow;
+
             DevKit.AddAndAssert(Well);
 
             Well.Name = "Update";
             DevKit.UpdateAndAssert(Well);
 
-            var now = DateTime.UtcNow;
+            var updateTime = DateTime.UtcNow;
 
             Well.Name = "Update2";
             DevKit.UpdateAndAssert(Well);
@@ -158,7 +160,7 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
 
             // Confirm update change history for last change
             changeType = ChangeInfoType.update;
-            var dTimLastChange = $"<dTimChange>{now:O}</dTimChange>";
+            var dTimLastChange = $"<dTimChange>{updateTime:O}</dTimChange>";
             queryIn = string.Format(QueryEmptyRootTemplate, string.Format(changeTypeQuery, changeType, dTimLastChange));
 
             changeLogs = GetAndAssertChangeLog(queryIn, OptionsIn.ReturnElements.All, 1);
@@ -174,6 +176,26 @@ namespace PDS.Witsml.Server.Data.ChangeLogs
             changeHistories = changeLogs.First().ChangeHistory;
             Assert.AreEqual(1, changeHistories.Count);
             Assert.AreEqual(changeType, changeHistories[0].ChangeType);
+
+            // Specify multiple criteria for dTimChange and changeType
+            var multipleCriteriaQuery = $"<changeLog uidObject=\"{Well.Uid}\">" + Environment.NewLine +
+                                 "<objectType>well</objectType>" + Environment.NewLine +
+                                 "<changeHistory>" + Environment.NewLine +
+                                 $"<dTimChange>{updateTime.AddMinutes(1):O}</dTimChange>" + Environment.NewLine +
+                                 $"<changeType>{ChangeInfoType.update}</changeType>" + Environment.NewLine +
+                                 "</changeHistory>" + Environment.NewLine +
+                                 "<changeHistory>" + Environment.NewLine +
+                                 $"<dTimChange>{addTime:O}</dTimChange>" + Environment.NewLine +
+                                 $"<changeType>{ChangeInfoType.add}</changeType>" + Environment.NewLine +
+                                 "</changeHistory>" + Environment.NewLine +
+                                 "</changeLog>";
+
+            // Query should only return the change history for add
+            changeLogs = GetAndAssertChangeLog(string.Format(QueryEmptyRootTemplate, multipleCriteriaQuery),
+                OptionsIn.ReturnElements.All, 1);
+            changeHistories = changeLogs.First().ChangeHistory;
+            Assert.AreEqual(1, changeHistories.Count);
+            Assert.AreEqual(ChangeInfoType.add, changeHistories[0].ChangeType);
         }
 
         private List<ChangeLog> GetAndAssertChangeLog(string queryIn, OptionsIn optionsIn, int? expectedChangeLogCount = null)
