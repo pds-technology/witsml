@@ -201,11 +201,23 @@ namespace PDS.Witsml.Data
             }
             else
             {
-                InitializeRecurringElementHandler(propertyInfo, propertyPath);
-
                 var args = propertyType.GetGenericArguments();
                 var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
-           
+
+                if (childType == null)
+                {
+                    // Handle duplicate elements which are not recurring elements
+                    foreach (var element in elementList)
+                    {
+                        var elementGroup = new[] { element }.GroupBy(x => x.Name.LocalName).First();
+                        NavigateElementGroup(propertyInfo, elementGroup, parentPath);
+                    }
+
+                    return;
+                }
+
+                InitializeRecurringElementHandler(propertyInfo, propertyPath);
+
                 NavigateRecurringElements(propertyInfo, elementList, childType, propertyPath);
 
                 HandleRecurringElements(propertyInfo, propertyPath);
