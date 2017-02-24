@@ -40,6 +40,7 @@ namespace PDS.Witsml.Data
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
         private static readonly UnknownElementSetting _unknownElementSetting;
+        private static readonly bool _allowDuplicateNonRecurringElements;
 
         /// <summary>
         /// Initializes the <see cref="DataObjectNavigator{TContext}" /> class.
@@ -47,6 +48,7 @@ namespace PDS.Witsml.Data
         static DataObjectNavigator()
         {
             Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out _unknownElementSetting);
+            _allowDuplicateNonRecurringElements = Properties.Settings.Default.AllowDuplicateNonRecurringElements;
         }
 
         /// <summary>
@@ -173,46 +175,20 @@ namespace PDS.Witsml.Data
             if (elementList.Count == 1)
             {
                 var element = elementList.FirstOrDefault();
-
-                if (propertyType.IsGenericType)
-                {
-                    var genericType = propertyType.GetGenericTypeDefinition();
-
-                    if (genericType == typeof(Nullable<>))
-                    {
-                        var underlyingType = Nullable.GetUnderlyingType(propertyType);
-                        NavigateNullableElementType(propertyInfo, underlyingType, element, propertyPath);
-                    }
-                    else if (genericType == typeof(List<>))
-                    {
-                        var childType = propertyType.GetGenericArguments()[0];
-                        NavigateArrayElementType(propertyInfo, elementList, childType, element, propertyPath);
-                    }
-                }
-                else if (propertyType.IsAbstract)
-                {
-                    var concreteType = GetConcreteType(element, propertyType);
-                    NavigateElementType(propertyInfo, concreteType, element, propertyPath);
-                }
-                else
-                {
-                    NavigateElementType(propertyInfo, propertyType, element, propertyPath);
-                }
+                NavigateElementGroupItem(propertyInfo, elementList, element, propertyPath);
             }
             else
             {
                 var args = propertyType.GetGenericArguments();
                 var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-                if (childType == null)
+                // Handle duplicate elements which are not recurring elements
+                if (childType == null && _allowDuplicateNonRecurringElements)
                 {
-                    // Handle duplicate elements which are not recurring elements
                     foreach (var element in elementList)
                     {
-                        var elementGroup = new[] { element }.GroupBy(x => x.Name.LocalName).First();
-                        NavigateElementGroup(propertyInfo, elementGroup, parentPath);
+                        NavigateElementGroupItem(propertyInfo, elementList, element, propertyPath);
                     }
-
                     return;
                 }
 
@@ -221,6 +197,43 @@ namespace PDS.Witsml.Data
                 NavigateRecurringElements(propertyInfo, elementList, childType, propertyPath);
 
                 HandleRecurringElements(propertyInfo, propertyPath);
+            }
+        }
+
+        /// <summary>
+        /// Navigates the element group item.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected virtual void NavigateElementGroupItem(PropertyInfo propertyInfo, List<XElement> elementList, XElement element, string propertyPath)
+        {
+            var propertyType = propertyInfo.PropertyType;
+
+            if (propertyType.IsGenericType)
+            {
+                var genericType = propertyType.GetGenericTypeDefinition();
+
+                if (genericType == typeof(Nullable<>))
+                {
+                    var underlyingType = Nullable.GetUnderlyingType(propertyType);
+                    NavigateNullableElementType(propertyInfo, underlyingType, element, propertyPath);
+                }
+                else if (genericType == typeof(List<>))
+                {
+                    var childType = propertyType.GetGenericArguments()[0];
+                    NavigateArrayElementType(propertyInfo, elementList, childType, element, propertyPath);
+                }
+            }
+            else if (propertyType.IsAbstract)
+            {
+                var concreteType = GetConcreteType(element, propertyType);
+                NavigateElementType(propertyInfo, concreteType, element, propertyPath);
+            }
+            else
+            {
+                NavigateElementType(propertyInfo, propertyType, element, propertyPath);
             }
         }
 

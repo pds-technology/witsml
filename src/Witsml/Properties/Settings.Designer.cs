@@ -58,5 +58,14 @@ namespace PDS.Witsml.Properties {
                 return ((int)(this["ChannelDataBlockFlushRateInMilliseconds"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AllowDuplicateNonRecurringElements {
+            get {
+                return ((bool)(this["AllowDuplicateNonRecurringElements"]));
+            }
+        }
     }
 }
