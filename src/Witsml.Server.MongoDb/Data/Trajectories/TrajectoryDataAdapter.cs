@@ -310,7 +310,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var ignored = new List<string>();
 
-            if(!OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()) || (parser.IsStructuralRangeQuery() && parser.Contains("trajectoryStation")))
+            if (!OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()) || (parser.IsStructuralRangeQuery() && parser.Contains("trajectoryStation")))
                 ignored.AddRange(new List<string> { "mdMn", "mdMx" });
 
             if (parser.IncludeTrajectoryStations())
@@ -615,7 +615,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
         {
             var current = GetEntity(uri);
-            var stationsCurrent = new List<TChild>(GetTrajectoryStations(current));
             var chunked = IsQueryingStationFile(current, current);
 
             if (chunked)
@@ -623,6 +622,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var stations = GetMongoFileStationData(uri);
                 FilterStationData(current, stations);
             }
+
+            var stationsCurrent = new List<TChild>(GetTrajectoryStations(current));
 
             FilterStationData(current, parser);
             MergeEntity(current, parser, true);
