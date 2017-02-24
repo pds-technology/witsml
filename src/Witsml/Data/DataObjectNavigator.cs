@@ -39,16 +39,16 @@ namespace PDS.Witsml.Data
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-        private static readonly UnknownElementSetting _unknownElementSetting;
-        private static readonly bool _allowDuplicateNonRecurringElements;
+        internal static UnknownElementSetting UnknownElementSetting;
+        internal static bool AllowDuplicateNonRecurringElements;
 
         /// <summary>
         /// Initializes the <see cref="DataObjectNavigator{TContext}" /> class.
         /// </summary>
         static DataObjectNavigator()
         {
-            Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out _unknownElementSetting);
-            _allowDuplicateNonRecurringElements = Properties.Settings.Default.AllowDuplicateNonRecurringElements;
+            Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out UnknownElementSetting);
+            AllowDuplicateNonRecurringElements = Properties.Settings.Default.AllowDuplicateNonRecurringElements;
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace PDS.Witsml.Data
                 var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
                 // Handle duplicate elements which are not recurring elements
-                if (childType == null && _allowDuplicateNonRecurringElements)
+                if (childType == null && AllowDuplicateNonRecurringElements)
                 {
                     foreach (var element in elementList)
                     {
@@ -667,11 +667,11 @@ namespace PDS.Witsml.Data
         {
             var message = $"Invalid {type} found: {name}";
 
-            if (_unknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
+            if (UnknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
             {
                 Logger.Debug(message);
             }
-            else if (_unknownElementSetting == UnknownElementSetting.Warn)
+            else if (UnknownElementSetting == UnknownElementSetting.Warn)
             {
                 Logger.Warn(message);
 
