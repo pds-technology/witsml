@@ -308,7 +308,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A list of element names.</returns>
         protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
-            var ignored = new List<string> { "mdMn", "mdMx" };
+            var ignored = new List<string>();
+
+            if(!OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()) || (parser.IsStructuralRangeQuery() && parser.Contains("trajectoryStation")))
+                ignored.AddRange(new List<string> { "mdMn", "mdMx" });
 
             if (parser.IncludeTrajectoryStations())
                 ignored.Add("trajectoryStation");
