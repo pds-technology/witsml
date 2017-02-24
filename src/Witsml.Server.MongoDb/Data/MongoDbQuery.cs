@@ -190,9 +190,6 @@ namespace PDS.Witsml.Server.Data
             Context.ParentFilters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
 
-            if(propertyInfo.GetCustomAttribute<RecurringElementAttribute>() == null)
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
-
             if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
             {
                 InitializeRecurringElementFilter(propertyPath);
