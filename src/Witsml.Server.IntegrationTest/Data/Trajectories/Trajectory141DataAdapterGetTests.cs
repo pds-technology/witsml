@@ -516,7 +516,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
         }
 
-        [Ignore]
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range()
         {
@@ -545,7 +544,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
         }
 
-        [Ignore]
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range()
         {
