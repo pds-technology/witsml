@@ -261,7 +261,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 .ForkProperties(ObjectTypes.TrajectoryStation, ObjectTypes.TrajectoryStation)
                 .FirstOrDefault();
 
-            if (stationParser == null || (!stationParser.HasElements() && !stationParser.Element().HasAttributes))
+            if ((stationParser == null && !OptionsIn.ReturnElements.StationLocationOnly.Equals(returnElements)) ||
+                (stationParser != null && !stationParser.HasElements() && !stationParser.Element().HasAttributes))
                 return stations;
 
             const string prefix = "TrajectoryStation.";
