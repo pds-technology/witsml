@@ -174,15 +174,15 @@ namespace PDS.Witsml.Server
                 var result = x.GetValue(dataObject, null);
                 if (result is bool)
                 {
-                    Assert.IsFalse((bool)result);
+                    Assert.IsFalse((bool)result, x.Name);
                 }
                 else if (result is IList)
                 {
-                    Assert.AreEqual(0, ((IList)result).Count);
+                    Assert.AreEqual(0, ((IList)result).Count, x.Name);
                 }
                 else
                 {
-                    Assert.IsNull(result);
+                    Assert.IsNull(result, x.Name);
                 }
             });
         }
@@ -340,6 +340,27 @@ namespace PDS.Witsml.Server
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Creates an id-only query from the specified data object.
+        /// </summary>
+        /// <typeparam name="TList">The listType of the data object.</typeparam>
+        /// <typeparam name="T">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>A new <see cref="XDocument"/> instance.</returns>
+        public XDocument CreateQuery<TList, T>(T dataObject)
+        {
+            var objectTemplate = Template.Create<TList>();
+
+            SetDocumentUids(dataObject, objectTemplate);
+            Assert.IsNotNull(objectTemplate);
+            Assert.IsNotNull(objectTemplate.Root);
+
+            // Remove all child nodes
+            Template.Remove(objectTemplate, $"//{ObjectTypes.GetObjectType<T>()}/*");
+
+            return objectTemplate;
         }
 
         public WMLS_AddToStoreResponse Add<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection

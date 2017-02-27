@@ -707,6 +707,51 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(lastStation.Location.First().WellCRS.Value, location.WellCRS.Value, "trajectoryStation/location/wellCRS");
         }
 
+        [TestMethod, Description("Implements test93 from the Energistics certification tests")]
+        public void Trajectory141DataAdapter_GetFromStore_with_station_location_only_chunked()
+        {
+            AddParents();
+
+            WitsmlSettings.MaxStationCount = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
+            DevKit.AddAndAssert(Trajectory);
+
+            AssertStationLocationOnly();
+        }
+
+        [TestMethod, Description("Implements test93 from the Energistics certification tests")]
+        public void Trajectory141DataAdapter_GetFromStore_with_station_location_only_unchunked()
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
+            DevKit.AddAndAssert(Trajectory);
+
+            AssertStationLocationOnly();
+        }
+
+        #region Helper Methods
+
+        private void AssertStationLocationOnly()
+        {
+            // Create a query template for trajectory
+            var objectTemplate = DevKit.CreateQuery<TrajectoryList, Trajectory>(Trajectory);
+
+            var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, objectTemplate.ToString(), null, OptionsIn.ReturnElements.StationLocationOnly);
+            Assert.IsNotNull(results);
+
+            var trajectory = results.FirstOrDefault();
+            Assert.IsNotNull(trajectory);
+
+            // Assert that only the expected elements and attributes are on the trajectory
+            DevKit.AssertRequestedElements(trajectory, new[] { "uid", "uidWell", "uidWellbore", "trajectoryStation" });
+
+            // Assert that only the expected elements and attributes are on the trajectoryStation
+            trajectory.TrajectoryStation.ForEach(
+                x => DevKit.AssertRequestedElements(x, new[] { "uid", "md", "tvd", "incl", "azi", "location", "dateTimeStn", "typeTrajStation" }));
+        }
+
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)
         {
             Assert.AreEqual(stations.Count, results.Count);
@@ -729,6 +774,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Assert.AreEqual(station.MDDelta?.Value, result.MDDelta?.Value);
                 Assert.AreEqual(station.StatusTrajStation, result.StatusTrajStation);
             }
-        }
+        } 
+        #endregion
     }
 }
