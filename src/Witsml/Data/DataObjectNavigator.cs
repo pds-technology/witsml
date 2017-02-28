@@ -138,9 +138,9 @@ namespace PDS.Witsml.Data
 
             foreach (var group in groupings)
             {
-                if (IsIgnored(group.Key, GetPropertyPath(parentPath, group.Key))) continue;
-
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+
+                if (IsIgnored(group.Key, GetPropertyPath(parentPath, propertyInfo?.Name ?? group.Key))) continue;
 
                 if (propertyInfo != null)
                 {

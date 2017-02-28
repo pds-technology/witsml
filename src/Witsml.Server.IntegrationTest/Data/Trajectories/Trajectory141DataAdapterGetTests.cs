@@ -566,17 +566,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 OptionsIn.ReturnElements.Requested);
             Assert.IsTrue(results.Count > 0);
 
-            var resultTrajectory = results.Where(t => t.Uid == Trajectory.Uid).ToList();
-            Assert.AreEqual(1, resultTrajectory.Count);
-            Assert.IsNotNull(resultTrajectory[0]);
-            var trajectory = resultTrajectory[0];
-            Assert.AreEqual(0, trajectory.TrajectoryStation.Count);
-            DevKit.AssertRequestedElements(trajectory, new[] { "mdMin", "mdMax", "uid", "uidWell", "uidWellbore", "name", "objectGrowing", "commonData" });
-            Assert.IsNotNull(trajectory.MDMax, trajectory.Name);
-            Assert.IsNotNull(trajectory.MDMin);
-            Assert.IsNotNull(trajectory.Name);
-            Assert.IsNotNull(trajectory.CommonData);
-            Assert.IsNotNull(trajectory.ObjectGrowing);
+            var trajectoryStation = results.FirstOrDefault(t => t.Uid == Trajectory.Uid);
+            Assert.IsNotNull(trajectoryStation);
+            Assert.AreEqual(0, trajectoryStation.TrajectoryStation.Count);
+            DevKit.AssertRequestedElements(trajectoryStation, new[] { "mdMin", "mdMax", "uid", "uidWell", "uidWellbore", "name", "objectGrowing", "commonData" });
+            Assert.IsNotNull(trajectoryStation.MDMax);
+            Assert.IsNotNull(trajectoryStation.MDMin);
+            Assert.IsNotNull(trajectoryStation.Name);
+            Assert.IsNotNull(trajectoryStation.CommonData);
+            Assert.IsNotNull(trajectoryStation.ObjectGrowing);
         }
 
         [TestMethod]
@@ -774,7 +772,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Assert.AreEqual(station.MDDelta?.Value, result.MDDelta?.Value);
                 Assert.AreEqual(station.StatusTrajStation, result.StatusTrajStation);
             }
-        } 
+        }
         #endregion
     }
 }
