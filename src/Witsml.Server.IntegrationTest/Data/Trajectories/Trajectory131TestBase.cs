@@ -39,5 +39,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             WitsmlSettings.TrajectoryMaxDataNodesDelete = DevKitAspect.DefaultTrajectoryMaxDataNodesDelete;
             WitsmlSettings.TrajectoryGrowingTimeoutPeriod = DevKitAspect.DefaultTrajectoryGrowingTimeoutPeriod;
         }
+
+        public void TestReset(int maxStationCount)
+        {
+            TestCleanUp();
+            TestSetUp();
+            WitsmlSettings.MaxStationCount = maxStationCount;
+        }
     }
 }

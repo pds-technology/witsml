@@ -53,20 +53,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_All()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
-            DevKit.AssertNames(result, Trajectory);
-            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
-
-            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_All(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_All(15);
         }
 
         [TestMethod]
@@ -121,20 +110,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Requested()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, "<serviceCompany /><trajectoryStation />", optionsIn: OptionsIn.ReturnElements.Requested);
-
-            DevKit.AssertNames(result);
-            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
-
-            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation, true);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Requested(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Requested(15);
         }
 
         [TestMethod]
@@ -189,141 +167,41 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.DataOnly);
-
-            DevKit.AssertNames(result);
-            Assert.IsNull(result.ServiceCompany);
-
-            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation, true);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only(15);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Station_Location_Only()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 0, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.DataOnly);
-
-            DevKit.AssertNames(result);
-            Assert.IsNull(result.ServiceCompany);
-
-            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Station_Location_Only(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Station_Location_Only(15);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            const int start = 15;
-            var query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start }
-            };
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
-
-            DevKit.AssertNames(result, Trajectory);
-
-            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start).ToList();
-            AssertTrajectoryStations(stations, result.TrajectoryStation);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min(20);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min(25);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min_Max()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            const int start = 15;
-            const int end = 20;
-            var query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
-                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
-            };
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
-
-            DevKit.AssertNames(result, Trajectory);
-
-            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
-            AssertTrajectoryStations(stations, result.TrajectoryStation);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min_Max(20);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min_Max(25);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Filters_Results_With_No_Data()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Query end range before the trajectory structure
-            var end = 9;
-            var query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
-            };
-            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
-
-            // Query start range after the trajectory structure
-            var start = 100;
-            query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
-            };
-            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
-
-            // Query range outside the trajectory structure
-            start = 2;
-            end = 5;
-            query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
-                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
-            };
-            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+            Trajectory141DataAdapter_GetFromStore_Filters_Results_With_No_Data(20);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Filters_Results_With_No_Data(25);
         }
 
         [TestMethod, Description("Tests GetFromStore on Trajectory is limited to MaxDataNodes")]
@@ -438,58 +316,96 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering()
         {
-            AddParents();
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 5);
-            DevKit.AddAndAssert(Trajectory);
-
-            const int start = 9;
-            const int end = 10;
-            var query = new Trajectory
-            {
-                Uid = Trajectory.Uid,
-                UidWell = Trajectory.UidWell,
-                UidWellbore = Trajectory.UidWellbore,
-                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
-                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end },
-                TrajectoryStation = new List<TrajectoryStation> { new TrajectoryStation { MD = new MeasuredDepthCoord { Value = 6, Uom = MeasuredDepthUom.m } } }
-            };
-
-            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
-
-            DevKit.AssertNames(result, Trajectory);
-
-            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
-            AssertTrajectoryStations(stations, result.TrajectoryStation);
+            Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering(15);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested()
         {
-            AddParents();
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(5, 20);
-            DevKit.AddAndAssert(Trajectory);
-
-            var queryIn = @"<trajectoryStation uid="""">
-                                <md uom=""""></md>
-                                <azi uom=""""></azi>
-                                <incl uom=""""></incl>
-                            </trajectoryStation>";
-
-            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
-            DevKit.AssertNames(result);
-
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested(5);
+            TestReset(10);
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested(15);
         }
 
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Structural_Range()
         {
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Structural_Range(15);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Structural_Range(25);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range()
+        {
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range(15);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range(25);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range()
+        {
+            Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range(15);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range(25);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid()
+        {
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid(3);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid(6);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type()
+        {
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type(3);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type(6);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type()
+        {
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type(3);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type(10);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value()
+        {
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value(3);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value(10);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location()
+        {
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location(3);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location(35);
+        }
+
+        [TestMethod, Description("Implements test93 from the Energistics certification tests")]
+        public void Trajectory141DataAdapter_GetFromStore_with_station_location_only()
+        {
+            Trajectory141DataAdapter_GetFromStore_with_station_location_only(35);
+            TestReset(5);
+            Trajectory141DataAdapter_GetFromStore_with_station_location_only(35);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Structural_Range(int numberOfStations)
+        {
             AddParents();
 
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 30);
             DevKit.AddAndAssert(Trajectory);
 
             var startRange = 30;
@@ -516,12 +432,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range()
+        private void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested_With_Empty_Structural_Range(int numberOfStations)
         {
             AddParents();
 
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 30);
             DevKit.AddAndAssert(Trajectory);
 
             var queryIn = @"<mdMn uom=""""></mdMn>
@@ -544,12 +459,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range()
+        private void Trajectory141DataAdapter_GetFromStore_Can_Get_Requested_With_Empty_Structural_Range(int numberOfStations)
         {
             AddParents();
 
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(15, 30);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 30);
             DevKit.AddAndAssert(Trajectory);
 
             var emptyString = string.Empty;
@@ -562,8 +476,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var queryIn = string.Format(BasicXMLTemplate, emptyString, emptyString, emptyString, requestedQuery);
 
-            var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null,
-                OptionsIn.ReturnElements.Requested);
+            var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, OptionsIn.ReturnElements.Requested);
             Assert.IsTrue(results.Count > 0);
 
             var trajectoryStation = results.FirstOrDefault(t => t.Uid == Trajectory.Uid);
@@ -577,12 +490,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(trajectoryStation.ObjectGrowing);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid()
+        private void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid(int numberOfStations)
         {
             AddParents();
 
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(3, 1);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 1);
             DevKit.AddAndAssert(Trajectory);
             var firstStation = Trajectory.TrajectoryStation.First();
             var secondStation = Trajectory.TrajectoryStation.First(s => s.Uid == "sta-2");
@@ -598,12 +510,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type()
+        private void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Type(int numberOfStations)
         {
             AddParents();
 
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(3, 1);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 1);
             DevKit.AddAndAssert(Trajectory);
             var firstStation = Trajectory.TrajectoryStation.First();
 
@@ -620,14 +531,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type()
+        private void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Uid_And_Type(int numberOfStations)
         {
             AddParents();
 
-            WitsmlSettings.MaxStationCount = 5;
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 10);
             DevKit.AddAndAssert(Trajectory);
             var firstStation = Trajectory.TrajectoryStation.First();
             var secondStation = Trajectory.TrajectoryStation.Find(s => s.Uid == "sta-2");
@@ -650,14 +558,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, secondStation }, result.TrajectoryStation);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value()
+        private void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Md_Value(int numberOfStations)
         {
             AddParents();
 
-            WitsmlSettings.MaxStationCount = 5;
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 10);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 10);
             DevKit.AddAndAssert(Trajectory);
             var firstStation = Trajectory.TrajectoryStation.First();
             var lastStation = Trajectory.TrajectoryStation.Last();
@@ -676,14 +581,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AssertTrajectoryStations(new List<TrajectoryStation> { firstStation, lastStation }, result.TrajectoryStation);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location()
+        private void Trajectory141DataAdapter_GetFromStore_Filter_Recurring_Element_By_Station_Location(int numberOfStations)
         {
             AddParents();
 
-            WitsmlSettings.MaxStationCount = 5;
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 15);
             DevKit.AddAndAssert(Trajectory);
 
             var lastStation = Trajectory.TrajectoryStation.Last();
@@ -705,35 +607,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(lastStation.Location.First().WellCRS.Value, location.WellCRS.Value, "trajectoryStation/location/wellCRS");
         }
 
-        [TestMethod, Description("Implements test93 from the Energistics certification tests")]
-        public void Trajectory141DataAdapter_GetFromStore_with_station_location_only_chunked()
+        private void Trajectory141DataAdapter_GetFromStore_with_station_location_only(int numberOfStations)
         {
             AddParents();
 
-            WitsmlSettings.MaxStationCount = 5;
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 15);
             DevKit.AddAndAssert(Trajectory);
 
-            AssertStationLocationOnly();
-        }
-
-        [TestMethod, Description("Implements test93 from the Energistics certification tests")]
-        public void Trajectory141DataAdapter_GetFromStore_with_station_location_only_unchunked()
-        {
-            AddParents();
-
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(35, 15);
-            DevKit.AddAndAssert(Trajectory);
-
-            AssertStationLocationOnly();
-        }
-
-        #region Helper Methods
-
-        private void AssertStationLocationOnly()
-        {
-            // Create a query template for trajectory
             var objectTemplate = DevKit.CreateQuery<TrajectoryList, Trajectory>(Trajectory);
 
             var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, objectTemplate.ToString(), null, OptionsIn.ReturnElements.StationLocationOnly);
@@ -749,6 +629,228 @@ namespace PDS.Witsml.Server.Data.Trajectories
             trajectory.TrajectoryStation.ForEach(
                 x => DevKit.AssertRequestedElements(x, new[] { "uid", "md", "tvd", "incl", "azi", "location", "dateTimeStn", "typeTrajStation" }));
         }
+
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_All(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            DevKit.AssertNames(result, Trajectory);
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Requested(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, "<serviceCompany /><trajectoryStation />", optionsIn: OptionsIn.ReturnElements.Requested);
+
+            DevKit.AssertNames(result);
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation, true);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Data_Only(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.DataOnly);
+
+            DevKit.AssertNames(result);
+            Assert.IsNull(result.ServiceCompany);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation, true);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_Return_Elements_Station_Location_Only(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.DataOnly);
+
+            DevKit.AssertNames(result);
+            Assert.IsNull(result.ServiceCompany);
+
+            AssertTrajectoryStations(Trajectory.TrajectoryStation, result.TrajectoryStation);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 10, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            const int start = 15;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start }
+            };
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
+
+            DevKit.AssertNames(result, Trajectory);
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start).ToList();
+            AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Data_By_Md_Min_Max(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 10, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            const int start = 15;
+            const int end = 20;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
+            };
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
+
+            DevKit.AssertNames(result, Trajectory);
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
+            AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Filters_Results_With_No_Data(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Query end range before the trajectory structure
+            var end = 9;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+
+            // Query start range after the trajectory structure
+            var start = 100;
+            query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+
+            // Query range outside the trajectory structure
+            start = 2;
+            end = 5;
+            query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end }
+            };
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true, isNotNull: false);
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Query_Uses_Structural_Range_Value_And_Not_Station_MD_For_Filtering(int numberOfStations)
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 5);
+            DevKit.AddAndAssert(Trajectory);
+
+            const int start = 9;
+            const int end = 10;
+            var query = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                MDMin = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = start },
+                MDMax = new MeasuredDepthCoord { Uom = Trajectory141Generator.MdUom, Value = end },
+                TrajectoryStation = new List<TrajectoryStation> { new TrajectoryStation { MD = new MeasuredDepthCoord { Value = 6, Uom = MeasuredDepthUom.m } } }
+            };
+
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(query, queryByExample: true);
+
+            DevKit.AssertNames(result, Trajectory);
+
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
+            AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+
+        private void Trajectory141DataAdapter_GetFromStore_Can_Filter_Recurring_Elements_Requested(int numberOfStations)
+        {
+            AddParents();
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 20);
+            DevKit.AddAndAssert(Trajectory);
+
+            var queryIn = @"<trajectoryStation uid="""">
+                                <md uom=""""></md>
+                                <azi uom=""""></azi>
+                                <incl uom=""""></incl>
+                            </trajectoryStation>";
+
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, queryIn, optionsIn: OptionsIn.ReturnElements.Requested);
+            DevKit.AssertNames(result);
+
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+        }
+
+        #region Helper Methods
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)
         {

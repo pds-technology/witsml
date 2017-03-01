@@ -40,16 +40,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141DataAdapter_AddToStore_AddTrajectory_With_Stations()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory with stations         
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Trajectory141DataAdapter_AddToStore_AddTrajectory_With_Stations(5);
+            TestReset(5);
+            Trajectory141DataAdapter_AddToStore_AddTrajectory_With_Stations(10);
         }
 
         [TestMethod, Description("Tests you cannot do AddToStore with more data nodes than specified in Trajectory MaxDataNodes")]
@@ -67,6 +60,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add trajetory with max allowed stations
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes, 0);
             DevKit.AddAndAssert(Trajectory);
+        }
+
+        private void Trajectory141DataAdapter_AddToStore_AddTrajectory_With_Stations(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory with stations         
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
         }
     }
 }

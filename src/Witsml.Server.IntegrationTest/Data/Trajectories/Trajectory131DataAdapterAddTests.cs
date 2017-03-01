@@ -39,11 +39,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory131DataAdapter_AddToStore_AddTrajectory_With_Stations()
         {
+            Trajectory131DataAdapter_AddToStore_AddTrajectory_With_Stations(4);
+            TestReset(10);
+            Trajectory131DataAdapter_AddToStore_AddTrajectory_With_Stations(15);
+        }
+
+        private void Trajectory131DataAdapter_AddToStore_AddTrajectory_With_Stations(int numberOfStations)
+        {
             // Add well and wellbore
             AddParents();
 
             // Add trajectory with stations         
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0);
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory

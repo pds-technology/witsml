@@ -32,26 +32,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [TestClass]
     public partial class Trajectory131DataAdapterDeleteTests : Trajectory131TestBase
     {
-
         [TestMethod]
         public void Trajectory131DataAdapter_DeleteFromStore_Delete_Full_Trajectory()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            DevKit.GetAndAssert(Trajectory);
-
-            // Delete trajectory
-            var delete = DevKit.CreateQuery(Trajectory);
-            DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(delete);
-
-            // Assert delete results
-            DevKit.GetAndAssert(Trajectory, false);
+            Trajectory131DataAdapter_DeleteFromStore_Delete_Full_Trajectory(4);
+            TestReset(10);
+            Trajectory131DataAdapter_DeleteFromStore_Delete_Full_Trajectory(15);
         }
 
         [TestMethod]
@@ -81,94 +67,25 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Stations()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-
-            // Delete trajectory stations
-            var stations = Trajectory.TrajectoryStation;
-            var queryIn = $"<trajectoryStation uid=\"{stations.First().Uid}\"/> <trajectoryStation uid=\"{stations.Last().Uid}\"/>";
-            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, queryIn);
-            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
-
-            // Assert delete results
-            result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(2, result.TrajectoryStation.Count);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Stations(4);
+            TestReset(10);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Stations(15);
         }
 
         [TestMethod]
         public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Stations_By_Structural_Range()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 0);
-            DevKit.AddAndAssert(Trajectory);
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-
-            // Delete all trajectory stations
-            const int start = 5;
-            const int end = 8;
-            var delete = "<mdMn uom=\"m\">" + start + "</mdMn><mdMx uom=\"m\">" + end + "</mdMx>";
-            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
-            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
-
-            // Assert delete results
-            result = DevKit.GetAndAssert(Trajectory);
-            Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start && s.MD.Value <= end);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Stations_By_Structural_Range(10);
+            TestReset(10);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Stations_By_Structural_Range(15);
         }
 
         [TestMethod]
         public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Station_Items()
         {
-            // Add well and wellbore
-            AddParents();
-
-            // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0, inCludeExtra: true);
-            DevKit.AddAndAssert(Trajectory);
-
-            var stations = Trajectory.TrajectoryStation;
-            var station1 = stations[0];
-            var station2 = stations[1];
-            var station3 = stations[2];
-
-            // Get trajectory
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            var resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
-            Assert.IsNotNull(resultStation3);
-            Assert.IsNotNull(resultStation3.MDDelta);
-
-            // Delete trajectory stations and elements
-            var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
-                         + "<trajectoryStation uid=\"" + station2.Uid + "\" />" + Environment.NewLine
-                         + "<trajectoryStation uid=\"" + station3.Uid + "\"><mdDelta /></trajectoryStation>";
-            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
-                delete);
-            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
-
-            // Assert delete results
-            result = DevKit.GetAndAssert(Trajectory);
-            stations = result.TrajectoryStation;
-            Assert.AreEqual(2, stations.Count);
-            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station1.Uid));
-            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station2.Uid));
-            resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
-            Assert.IsNotNull(resultStation3);
-            Assert.IsNull(resultStation3.MDDelta);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Station_Items(4);
+            TestReset(10);
+            Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Station_Items(15);
         }
 
         [TestMethod]
@@ -236,6 +153,116 @@ namespace PDS.Witsml.Server.Data.Trajectories
                          + "<trajectoryStation uid=\"" + station1.Uid + "\" />";
             var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.ChildUidNotUnique);
+        }
+
+        private void Trajectory131DataAdapter_DeleteFromStore_Delete_Full_Trajectory(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            DevKit.GetAndAssert(Trajectory);
+
+            // Delete trajectory
+            var delete = DevKit.CreateQuery(Trajectory);
+            DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(delete);
+
+            // Assert delete results
+            DevKit.GetAndAssert(Trajectory, false);
+        }
+
+        private void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Stations(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Delete trajectory stations
+            var stations = Trajectory.TrajectoryStation;
+            var queryIn = $"<trajectoryStation uid=\"{stations.First().Uid}\"/> <trajectoryStation uid=\"{stations.Last().Uid}\"/>";
+            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, queryIn);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count - 2, result.TrajectoryStation.Count);
+        }
+
+        private void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Stations_By_Structural_Range(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Delete all trajectory stations
+            const int start = 5;
+            const int end = 8;
+            var delete = "<mdMn uom=\"m\">" + start + "</mdMn><mdMx uom=\"m\">" + end + "</mdMx>";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start && s.MD.Value <= end);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+        }
+
+        private void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Station_Items(int numberOfStations)
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numberOfStations, 0, inCludeExtra: true);
+            DevKit.AddAndAssert(Trajectory);
+
+            var stations = Trajectory.TrajectoryStation;
+            var station1 = stations[0];
+            var station2 = stations[1];
+            var station3 = stations[2];
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+            var resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
+            Assert.IsNotNull(resultStation3);
+            Assert.IsNotNull(resultStation3.MDDelta);
+
+            // Delete trajectory stations and elements
+            var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station2.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station3.Uid + "\"><mdDelta /></trajectoryStation>";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+                delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            stations = result.TrajectoryStation;
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count - 2, stations.Count);
+            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station1.Uid));
+            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station2.Uid));
+            resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
+            Assert.IsNotNull(resultStation3);
+            Assert.IsNull(resultStation3.MDDelta);
         }
     }
 }
