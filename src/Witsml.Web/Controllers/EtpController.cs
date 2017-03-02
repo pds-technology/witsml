@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -46,7 +47,21 @@ namespace PDS.Witsml.Web.Controllers
         // GET: api/etp
         public HttpResponseMessage Get()
         {
-            return UpgradeRequest();
+            var response = UpgradeRequest();
+
+            if (response.StatusCode == HttpStatusCode.SwitchingProtocols)
+            {
+                response.ReasonPhrase = "Web Socket Protocol Handshake";
+                response.Headers.Add("Access-Control-Allow-Headers", new []
+                {
+                    "content-type",
+                    "authorization",
+                    "x-websocket-version",
+                    "x-websocket-protocol"
+                });
+            }
+
+            return response;
         }
 
         // GET: .well-known/etp-server-capabilities
