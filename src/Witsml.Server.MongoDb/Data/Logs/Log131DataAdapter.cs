@@ -26,12 +26,14 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Datatypes.Object;
 using MongoDB.Driver;
+using MongoDB.Bson;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Providers.Store;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -51,7 +53,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             using (var transaction = GetTransaction())
             {
-                transaction.SetContext(dataObject.GetUri());
+                var uri = dataObject.GetUri();
+                transaction.SetContext(uri);
                 ClearIndexValues(dataObject);
 
                 // Separate log header and log data
@@ -59,7 +62,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Insert log header
                 InsertEntity(dataObject);
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
+                UpdateLogDataAndIndexRange(uri, new[] { reader });
+                // Update the DataRowCount for the Log
+                UpdateDataRowCount(uri);
                 // Commit transaction
                 transaction.Commit();
             }               
@@ -84,6 +89,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 var reader = ExtractDataReader(dataObject, GetEntity(uri));
                 // Update log data and index ranges
                 UpdateLogDataAndIndexRange(uri, new[] { reader }, originalMnemonics);
+                // Update the DataRowCount for the Log
+                UpdateDataRowCount(uri);
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.UpdateInStore, uri);
                 // Commit transaction
@@ -112,6 +119,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 ReplaceEntity(dataObject, uri);
                 // Update log data and index ranges
                 UpdateLogDataAndIndexRange(uri, new [] { reader }, originalMnemonics);
+                // Update the DataRowCount for the Log
+                UpdateDataRowCount(uri);
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
@@ -632,6 +641,53 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override EtpUri GetChannelUri(LogCurveInfo channel, Log entity)
         {
             return channel.GetUri(entity);
+        }
+
+        /// <summary>
+        /// Gets the data row count update.
+        /// </summary>
+        /// <param name="logHeaderUpdate">The log header update.</param>
+        /// <param name="currentLog">The current log.</param>
+        /// <param name="dataRowCount">The data row count.</param>
+        /// <returns>
+        /// The current log header update
+        /// </returns>
+        protected override UpdateDefinition<Log> GetDataRowCountUpdate(UpdateDefinition<Log> logHeaderUpdate, Log currentLog, int dataRowCount)
+        {
+            if (dataRowCount.Equals(currentLog.DataRowCount))
+                return logHeaderUpdate;
+
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "DataRowCountSpecified", true);
+            return MongoDbUtility.BuildUpdate(logHeaderUpdate, "DataRowCount", dataRowCount);
+        }
+
+        /// <summary>
+        /// Updates the data row count for the log.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        protected override void UpdateDataRowCount(EtpUri uri)
+        {
+            var current = GetEntity(uri);
+            var dataRowCount = ChannelDataChunkAdapter.GetDataRowCount(uri);
+
+            if (current.DataRowCount.Equals(dataRowCount))
+                return;
+            
+            // Update the growing object's header
+            var updates = GetDataRowCountUpdate(null, current, dataRowCount);
+            var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
+            var fields = MongoDbUtility.CreateUpdateFields<Log>();
+
+            Logger.Debug($"Updating date time last change for URI: {uri}");
+            updates = MongoDbUtility.BuildUpdate(updates, fields);
+
+            var mongoUpdate = new MongoDbUpdate<Log>(Container, GetCollection(), null, IdPropertyName);
+            mongoUpdate.UpdateFields(filter, updates);
+
+            // Join existing Transaction
+            var transaction = Transaction;
+            transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
+            transaction.Save();
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

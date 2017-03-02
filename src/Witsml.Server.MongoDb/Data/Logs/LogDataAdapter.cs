@@ -283,6 +283,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                     PartialDeleteEntity(parser, uri);
                     PartialDeleteLogData(uri, parser, channels, currentRanges);
+                    UpdateDataRowCount(uri);
                     transaction.Commit();
                 }
             }
@@ -369,7 +370,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A list of element names.</returns>
         protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
-            return new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
+            return new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData", "dataRowCount" };
         }
 
         /// <summary>
@@ -383,7 +384,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .Concat(new[]
                 {
                     "direction", "objectGrowing", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex",
-                    "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex"
+                    "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex", "dataRowCount"
                 })
                 .ToList();
         }
@@ -482,6 +483,27 @@ namespace PDS.Witsml.Server.Data.Logs
             var maxRange = IsIncreasing(current) ? updateEnd : updateStart;
 
             UpdateGrowingObject(current, logHeaderUpdate, originalMnemonics, affectedMnemonics, minRange, maxRange, indexUnit, isTimeLog, rangeExtended, updateIndexRanges);
+        }
+
+        /// <summary>
+        /// Gets the data row count update.
+        /// </summary>
+        /// <param name="logHeaderUpdate">The log header update.</param>
+        /// <param name="currentLog">The current log.</param>
+        /// <param name="dataRowCount">The data row count.</param>
+        /// <returns>The current log header update</returns>
+        protected virtual UpdateDefinition<T> GetDataRowCountUpdate(UpdateDefinition<T> logHeaderUpdate, T currentLog, int dataRowCount)
+        {
+            return logHeaderUpdate;
+        }
+
+        /// <summary>
+        /// Updates the data row count for the log.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        protected virtual void UpdateDataRowCount(EtpUri uri)
+        {
+            
         }
 
         /// <summary>

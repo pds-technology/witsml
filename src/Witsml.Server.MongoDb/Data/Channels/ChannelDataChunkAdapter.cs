@@ -319,6 +319,28 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
+        /// Gets the total data row count from channelDataChunks for the specified uri.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        public int GetDataRowCount(EtpUri uri)
+        {
+            var filter = Builders<ChannelDataChunk>.Filter.Eq("Uri", uri.Uri.ToLower());
+            var dataRowCountName = "DataRowCount";
+            var dataRowCount = 0;
+
+            var aggregate = GetCollection().Aggregate().Match(filter).Group(new BsonDocument {{"_id", ""}, {dataRowCountName, new BsonDocument("$sum", "$RecordCount")} });
+            var dataRowCountDocument = aggregate.ToList().FirstOrDefault();
+
+            if (dataRowCountDocument != null)
+            {
+                dataRowCount = dataRowCountDocument[dataRowCountName].AsInt32;
+            }
+
+            return dataRowCount;
+        }
+
+        /// <summary>
         /// Bulks writes <see cref="ChannelDataChunk" /> records for insert and update
         /// </summary>
         /// <param name="chunks">The chunks.</param>
