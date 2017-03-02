@@ -673,12 +673,12 @@ namespace PDS.Witsml.Server.Data.Logs
             if (current.DataRowCount.Equals(dataRowCount))
                 return;
             
-            // Update the growing object's header
+            // Update the dataRowCount in the header
             var updates = GetDataRowCountUpdate(null, current, dataRowCount);
             var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
             var fields = MongoDbUtility.CreateUpdateFields<Log>();
 
-            Logger.Debug($"Updating date time last change for URI: {uri}");
+            Logger.Debug($"Updating dataRowCount for URI: {uri}");
             updates = MongoDbUtility.BuildUpdate(updates, fields);
 
             var mongoUpdate = new MongoDbUpdate<Log>(Container, GetCollection(), null, IdPropertyName);
