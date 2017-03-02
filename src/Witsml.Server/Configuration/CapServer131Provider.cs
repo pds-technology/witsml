@@ -69,7 +69,12 @@ namespace PDS.Witsml.Server.Configuration
 
             if (request.Function == Functions.GetFromStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.DataVersion.Keyword);
+                ValidateKeywords(optionsIn,
+                    OptionsIn.ReturnElements.Keyword,
+                    OptionsIn.MaxReturnNodes.Keyword,
+                    OptionsIn.RequestLatestValues.Keyword,
+                    OptionsIn.RequestObjectSelectionCapability.Keyword,
+                    OptionsIn.DataVersion.Keyword);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);
