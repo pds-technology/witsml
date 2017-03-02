@@ -145,8 +145,16 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The number of maximum nodes to returned if it exists in the Options In, null otherwise.</returns>
         public int? MaxReturnNodes()
         {
-            return Options.ContainsKey(OptionsIn.MaxReturnNodes.Keyword)
-                ? int.Parse(Options[OptionsIn.MaxReturnNodes.Keyword])
+            var dataRowCount = GetDataRowCount();
+            if (dataRowCount != null)
+                return dataRowCount;
+
+            if (!Options.ContainsKey(OptionsIn.MaxReturnNodes.Keyword))
+                return null;
+
+            int nodeCount;
+            return int.TryParse(Options[OptionsIn.MaxReturnNodes.Keyword], out nodeCount)
+                ? nodeCount
                 : (int?)null;
         }
 
@@ -156,8 +164,12 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The number of latest values requested in it exists in the Options In, null otherwise.</returns>
         public int? RequestLatestValues()
         {
-            return Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword)
-                ? int.Parse(Options[OptionsIn.RequestLatestValues.Keyword])
+            if (!Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword))
+                return null;
+
+            int requestLatestValues;
+            return int.TryParse(Options[OptionsIn.RequestLatestValues.Keyword], out requestLatestValues)
+                ? requestLatestValues
                 : (int?)null;
         }
 
@@ -489,6 +501,24 @@ namespace PDS.Witsml.Server.Data
         public void RemoveSubElements()
         {
             Element()?.RemoveNodes();
+        }
+
+        private int? GetDataRowCount()
+        {
+            // Only valid for 131, otherwise we want to ignore.
+            var dataRowCount = ObjectTypes.GetVersion(Root).Equals(OptionsIn.DataVersion.Version131.Value)
+                ? PropertyValue("dataRowCount")
+                : null;
+
+            // return null if dataRowCount not provided
+            if (string.IsNullOrWhiteSpace(dataRowCount))
+                return null;
+
+            // Return count if parse was successful, otherwise null
+            int count;
+            return int.TryParse(dataRowCount, out count)
+                ? count
+                : (int?)null;
         }
     }
 }
