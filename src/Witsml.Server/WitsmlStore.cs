@@ -165,7 +165,8 @@ namespace PDS.Witsml.Server
                 _log.Debug(context);
 
                 UserAuthorizationProvider.CheckSoapAccess();
-                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders);
+                version = WitsmlOperationContext.Current.DataSchemaVersion;
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataProvider.GetFromStore(context);
@@ -212,7 +213,8 @@ namespace PDS.Witsml.Server
                 _log.Debug(context);
 
                 UserAuthorizationProvider.CheckSoapAccess();
-                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders);
+                version = WitsmlOperationContext.Current.DataSchemaVersion;
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.AddToStore(context);
@@ -254,7 +256,8 @@ namespace PDS.Witsml.Server
                 _log.Debug(context);
 
                 UserAuthorizationProvider.CheckSoapAccess();
-                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders);
+                version = WitsmlOperationContext.Current.DataSchemaVersion;
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.UpdateInStore(context);
@@ -296,7 +299,8 @@ namespace PDS.Witsml.Server
                 _log.Debug(context);
 
                 UserAuthorizationProvider.CheckSoapAccess();
-                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders);
+                version = WitsmlOperationContext.Current.DataSchemaVersion;
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.DeleteFromStore(context);

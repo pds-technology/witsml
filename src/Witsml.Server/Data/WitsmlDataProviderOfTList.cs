@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data
                 collection.SetDocumentInfo(parser, op.User);
 
             return new WitsmlResult<IEnergisticsCollection>(
-                responseContext.DataTruncated 
+                responseContext.DataTruncated && op.DataSchemaVersion.Equals(OptionsIn.DataVersion.Version141.Value)
                     ? op.Warnings.Any() ? ErrorCodes.PartialSuccessWithWarnings : ErrorCodes.ParialSuccess 
                     : op.Warnings.Any() ? ErrorCodes.SuccessWithWarnings : ErrorCodes.Success,
                 string.Join(" ", op.Warnings.Select(x => x.ErrorMessage)),

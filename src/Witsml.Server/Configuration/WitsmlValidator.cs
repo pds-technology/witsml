@@ -39,9 +39,8 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the WITSML Store API request.
         /// </summary>
         /// <param name="providers">The capServer providers.</param>
-        /// <param name="version">The data schema version.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, out string version)
+        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers)
         {
             var context = WitsmlOperationContext.Current;
             _log.DebugFormat("Validating WITSML request for {0}", context.Request.ObjectType);
@@ -60,7 +59,7 @@ namespace PDS.Witsml.Server.Configuration
             }
 
             capServerProvider.ValidateRequest();
-            version = dataSchemaVersion;
+            context.DataSchemaVersion = dataSchemaVersion;
         }
 
         /// <summary>

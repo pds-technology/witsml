@@ -124,6 +124,12 @@ namespace PDS.Witsml.Server
         public XDocument Document { get; set; }
 
         /// <summary>
+        /// Gets or sets the data schema version for the context.
+        /// </summary>
+        /// <value>The data schema version.</value>
+        public string DataSchemaVersion { get; set; }
+
+        /// <summary>
         /// Gets or sets the current change history entry.
         /// </summary>
         /// <value>The current change history.</value>

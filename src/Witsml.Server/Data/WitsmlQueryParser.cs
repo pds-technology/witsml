@@ -506,7 +506,7 @@ namespace PDS.Witsml.Server.Data
         private int? GetDataRowCount()
         {
             // Only valid for 131, otherwise we want to ignore.
-            var dataRowCount = ObjectTypes.GetVersion(Root).Equals(OptionsIn.DataVersion.Version131.Value)
+            var dataRowCount = WitsmlOperationContext.Current.DataSchemaVersion.Equals(OptionsIn.DataVersion.Version131.Value)
                 ? PropertyValue("dataRowCount")
                 : null;
 
