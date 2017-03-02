@@ -79,10 +79,11 @@ namespace PDS.Witsml.Server.Controllers
 
             if (context.IsWebSocketRequest || context.IsWebSocketRequestUpgrading)
             {
-                context.AcceptWebSocketRequest(AcceptWebSocketRequest, new AspNetWebSocketOptions()
-                {
-                    SubProtocol = EtpSettings.EtpSubProtocolName
-                });
+                var options = context.WebSocketRequestedProtocols?.Count > 0
+                    ? new AspNetWebSocketOptions { SubProtocol = EtpSettings.EtpSubProtocolName }
+                    : null;
+
+                context.AcceptWebSocketRequest(AcceptWebSocketRequest, options);
 
                 return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
             }
@@ -171,10 +172,12 @@ namespace PDS.Witsml.Server.Controllers
             var combined = new Dictionary<string, string>();
 
             foreach (var key in queryString.AllKeys)
-                combined[key] = queryString[key];
+                if (!string.IsNullOrWhiteSpace(key))
+                    combined[key] = queryString[key];
 
             foreach (var key in headers.AllKeys)
-                combined[key] = headers[key];
+                if (!string.IsNullOrWhiteSpace(key))
+                    combined[key] = headers[key];
 
             return combined;
         }
