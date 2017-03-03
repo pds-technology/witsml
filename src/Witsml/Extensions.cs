@@ -20,8 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML200.ReferenceData;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using Witsml141 = Energistics.DataAccess.WITSML141;
+using Witsml131 = Energistics.DataAccess.WITSML131;
 using PDS.Framework;
 using PDS.Witsml.Properties;
 
@@ -197,7 +198,7 @@ namespace PDS.Witsml
         /// <returns>The timestamp in unix time microseconds</returns>
         public static long ToUnixTimeMicroseconds(this Timestamp timestamp)
         {
-            return ((DateTimeOffset) timestamp).ToUnixTimeMicroseconds();
+            return ((DateTimeOffset)timestamp).ToUnixTimeMicroseconds();
         }
 
         /// <summary>
@@ -230,9 +231,9 @@ namespace PDS.Witsml
         public static ErrorCodes GetMissingElementUidErrorCode(this Functions function)
         {
             return function == Functions.AddToStore
-                ? ErrorCodes.MissingElementUidForAdd 
-                : function == Functions.DeleteFromStore 
-                ? ErrorCodes.MissingElementUidForDelete 
+                ? ErrorCodes.MissingElementUidForAdd
+                : function == Functions.DeleteFromStore
+                ? ErrorCodes.MissingElementUidForDelete
                 : ErrorCodes.MissingElementUidForUpdate;
         }
 
@@ -246,6 +247,33 @@ namespace PDS.Witsml
             return (function == Functions.AddToStore || function == Functions.UpdateInStore)
                 ? ErrorCodes.MissingUnitForMeasureData
                 : ErrorCodes.EmptyUomSpecified;
+        }
+
+        /// <summary>
+        /// Gets the object growing status.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        public static bool? GetObjectGrowingStatus(this object dataObject)
+        {
+            var log131 = dataObject as Witsml131.Log;
+            var log141 = dataObject as Witsml141.Log;
+            var trajectory131 = dataObject as Witsml131.Trajectory;
+            var trajectory141 = dataObject as Witsml141.Trajectory;
+
+            return log131?.ObjectGrowing ?? log141?.ObjectGrowing ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing ?? false;
+        }
+
+        /// <summary>
+        /// Gets the wellbore status.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        public static bool? GetWellboreStatus(this object dataObject)
+        {
+            var wellbore141 = dataObject as Witsml141.Wellbore;
+
+            return wellbore141?.IsActive;
         }
     }
 }

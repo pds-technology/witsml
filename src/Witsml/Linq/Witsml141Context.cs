@@ -115,7 +115,7 @@ namespace PDS.Witsml.Linq
         public override IEnumerable<IWellObject> GetWellbores(EtpUri uri)
         {
             return Wellbores
-                .With(OptionsIn.ReturnElements.IdOnly)
+                .With(OptionsIn.ReturnElements.All)
                 .Where(x => x.UidWell == uri.ObjectId)
                 .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
