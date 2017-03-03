@@ -287,6 +287,78 @@ namespace PDS.Witsml.Server.Data.Logs
             AssertLogParam(log3, logParam4, result.XMLout);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_DataRowCount_Less_Than_Total()
+        {
+            const int totalAddRows = 10;
+            const int lessRows = 5;
+            GetAndAssertByDataRowCount(totalAddRows, lessRows, totalAddRows - lessRows);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_DataRowCount_Equals_Total()
+        {
+            const int totalAddRows = 10;
+            const int lessRows = 0;
+            GetAndAssertByDataRowCount(totalAddRows, lessRows, totalAddRows);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_DataRowCount_Greater_Than_Total()
+        {
+            const int totalAddRows = 10;
+            const int lessRows = -5;
+            GetAndAssertByDataRowCount(totalAddRows, lessRows, totalAddRows);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_MaxDataNodes()
+        {
+            const int totalAddRows = 10;
+            const int expectedRows = 5;
+
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, totalAddRows, false);
+
+            var queryLog = DevKit.CreateLog(Log);
+
+            // Get the log
+            var optionsIn = $"{OptionsIn.ReturnElements.MaxReturnNodes.Eq(expectedRows)};{OptionsIn.ReturnElements.All}";
+            var result = DevKit.GetAndAssert<LogList, Log>(queryLog, optionsIn: optionsIn);
+
+            // Assert that the DataRowCount is the same as the number of rows added.
+            Assert.AreEqual(expectedRows, result.LogData.Count);
+
+            // First rows are equal
+            Assert.AreEqual(Log.LogData[0], result.LogData[0]);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_RequestLatestValues()
+        {
+            const int totalAddRows = 10;
+            const int expectedRows = 5;
+
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, totalAddRows, false);
+
+            var queryLog = DevKit.CreateLog(Log);
+
+            // Get the log
+            var optionsIn = $"{OptionsIn.ReturnElements.RequestLatestValues.Eq(expectedRows)};{OptionsIn.ReturnElements.All}";
+            var result = DevKit.GetAndAssert<LogList, Log>(queryLog, optionsIn: optionsIn);
+
+            // Assert that the DataRowCount is the same as the number of rows added.
+            Assert.AreEqual(expectedRows, result.LogData.Count);
+
+            // Last rows are equal
+            Assert.AreEqual(Log.LogData[Log.LogData.Count-1], result.LogData[result.LogData.Count-1]);
+        }
+
         #region Helper Methods
 
         private static void AssertLogParam(Log expectedLog, IndexedObject expectedLogParam, string xmlOut)
@@ -357,6 +429,21 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Add a log
             return DevKit.Add<LogList, Log>(Log);
+        }
+
+        private void GetAndAssertByDataRowCount(int totalAddRows, int lessRows, int expectedRows)
+        {
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, totalAddRows, false);
+
+            var queryLog = DevKit.CreateLog(Log);
+            DevKit.GetAndAssertDataRowCount(queryLog, totalAddRows);
+
+            // Retrieve less than dataRowCount rows
+            queryLog.DataRowCount = totalAddRows - lessRows;
+            DevKit.GetAndAssertDataRowCountExpected(queryLog, expectedRows);
         }
         #endregion Helper Methods
     }

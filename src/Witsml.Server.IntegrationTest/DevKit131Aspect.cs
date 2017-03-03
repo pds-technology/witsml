@@ -215,6 +215,66 @@ namespace PDS.Witsml.Server
             return CreateLog(log.Uid, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
         }
 
+        public void AddLogWithData(Log log, LogIndexType indexType, int numRows, bool hasEmptyChannel)
+        {
+            InitHeader(log, indexType);
+            InitDataMany(log, Mnemonics(log), Units(log), numRows, hasEmptyChannel: hasEmptyChannel);
+
+            var response = Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        public Log GetAndAssertDataRowCount(Log queryLog, int dataRowCount)
+        {
+            // Get the log
+            var result = GetAndAssert<LogList, Log>(queryLog);
+
+            // Assert that the DataRowCount is the same as the number of rows added.
+            Assert.AreEqual(dataRowCount, result.DataRowCount);
+
+            return result;
+        }
+
+        public Log GetAndAssertDataRowCountExpected(Log queryLog, int expectedRows)
+        {
+            // Get the log
+            var result = GetAndAssert<LogList, Log>(queryLog, queryByExample: true);
+
+            // Assert that the LogData.Count is the same as the number of rows added.
+            Assert.AreEqual(expectedRows, result.LogData.Count);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Creates the update log with rows with number of totalUpdateRows specified.
+        /// The index starts after the last index in the specified log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="totalUpdateRows">The total update rows.</param>
+        /// <returns>An update log with totalUpdateRows rows</returns>
+        public Log CreateUpdateLogWithRows(Log log, int totalUpdateRows)
+        {
+            // Create Update Log with one new row
+            var updateLog = CreateLog(log);
+            updateLog.LogCurveInfo = log.LogCurveInfo;
+
+            var startIndex = int.Parse(log.LogData[log.LogData.Count - 1].Split(',')[0]);
+            updateLog.LogData = new List<string>();
+
+            for (var i = startIndex; i < startIndex + totalUpdateRows; i++)
+            {
+                // Compute the next index value
+                var index = startIndex + 1;
+
+                // Create a row of Data
+                var data = Enumerable.Repeat(index, log.LogCurveInfo.Count);
+                updateLog.LogData.Add(string.Join(",", data));
+            }
+
+            return updateLog;
+        }
+
         /// <summary>
         /// Adds well object and test the return code
         /// </summary>

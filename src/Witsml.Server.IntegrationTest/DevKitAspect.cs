@@ -211,10 +211,16 @@ namespace PDS.Witsml.Server
         /// <param name="query">The query.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
+        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
         {
-            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
+            short resultCode;
+            var results = QueryWithErrorCode<TList, TObject>(query, out resultCode, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
+
+            // Assert that we get the expected Result (Error) Code
+            Assert.AreEqual(errorCode, resultCode);
+
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();
