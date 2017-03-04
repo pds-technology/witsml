@@ -410,6 +410,20 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log, ErrorCodes.ErrorRowDataCount);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_AddToStore_With_Data_Updates_DataRowCount()
+        {
+            AddParents();
+
+            // Add 10 rows of data
+            const int dataRowCount = 10;
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, dataRowCount, false);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount);
+        }
+
         #region Helper Methods
 
         private Log GetLog(Log log)
