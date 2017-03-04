@@ -219,7 +219,7 @@ namespace PDS.Witsml.Server
             var results = QueryWithErrorCode<TList, TObject>(query, out resultCode, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
 
             // Assert that we get the expected Result (Error) Code
-            Assert.AreEqual(errorCode, resultCode);
+            Assert.AreEqual((short)errorCode, resultCode);
 
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
