@@ -437,6 +437,8 @@ namespace PDS.Witsml.Server
                 Assert.IsNotNull(args);
                 Assert.AreEqual(exist, args.Any());
 
+                var folder = ResourceTypes.Folder.ToString();
+
                 // Check Resource URIs
                 foreach (var arg in args)
                 {
@@ -449,7 +451,7 @@ namespace PDS.Witsml.Server
                     {
                         Assert.IsTrue(uri.IsBaseUri);
                     }
-                    else
+                    else if (!folder.EqualsIgnoreCase(arg.Message.Resource.ResourceType))
                     {
                         Assert.AreEqual(uri.Family, resourceUri.Family);
                         Assert.AreEqual(uri.Version, resourceUri.Version);

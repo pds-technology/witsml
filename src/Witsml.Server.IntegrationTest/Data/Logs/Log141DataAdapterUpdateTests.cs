@@ -491,7 +491,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.UpdateAndAssert(log);
 
             // Query log after appending data
-            result = DevKit.GetAndAssert(log);
+            result = DevKit.GetAndAssert(log, errorCode: ErrorCodes.ParialSuccess);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(WitsmlSettings.LogMaxDataNodesGet, result.LogData[0].Data.Count);
         }

@@ -196,11 +196,12 @@ namespace PDS.Witsml.Server
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null, bool queryByExample = false) where TList : IEnergisticsCollection where TObject : IDataObject
+        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null, bool queryByExample = false, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection where TObject : IDataObject
         {
             var query = queryByExample ? example : CreateQuery(example);
-            return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn);
+            return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn, errorCode);
         }
 
         /// <summary>

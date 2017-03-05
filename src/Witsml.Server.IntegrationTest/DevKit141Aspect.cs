@@ -584,10 +584,11 @@ namespace PDS.Witsml.Server
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The first log from the response</returns>
-        public Log GetAndAssert(Log log, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        public Log GetAndAssert(Log log, bool isNotNull = true, string optionsIn = null, bool queryByExample = false, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            return GetAndAssert<LogList, Log>(log, isNotNull, optionsIn, queryByExample);
+            return GetAndAssert<LogList, Log>(log, isNotNull, optionsIn, queryByExample, errorCode);
         }
 
         /// <summary>
@@ -597,10 +598,11 @@ namespace PDS.Witsml.Server
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The first trajectory from the response</returns>
-        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample);
+            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample, errorCode);
         }
 
         /// <summary>
