@@ -138,6 +138,14 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Data\Activities\Activity200DataAdapter.cs" />
+    <Compile Include="Data\Activities\Activity200DataAdapter.generated.cs">
+      <DependentUpon>Activity200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataAdapter.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataAdapter.generated.cs">
+      <DependentUpon>ActivityTemplate200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment141DataAdapter.cs" />
     <Compile Include="Data\Attachments\Attachment141DataAdapter.generated.cs">
       <DependentUpon>Attachment141DataAdapter.cs</DependentUpon>
@@ -155,6 +163,10 @@
     </Compile>
     <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataAdapter.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataAdapter.generated.cs">
+      <DependentUpon>DataAssuranceRecord200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
     <Compile Include="Data\GrowingObjects\GrowingObjectDataAdapterBase.cs" />

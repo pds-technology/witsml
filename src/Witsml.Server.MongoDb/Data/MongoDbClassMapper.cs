@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using PDS.Framework;
 using PDS.Witsml.Data.ChangeLogs;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Data.Transactions;
@@ -42,6 +45,7 @@ namespace PDS.Witsml.Server.Data
         public void Register()
         {
             RegisterDataTypes();
+            RegisterActivityParameterTypes();
 
             Register3<Witsml141.ChangeLog>();
             Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
@@ -59,6 +63,15 @@ namespace PDS.Witsml.Server.Data
 
             Register(new TimestampSerializer());
             Register(new XmlElementSerializer());
+        }
+
+        private void RegisterActivityParameterTypes()
+        {
+            var parameter = typeof(Witsml200.ComponentSchemas.AbstractActivityParameter);
+
+            parameter.Assembly.GetTypes()
+                .Where(x => parameter.IsAssignableFrom(x) && !x.IsAbstract)
+                .ForEach(x => Register2(x, true));
         }
 
         private void Register<T>() where T : IDataObject
@@ -88,12 +101,32 @@ namespace PDS.Witsml.Server.Data
             Register3<T>();
         }
 
+        private void Register2(Type type, bool autoMap = false)
+        {
+            Register3(type.BaseType, true);
+            Register3(type, autoMap);
+        }
+
         private void Register3<T>()
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
                 var cm = BsonClassMap.RegisterClassMap<T>();
                 cm.SetIgnoreExtraElements(true);
+            }
+        }
+
+        private void Register3(Type type, bool autoMap = false)
+        {
+            if (!BsonClassMap.IsClassMapRegistered(type))
+            {
+                var cm = new BsonClassMap(type);
+                cm.SetIgnoreExtraElements(true);
+
+                if (autoMap)
+                    cm.AutoMap();
+
+                BsonClassMap.RegisterClassMap(cm);
             }
         }
 

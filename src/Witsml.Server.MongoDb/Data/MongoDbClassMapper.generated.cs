@@ -36,6 +36,12 @@ namespace PDS.Witsml.Server.Data
     {
         private void RegisterDataTypes()
         {
+            // activity
+            Register2<Witsml200.Activity>();
+
+            // activityTemplate
+            Register2<Witsml200.ActivityTemplate>();
+
             // attachment
             Register<Witsml141.Attachment>();
             Register2<Witsml200.Attachment>();
@@ -45,6 +51,9 @@ namespace PDS.Witsml.Server.Data
 
             // channelSet
             Register2<Witsml200.ChannelSet>();
+
+            // dataAssuranceRecord
+            Register2<Witsml200.DataAssuranceRecord>();
 
             // log
             Register<Witsml131.Log>();

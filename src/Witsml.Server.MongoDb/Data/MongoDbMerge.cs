@@ -93,7 +93,7 @@ namespace PDS.Witsml.Server.Data
 
                 if (element.HasAttributes)
                 {
-                    var properties = GetPropertyInfo(elementType);
+                    var properties = GetPropertyInfo(elementType, element);
                     NavigateAttributes(element, propertyPath, properties, true);
                 }
                 else

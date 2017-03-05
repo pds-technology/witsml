@@ -296,7 +296,11 @@ namespace PDS.Witsml.Server.Data
 
                     if (IsComplexType(type))
                     {
-                        item = ParseNestedElement(type, element);
+                        var complexType = type.IsAbstract
+                            ? GetConcreteType(element, type)
+                            : type;
+
+                        item = ParseNestedElement(complexType, element);
                     }
                     else
                     {
