@@ -30,6 +30,16 @@ namespace PDS.Witsml
     public static partial class ObjectNames
     {
         /// <summary>
+        /// The data object name for a 2.0 Activity.
+        /// </summary>
+        public static readonly ObjectName Activity200 = new ObjectName(ObjectTypes.Activity, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 ActivityTemplate.
+        /// </summary>
+        public static readonly ObjectName ActivityTemplate200 = new ObjectName(ObjectTypes.ActivityTemplate, Version200);
+
+        /// <summary>
         /// The data object name for a 1.4.1.1 Attachment.
         /// </summary>
         public static readonly ObjectName Attachment141 = new ObjectName(ObjectTypes.Attachment, Version141);
@@ -48,6 +58,11 @@ namespace PDS.Witsml
         /// The data object name for a 2.0 ChannelSet.
         /// </summary>
         public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 DataAssuranceRecord.
+        /// </summary>
+        public static readonly ObjectName DataAssuranceRecord200 = new ObjectName(ObjectTypes.DataAssuranceRecord, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Log.

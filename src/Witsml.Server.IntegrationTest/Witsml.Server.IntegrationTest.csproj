@@ -117,6 +117,38 @@
     <Compile Include="Configuration\CapServer141ProviderTests.cs" />
     <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
     <Compile Include="ContainerTests.cs" />
+    <Compile Include="Data\Activities\Activity200EtpTests.cs" />
+    <Compile Include="Data\Activities\Activity200EtpTests.generated.cs">
+      <DependentUpon>Activity200EtpTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200StoreTests.cs" />
+    <Compile Include="Data\Activities\Activity200StoreTests.generated.cs">
+      <DependentUpon>Activity200StoreTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200TestBase.cs" />
+    <Compile Include="Data\Activities\Activity200TestBase.generated.cs">
+      <DependentUpon>Activity200TestBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200ValidatorTests.cs" />
+    <Compile Include="Data\Activities\Activity200ValidatorTests.generated.cs">
+      <DependentUpon>Activity200ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200EtpTests.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200EtpTests.generated.cs">
+      <DependentUpon>ActivityTemplate200EtpTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200StoreTests.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200StoreTests.generated.cs">
+      <DependentUpon>ActivityTemplate200StoreTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200TestBase.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200TestBase.generated.cs">
+      <DependentUpon>ActivityTemplate200TestBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200ValidatorTests.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200ValidatorTests.generated.cs">
+      <DependentUpon>ActivityTemplate200ValidatorTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment141DataAdapterAddTests.cs" />
     <Compile Include="Data\Attachments\Attachment141DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Attachments\Attachment141DataAdapterGetTests.cs" />
@@ -201,6 +233,22 @@
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapterGetTests.cs" />
     <Compile Include="Data\Channels\ChannelDataExtensionsTests.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200EtpTests.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200EtpTests.generated.cs">
+      <DependentUpon>DataAssuranceRecord200EtpTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200StoreTests.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200StoreTests.generated.cs">
+      <DependentUpon>DataAssuranceRecord200StoreTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200TestBase.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200TestBase.generated.cs">
+      <DependentUpon>DataAssuranceRecord200TestBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200ValidatorTests.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200ValidatorTests.generated.cs">
+      <DependentUpon>DataAssuranceRecord200ValidatorTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\GrowingObjects\GrowingObject131DataAdapterUpdateTests.cs" />
     <Compile Include="Data\GrowingObjects\GrowingObject141DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterAddTests.cs" />

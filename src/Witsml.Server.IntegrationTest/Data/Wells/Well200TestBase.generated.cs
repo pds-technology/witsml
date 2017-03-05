@@ -35,11 +35,8 @@ namespace PDS.Witsml.Server.Data.Wells
 {
     public abstract partial class Well200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<wells xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><well uid=\"{0}\">{1}</well></wells>";
-
         public Well Well { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Well> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -55,8 +52,6 @@ namespace PDS.Witsml.Server.Data.Wells
                 SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
-
-            QueryEmptyList = DevKit.List(new Well());
 
             BeforeEachTest();
             OnTestSetUp();

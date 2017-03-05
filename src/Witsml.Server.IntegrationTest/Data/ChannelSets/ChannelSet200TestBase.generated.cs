@@ -35,13 +35,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 {
     public abstract partial class ChannelSet200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<channelSets xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><channelSet uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</channelSet></channelSets>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public ChannelSet ChannelSet { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<ChannelSet> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -69,10 +66,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("ChannelSet"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(ChannelSet)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new ChannelSet());
 
             BeforeEachTest();
             OnTestSetUp();

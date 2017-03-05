@@ -210,7 +210,7 @@ namespace PDS.Witsml.Server.Data
 
                 if (!parent.IsBaseUri)
                 {
-                    var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.Version));
+                    var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.GetDataSchemaVersion()));
                     dataProvider.Ensure(parent);
                 }
 

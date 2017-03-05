@@ -327,7 +327,7 @@ namespace PDS.Witsml.Server.Data
         {
             var adapters = new List<IWitsmlDataAdapter>();
 
-            if (OptionsIn.DataVersion.Version200.Equals(uri.Version))
+            if (uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210))
             {
                 // Cascade delete not defined for WITSML 2.0 / ETP
                 return;

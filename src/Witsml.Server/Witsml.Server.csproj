@@ -118,6 +118,22 @@
     <Compile Include="Configuration\WitsmlEndpointTypes.cs" />
     <Compile Include="Configuration\WitsmlSettings.cs" />
     <Compile Include="Configuration\WitsmlValidator.cs" />
+    <Compile Include="Data\Activities\Activity200DataProvider.cs" />
+    <Compile Include="Data\Activities\Activity200DataProvider.generated.cs">
+      <DependentUpon>Activity200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200Validator.cs" />
+    <Compile Include="Data\Activities\Activity200Validator.generated.cs">
+      <DependentUpon>Activity200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataProvider.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataProvider.generated.cs">
+      <DependentUpon>ActivityTemplate200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200Validator.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200Validator.generated.cs">
+      <DependentUpon>ActivityTemplate200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment141DataProvider.cs" />
     <Compile Include="Data\Attachments\Attachment141DataProvider.generated.cs">
       <DependentUpon>Attachment141DataProvider.cs</DependentUpon>
@@ -154,7 +170,17 @@
     </Compile>
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />
     <Compile Include="Data\Common\IRecurringElementValidator.cs" />
+    <Compile Include="Data\Common\ParameterTemplate200Validator.cs" />
+    <Compile Include="Data\Common\AbstractActivityParameter200Validator.cs" />
     <Compile Include="Data\Common\TimestampedTimeZone141Validator.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataProvider.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataProvider.generated.cs">
+      <DependentUpon>DataAssuranceRecord200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200Validator.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200Validator.generated.cs">
+      <DependentUpon>DataAssuranceRecord200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DataObjectMapper.cs" />
     <Compile Include="Data\DataObjectMappingContext.cs" />
     <Compile Include="Data\DataObjectValidationContext.cs" />

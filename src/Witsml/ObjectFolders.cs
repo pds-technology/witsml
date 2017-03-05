@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using Energistics.Datatypes;
+
 namespace PDS.Witsml
 {
     /// <summary>
@@ -23,6 +26,31 @@ namespace PDS.Witsml
     /// </summary>
     public static class ObjectFolders
     {
+        /// <summary>
+        /// An ObjectFolders identifier for Activities.
+        /// </summary>
+        public const string Activities = "Activities";
+
+        /// <summary>
+        /// An ObjectFolders identifier for ActivityTemplates.
+        /// </summary>
+        public const string ActivityTemplates = "ActivityTemplates";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Channels.
+        /// </summary>
+        public const string Channels = "Channels";
+
+        /// <summary>
+        /// An ObjectFolders identifier for ChannelSets.
+        /// </summary>
+        public const string ChannelSets = "ChannelSets";
+
+        /// <summary>
+        /// An ObjectFolders identifier for DataAssuranceRecords.
+        /// </summary>
+        public const string DataAssuranceRecords = "DataAssuranceRecords";
+
         /// <summary>
         /// An ObjectFolders identifier for Logs.
         /// </summary>
@@ -62,5 +90,32 @@ namespace PDS.Witsml
         /// An ObjectFolders identifier for Trajectories.
         /// </summary>
         public const string Trajectories = "Trajectories";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Wells.
+        /// </summary>
+        public const string Wells = "Wells";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Wellbores.
+        /// </summary>
+        public const string Wellbores = "Wellbores";
+
+        /// <summary>
+        /// The folder names for all top level objects.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<EtpUri, string> TopLevelObjects = new Dictionary<EtpUri, string>
+        {
+            { EtpUris.Eml210.Append(ObjectTypes.Activity), Activities },
+            { EtpUris.Eml210.Append(ObjectTypes.ActivityTemplate), ActivityTemplates },
+            { EtpUris.Witsml200.Append(ObjectTypes.Channel), Channels },
+            { EtpUris.Witsml200.Append(ObjectTypes.ChannelSet), ChannelSets },
+            { EtpUris.Eml210.Append(ObjectTypes.DataAssuranceRecord), DataAssuranceRecords },
+            { EtpUris.Witsml200.Append(ObjectTypes.Log), Logs },
+            { EtpUris.Witsml200.Append(ObjectTypes.Rig), Rigs },
+            { EtpUris.Witsml200.Append(ObjectTypes.Trajectory), Trajectories },
+            { EtpUris.Witsml200.Append(ObjectTypes.Well), Wells },
+            { EtpUris.Witsml200.Append(ObjectTypes.Wellbore), Wellbores }
+        };
     }
 }

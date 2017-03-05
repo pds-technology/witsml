@@ -35,13 +35,10 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
 {
     public abstract partial class RigUtilization200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<rigUtilizations xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rigUtilization uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</rigUtilization></rigUtilizations>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public RigUtilization RigUtilization { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<RigUtilization> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -69,10 +66,8 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("RigUtilization"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(RigUtilization)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new RigUtilization());
 
             BeforeEachTest();
             OnTestSetUp();

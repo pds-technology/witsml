@@ -35,12 +35,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
 {
     public abstract partial class Wellbore200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<wellbores xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><wellbore uidWell=\"{0}\" uid=\"{1}\">{2}</wellbore></wellbores>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Wellbore> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -61,10 +58,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
                 Well = DevKit.DataObjectReference(Well),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Wellbore)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new Wellbore());
 
             BeforeEachTest();
             OnTestSetUp();

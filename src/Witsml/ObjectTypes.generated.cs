@@ -30,6 +30,16 @@ namespace PDS.Witsml
     public static partial class ObjectTypes
     {
         /// <summary>
+        /// The data object type for a Activity.
+        /// </summary>
+        public const string Activity = "activity";
+
+        /// <summary>
+        /// The data object type for a ActivityTemplate.
+        /// </summary>
+        public const string ActivityTemplate = "activityTemplate";
+
+        /// <summary>
         /// The data object type for a Attachment.
         /// </summary>
         public const string Attachment = "attachment";
@@ -43,6 +53,11 @@ namespace PDS.Witsml
         /// The data object type for a ChannelSet.
         /// </summary>
         public const string ChannelSet = "channelSet";
+
+        /// <summary>
+        /// The data object type for a DataAssuranceRecord.
+        /// </summary>
+        public const string DataAssuranceRecord = "dataAssuranceRecord";
 
         /// <summary>
         /// The data object type for a Log.

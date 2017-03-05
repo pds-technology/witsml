@@ -35,11 +35,8 @@ namespace PDS.Witsml.Server.Data.Rigs
 {
     public abstract partial class Rig200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rig uid=\"{0}\">{1}</rig></rigs>";
-
         public Rig Rig { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Rig> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -49,12 +46,10 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             Rig = new Rig
             {
-                SchemaVersion = "2.0",
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Rig)).Version,
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Rig")
             };
-
-            QueryEmptyList = DevKit.List(new Rig());
 
             BeforeEachTest();
             OnTestSetUp();

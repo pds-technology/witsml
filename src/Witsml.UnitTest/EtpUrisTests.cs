@@ -280,5 +280,41 @@ namespace PDS.Witsml
             Assert.AreEqual(ObjectTypes.ChannelIndex, uri.ObjectType);
             Assert.AreEqual(channelIndex.Mnemonic, uri.ObjectId);
         }
+
+        [TestMethod]
+        public void EtpUris_GetUri_Can_Get_Activity_200_Uri()
+        {
+            var activity = new Witsml200.Activity { Uuid = _data.Uid() };
+            var uri = activity.GetUri();
+
+            Assert.AreEqual($"eml://eml21/Activity({ activity.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=Activity", uri.ContentType.ToString(), true);
+            Assert.AreEqual("activity", uri.ObjectType, true);
+            Assert.AreEqual(activity.Uuid, uri.ObjectId, true);
+        }
+
+        [TestMethod]
+        public void EtpUris_GetUri_Can_Get_ActivityTemplate_200_Uri()
+        {
+            var activityTemplate = new Witsml200.ActivityTemplate { Uuid = _data.Uid() };
+            var uri = activityTemplate.GetUri();
+
+            Assert.AreEqual($"eml://eml21/ActivityTemplate({ activityTemplate.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=ActivityTemplate", uri.ContentType.ToString(), true);
+            Assert.AreEqual("activityTemplate", uri.ObjectType, true);
+            Assert.AreEqual(activityTemplate.Uuid, uri.ObjectId, true);
+        }
+
+        [TestMethod]
+        public void EtpUris_GetUri_Can_Get_DataAssuranceRecord_200_Uri()
+        {
+            var dataAssuranceRecord = new Witsml200.DataAssuranceRecord { Uuid = _data.Uid() };
+            var uri = dataAssuranceRecord.GetUri();
+
+            Assert.AreEqual($"eml://eml21/DataAssuranceRecord({ dataAssuranceRecord.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=DataAssuranceRecord", uri.ContentType.ToString(), true);
+            Assert.AreEqual("dataAssuranceRecord", uri.ObjectType, true);
+            Assert.AreEqual(dataAssuranceRecord.Uuid, uri.ObjectId, true);
+        }
     }
 }

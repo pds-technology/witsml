@@ -133,7 +133,7 @@ namespace PDS.Witsml.Data
         {
             if (IsIgnored(element.Name.LocalName)) return;
 
-            var properties = GetPropertyInfo(type);
+            var properties = GetPropertyInfo(type, element);
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
@@ -304,7 +304,7 @@ namespace PDS.Witsml.Data
 
                 if (element.HasAttributes)
                 {
-                    var properties = GetPropertyInfo(elementType);
+                    var properties = GetPropertyInfo(elementType, element);
                     NavigateAttributes(element, propertyPath, properties, true);
                 }
                 else
@@ -493,6 +493,9 @@ namespace PDS.Witsml.Data
             {
                 Name = xmlType == null ? type.Name : xmlType.TypeName
             };
+
+            // Remove xsi:type attribute used for abstract types
+            clone.Attribute(Xsi("type"))?.Remove();
 
             return WitsmlParser.Parse(type, clone);
         }
@@ -831,11 +834,15 @@ namespace PDS.Witsml.Data
         /// <summary>
         /// Gets the property information.
         /// </summary>
-        /// <param name="t">The property type.</param>
-        /// <returns></returns>
-        protected IList<PropertyInfo> GetPropertyInfo(Type t)
+        /// <param name="type">The property type.</param>
+        /// <param name="element">An optional element containing type information.</param>
+        /// <returns>A collection of <see cref="PropertyInfo"/> objects.</returns>
+        protected IList<PropertyInfo> GetPropertyInfo(Type type, XElement element = null)
         {
-            return t.GetProperties()
+            if (type.IsAbstract && element != null)
+                type = GetConcreteType(element, type);
+
+            return type.GetProperties()
                 .Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false))
                 .ToList();
         }
@@ -969,7 +976,7 @@ namespace PDS.Witsml.Data
             // Ignore list properties that declare child elements using XmlArrayItem
             if (propertyInfo.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
 
-            var properties = GetPropertyInfo(elementType);
+            var properties = GetPropertyInfo(elementType, element);
 
             foreach (var attribute in element.Attributes())
             {
