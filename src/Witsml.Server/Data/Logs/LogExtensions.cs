@@ -142,11 +142,18 @@ namespace PDS.Witsml.Server.Data.Logs
             foreach (var row in logData)
             {
                 // Ensure row length matches expected length
-                var rowLength = row.Split(new[] { delimiter }, StringSplitOptions.None).Length;
-                if (rowLength != mnemonicCount)
+                if (row.Contains("\""))
                 {
-                    _log.Error($"Data points {rowLength} does not match number of channels {mnemonicCount}");
-                    throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                    ChannelDataReader.SplitRowWithQuotes(row, delimiter, mnemonicCount);
+                }
+                else
+                {
+                    var rowLength = row.Split(new[] { delimiter }, StringSplitOptions.None).Length;
+                    if (rowLength != mnemonicCount)
+                    {
+                        _log.Error($"Data points {rowLength} does not match number of channels {mnemonicCount}");
+                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                    }
                 }
 
                 var value = row.Substring(0, row.IndexOf(delimiter, StringComparison.InvariantCulture));

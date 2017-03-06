@@ -646,6 +646,91 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+
+        [TestMethod, Description("A string value with a comma delimiter inside quotes.")]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_With_Special_Character_Comma()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo[1].TypeLogData = LogDataType.@string;
+            Log.LogCurveInfo[1].Unit = "unitless";
+            Log.LogData = new List<LogData>();
+
+            // Add log
+            DevKit.AddAndAssert(Log);
+
+            var update = DevKit.CreateLog(Log);
+
+            update.LogData = new List<LogData>()
+            {
+                new LogData()
+                {
+                    MnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value)),
+                    UnitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit)),
+                    Data = new List<string>()
+                    {
+                        @"5000.0, ""A comma, in the value"",30.0",
+                        @"5000.1, ""Another comma, in the value"",31.0",
+                        @"5000.2, ""No comma in the value"",32.0",
+                    }
+                }
+            };
+
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.LogData.Count);
+
+            result.LogData[0].Data.ForEach(x => DevKit.AssertDataRowWithQuotes(x, ",", 3));
+        }
+
+        [TestMethod, Description("A string value with a custom delimiter inside quotes.")]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_With_Special_Character_Custom_Delimiter()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.DataDelimiter = "|";
+            Log.LogCurveInfo[1].TypeLogData = LogDataType.@string;
+            Log.LogCurveInfo[1].Unit = "unitless";
+            Log.LogData = new List<LogData>();
+
+            // Add log
+            DevKit.AddAndAssert(Log);
+
+            var update = DevKit.CreateLog(Log);
+
+            update.LogData = new List<LogData>()
+            {
+                new LogData()
+                {
+                    MnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value)),
+                    UnitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit)),
+                    Data = new List<string>()
+                    {
+                        @"5000.0| ""A pipe| in the value""|30.0",
+                        @"5000.1| ""Another pipe | in the value""|31.0",
+                        @"5000.2| ""No comma in the value""|32.0",
+                    }
+                }
+            };
+
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.LogData.Count);
+
+            result.LogData[0].Data.ForEach(x => DevKit.AssertDataRowWithQuotes(x, Log.DataDelimiter, 3));
+        }
+
+
         /// <summary>
         /// This partial update tests the following scenario:
         /// A log has 1 index curve and 3 channels is added with only channel 2 has initial data [chunk index {1, 5000)];

@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,6 +30,7 @@ using PDS.Framework;
 using PDS.Witsml.Data;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
+using Microsoft.VisualBasic.FileIO;
 
 namespace PDS.Witsml.Server
 {
@@ -515,6 +517,20 @@ namespace PDS.Witsml.Server
             var chars = Enumerable.Range(0, size)
                                    .Select(x => input[random.Next(0, input.Length)]);
             return new string(chars.ToArray());
+        }
+
+        public void AssertDataRowWithQuotes(string row, string delimiter, int mnemonicCount = 0)
+        {
+            using (var sr = new StringReader(row))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    var values = parser.ReadFields();
+                    Assert.IsNotNull(values);
+                    Assert.AreEqual(mnemonicCount, values.Length);
+                }
+            }
         }
     }
 }

@@ -352,6 +352,39 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Splits the row with quotes into a JSON row value.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <param name="channelCount">The count of channels.</param>
+        /// <returns>The row in JSON format.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        public static string SplitRowWithQuotes(string row, string delimiter, int channelCount)
+        {
+            using (var sr = new StringReader(row))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    var values = parser.ReadFields();
+
+                    if (values == null)
+                        return null;
+
+                    if (values.Length != channelCount)
+                    {
+                        _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, channelCount);
+                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                    }
+
+                    values = values.Select(Format).ToArray();
+
+                    return $"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]";
+                }
+            }
+        }
+
+        /// <summary>
         /// Reads the supplied channel data value to resolve any json.net data types to primitive types.
         /// </summary>
         /// <param name="value">The channel data value.</param>
@@ -1897,18 +1930,27 @@ namespace PDS.Witsml.Data.Channels
             {
                 foreach (var row in data)
                 {
-                    var values = Split(row, delimiter);
-                    if (values.Length != count)
+                    // If any of the values are quoted evaluate row for extra delimiter
+                    if (row.Contains("\""))
                     {
-                        _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, count);
-                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                        rows.Add(SplitRowWithQuotes(row, delimiter, count));
                     }
+                    else
+                    {
+                        var values = Split(row, delimiter);
+                        if (values.Length != count)
+                        {
+                            _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length,
+                                count);
+                            throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                        }
 
-                    values = values
-                        .Select(Format)
-                        .ToArray();
+                        values = values
+                            .Select(Format)
+                            .ToArray();
 
-                    rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
+                        rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
+                    }
                 }
             }
 
