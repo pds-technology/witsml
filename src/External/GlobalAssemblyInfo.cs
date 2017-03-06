@@ -18,15 +18,15 @@
 
 using System.Reflection;
 
-[assembly: AssemblyCopyright("Copyright © 2016")]
+[assembly: AssemblyCopyright("Copyright © 2017")]
 [assembly: AssemblyCompany("Petrotechnical Data Systems")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2016.1.0.0")]
-[assembly: AssemblyFileVersion("2016.1.0.0")]
-[assembly: AssemblyInformationalVersion("2016.1.0.0")]
+[assembly: AssemblyVersion("2017.1.0.0")]
+[assembly: AssemblyFileVersion("2017.1.0.0")]
+[assembly: AssemblyInformationalVersion("2017.1.0.0")]
 
 #if DEBUG
 [assembly: System.Diagnostics.Debuggable(true, true)]
