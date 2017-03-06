@@ -1429,14 +1429,14 @@ namespace PDS.Witsml.Server.Data.Logs
             var units = GetUnitList(logHeader, keys);
             var dataTypes = GetDataTypeList(logHeader, keys);
             var nullValues = GetNullValueList(logHeader, keys);
-            string[] queryMnemonics = GetQueryMnemonics(parser);
+            var queryMnemonics = GetQueryMnemonics(parser);
             Dictionary<string, Range<double?>> ranges;
 
             var logData = QueryChannelData(
                 context, logHeader.GetUri(), logHeader, range, mnemonics, units, dataTypes, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
 
             // Format the data for output
-            var count = FormatLogData(log, logHeader, mnemonics, units, logData, ranges);
+            var count = FormatLogData(log, logHeader, mnemonics, units, dataTypes, logData, ranges);
 
             // Update the response context growing object totals
             context.UpdateGrowingObjectTotals(count, keys.Length);
@@ -1454,21 +1454,53 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        private int FormatLogData(T log, T logHeader, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, 
-            IReadOnlyCollection<List<List<object>>> logData, Dictionary<string, Range<double?>> ranges)
+        private int FormatLogData(T log, T logHeader, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units,
+                    IDictionary<int, string> dataTypes, IReadOnlyCollection<List<List<object>>> logData, Dictionary<string, Range<double?>> ranges)
         {
             Logger.Debug("Formatting logData values.");
 
             if (logData.Count <= 0)
                 return logData.Count;
 
-            var data = logData
-                .Select(row => string.Join(GetLogDataDelimiter(logHeader), row.SelectMany(x => x)))
-                .ToList();
+            var delimiter = GetLogDataDelimiter(logHeader);
+
+            var data = dataTypes.Any(x => x.Value != null && x.Value.Contains("string"))
+                ? SelectDataWithStringDataTypes(dataTypes, logData, delimiter)
+                : logData.Select(row => string.Join(delimiter, row.SelectMany(x => x))).ToList();
+
             SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
             SetLogIndexRange(log, logHeader, ranges, mnemonicSlices[0]);
 
             return logData.Count;
+        }
+
+        private static List<string> SelectDataWithStringDataTypes(IDictionary<int, string> dataTypes, IReadOnlyCollection<List<List<object>>> logData, string delimiter)
+        {
+            return logData
+                .Select(row => string.Join(delimiter, row.SelectMany((x, i) =>
+                {
+                    // Add the index without formating
+                    if (i == 0)
+                        return x;
+
+                    var dataRow = new List<object>();
+                    x.ForEach((c, j) =>
+                    {
+                        var dataType = dataTypes.Where(kvp => kvp.Key == i).Select(kvp => kvp.Value).FirstOrDefault();
+
+                        if (dataType != null && dataType.Contains("string"))
+                        {
+                            // If the value contains the delimter wrap it with quotes
+                            dataRow.Add((x[j] != null && x[j].ToString().Contains(delimiter)) ? $"\"{x[j]}\"" : x[j]);
+                        }
+                        else
+                        {
+                            dataRow.Add(x[j]);
+                        }
+                    });
+                    return dataRow;
+                })))
+                .ToList();
         }
 
         private void FormatLogHeader(T log, string[] mnemonics)
