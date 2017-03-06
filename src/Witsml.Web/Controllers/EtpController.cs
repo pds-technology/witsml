@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
-using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -27,7 +26,6 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Controllers;
 
 namespace PDS.Witsml.Web.Controllers
@@ -48,24 +46,7 @@ namespace PDS.Witsml.Web.Controllers
         // GET: api/etp
         public HttpResponseMessage Get()
         {
-            var response = UpgradeRequest();
-
-            if (response.StatusCode == HttpStatusCode.SwitchingProtocols)
-            {
-                response.Headers.Server.TryParseAdd(WitsmlSettings.DefaultServerName);
-                response.ReasonPhrase = "Web Socket Protocol Handshake";
-
-                response.Headers.Add("Access-Control-Allow-Headers", new []
-                {
-                    "content-type",
-                    "authorization",
-                    "x-websocket-extensions",
-                    "x-websocket-version",
-                    "x-websocket-protocol"
-                });
-            }
-
-            return response;
+            return UpgradeRequest();
         }
 
         // GET: .well-known/etp-server-capabilities
