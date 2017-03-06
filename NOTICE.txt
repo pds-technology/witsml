@@ -1,5 +1,5 @@
-PDS.Witsml.Server, 2016.1
-Copyright 2016 Petrotechnical Data Systems
+PDS.Witsml.Server, 2017.1
+Copyright 2017 Petrotechnical Data Systems
 
 PDS.Witsml.Server incorporates ETP, WITSML™, PRODML™ and RESQML™ technology and standards
 provided by the Energistics Consortium, Inc.  Energistics®, WITSML™, PRODML™, RESQML™ and
@@ -10,7 +10,7 @@ Third Party Software
 Energistics 
 The following Energistics © products were used in the creation of this work: 
 
- - Energistics Transfer Protocol (ETP) Specifications, Version 1.0 
+ - Energistics Transfer Protocol (ETP) Specifications, Version 1.1 
  - WITSML™ Data Schema Specifications, Versions 2.0, 1.4.1.1 and 1.3.1.1
  - WITSML™ API Specifications, Versions 1.4.1.1 and 1.3.1
  - PRODML™ Data Schema Specifications, Version 1.2.2 
