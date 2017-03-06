@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,7 +70,12 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             else
             {
-                var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)                    ? Energistics.Common.EtpExtensions.Serialize(entity)                    : WitsmlParser.ToXml(entity);                dataObject.SetString(data);            }
+                var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)
+                    ? Energistics.Common.EtpExtensions.Serialize(entity)
+                    : WitsmlParser.ToXml(entity);
+
+                dataObject.SetString(data);
+            }
 
             dataObject.Resource = new Resource()
             {
@@ -133,12 +138,20 @@ namespace PDS.Witsml.Server.Providers.Store
 
             try
             {
-                var data = putObject.DataObject.GetString();
-                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))                {
+                var data = putObject.DataObject.GetString();
+
+                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))
+                {
                     var objectType = uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210)
                         ? ObjectTypes.GetObjectType(uri.ObjectType, OptionsIn.DataVersion.Version200.Value)
                         : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
-                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);                    data = WitsmlParser.ToXml(instance);                }                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
+
+                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);
+                    data = WitsmlParser.ToXml(instance);
+                }
+
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
+
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
                 dataAdapter.Put(putObject.DataObject);
 

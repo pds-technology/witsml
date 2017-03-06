@@ -256,7 +256,7 @@ Contains unit tests for the solution.
 ---
 
 ### Copyright and License
-Copyright &copy; 2016 Petrotechnical Data Systems
+Copyright &copy; 2017 Petrotechnical Data Systems
 
 Released under the Apache License, Version 2.0
 

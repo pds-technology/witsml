@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -424,7 +424,19 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     .ToArray();
 
                 // Remove any contexts from the list that have completed returning all data
-                completedContexts.ForEach(c =>                {                    // Notify consumer if the ReceiveChangeNotification field is true                    if (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ReceiveChangeNotification)                    {                        // TODO: Decide which message shoud be sent...                        // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);                        // ChannelRemove(c.ChannelId);                    }                   contextList.Remove(c);                });
+                completedContexts.ForEach(c =>
+                {
+                    // Notify consumer if the ReceiveChangeNotification field is true
+                    if (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ReceiveChangeNotification)
+                    {
+                        // TODO: Decide which message shoud be sent...
+                        // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);
+                        // ChannelRemove(c.ChannelId);
+                    }
+
+                   contextList.Remove(c);
+                });
+
                 // Delay to prevent CPU overhead
                 await Task.Delay(WitsmlSettings.StreamChannelDataDelayMilliseconds, token);
             }
