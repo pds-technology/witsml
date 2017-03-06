@@ -650,7 +650,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="currentLog">The current log.</param>
         /// <param name="dataRowCount">The data row count.</param>
         /// <returns>
-        /// The current log header update
+        /// The current log header update.
         /// </returns>
         protected override UpdateDefinition<Log> GetDataRowCountUpdate(UpdateDefinition<Log> logHeaderUpdate, Log currentLog, int dataRowCount)
         {

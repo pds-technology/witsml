@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Gets the total data row count from channelDataChunks for the specified uri.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        /// <returns></returns>
+        /// <returns>The total data row count.</returns>
         public int GetDataRowCount(EtpUri uri)
         {
             var filter = Builders<ChannelDataChunk>.Filter.Eq("Uri", uri.Uri.ToLower());

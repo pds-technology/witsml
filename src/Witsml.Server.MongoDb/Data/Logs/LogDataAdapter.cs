@@ -491,7 +491,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="logHeaderUpdate">The log header update.</param>
         /// <param name="currentLog">The current log.</param>
         /// <param name="dataRowCount">The data row count.</param>
-        /// <returns>The current log header update</returns>
+        /// <returns>The current log header update.</returns>
         protected virtual UpdateDefinition<T> GetDataRowCountUpdate(UpdateDefinition<T> logHeaderUpdate, T currentLog, int dataRowCount)
         {
             return logHeaderUpdate;
