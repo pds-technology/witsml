@@ -288,6 +288,19 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log131DataAdapter_GetFromStore_With_DataRowCount_Greater_Than_LogMaxDataNodesGet()
+        {
+            WitsmlSettings.LogMaxDataNodesGet = 8;
+
+            // dataRowCount will be 9
+            const int totalAddRows = 10;
+            const int lessRows = 1;
+
+            // Assert that only LogMaxDataNodesGet rows are returned which is less than dataRowCount
+            GetAndAssertByDataRowCount(totalAddRows, lessRows, WitsmlSettings.LogMaxDataNodesGet);
+        }
+
+        [TestMethod]
         public void Log131DataAdapter_GetFromStore_With_DataRowCount_Less_Than_Total()
         {
             const int totalAddRows = 10;
