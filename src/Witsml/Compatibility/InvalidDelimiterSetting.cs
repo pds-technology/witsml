@@ -21,26 +21,24 @@ namespace PDS.Witsml.Compatibility
     /// <summary>
     /// Enumeration of settings to control how unknown elements will be handled.
     /// </summary>
-    public enum UnknownElementSetting
+    public enum InvalidDelimiterSetting
     {
         /// <summary>
-        /// When an unknown element is encountered, the following error codes will be returned:
-        /// Get: -469;
-        /// Add: -409;
+        /// When an invalid delimiter is encountered, the following error codes will be returned:
+        /// Add: -469;
         /// Update: -483;
-        /// Delete: -469;
         /// </summary>
         Error,
 
         /// <summary>
-        /// When an unknown element is encountered, the following return codes will be used:
+        /// When an invalid delimiter is encountered, the following return codes will be used:
         /// Success: 1001;
         /// Partial Success: 1002;
         /// </summary>
         Warn,
 
         /// <summary>
-        /// When an unknown element is encountered, it will be silently ignored.
+        /// When an invalid delimiter is encountered, it will be silently ignored.
         /// </summary>
         Ignore
     }

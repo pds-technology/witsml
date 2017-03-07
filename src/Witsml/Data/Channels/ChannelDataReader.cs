@@ -28,6 +28,7 @@ using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
+using PDS.Witsml.Compatibility;
 
 namespace PDS.Witsml.Data.Channels
 {
@@ -53,6 +54,7 @@ namespace PDS.Witsml.Data.Channels
 
         private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
         private static readonly string[] _empty = new string[0];
+        private static InvalidDelimiterSetting InvalidDelimiterSetting;
 
         private List<List<List<object>>> _records;
         private IList<Range<double?>> _ranges;
@@ -116,7 +118,7 @@ namespace PDS.Witsml.Data.Channels
         public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
         {
             _log.Debug("ChannelDataReader instance created for IChannelDataRecords");
-
+            
             var items = records
                 .Cast<ChannelDataReader>()
                 .Select(x => new { Row = x._current, Record = x, x.Mnemonics, x.Units, x.NullValues })
@@ -361,6 +363,7 @@ namespace PDS.Witsml.Data.Channels
         /// <exception cref="WitsmlException"></exception>
         public static string SplitRowWithQuotes(string row, string delimiter, int channelCount)
         {
+            Enum.TryParse(Properties.Settings.Default.InvalidDelimiterSetting, out InvalidDelimiterSetting);
             using (var sr = new StringReader(row))
             {
                 using (var parser = new TextFieldParser(sr))

@@ -17,5 +17,8 @@
     <Setting Name="AllowDuplicateNonRecurringElements" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="InvalidDelimiterSetting" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Ignore</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
