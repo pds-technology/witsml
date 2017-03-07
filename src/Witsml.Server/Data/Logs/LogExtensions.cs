@@ -141,20 +141,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexValues = new HashSet<double>();
             foreach (var row in logData)
             {
-                // Ensure row length matches expected length
-                if (row.Contains("\""))
-                {
-                    ChannelDataReader.SplitRowWithQuotes(row, delimiter, mnemonicCount);
-                }
-                else
-                {
-                    var rowLength = row.Split(new[] { delimiter }, StringSplitOptions.None).Length;
-                    if (rowLength != mnemonicCount)
-                    {
-                        _log.Error($"Data points {rowLength} does not match number of channels {mnemonicCount}");
-                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
-                    }
-                }
+                ChannelDataReader.Split(row, delimiter, mnemonicCount);
 
                 var value = row.Substring(0, row.IndexOf(delimiter, StringComparison.InvariantCulture));
                 if (isTimeLog)

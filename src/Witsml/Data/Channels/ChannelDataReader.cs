@@ -314,77 +314,36 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Splits the specified comma delimited value.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public static string[] Split(string value)
-        {
-            return string.IsNullOrWhiteSpace(value)
-                ? _empty
-                : value.Split(',').Select(i => i.Trim()).ToArray();
-        }
-
-        /// <summary>
         /// Splits the specified data.
         /// </summary>
         /// <param name="data">The data.</param>
         /// <param name="delimiter">The delimiter.</param>
-        /// <returns></returns>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static string[] Split(string data, string delimiter)
+        /// <param name="channelCount">The count of channels for validation.</param>
+        /// <returns>An array of data values.</returns>
+        public static string[] Split(string data, string delimiter = ",", int? channelCount = null)
         {
-            if (data == null)
+            if (string.IsNullOrWhiteSpace(data))
                 return new string[0];
 
             if (delimiter.Length < 2)
-                return data.Split(delimiter[0]);
+            {
+                if (data.Contains("\""))
+                {
+                    HandleInvalidDelimiterSetting(delimiter, data);
+                    return SplitWithTextFieldParser(data, delimiter, channelCount);
+                }
+
+                var values = data.Split(delimiter[0]).Select(i => i.Trim()).ToArray();
+                ValidateChannelArrayCount(channelCount, values);
+
+                return values;
+            }
 
             // TextFieldParser iterates when it detects new line characters
             data = data.Replace("\n", " ");
 
-            using (var sr = new StringReader(data))
-            {
-                using (var parser = new TextFieldParser(sr))
-                {
-                    parser.SetDelimiters(delimiter);
-                    return parser.ReadFields();
-                }
-            }
-        }
+            return SplitWithTextFieldParser(data, delimiter);
 
-        /// <summary>
-        /// Splits the row with quotes into a JSON row value.
-        /// </summary>
-        /// <param name="row">The row.</param>
-        /// <param name="delimiter">The delimiter.</param>
-        /// <param name="channelCount">The count of channels.</param>
-        /// <returns>The row in JSON format.</returns>
-        /// <exception cref="WitsmlException"></exception>
-        public static string SplitRowWithQuotes(string row, string delimiter, int channelCount)
-        {
-            Enum.TryParse(Properties.Settings.Default.InvalidDelimiterSetting, out InvalidDelimiterSetting);
-            using (var sr = new StringReader(row))
-            {
-                using (var parser = new TextFieldParser(sr))
-                {
-                    parser.SetDelimiters(delimiter);
-                    var values = parser.ReadFields();
-
-                    if (values == null)
-                        return null;
-
-                    if (values.Length != channelCount)
-                    {
-                        _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, channelCount);
-                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
-                    }
-
-                    values = values.Select(Format).ToArray();
-
-                    return $"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]";
-                }
-            }
         }
 
         /// <summary>
@@ -1574,6 +1533,62 @@ namespace PDS.Witsml.Data.Channels
             return channelData;
         }
 
+        /// <summary>
+        /// Splits the row with quotes into a JSON row value.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <param name="channelCount">The count of channels for validation.</param>
+        /// <returns>The row in JSON format.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        private static string[] SplitWithTextFieldParser(string row, string delimiter, int? channelCount = null)
+        {
+            using (var sr = new StringReader(row))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    var values = parser.ReadFields();
+
+                    if (values == null)
+                        return null;
+
+                    ValidateChannelArrayCount(channelCount, values);
+
+                    return values;
+                }
+            }
+        }
+
+        private static void ValidateChannelArrayCount(int? channelCount, string[] values)
+        {
+            if (!channelCount.HasValue || values.Length == channelCount)
+                return;
+
+            _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, channelCount);
+            throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+        }
+
+        private static void HandleInvalidDelimiterSetting(string delimiter, string data)
+        {
+            Enum.TryParse(Properties.Settings.Default.InvalidDelimiterSetting, out InvalidDelimiterSetting);
+            var message = $"Invalid delimiter \"{delimiter}\" found in data row: {data}";
+
+            if (InvalidDelimiterSetting == InvalidDelimiterSetting.Ignore)
+            {
+                _log.Debug(message);
+            }
+            else if (InvalidDelimiterSetting == InvalidDelimiterSetting.Warn)
+            {
+                _log.Warn(message);
+            }
+            else
+            {
+                throw new WitsmlException(ErrorCodes.UpdateTemplateNonConforming, message);
+            }
+        }
+
         private object[] GetFullRowValues(object[] rowValues, string[] slicedMnemonics)
         {
             var rowMnemonics = _recordMnemonics != null ? _recordMnemonics[_current] : slicedMnemonics;
@@ -1933,27 +1948,14 @@ namespace PDS.Witsml.Data.Channels
             {
                 foreach (var row in data)
                 {
-                    // If any of the values are quoted evaluate row for extra delimiter
-                    if (row.Contains("\""))
-                    {
-                        rows.Add(SplitRowWithQuotes(row, delimiter, count));
-                    }
-                    else
-                    {
-                        var values = Split(row, delimiter);
-                        if (values.Length != count)
-                        {
-                            _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length,
-                                count);
-                            throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
-                        }
+                    var values = Split(row, delimiter, count);
+                    ValidateChannelArrayCount(count, values);
 
-                        values = values
-                            .Select(Format)
-                            .ToArray();
+                    values = values
+                        .Select(Format)
+                        .ToArray();
 
-                        rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
-                    }
+                    rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
                 }
             }
 
