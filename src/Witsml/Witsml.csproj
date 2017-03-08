@@ -107,6 +107,7 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Compatibility\CompatibilitySettings.cs" />
     <Compile Include="Compatibility\InvalidDataRowSetting.cs" />
     <Compile Include="Compatibility\UnknownElementSetting.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistory.cs" />

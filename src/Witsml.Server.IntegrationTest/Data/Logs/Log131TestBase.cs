@@ -18,6 +18,7 @@
 
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -39,6 +40,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
         partial void AfterEachTest()
         {
+            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
+            CompatibilitySettings.InvalidDataRowSetting = DevKitAspect.DefaultInvalidDataRowSetting;
+            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
+
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
             WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;

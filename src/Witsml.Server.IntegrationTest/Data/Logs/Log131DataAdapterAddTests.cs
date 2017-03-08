@@ -24,7 +24,7 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -399,6 +399,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log131DataAdapter_AddToStore_Invalid_Data_Rows()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             // Initialize Log Header

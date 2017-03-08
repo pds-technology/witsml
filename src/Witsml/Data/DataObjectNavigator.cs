@@ -39,17 +39,6 @@ namespace PDS.Witsml.Data
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-        internal static UnknownElementSetting UnknownElementSetting;
-        internal static bool AllowDuplicateNonRecurringElements;
-
-        /// <summary>
-        /// Initializes the <see cref="DataObjectNavigator{TContext}" /> class.
-        /// </summary>
-        static DataObjectNavigator()
-        {
-            Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out UnknownElementSetting);
-            AllowDuplicateNonRecurringElements = Properties.Settings.Default.AllowDuplicateNonRecurringElements;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
@@ -183,7 +172,7 @@ namespace PDS.Witsml.Data
                 var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
                 // Handle duplicate elements which are not recurring elements
-                if (childType == null && AllowDuplicateNonRecurringElements)
+                if (childType == null && CompatibilitySettings.AllowDuplicateNonRecurringElements)
                 {
                     foreach (var element in elementList)
                     {
@@ -670,11 +659,11 @@ namespace PDS.Witsml.Data
         {
             var message = $"Invalid {type} found: {name}";
 
-            if (UnknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
+            if (CompatibilitySettings.UnknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
             {
                 Logger.Debug(message);
             }
-            else if (UnknownElementSetting == UnknownElementSetting.Warn)
+            else if (CompatibilitySettings.UnknownElementSetting == UnknownElementSetting.Warn)
             {
                 Logger.Warn(message);
 

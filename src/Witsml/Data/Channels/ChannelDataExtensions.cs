@@ -36,15 +36,6 @@ namespace PDS.Witsml.Data.Channels
     public static class ChannelDataExtensions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataExtensions));
-        internal static InvalidDataRowSetting InvalidDataRowSetting;
-
-        /// <summary>
-        /// Initializes the <see cref="ChannelDataExtensions"/> class.
-        /// </summary>
-        static ChannelDataExtensions()
-        {
-            Enum.TryParse(Properties.Settings.Default.InvalidDataRowSetting, out InvalidDataRowSetting);
-        }
 
         /// <summary>
         /// Gets the data delimiter for channel data or the default data delimiter.
@@ -351,7 +342,7 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>An empty array.</returns>
         public static string[] HandleInvalidDataRow(WitsmlException error, ICollection<WitsmlValidationResult> warnings = null)
         {
-            switch (InvalidDataRowSetting)
+            switch (CompatibilitySettings.InvalidDataRowSetting)
             {
                 case InvalidDataRowSetting.Ignore:
                     _log.Debug(error.Message);

@@ -25,17 +25,23 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Data;
+using PDS.Witsml.Properties;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
-using Microsoft.VisualBasic.FileIO;
 
 namespace PDS.Witsml.Server
 {
     public abstract class DevKitAspect : DataGenerator
     {
+        public static readonly bool DefaultAllowDuplicateNonRecurringElements;
+        public static readonly InvalidDataRowSetting DefaultInvalidDataRowSetting;
+        public static readonly UnknownElementSetting DefaultUnknownElementSetting;
+
         public static readonly int DefaultXmlOutDebugSize = WitsmlSettings.TruncateXmlOutDebugSize;
         public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
         public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
@@ -62,6 +68,13 @@ namespace PDS.Witsml.Server
         public static readonly string DefaultTimeZone = WitsmlSettings.DefaultTimeZone;
 
         public readonly string TimeZone = "-06:00";
+
+        static DevKitAspect()
+        {
+            DefaultAllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+            Enum.TryParse(Settings.Default.InvalidDataRowSetting, out DefaultInvalidDataRowSetting);
+            Enum.TryParse(Settings.Default.UnknownElementSetting, out DefaultUnknownElementSetting);
+        }
 
         protected DevKitAspect(string url, WMLSVersion version, TestContext context)
         {

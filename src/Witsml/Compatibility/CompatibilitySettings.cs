@@ -16,30 +16,39 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using PDS.Witsml.Properties;
+
 namespace PDS.Witsml.Compatibility
 {
     /// <summary>
-    /// Enumeration of settings to control how invalid data rows will be handled.
+    /// Provides central access to all compatibility settings.
     /// </summary>
-    public enum InvalidDataRowSetting
+    public static class CompatibilitySettings
     {
         /// <summary>
-        /// When an invalid data row is encountered, the following error codes will be returned:
-        /// Add: -483 or -1051;
-        /// Update: -483 or -1051;
+        /// The allow duplicate non recurring elements setting.
         /// </summary>
-        Error,
+        public static bool AllowDuplicateNonRecurringElements;
 
         /// <summary>
-        /// When an invalid data row is encountered, the following return codes will be used:
-        /// Success: 1001;
-        /// Partial Success: 1002;
+        /// The invalid data row setting.
         /// </summary>
-        Warn,
+        public static InvalidDataRowSetting InvalidDataRowSetting;
 
         /// <summary>
-        /// When an invalid data row is encountered, it will be silently ignored.
+        /// The unknown element setting.
         /// </summary>
-        Ignore
+        public static UnknownElementSetting UnknownElementSetting;
+
+        /// <summary>
+        /// Initializes the <see cref="CompatibilitySettings"/> class.
+        /// </summary>
+        static CompatibilitySettings()
+        {
+            AllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+            Enum.TryParse(Settings.Default.InvalidDataRowSetting, out InvalidDataRowSetting);
+            Enum.TryParse(Settings.Default.UnknownElementSetting, out UnknownElementSetting);
+        }
     }
 }

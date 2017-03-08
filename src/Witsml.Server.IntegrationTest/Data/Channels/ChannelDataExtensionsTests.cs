@@ -255,10 +255,7 @@ namespace PDS.Witsml.Server.Data.Channels
             reader = log.GetReader();
             Assert.IsNotNull(reader);
 
-            AssertReaderAndData(new List<ChannelDataReader> { reader });
-
-            log.IndexCurve = null;
-            Should.Throw<WitsmlException>(() => reader = log.GetReader());
+            AssertReaderAndData(DevKit.List(reader));
         }
 
         [TestMethod]
