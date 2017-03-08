@@ -313,7 +313,17 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Splits the specified data.
+        /// Splits the comma delimited data value.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns>An array of values.</returns>
+        public static string[] Split(string data)
+        {
+            return data.SplitAndTrim(DefaultDataDelimiter);
+        }
+
+        /// <summary>
+        /// Splits the delimited data value based on the specified delimiter.
         /// </summary>
         /// <param name="data">The data.</param>
         /// <param name="delimiter">The delimiter.</param>
@@ -321,7 +331,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="warnings">The collection of validation warnings.</param>
         /// <returns>An array of data values.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static string[] Split(string data, string delimiter = ",", int? channelCount = null, ICollection<WitsmlValidationResult> warnings = null)
+        public static string[] Split(string data, string delimiter, int? channelCount = null, ICollection<WitsmlValidationResult> warnings = null)
         {
             // No need to validate rows with no data, they should be ignored
             if (string.IsNullOrWhiteSpace(data))
@@ -332,7 +342,7 @@ namespace PDS.Witsml.Data.Channels
             {
                 try
                 {
-                    var values = data.Split(delimiter[0]);
+                    var values = data.SplitAndTrim(delimiter);
                     return ChannelDataExtensions.ValidateRowDataCount(values, data, channelCount, warnings);
                 }
                 catch (Exception ex)

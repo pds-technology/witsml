@@ -64,6 +64,21 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Creates an array of trimmed strings by splitting this string at each occurence of a separator.
+        /// </summary>
+        /// <param name="value">The string value.</param>
+        /// <param name="separator">The separator.</param>
+        /// <returns>A string array.</returns>
+        public static string[] SplitAndTrim(this string value, string separator)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? new string[0]
+                : value.Split(new[] { separator }, StringSplitOptions.None)
+                       .Select(x => x.Trim())
+                       .ToArray();
+        }
+
+        /// <summary>
         /// Determines whether the collection contains the specified value, ignoring case.
         /// </summary>
         /// <param name="source">The source.</param>
