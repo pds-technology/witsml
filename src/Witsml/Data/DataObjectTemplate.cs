@@ -174,6 +174,28 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Adds an element to the document using the specified XPath expression.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpath">The xpath.</param>
+        /// <param name="elements">The name.</param>
+        /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
+        public DataObjectTemplate Add(XDocument document, string xpath, params string[] elements)
+        {
+            var manager = GetNamespaceManager(document.Root);
+            xpath = IncludeNamespacePrefix(xpath);
+
+            var ns = document.Root?.GetDefaultNamespace();
+
+            var element = document.XPathSelectElement(xpath, manager);
+
+            if (element != null)
+                elements.ForEach(x => element.Add(new XElement(ns + x)));
+
+            return this;
+        }
+
+        /// <summary>
         /// Removes nodes from the document using the specified XPath expressions.
         /// </summary>
         /// <param name="document">The document.</param>
@@ -185,6 +207,23 @@ namespace PDS.Witsml.Data
 
             xpaths
                 .Select(IncludeNamespacePrefix)
+                .SelectMany(x => document.Evaluate(x, manager).ToArray())
+                .ForEach(RemoveElementOrAttribute);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes all nodes from the document using the specified XPath expressions.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpaths">The XPath expressions.</param>
+        /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
+        public DataObjectTemplate RemoveAll(XDocument document, params string[] xpaths)
+        {
+            var manager = GetNamespaceManager(document.Root);
+
+            xpaths
                 .SelectMany(x => document.Evaluate(x, manager).ToArray())
                 .ForEach(RemoveElementOrAttribute);
 
@@ -222,8 +261,11 @@ namespace PDS.Witsml.Data
             }
 
             XNamespace ns = xmlType?.Namespace ?? xmlRoot.Namespace;
-            var document = new XDocument(new XElement(ns + objectType));
 
+            var element = new XElement(ns + objectType);
+            element.SetAttributeValue("xmlns", ns);
+
+            var document = new XDocument(element);
             CreateTemplate(type, ns, document.Root);
 
             // Set version attribute for top level data objects
