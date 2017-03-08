@@ -70,10 +70,10 @@ namespace PDS.Witsml.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Error")]
-        public string InvalidDelimiterSetting {
+        [global::System.Configuration.DefaultSettingValueAttribute("Ignore")]
+        public string InvalidDataRowSetting {
             get {
-                return ((string)(this["InvalidDelimiterSetting"]));
+                return ((string)(this["InvalidDataRowSetting"]));
             }
         }
     }

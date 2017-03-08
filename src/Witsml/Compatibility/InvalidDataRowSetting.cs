@@ -19,26 +19,26 @@
 namespace PDS.Witsml.Compatibility
 {
     /// <summary>
-    /// Enumeration of settings to control how unknown elements will be handled.
+    /// Enumeration of settings to control how invalid data rows will be handled.
     /// </summary>
-    public enum InvalidDelimiterSetting
+    public enum InvalidDataRowSetting
     {
         /// <summary>
-        /// When an invalid delimiter is encountered, the following error codes will be returned:
+        /// When an invalid data row is encountered, the following error codes will be returned:
         /// Add: -469;
         /// Update: -483;
         /// </summary>
         Error,
 
         /// <summary>
-        /// When an invalid delimiter is encountered, the following return codes will be used:
+        /// When an invalid data row is encountered, the following return codes will be used:
         /// Success: 1001;
         /// Partial Success: 1002;
         /// </summary>
         Warn,
 
         /// <summary>
-        /// When an invalid delimiter is encountered, it will be silently ignored.
+        /// When an invalid data row is encountered, it will be silently ignored.
         /// </summary>
         Ignore
     }

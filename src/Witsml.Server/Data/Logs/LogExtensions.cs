@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -138,18 +139,26 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
         public static bool HasDuplicateIndexes(this List<string> logData, Functions function, string delimiter, bool isTimeLog, int mnemonicCount)
         {
+            var warnings = new List<WitsmlValidationResult>();
             var indexValues = new HashSet<double>();
+
             foreach (var row in logData)
             {
-                ChannelDataReader.Split(row, delimiter, mnemonicCount);
+                var values = ChannelDataReader.Split(row, delimiter, mnemonicCount, warnings);
+                var value = values.FirstOrDefault();
 
-                var value = row.Substring(0, row.IndexOf(delimiter, StringComparison.InvariantCulture));
                 if (isTimeLog)
                 {
                     DateTimeOffset dto;
-                    if (!DateTimeOffset.TryParse(value, out dto))
-                        throw new WitsmlException(function.GetNonConformingErrorCode());
 
+                    if (!DateTimeOffset.TryParse(value, out dto))
+                    {
+                        var error = new WitsmlException(function.GetNonConformingErrorCode());
+                        ChannelDataExtensions.HandleInvalidDataRow(error, warnings);
+                        continue;
+                    }
+
+                    // TODO: Add compatibility option for DuplicateIndexSetting
                     if (indexValues.Contains(dto.UtcTicks))
                         return true;
 
@@ -158,15 +167,27 @@ namespace PDS.Witsml.Server.Data.Logs
                 else
                 {
                     double doubleValue;
-                    if (!double.TryParse(value, out doubleValue))
-                        throw new WitsmlException(function.GetNonConformingErrorCode());
 
+                    if (!double.TryParse(value, out doubleValue))
+                    {
+                        var error = new WitsmlException(function.GetNonConformingErrorCode());
+                        ChannelDataExtensions.HandleInvalidDataRow(error, warnings);
+                        continue;
+                    }
+
+                    // TODO: Add compatibility option for DuplicateIndexSetting
                     if (indexValues.Contains(doubleValue))
                         return true;
 
                     indexValues.Add(doubleValue);
                 }
             }
+
+            if (warnings.Any())
+            {
+                WitsmlOperationContext.Current.Warnings.AddRange(warnings);
+            }
+
             return false;
         }
     }
