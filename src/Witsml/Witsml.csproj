@@ -165,6 +165,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="EtpUris.cs" />
+    <Compile Include="Query\QueryTemplates.cs" />
+    <Compile Include="Query\QueryTemplates.generated.cs">
+      <DependentUpon>QueryTemplates.cs</DependentUpon>
+    </Compile>
     <Compile Include="Range.cs" />
     <Compile Include="Units.cs" />
     <Compile Include="WitsmlException.cs" />
