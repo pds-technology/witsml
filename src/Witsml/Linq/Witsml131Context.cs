@@ -66,11 +66,6 @@ namespace PDS.Witsml.Linq
         }
 
         /// <summary>
-        /// Gets the data schema version.
-        /// </summary>
-        public override string DataSchemaVersion => OptionsIn.DataVersion.Version131.Value;
-
-        /// <summary>
         /// Gets the wells.
         /// </summary>
         public IWitsmlQuery<Well> Wells => CreateQuery<Well, WellList>();
@@ -93,7 +88,7 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Gets the trajectories.
         /// </summary>
-        public IWitsmlQuery<Trajectory> Trajectories => CreateQuery<Trajectory, TrajectoryList>();
+        public IWitsmlQuery<Trajectory> Trajectories => CreateQuery<Trajectory, TrajectoryList>();        
 
         /// <summary>
         /// Gets all wells.

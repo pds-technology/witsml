@@ -254,14 +254,16 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <returns></returns>
-        public static bool? GetObjectGrowingStatus(this object dataObject)
+        public static bool? GetObjectGrowingStatus(this IDataObject dataObject)
         {
             var log131 = dataObject as Witsml131.Log;
             var log141 = dataObject as Witsml141.Log;
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
 
-            return log131?.ObjectGrowing ?? log141?.ObjectGrowing ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing ?? false;
+            return log131?.ObjectGrowing ?? log141?.ObjectGrowing
+                ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing
+                ?? false;
         }
 
         /// <summary>
@@ -269,7 +271,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <returns></returns>
-        public static bool? GetWellboreStatus(this object dataObject)
+        public static bool? GetWellboreStatus(this IDataObject dataObject)
         {
             var wellbore141 = dataObject as Witsml141.Wellbore;
 

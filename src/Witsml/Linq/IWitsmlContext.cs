@@ -68,12 +68,12 @@ namespace PDS.Witsml.Linq
         IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri);
 
         /// <summary>
-        /// Gets the growing objects header only.
+        /// Gets the growing objects id-only with object growing status.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="uri">The URI.</param>
         /// <returns>The wellbore objects of specified type with header.</returns>
-        IEnumerable<IWellboreObject> GetGrowingObjectsHeaderOnly(string objectType, EtpUri uri);
+        IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri uri);
 
         /// <summary>
         /// Gets the object identifier only.

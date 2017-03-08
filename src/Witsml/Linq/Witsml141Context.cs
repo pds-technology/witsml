@@ -66,11 +66,6 @@ namespace PDS.Witsml.Linq
         }
 
         /// <summary>
-        /// Gets the data schema version.
-        /// </summary>
-        public override string DataSchemaVersion => OptionsIn.DataVersion.Version141.Value;
-
-        /// <summary>
         /// Gets the wells.
         /// </summary>
         public IWitsmlQuery<Well> Wells => CreateQuery<Well, WellList>();

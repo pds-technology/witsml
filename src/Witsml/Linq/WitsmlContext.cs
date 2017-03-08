@@ -44,6 +44,7 @@ namespace PDS.Witsml.Linq
         protected WitsmlContext(string url, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, timeoutInMinutes, version);
+            SetDataSchemaVersion(version);
         }
 
         /// <summary>
@@ -57,6 +58,7 @@ namespace PDS.Witsml.Linq
         protected WitsmlContext(string url, string username, string password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
+            SetDataSchemaVersion(version);
         }
 
         /// <summary>
@@ -70,6 +72,7 @@ namespace PDS.Witsml.Linq
         protected WitsmlContext(string url, string username, SecureString password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
+            SetDataSchemaVersion(version);
         }
 
         /// <summary>
@@ -89,7 +92,7 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Gets the data schema version.
         /// </summary>
-        public abstract string DataSchemaVersion { get; }
+        public string DataSchemaVersion { get; private set; }
 
         /// <summary>
         /// Gets or sets the log query action.
@@ -150,14 +153,12 @@ namespace PDS.Witsml.Linq
         }
 
         /// <summary>
-        /// Gets the growing objects header only.
+        /// Gets the growing objects id-only with object growing status.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="uri">The URI.</param>
-        /// <returns>
-        /// The wellbore objects of specified type with header.
-        /// </returns>
-        public virtual IEnumerable<IWellboreObject> GetGrowingObjectsHeaderOnly(string objectType, EtpUri uri)
+        /// <returns> The wellbore objects of specified type with header. </returns>
+        public virtual IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri uri)
         {
             return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly);
         }
@@ -205,7 +206,7 @@ namespace PDS.Witsml.Linq
         /// <param name="optionsIn">The options in.</param>
         /// <returns></returns>
         protected virtual IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, params OptionsIn[] optionsIn) where T : IDataObject
-        {
+        {            
             var filters = new List<string>();
             var values = new List<object>();
             var count = 0;
@@ -245,7 +246,7 @@ namespace PDS.Witsml.Linq
             }
 
             return dataObjects.OrderBy(x => x.Name);
-        }
+        }       
 
         /// <summary>
         /// Formats the WITSML query.
@@ -314,6 +315,19 @@ namespace PDS.Witsml.Linq
                 UseDefaultNetworkCredentials = true,
                 Timeout = (int)(60000 * timeoutInMinutes)
             };
+        }
+
+        /// <summary>
+        /// Sets the data schema version from WITSML version.
+        /// </summary>
+        /// <param name="version">The WITSML version.</param>
+        private void SetDataSchemaVersion(WMLSVersion version)
+        {
+            var dataVersion = version == WMLSVersion.WITSML131
+                ? OptionsIn.DataVersion.Version131.Value
+                : OptionsIn.DataVersion.Version141.Value;
+
+            DataSchemaVersion = dataVersion;
         }
 
         #region IDisposable Support
