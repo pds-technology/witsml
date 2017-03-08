@@ -345,6 +345,10 @@ namespace PDS.Witsml.Data.Channels
                     var values = data.SplitAndTrim(delimiter);
                     return ChannelDataExtensions.ValidateRowDataCount(values, data, channelCount, warnings);
                 }
+                catch (WitsmlException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     var message = $"Invalid data row: {data}";
@@ -368,6 +372,10 @@ namespace PDS.Witsml.Data.Channels
                     return values != null && values.Any()
                         ? ChannelDataExtensions.ValidateRowDataCount(values, data, channelCount, warnings)
                         : new string[0];
+                }
+                catch (WitsmlException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
