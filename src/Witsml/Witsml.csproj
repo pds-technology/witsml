@@ -171,6 +171,7 @@
     <Compile Include="Query\QueryTemplates.generated.cs">
       <DependentUpon>QueryTemplates.cs</DependentUpon>
     </Compile>
+    <Compile Include="Query\WitsmlQueryContext.cs" />
     <Compile Include="Range.cs" />
     <Compile Include="Units.cs" />
     <Compile Include="WitsmlException.cs" />
