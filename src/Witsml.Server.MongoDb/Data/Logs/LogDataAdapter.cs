@@ -1464,8 +1464,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var delimiter = GetLogDataDelimiter(logHeader);
 
-            var data = dataTypes.Any(x => x.Value != null && x.Value.Contains("string"))
-                ? SelectDataWithStringDataTypes(dataTypes, logData, delimiter)
+            var data = !dataTypes.Any() || dataTypes.Values.Contains("string")
+                ? logData.Select(row => string.Join(delimiter, row.SelectMany(x => x).Select(x => Format(x, delimiter)))).ToList()
                 : logData.Select(row => string.Join(delimiter, row.SelectMany(x => x))).ToList();
 
             SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
@@ -1474,35 +1474,16 @@ namespace PDS.Witsml.Server.Data.Logs
             return logData.Count;
         }
 
-        private static List<string> SelectDataWithStringDataTypes(IDictionary<int, string> dataTypes, IReadOnlyCollection<List<List<object>>> logData, string delimiter)
+        private object Format(object value, string delimiter)
         {
-            return logData
-                .Select(row => string.Join(delimiter, row.SelectMany((x, i) =>
-                {
-                    // Add the index without formating
-                    if (i == 0)
-                        return x;
+            // Return if value is not a string
+            if (!(value is string)) return value;
 
-                    var dataRow = new List<object>();
-                    x.ForEach((c, j) =>
-                    {
-                        var dataType = dataTypes.Where(kvp => kvp.Key == i).Select(kvp => kvp.Value).FirstOrDefault();
-
-                        if (dataType != null && dataType.Contains("string"))
-                        {
-                            // If the value contains the delimter wrap it with quotes
-                            dataRow.Add((x[j] != null && x[j].ToString().Contains(delimiter)) ? $"\"{x[j]}\"" : x[j]);
-                        }
-                        else
-                        {
-                            dataRow.Add(x[j]);
-                        }
-                    });
-                    return dataRow;
-                })))
-                .ToList();
+            return value.ToString().Contains(delimiter) 
+                ? $"\"{value}\"" 
+                : value;
         }
-
+        
         private void FormatLogHeader(T log, string[] mnemonics)
         {
             var logCurves = GetLogCurves(log);
