@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess.Validation;
 using log4net;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Data.Logs;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -308,6 +311,57 @@ namespace PDS.Witsml.Data.Channels
                 Witsml200.ReferenceData.EtpDataType.@long.ToString(),
                 channelIndex.IsIncreasing(),
                 channelIndex.IsTimeIndex());
+        }
+
+        /// <summary>
+        /// Validates the row data count.
+        /// </summary>
+        /// <param name="values">The values array.</param>
+        /// <param name="data">The data row.</param>
+        /// <param name="channelCount">The channel count.</param>
+        /// <param name="warnings">The collection of validation warnings.</param>
+        /// <returns>A validated array of data row values or an empty array.</returns>
+        public static string[] ValidateRowDataCount(string[] values, string data, int? channelCount = null, ICollection<WitsmlValidationResult> warnings = null)
+        {
+            if (!channelCount.HasValue || values.Length == channelCount)
+                return values;
+
+            var message = ErrorCodes.ErrorRowDataCount.GetDescription() +
+                          $" Expected: {channelCount}; Actual: {values.Length}; Data: {data}";
+
+            var error = new WitsmlException(ErrorCodes.ErrorRowDataCount, message);
+
+            return HandleInvalidDataRow(error, warnings);
+        }
+
+        /// <summary>
+        /// Handles the invalid data row according to the configured InvalidDataRowSetting value.
+        /// </summary>
+        /// <param name="error">The error.</param>
+        /// <param name="warnings">The collection of validation warnings.</param>
+        /// <returns>An empty array.</returns>
+        public static string[] HandleInvalidDataRow(WitsmlException error, ICollection<WitsmlValidationResult> warnings = null)
+        {
+            switch (CompatibilitySettings.InvalidDataRowSetting)
+            {
+                case InvalidDataRowSetting.Ignore:
+                    _log.Debug(error.Message);
+                    break;
+
+                case InvalidDataRowSetting.Warn:
+                    warnings?.Add(new WitsmlValidationResult((short)error.ErrorCode, error.Message, new[] { "data" }));
+                    _log.Warn(error.Message);
+                    break;
+
+                case InvalidDataRowSetting.Error:
+                    throw error;
+
+                default:
+                    throw error;
+            }
+
+            // return blank data row
+            return new string[0];
         }
 
         /// <summary>

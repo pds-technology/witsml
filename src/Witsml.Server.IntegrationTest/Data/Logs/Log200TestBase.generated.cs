@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,13 +35,10 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public abstract partial class Log200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<logs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><log uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</log></logs>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Log Log { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Log> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -69,10 +66,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Log"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Log)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new Log());
 
             BeforeEachTest();
             OnTestSetUp();

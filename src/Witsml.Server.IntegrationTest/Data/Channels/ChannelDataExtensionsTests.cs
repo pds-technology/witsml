@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -255,10 +255,7 @@ namespace PDS.Witsml.Server.Data.Channels
             reader = log.GetReader();
             Assert.IsNotNull(reader);
 
-            AssertReaderAndData(new List<ChannelDataReader> { reader });
-
-            log.IndexCurve = null;
-            Should.Throw<WitsmlException>(() => reader = log.GetReader());
+            AssertReaderAndData(DevKit.List(reader));
         }
 
         [TestMethod]

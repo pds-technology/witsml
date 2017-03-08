@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.Compatibility
+namespace PDS.Witsml.Compatibility
 {
     /// <summary>
     /// Enumeration of settings to control how unknown elements will be handled.

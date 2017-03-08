@@ -67,5 +67,14 @@ namespace PDS.Witsml.Properties {
                 return ((bool)(this["AllowDuplicateNonRecurringElements"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ignore")]
+        public string InvalidDataRowSetting {
+            get {
+                return ((string)(this["InvalidDataRowSetting"]));
+            }
+        }
     }
 }

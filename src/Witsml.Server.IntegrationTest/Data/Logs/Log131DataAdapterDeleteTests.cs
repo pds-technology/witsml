@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -616,6 +616,18 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete, ErrorCodes.ErrorDeletingIndexCurve);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_DeleteFromStore_Delete_Updates_DataRowCount()
+        {
+            DeleteAndAssertDataRowCount(10, 5, 9);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_DeleteFromStore_Delete_No_Rows_Does_Not_Change_DataRowCount()
+        {
+            DeleteAndAssertDataRowCount(10, 100, 10);
+        }
+
         #region Helper Methods
 
         private void DeleteLog(Log log, string delete, ErrorCodes error = ErrorCodes.Success)
@@ -623,6 +635,27 @@ namespace PDS.Witsml.Server.Data.Logs
             var queryIn = string.Format(BasicXMLTemplate, log.UidWell, log.UidWellbore, log.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
             Assert.AreEqual((short)error, response.Result);
+        }
+
+        private void DeleteAndAssertDataRowCount(int rowsToAdd, int deleteIndex, int expectedDataRowCount)
+        {
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, rowsToAdd, false);
+
+            // Assert that the dataRowCount is equivalent with the AddToStore
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), rowsToAdd);
+
+            // Create a deleteLog that deletes one row
+            var deleteLog = DevKit.CreateLog(Log);
+            deleteLog.StartIndex = new GenericMeasure(deleteIndex, Log.LogCurveInfo[0].Unit);
+            deleteLog.EndIndex = new GenericMeasure(deleteIndex, Log.LogCurveInfo[0].Unit);
+
+            // Update the Log with a new Row
+            DevKit.DeleteAndAssert(deleteLog, partialDelete: true);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), expectedDataRowCount);
         }
 
         #endregion

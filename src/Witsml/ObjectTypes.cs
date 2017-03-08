@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -123,6 +123,18 @@ namespace PDS.Witsml
         /// </summary>
         public const string WellboreGeometry = "wellboreGeometry";
 
+        /// <summary>
+        /// The collection of object types which contain children in the hierarchy.
+        /// </summary>
+        public static readonly string[] ParentObjects = 
+        {
+            ChannelSet,
+            Log,
+            Rig,
+            Well,
+            Wellbore
+        };
+
         private static readonly string[] _growingObjects = { Log, MudLog, Trajectory };
 
         private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
@@ -132,10 +144,14 @@ namespace PDS.Witsml
         /// </summary>
         public static readonly IDictionary<string, string> ObjectTypeMap;
 
+        /// <summary>
+        /// Initializes the <see cref="ObjectTypes"/> class.
+        /// </summary>
         static ObjectTypes()
         {
             ObjectTypeMap = typeof(ObjectTypes)
                 .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(x => x.FieldType == typeof(string))
                 .Select(x => x.GetValue(null))
                 .Where(x => x != null)
                 .Cast<string>()

@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,13 +35,10 @@ namespace PDS.Witsml.Server.Data.Attachments
 {
     public abstract partial class Attachment200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<attachments xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</attachment></attachments>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Attachment> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -69,10 +66,8 @@ namespace PDS.Witsml.Server.Data.Attachments
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Attachment"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Attachment)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new Attachment());
 
             BeforeEachTest();
             OnTestSetUp();

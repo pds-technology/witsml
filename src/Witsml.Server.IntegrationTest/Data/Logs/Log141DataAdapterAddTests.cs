@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -519,14 +520,13 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("As comma is a delimiter, this test is served as a reminder of the problem and will need to be updated to the decided response of the server.")]
-        [Ignore]
         public void Log141DataAdapter_AddToStore_AddLog_With_Special_Character_Comma()
         {
             AddParents();
 
             // Add log          
             var description = "<description>Test special character , (comma) </description>";
-            var row = "<data>5000.0, comma ,, 5.0</data>";
+            var row = @"<data>5000.0, ""A comma, in the value"",30.0</data>";
 
             var xmlIn = FormatXmlIn(Log, description, row);
 
@@ -538,7 +538,11 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            returnLog.LogData[0].Data.ForEach(x =>
+            {
+                DevKit.AssertDataRowWithQuotes(x, ",", 3);
+            });
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \f (form feed).")]
@@ -955,6 +959,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Invalid_Data_Rows()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             // Initialize Log Header

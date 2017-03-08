@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2016.1
+// PDS.Framework, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,6 +61,21 @@ namespace PDS.Framework
         {
             if (parameter == null)
                 throw new ArgumentNullException(parameterName);
+        }
+
+        /// <summary>
+        /// Creates an array of trimmed strings by splitting this string at each occurence of a separator.
+        /// </summary>
+        /// <param name="value">The string value.</param>
+        /// <param name="separator">The separator.</param>
+        /// <returns>A string array.</returns>
+        public static string[] SplitAndTrim(this string value, string separator)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? new string[0]
+                : value.Split(new[] { separator }, StringSplitOptions.None)
+                       .Select(x => x.Trim())
+                       .ToArray();
         }
 
         /// <summary>
@@ -355,7 +370,8 @@ namespace PDS.Framework
 
             return null;
         }
-        /// <summary>
+
+        /// <summary>
         /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.
         /// </summary>
         /// <param name="element">The element.</param>
@@ -380,5 +396,6 @@ namespace PDS.Framework
         public static IEnumerable<object> Evaluate(this XDocument document, string expression, IXmlNamespaceResolver resolver)
         {
             return ((IEnumerable) document.XPathEvaluate(expression, resolver)).Cast<object>();
-        }    }
+        }
+    }
 }

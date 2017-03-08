@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Providers.Store
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
             var uri = new EtpUri(args.Message.Uri);
-            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
             var entity = dataAdapter.Get(uri) as Witsml200.AbstractObject;
 
             StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));

@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Jobs;
@@ -433,6 +435,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log131DataAdapter_UpdateInStore_Invalid_Data_Rows()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             // Initialize Log Header
@@ -456,6 +460,67 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Update with invalid data
             DevKit.UpdateAndAssert(updateLog, ErrorCodes.ErrorRowDataCount);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_With_New_Row_Updates_DataRowCount()
+        {
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            const int dataRowCount = 10;
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, dataRowCount, false);
+
+            // Create an Update log with totalUpdateRows
+            const int totalUpdateRows = 1;
+            var updateLog = DevKit.CreateUpdateLogWithRows(Log, totalUpdateRows);
+
+            // Update the Log with a new Row
+            DevKit.UpdateAndAssert(updateLog);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount + totalUpdateRows);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Updates_Existing_Row_Does_Not_Change_DataRowCount()
+        {
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            const int dataRowCount = 10;
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, dataRowCount, false);
+
+            // Create an Update log that updates the last row of LogData
+            var updateLog = DevKit.CreateLog(Log);
+            updateLog.LogCurveInfo = Log.LogCurveInfo;
+            updateLog.LogData = new List<string> {Log.LogData[Log.LogData.Count - 1]};
+
+            // Update the Log with a new Row
+            DevKit.UpdateAndAssert(updateLog);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Updates_Existing_And_New_Row_Updates_DataRowCount()
+        {
+            AddParents();
+
+            // Add a Log with dataRowCount Rows
+            const int dataRowCount = 10;
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, dataRowCount, false);
+
+            // Create an Update log with totalUpdateRows
+            const int totalUpdateRows = 1;
+            var updateLog = DevKit.CreateUpdateLogWithRows(Log, totalUpdateRows);
+
+            // Add an existing row to the top of the updateLog's LogData
+            updateLog.LogData.Insert(0, Log.LogData[Log.LogData.Count - 1]);
+
+            // Update the Log with a new Row
+            DevKit.UpdateAndAssert(updateLog);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount + totalUpdateRows);
         }
 
         #region Helper Functions

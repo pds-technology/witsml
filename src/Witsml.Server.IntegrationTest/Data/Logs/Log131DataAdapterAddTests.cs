@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -399,6 +399,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log131DataAdapter_AddToStore_Invalid_Data_Rows()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             // Initialize Log Header
@@ -408,6 +410,20 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitData(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
 
             DevKit.AddAndAssert(Log, ErrorCodes.ErrorRowDataCount);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_AddToStore_With_Data_Updates_DataRowCount()
+        {
+            AddParents();
+
+            // Add 10 rows of data
+            const int dataRowCount = 10;
+
+            // Add a Log with dataRowCount Rows
+            DevKit.AddLogWithData(Log, LogIndexType.measureddepth, dataRowCount, false);
+
+            DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount);
         }
 
         #region Helper Methods

@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -437,6 +437,8 @@ namespace PDS.Witsml.Server
                 Assert.IsNotNull(args);
                 Assert.AreEqual(exist, args.Any());
 
+                var folder = ResourceTypes.Folder.ToString();
+
                 // Check Resource URIs
                 foreach (var arg in args)
                 {
@@ -449,7 +451,7 @@ namespace PDS.Witsml.Server
                     {
                         Assert.IsTrue(uri.IsBaseUri);
                     }
-                    else
+                    else if (!folder.EqualsIgnoreCase(arg.Message.Resource.ResourceType))
                     {
                         Assert.AreEqual(uri.Family, resourceUri.Family);
                         Assert.AreEqual(uri.Version, resourceUri.Version);

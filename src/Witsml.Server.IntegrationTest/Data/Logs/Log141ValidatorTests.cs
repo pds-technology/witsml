@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,27 +24,13 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     public partial class Log141ValidatorTests
     {
-        protected override void OnTestCleanUp()
-        {
-            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
-            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;
-            WitsmlSettings.LogMaxDataPointsUpdate = DevKitAspect.DefaultLogMaxDataPointsAdd;
-            WitsmlSettings.LogMaxDataPointsAdd = DevKitAspect.DefaultLogMaxDataPointsUpdate;
-            WitsmlSettings.LogMaxDataPointsDelete = DevKitAspect.DefaultLogMaxDataPointsDelete;
-            WitsmlSettings.LogMaxDataNodesGet = DevKitAspect.DefaultLogMaxDataNodesGet;
-            WitsmlSettings.LogMaxDataNodesAdd = DevKitAspect.DefaultLogMaxDataNodesAdd;
-            WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
-            WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
-            WitsmlOperationContext.Current = null;
-        }
-
         [TestMethod]
         public void Log141Validator_AddToStore_Error_447_Duplicate_Column_Identifiers_InLogCurveInfo()
         {
@@ -1084,6 +1070,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void ChannelDataReader_AddToStore_Error_1051_Incorrect_Row_Value_Count()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
@@ -1099,6 +1087,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void ChannelDataReader_UpdateInStore_Error_1051_Incorrect_Row_Value_Count()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             const int count = 10;
             AddParents();
 

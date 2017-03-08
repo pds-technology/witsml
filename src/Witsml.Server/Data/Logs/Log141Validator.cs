@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -499,10 +499,13 @@ namespace PDS.Witsml.Server.Data.Logs
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
                         {
+                            // TODO: Optimize use of IsFirstValueDateTime inside of HasDuplicateIndexes (e.g. multiple calls to Split)
                             if (logData.Data.HasDuplicateIndexes(function, delimiter, logData.Data[0].IsFirstValueDateTime(delimiter), mnemonics.Length))
                             {
                                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
                             }
+
+                            // TODO: Can we use mnemonics.Length instead of calling Split again here?
                             totalPoints += logData.Data.Count * ChannelDataReader.Split(logData.Data[0], delimiter).Length;
                         }
                         if (function.IsTotalDataPointsValid(totalPoints))

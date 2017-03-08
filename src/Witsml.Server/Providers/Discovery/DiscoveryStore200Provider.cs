@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
         private readonly IEtpDataProvider<Log> _logDataProvider;
         private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
+        private readonly IEtpDataProvider<RigUtilization> _rigUtilizationDataProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
@@ -51,19 +52,22 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <param name="wellboreDataProvider">The wellbore data Provider.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
+        /// <param name="rigUtilizationDataProvider">The rig utilization data provider.</param>
         [ImportingConstructor]
         public DiscoveryStore200Provider(
             IContainer container,
             IEtpDataProvider<Well> wellDataProvider,
             IEtpDataProvider<Wellbore> wellboreDataProvider,
             IEtpDataProvider<Log> logDataProvider,
-            IEtpDataProvider<ChannelSet> channelSetDataProvider)
+            IEtpDataProvider<ChannelSet> channelSetDataProvider,
+            IEtpDataProvider<RigUtilization> rigUtilizationDataProvider)
         {
             _container = container;
             _wellDataProvider = wellDataProvider;
             _wellboreDataProvider = wellboreDataProvider;
             _logDataProvider = logDataProvider;
             _channelSetDataProvider = channelSetDataProvider;
+            _rigUtilizationDataProvider = rigUtilizationDataProvider;
         }
 
         /// <summary>
@@ -101,15 +105,21 @@ namespace PDS.Witsml.Server.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(uri.Query))
                 parentUri = new EtpUri(parentUri + uri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Witsml200))
+            if (!uri.IsRelatedTo(EtpUris.Witsml200) && !uri.IsRelatedTo(EtpUris.Eml210))
             {
                 return;
             }
-            if (uri.IsBaseUri || (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType)))
+            if (uri.IsBaseUri)
             {
-                _wellDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                ObjectFolders.TopLevelObjects
+                    .Select(item => DiscoveryStoreProvider.NewFolder(item.Key.Parent, item.Key.ObjectType, item.Value))
+                    .ForEach(args.Context.Add);
             }
+            //else if (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            //{
+            //    _wellDataProvider.GetAll(uri)
+            //        .ForEach(x => args.Context.Add(ToResource(x)));
+            //}
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
             {
                 if (ObjectFolders.Logs.EqualsIgnoreCase(uri.ObjectType))
@@ -133,12 +143,13 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 else
                 {
                     var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
-                    var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
+                    var hasChildren = ObjectTypes.ParentObjects.ContainsIgnoreCase(objectType) ? -1 : 0;
+                    var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
 
                     dataProvider
                         .GetAll(parentUri)
                         .Cast<AbstractObject>()
-                        .ForEach(x => args.Context.Add(ToResource(x)));
+                        .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
                 }
             }
             else if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
@@ -172,6 +183,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
 
                 var set = _channelSetDataProvider.Get(uri);
                 set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
+            }
+            else if (ObjectTypes.Rig.EqualsIgnoreCase(uri.ObjectType))
+            {
+                _rigUtilizationDataProvider.GetAll(uri)
+                    .ForEach(x => args.Context.Add(ToResource(x)));
             }
         }
 
@@ -224,13 +240,14 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 name: entity.Mnemonic);
         }
 
-        private Resource ToResource(AbstractObject entity)
+        private Resource ToResource(AbstractObject entity, int hasChildren = 0)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title);
+                name: entity.Citation.Title,
+                count: hasChildren);
         }
     }
 }

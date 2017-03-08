@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -37,6 +38,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
         partial void AfterEachTest()
         {
+            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
+            CompatibilitySettings.InvalidDataRowSetting = DevKitAspect.DefaultInvalidDataRowSetting;
+            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
+
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
             WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;

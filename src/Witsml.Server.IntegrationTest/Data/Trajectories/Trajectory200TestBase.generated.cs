@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,13 +35,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 {
     public abstract partial class Trajectory200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<trajectorys xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</trajectory></trajectorys>";
-
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Trajectory Trajectory { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Trajectory> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -69,10 +66,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Trajectory"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-                SchemaVersion = "2.0"
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Trajectory)).Version,
             };
-
-            QueryEmptyList = DevKit.List(new Trajectory());
 
             BeforeEachTest();
             OnTestSetUp();

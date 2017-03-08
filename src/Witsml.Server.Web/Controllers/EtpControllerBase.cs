@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,30 +70,6 @@ namespace PDS.Witsml.Server.Controllers
         public List<IEtpDataProvider> DataAdapters { get; set; }
 
         /// <summary>
-        /// Upgrades the HTTP request to a Web Socket request.
-        /// </summary>
-        /// <returns>An <see cref="HttpResponseMessage"/> with the appropriate status code.</returns>
-        protected HttpResponseMessage UpgradeRequest()
-        {
-            var context = HttpContext.Current;
-
-            if (context.IsWebSocketRequest || context.IsWebSocketRequestUpgrading)
-            {
-                var options = context.WebSocketRequestedProtocols?.Count > 0
-                    ? new AspNetWebSocketOptions { SubProtocol = EtpSettings.EtpSubProtocolName }
-                    : null;
-
-                context.AcceptWebSocketRequest(AcceptWebSocketRequest, options);
-
-                return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
-            }
-
-            return Request.CreateResponse(
-                HttpStatusCode.UpgradeRequired,
-                new { error = "Invalid web socket request" });
-        }
-
-        /// <summary>
         /// Gets the server's capabilities.
         /// </summary>
         /// <returns>A <see cref="ServerCapabilities"/> object.</returns>
@@ -143,21 +119,47 @@ namespace PDS.Witsml.Server.Controllers
         }
 
         /// <summary>
-        /// Registers the protocol handlers supported by the specified <see cref="EtpServerHandler"/>.
+        /// Upgrades the HTTP request to a Web Socket request.
         /// </summary>
-        /// <param name="handler">The handler.</param>
-        protected virtual void RegisterProtocolHandlers(EtpServerHandler handler)
+        /// <returns>An <see cref="HttpResponseMessage"/> with the appropriate status code.</returns>
+        protected HttpResponseMessage UpgradeRequest()
         {
+            var context = HttpContext.Current;
+
+            if (context.IsWebSocketRequest || context.IsWebSocketRequestUpgrading)
+            {
+                var options = CreateWebSocketOptions(context.WebSocketRequestedProtocols);
+                context.AcceptWebSocketRequest(AcceptWebSocketRequest, options);
+
+                var response = Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
+                UpdateHandshakeResponse(response);
+
+                return response;
+            }
+
+            return Request.CreateResponse(
+                HttpStatusCode.UpgradeRequired,
+                new { error = "Invalid web socket request" });
         }
 
-        private EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
+        /// <summary>
+        /// Creates the web socket options for the requested protocols.
+        /// </summary>
+        /// <param name="requestedProtocols">The requested protocols.</param>
+        /// <returns>A new <see cref="AspNetWebSocketOptions"/> instance.</returns>
+        protected virtual AspNetWebSocketOptions CreateWebSocketOptions(IList<string> requestedProtocols)
         {
-            var handler = new EtpServerHandler(socket, _defaultServerName, _overrideServerVersion, headers);
-            RegisterProtocolHandlers(handler);
-            return handler;
+            return requestedProtocols?.Count > 0
+                ? new AspNetWebSocketOptions { SubProtocol = EtpSettings.EtpSubProtocolName }
+                : null;
         }
 
-        private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
+        /// <summary>
+        /// Accepts the web socket request.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
+        protected virtual async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var headers = GetWebSocketHeaders(context.Headers, context.QueryString);
             using (var handler = CreateEtpServerHandler(context.WebSocket, headers))
@@ -165,6 +167,46 @@ namespace PDS.Witsml.Server.Controllers
                 handler.SupportedObjects = GetSupportedObjects();
                 await handler.Accept(context);
             }
+        }
+
+        /// <summary>
+        /// Creates the ETP server handler.
+        /// </summary>
+        /// <param name="socket">The WebSocket.</param>
+        /// <param name="headers">The headers.</param>
+        /// <returns></returns>
+        protected virtual EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
+        {
+            var handler = new EtpServerHandler(socket, _defaultServerName, _overrideServerVersion, headers);
+            RegisterProtocolHandlers(handler);
+            return handler;
+        }
+
+        /// <summary>
+        /// Registers the protocol handlers supported by the specified <see cref="EtpServerHandler"/>.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        protected virtual void RegisterProtocolHandlers(EtpServerHandler handler)
+        {
+        }
+
+        /// <summary>
+        /// Updates the WebSocket handshake response.
+        /// </summary>
+        /// <param name="response">The response.</param>
+        protected virtual void UpdateHandshakeResponse(HttpResponseMessage response)
+        {
+            response.Headers.Server.TryParseAdd(WitsmlSettings.DefaultServerName);
+            response.ReasonPhrase = "Web Socket Protocol Handshake";
+
+            response.Headers.Add("Access-Control-Allow-Headers", new[]
+            {
+                "content-type",
+                "authorization",
+                "x-websocket-extensions",
+                "x-websocket-version",
+                "x-websocket-protocol"
+            });
         }
 
         private IDictionary<string, string> GetWebSocketHeaders(NameValueCollection headers, NameValueCollection queryString)

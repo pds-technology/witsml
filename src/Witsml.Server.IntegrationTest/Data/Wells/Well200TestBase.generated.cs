@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,11 +35,8 @@ namespace PDS.Witsml.Server.Data.Wells
 {
     public abstract partial class Well200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<wells xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><well uid=\"{0}\">{1}</well></wells>";
-
         public Well Well { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Well> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -55,8 +52,6 @@ namespace PDS.Witsml.Server.Data.Wells
                 SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
-
-            QueryEmptyList = DevKit.List(new Well());
 
             BeforeEachTest();
             OnTestSetUp();

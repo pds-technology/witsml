@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,7 +70,12 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             else
             {
-                var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)                    ? Energistics.Common.EtpExtensions.Serialize(entity)                    : WitsmlParser.ToXml(entity);                dataObject.SetString(data);            }
+                var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)
+                    ? Energistics.Common.EtpExtensions.Serialize(entity)
+                    : WitsmlParser.ToXml(entity);
+
+                dataObject.SetString(data);
+            }
 
             dataObject.Resource = new Resource()
             {
@@ -108,7 +113,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.GetDataSchemaVersion()));
                 provider.GetObject(args);
             }
             catch (ContainerException ex)
@@ -133,13 +138,21 @@ namespace PDS.Witsml.Server.Providers.Store
 
             try
             {
-                var data = putObject.DataObject.GetString();
-                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))                {
-                    var objectType = OptionsIn.DataVersion.Version200.Equals(uri.Version)
-                        ? ObjectTypes.GetObjectType(uri.ObjectType, uri.Version)
+                var data = putObject.DataObject.GetString();
+
+                if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))
+                {
+                    var objectType = uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210)
+                        ? ObjectTypes.GetObjectType(uri.ObjectType, OptionsIn.DataVersion.Version200.Value)
                         : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
-                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);                    data = WitsmlParser.ToXml(instance);                }                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+
+                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);
+                    data = WitsmlParser.ToXml(instance);
+                }
+
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
+
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
                 dataAdapter.Put(putObject.DataObject);
 
                 Acknowledge(header.MessageId);
@@ -180,7 +193,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
                 dataAdapter.Delete(etpUri);
 
                 Acknowledge(header.MessageId);

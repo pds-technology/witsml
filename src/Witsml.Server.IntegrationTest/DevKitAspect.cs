@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Data;
+using PDS.Witsml.Properties;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 
@@ -34,6 +38,10 @@ namespace PDS.Witsml.Server
 {
     public abstract class DevKitAspect : DataGenerator
     {
+        public static readonly bool DefaultAllowDuplicateNonRecurringElements;
+        public static readonly InvalidDataRowSetting DefaultInvalidDataRowSetting;
+        public static readonly UnknownElementSetting DefaultUnknownElementSetting;
+
         public static readonly int DefaultXmlOutDebugSize = WitsmlSettings.TruncateXmlOutDebugSize;
         public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
         public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
@@ -60,6 +68,13 @@ namespace PDS.Witsml.Server
         public static readonly string DefaultTimeZone = WitsmlSettings.DefaultTimeZone;
 
         public readonly string TimeZone = "-06:00";
+
+        static DevKitAspect()
+        {
+            DefaultAllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+            Enum.TryParse(Settings.Default.InvalidDataRowSetting, out DefaultInvalidDataRowSetting);
+            Enum.TryParse(Settings.Default.UnknownElementSetting, out DefaultUnknownElementSetting);
+        }
 
         protected DevKitAspect(string url, WMLSVersion version, TestContext context)
         {
@@ -196,11 +211,12 @@ namespace PDS.Witsml.Server
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null, bool queryByExample = false) where TList : IEnergisticsCollection where TObject : IDataObject
+        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null, bool queryByExample = false, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection where TObject : IDataObject
         {
             var query = queryByExample ? example : CreateQuery(example);
-            return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn);
+            return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn, errorCode);
         }
 
         /// <summary>
@@ -211,10 +227,16 @@ namespace PDS.Witsml.Server
         /// <param name="query">The query.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
+        /// <param name="errorCode">The expected error code.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
+        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
         {
-            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
+            short resultCode;
+            var results = QueryWithErrorCode<TList, TObject>(query, out resultCode, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
+
+            // Assert that we get the expected Result (Error) Code
+            Assert.AreEqual((short)errorCode, resultCode);
+
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();
@@ -508,6 +530,20 @@ namespace PDS.Witsml.Server
             var chars = Enumerable.Range(0, size)
                                    .Select(x => input[random.Next(0, input.Length)]);
             return new string(chars.ToArray());
+        }
+
+        public void AssertDataRowWithQuotes(string row, string delimiter, int mnemonicCount = 0)
+        {
+            using (var sr = new StringReader(row))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    var values = parser.ReadFields();
+                    Assert.IsNotNull(values);
+                    Assert.AreEqual(mnemonicCount, values.Length);
+                }
+            }
         }
     }
 }

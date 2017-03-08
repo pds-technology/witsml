@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,7 +68,13 @@ namespace PDS.Witsml.Server.Data
         /// <param name="fields">The requested fields.</param>
         /// <returns>The partial data object instance.</returns>
         object Get(EtpUri uri, params string[] fields);
-        /// <summary>        /// Gets the URI for the specified data object.        /// </summary>        /// <param name="dataObject">The data object.</param>        /// <returns>The data object URI.</returns>        EtpUri GetUri(object dataObject);
+
+        /// <summary>
+        /// Gets the URI for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The data object URI.</returns>
+        EtpUri GetUri(object dataObject);
 
         /// <summary>
         /// Deletes a data object by the specified URI.

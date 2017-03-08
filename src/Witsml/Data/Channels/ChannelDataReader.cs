@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Energistics.DataAccess.Validation;
 using log4net;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
@@ -38,13 +39,13 @@ namespace PDS.Witsml.Data.Channels
     /// <seealso cref="PDS.Witsml.Data.Channels.IChannelDataRecord" />
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
-        private const string Null = "null";
-        private const string NaN = "NaN";
-
         /// <summary>
         /// The default data delimiter
         /// </summary>
         public const string DefaultDataDelimiter = ",";
+
+        private const string Null = "null";
+        private const string NaN = "NaN";
 
         private static readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
         {
@@ -312,41 +313,75 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Splits the specified comma delimited value.
+        /// Splits the comma delimited data value.
         /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public static string[] Split(string value)
+        /// <param name="data">The data.</param>
+        /// <returns>An array of values.</returns>
+        public static string[] Split(string data)
         {
-            return string.IsNullOrWhiteSpace(value)
-                ? _empty
-                : value.Split(',').Select(i => i.Trim()).ToArray();
+            return data.SplitAndTrim(DefaultDataDelimiter);
         }
 
         /// <summary>
-        /// Splits the specified data.
+        /// Splits the delimited data value based on the specified delimiter.
         /// </summary>
         /// <param name="data">The data.</param>
         /// <param name="delimiter">The delimiter.</param>
-        /// <returns></returns>
+        /// <param name="channelCount">The count of channels for validation.</param>
+        /// <param name="warnings">The collection of validation warnings.</param>
+        /// <returns>An array of data values.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static string[] Split(string data, string delimiter)
+        public static string[] Split(string data, string delimiter, int? channelCount = null, ICollection<WitsmlValidationResult> warnings = null)
         {
-            if (data == null)
+            // No need to validate rows with no data, they should be ignored
+            if (string.IsNullOrWhiteSpace(data))
                 return new string[0];
 
-            if (delimiter.Length < 2)
-                return data.Split(delimiter[0]);
+            // Check to see if delimiter is a single character and there are no quoted strings
+            if (delimiter.Length < 2 && !data.Contains("\""))
+            {
+                try
+                {
+                    var values = data.SplitAndTrim(delimiter);
+                    return ChannelDataExtensions.ValidateRowDataCount(values, data, channelCount, warnings);
+                }
+                catch (WitsmlException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    var message = $"Invalid data row: {data}";
+                    var error = new WitsmlException(ErrorCodes.UpdateTemplateNonConforming, message, ex);
+                    return ChannelDataExtensions.HandleInvalidDataRow(error, warnings);
+                }
+            }
 
             // TextFieldParser iterates when it detects new line characters
             data = data.Replace("\n", " ");
 
-            using (var sr = new StringReader(data))
+            using (var reader = new StringReader(data))
+            using (var parser = new TextFieldParser(reader))
             {
-                using (var parser = new TextFieldParser(sr))
+                parser.SetDelimiters(delimiter);
+
+                try
                 {
-                    parser.SetDelimiters(delimiter);
-                    return parser.ReadFields();
+                    var values = parser.ReadFields();
+
+                    return values != null && values.Any()
+                        ? ChannelDataExtensions.ValidateRowDataCount(values, data, channelCount, warnings)
+                        : new string[0];
+                }
+                catch (WitsmlException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    var message = $"Invalid data row: {data}";
+                    var error = new WitsmlException(ErrorCodes.UpdateTemplateNonConforming, message, ex);
+                    return ChannelDataExtensions.HandleInvalidDataRow(error, warnings);
                 }
             }
         }
@@ -1897,12 +1932,10 @@ namespace PDS.Witsml.Data.Channels
             {
                 foreach (var row in data)
                 {
-                    var values = Split(row, delimiter);
-                    if (values.Length != count)
-                    {
-                        _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, count);
-                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
-                    }
+                    var values = Split(row, delimiter, count);
+
+                    if (!values.Any())
+                        continue;
 
                     values = values
                         .Select(Format)

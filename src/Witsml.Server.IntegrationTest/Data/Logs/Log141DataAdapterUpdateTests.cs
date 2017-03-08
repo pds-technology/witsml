@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Compatibility;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
@@ -491,7 +492,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.UpdateAndAssert(log);
 
             // Query log after appending data
-            result = DevKit.GetAndAssert(log);
+            result = DevKit.GetAndAssert(log, errorCode: ErrorCodes.ParialSuccess);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(WitsmlSettings.LogMaxDataNodesGet, result.LogData[0].Data.Count);
         }
@@ -645,6 +646,91 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(channelCount, points.Length);
             }
         }
+
+
+        [TestMethod, Description("A string value with a comma delimiter inside quotes.")]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_With_Special_Character_Comma()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo[1].TypeLogData = LogDataType.@string;
+            Log.LogCurveInfo[1].Unit = "unitless";
+            Log.LogData = new List<LogData>();
+
+            // Add log
+            DevKit.AddAndAssert(Log);
+
+            var update = DevKit.CreateLog(Log);
+
+            update.LogData = new List<LogData>()
+            {
+                new LogData()
+                {
+                    MnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value)),
+                    UnitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit)),
+                    Data = new List<string>()
+                    {
+                        @"5000.0, ""A comma, in the value"",30.0",
+                        @"5000.1, ""Another comma, in the value"",31.0",
+                        @"5000.2, ""No comma in the value"",32.0",
+                    }
+                }
+            };
+
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.LogData.Count);
+
+            result.LogData[0].Data.ForEach(x => DevKit.AssertDataRowWithQuotes(x, ",", 3));
+        }
+
+        [TestMethod, Description("A string value with a custom delimiter inside quotes.")]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_With_Special_Character_Custom_Delimiter()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.DataDelimiter = "|";
+            Log.LogCurveInfo[1].TypeLogData = LogDataType.@string;
+            Log.LogCurveInfo[1].Unit = "unitless";
+            Log.LogData = new List<LogData>();
+
+            // Add log
+            DevKit.AddAndAssert(Log);
+
+            var update = DevKit.CreateLog(Log);
+
+            update.LogData = new List<LogData>()
+            {
+                new LogData()
+                {
+                    MnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value)),
+                    UnitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit)),
+                    Data = new List<string>()
+                    {
+                        @"5000.0| ""A pipe| in the value""|30.0",
+                        @"5000.1| ""Another pipe | in the value""|31.0",
+                        @"5000.2| ""No comma in the value""|32.0",
+                    }
+                }
+            };
+
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.LogData.Count);
+
+            result.LogData[0].Data.ForEach(x => DevKit.AssertDataRowWithQuotes(x, Log.DataDelimiter, 3));
+        }
+
 
         /// <summary>
         /// This partial update tests the following scenario:
@@ -2781,6 +2867,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Invalid_Data_Rows()
         {
+            CompatibilitySettings.InvalidDataRowSetting = InvalidDataRowSetting.Error;
+
             AddParents();
 
             // Initialize Log Header

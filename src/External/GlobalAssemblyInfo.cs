@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@
 
 using System.Reflection;
 
-[assembly: AssemblyCopyright("Copyright � 2016")]
+[assembly: AssemblyCopyright("Copyright © 2017")]
 [assembly: AssemblyCompany("Petrotechnical Data Systems")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2016.1.0.0")]
-[assembly: AssemblyFileVersion("2016.1.0.0")]
-[assembly: AssemblyInformationalVersion("2016.1.0.0")]
+[assembly: AssemblyVersion("2017.1.0.0")]
+[assembly: AssemblyFileVersion("2017.1.0.0")]
+[assembly: AssemblyInformationalVersion("2017.1.0.0")]
 
 #if DEBUG
 [assembly: System.Diagnostics.Debuggable(true, true)]

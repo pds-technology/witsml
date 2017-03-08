@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,11 +35,8 @@ namespace PDS.Witsml.Server.Data.Rigs
 {
     public abstract partial class Rig200TestBase : IntegrationTestBase
     {
-        public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rig uid=\"{0}\">{1}</rig></rigs>";
-
         public Rig Rig { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public List<Rig> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
@@ -49,12 +46,10 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             Rig = new Rig
             {
-                SchemaVersion = "2.0",
+                SchemaVersion = EtpUris.GetUriFamily(typeof(Rig)).Version,
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Rig")
             };
-
-            QueryEmptyList = DevKit.List(new Rig());
 
             BeforeEachTest();
             OnTestSetUp();

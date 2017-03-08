@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
-using PDS.Witsml.Server.Compatibility;
+using PDS.Witsml.Compatibility;
 
 namespace PDS.Witsml.Data
 {
@@ -39,17 +39,6 @@ namespace PDS.Witsml.Data
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-        internal static UnknownElementSetting UnknownElementSetting;
-        internal static bool AllowDuplicateNonRecurringElements;
-
-        /// <summary>
-        /// Initializes the <see cref="DataObjectNavigator{TContext}" /> class.
-        /// </summary>
-        static DataObjectNavigator()
-        {
-            Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out UnknownElementSetting);
-            AllowDuplicateNonRecurringElements = Properties.Settings.Default.AllowDuplicateNonRecurringElements;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
@@ -133,7 +122,7 @@ namespace PDS.Witsml.Data
         {
             if (IsIgnored(element.Name.LocalName)) return;
 
-            var properties = GetPropertyInfo(type);
+            var properties = GetPropertyInfo(type, element);
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
@@ -183,7 +172,7 @@ namespace PDS.Witsml.Data
                 var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
                 // Handle duplicate elements which are not recurring elements
-                if (childType == null && AllowDuplicateNonRecurringElements)
+                if (childType == null && CompatibilitySettings.AllowDuplicateNonRecurringElements)
                 {
                     foreach (var element in elementList)
                     {
@@ -304,7 +293,7 @@ namespace PDS.Witsml.Data
 
                 if (element.HasAttributes)
                 {
-                    var properties = GetPropertyInfo(elementType);
+                    var properties = GetPropertyInfo(elementType, element);
                     NavigateAttributes(element, propertyPath, properties, true);
                 }
                 else
@@ -494,6 +483,9 @@ namespace PDS.Witsml.Data
                 Name = xmlType == null ? type.Name : xmlType.TypeName
             };
 
+            // Remove xsi:type attribute used for abstract types
+            clone.Attribute(Xsi("type"))?.Remove();
+
             return WitsmlParser.Parse(type, clone);
         }
 
@@ -667,11 +659,11 @@ namespace PDS.Witsml.Data
         {
             var message = $"Invalid {type} found: {name}";
 
-            if (UnknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
+            if (CompatibilitySettings.UnknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
             {
                 Logger.Debug(message);
             }
-            else if (UnknownElementSetting == UnknownElementSetting.Warn)
+            else if (CompatibilitySettings.UnknownElementSetting == UnknownElementSetting.Warn)
             {
                 Logger.Warn(message);
 
@@ -831,11 +823,15 @@ namespace PDS.Witsml.Data
         /// <summary>
         /// Gets the property information.
         /// </summary>
-        /// <param name="t">The property type.</param>
-        /// <returns></returns>
-        protected IList<PropertyInfo> GetPropertyInfo(Type t)
+        /// <param name="type">The property type.</param>
+        /// <param name="element">An optional element containing type information.</param>
+        /// <returns>A collection of <see cref="PropertyInfo"/> objects.</returns>
+        protected IList<PropertyInfo> GetPropertyInfo(Type type, XElement element = null)
         {
-            return t.GetProperties()
+            if (type.IsAbstract && element != null)
+                type = GetConcreteType(element, type);
+
+            return type.GetProperties()
                 .Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false))
                 .ToList();
         }
@@ -969,7 +965,7 @@ namespace PDS.Witsml.Data
             // Ignore list properties that declare child elements using XmlArrayItem
             if (propertyInfo.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
 
-            var properties = GetPropertyInfo(elementType);
+            var properties = GetPropertyInfo(elementType, element);
 
             foreach (var attribute in element.Attributes())
             {

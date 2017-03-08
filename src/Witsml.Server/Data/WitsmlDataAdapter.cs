@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2016.1
+// PDS.Witsml.Server, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -327,7 +327,7 @@ namespace PDS.Witsml.Server.Data
         {
             var adapters = new List<IWitsmlDataAdapter>();
 
-            if (OptionsIn.DataVersion.Version200.Equals(uri.Version))
+            if (uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210))
             {
                 // Cascade delete not defined for WITSML 2.0 / ETP
                 return;
