@@ -190,7 +190,7 @@ namespace PDS.Witsml.Server.Data
             Context.ParentFilters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
 
-            if (!AllowDuplicateNonRecurringElements && propertyInfo.GetCustomAttribute<RecurringElementAttribute>() == null)
+            if (!Compatibility.CompatibilitySettings.AllowDuplicateNonRecurringElements && propertyInfo.GetCustomAttribute<RecurringElementAttribute>() == null)
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
 
             if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
