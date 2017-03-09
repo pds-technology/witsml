@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,14 +24,14 @@
 // ----------------------------------------------------------------------
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     /// <summary>
     /// Provides validation for <see cref="Trajectory" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Trajectory}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Trajectory}" />
     [Export(typeof(IDataObjectValidator<Trajectory>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class Trajectory141Validator : DataObjectValidator<Trajectory, Wellbore, Well>

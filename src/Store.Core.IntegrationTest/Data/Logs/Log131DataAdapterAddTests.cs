@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,10 +24,10 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Compatibility;
-using PDS.Witsml.Server.Data.Channels;
+using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Store.Data.Channels;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     [TestClass]
     public partial class Log131DataAdapterAddTests : Log131TestBase

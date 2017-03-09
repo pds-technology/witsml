@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,12 +22,12 @@ using System.Text;
 using System.Web.Security;
 using log4net;
 
-namespace PDS.Framework.Web.Security
+namespace PDS.WITSMLstudio.Framework.Web.Security
 {
     /// <summary>
     /// Provides basic authentication.
     /// </summary>
-    /// <seealso cref="PDS.Framework.Web.Security.CustomAuthenticationModule" />
+    /// <seealso cref="PDS.WITSMLstudio.Framework.Web.Security.CustomAuthenticationModule" />
     public class BasicAuthenticationModule : CustomAuthenticationModule
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));

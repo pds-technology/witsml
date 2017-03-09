@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,9 +21,9 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.WITSMLstudio.Store.Data.Channels
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,9 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Data.Channels
+namespace PDS.WITSMLstudio.Data.Channels
 {
 
     /// <summary>

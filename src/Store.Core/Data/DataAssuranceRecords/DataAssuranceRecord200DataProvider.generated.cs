@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -28,14 +28,14 @@ using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.DataAssuranceRecords
+namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="DataAssuranceRecord"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{DataAssuranceRecord}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{DataAssuranceRecord}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<DataAssuranceRecord>))]
     [Export200(ObjectTypes.DataAssuranceRecord, typeof(IEtpDataProvider))]

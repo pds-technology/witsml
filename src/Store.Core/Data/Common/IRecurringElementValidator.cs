@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,7 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace PDS.Witsml.Server.Data.Common
+namespace PDS.WITSMLstudio.Store.Data.Common
 {
     /// <summary>
     /// Defines validation method for recurring elements without a uid in the schema.

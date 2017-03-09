@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,16 +23,16 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess;
-using PDS.Framework;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Provides a mechanism to map WITSML data objects and project specific properties.
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{T}" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigator{T}" />
     public class DataObjectMapper<T> : DataObjectNavigator<DataObjectMappingContext<T>>
     {
         private readonly WitsmlQueryParser _parser;

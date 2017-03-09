@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,10 +23,10 @@ using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml131 = Energistics.DataAccess.WITSML131;
-using PDS.Framework;
-using PDS.Witsml.Properties;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Properties;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Provides extension methods that can be used with common WITSML types and interfaces.

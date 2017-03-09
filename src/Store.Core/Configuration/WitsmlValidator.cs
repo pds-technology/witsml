@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,9 +24,9 @@ using System.ServiceModel.Web;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using log4net;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Provides common validation for the main WITSML Store API methods.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,9 +19,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using log4net;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Defines the set of well known configuration options that can be used 
@@ -34,11 +34,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the list of supported data schema versions.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class DataVersion : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.DataVersion"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.DataVersion"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public DataVersion(string value) : base(Keyword, value) { }
@@ -67,11 +67,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the list of returnElements configuration option values.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class ReturnElements : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.ReturnElements"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.ReturnElements"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public ReturnElements(string value) : base(Keyword, value) { }
@@ -135,11 +135,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the maxReturnNodes option value.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class MaxReturnNodes : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.MaxReturnNodes"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.MaxReturnNodes"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public MaxReturnNodes(int value) : base(Keyword, value.ToString()) { }
@@ -163,11 +163,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the list of compressionMethod configuration option values.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class CompressionMethod : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.CompressionMethod"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.CompressionMethod"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public CompressionMethod(string value) : base(Keyword, value) { }
@@ -201,11 +201,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the choice of requestObjectSelectionCapability configuration option values.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class RequestObjectSelectionCapability : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestObjectSelectionCapability"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.RequestObjectSelectionCapability"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestObjectSelectionCapability(string value) : base(Keyword, value) { }
@@ -239,11 +239,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the choice of RequestPrivateGroupOnly configuration option values.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class RequestPrivateGroupOnly : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestPrivateGroupOnly"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.RequestPrivateGroupOnly"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestPrivateGroupOnly(string value) : base(Keyword, value) { }
@@ -277,11 +277,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines a RequestLatestValues OptionIn for a given value.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class RequestLatestValues : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestLatestValues"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.RequestLatestValues"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
@@ -305,11 +305,11 @@ namespace PDS.Witsml
         /// <summary>
         /// Defines the choices for the CascadedDelete configuration option value.
         /// </summary>
-        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
         public class CascadedDelete : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.CascadedDelete"/> class.
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.CascadedDelete"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public CascadedDelete(string value) : base(Keyword, value) { }

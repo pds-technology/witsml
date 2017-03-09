@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,10 +18,10 @@
 
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
-using PDS.Witsml.Compatibility;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     /// <summary>
     /// Log131TestBase

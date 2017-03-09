@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,9 +19,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Provides common validation for child data objects.
@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="TObject">The type of the object.</typeparam>
     /// <typeparam name="TWellbore">The type of the wellbore.</typeparam>
     /// <typeparam name="TWell">The type of the well.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{TObject}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{TObject}" />
     public abstract class DataObjectValidator<TObject, TWellbore, TWell> : DataObjectValidator<TObject>
         where TObject : IWellboreObject
         where TWellbore : IWellObject

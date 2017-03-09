@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,12 +27,12 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Properties;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Data.Channels;
+using PDS.WITSMLstudio.Store.Properties;
 
-namespace PDS.Witsml.Server.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
     /// <summary>
     /// Consumer class for channel streaming

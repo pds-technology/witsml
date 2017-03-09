@@ -7,8 +7,8 @@
     <ProjectGuid>{90A1FD9F-6A85-4AD2-8523-1360034DCD76}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Framework.Web</RootNamespace>
-    <AssemblyName>PDS.Framework.Web</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio.Framework.Web</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Framework.Web</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\PDS.Framework.Web.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\PDS.WITSMLstudio.Framework.Web.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\PDS.Framework.Web.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\PDS.WITSMLstudio.Framework.Web.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

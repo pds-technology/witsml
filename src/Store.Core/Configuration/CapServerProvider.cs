@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,13 +21,13 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using log4net;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Provides common WTISML server capabilities for any data schema version.
     /// </summary>
     /// <typeparam name="T">The capServers type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Configuration.ICapServerProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Configuration.ICapServerProvider" />
     public abstract class CapServerProvider<T> : WitsmlValidator, ICapServerProvider
     {
         private T _capServer;

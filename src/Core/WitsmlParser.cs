@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,10 +23,10 @@ using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Provides static helper methods that can be used to parse WITSML XML strings.

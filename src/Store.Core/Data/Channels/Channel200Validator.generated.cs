@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,14 +24,14 @@
 // ----------------------------------------------------------------------
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.WITSMLstudio.Store.Data.Channels
 {
     /// <summary>
     /// Provides validation for <see cref="Channel" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Channel}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Channel}" />
     [Export(typeof(IDataObjectValidator<Channel>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class Channel200Validator : DataObjectValidator<Channel>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,9 +18,9 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// TaskRunner tests.

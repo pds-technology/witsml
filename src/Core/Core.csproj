@@ -7,8 +7,8 @@
     <ProjectGuid>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Witsml</RootNamespace>
-    <AssemblyName>PDS.Witsml</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\PDS.Witsml.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\PDS.WITSMLstudio.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\PDS.Witsml.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\PDS.WITSMLstudio.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,19 +24,19 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
-using PDS.Framework;
-using PDS.Witsml.Data;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Common;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.Common;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Defines common validation functionality for WITSML data objects.
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{DataObjectValidationContext}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IDataObjectValidator{T}" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigator{DataObjectValidationContext}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDataObjectValidator{T}" />
     /// <seealso cref="System.ComponentModel.DataAnnotations.IValidatableObject" />
     public abstract class DataObjectValidator<T> : DataObjectNavigator<DataObjectValidationContext<T>>,  IDataObjectValidator<T>, IValidatableObject
     {
@@ -66,7 +66,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="function">The WITSML API method.</param>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object.</param>
-        /// <exception cref="PDS.Witsml.WitsmlException">If any validation errors are detected.</exception>
+        /// <exception cref="PDS.WITSMLstudio.WitsmlException">If any validation errors are detected.</exception>
         public void Validate(Functions function, WitsmlQueryParser parser, T dataObject)
         {
             Logger.DebugFormat("Validating data object for {0}; Type: {1}", function, typeof(T).FullName);

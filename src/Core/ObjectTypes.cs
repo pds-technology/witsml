@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,9 +24,9 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Defines properties and methods for specifying or determining a WITSML data object's type.

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.Properties {
+namespace PDS.WITSMLstudio.Store.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Store")]
         public string DefaultServerName {
             get {
                 return ((string)(this["DefaultServerName"]));

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,11 +23,11 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Providers.Store
+namespace PDS.WITSMLstudio.Store.Providers.Store
 {
     /// <summary>
     /// Process messages received for the Store role of the Store protocol.

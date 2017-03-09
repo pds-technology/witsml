@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Defines static helper methods for <see cref="ResponseContext"/>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@
 //     if the code is regenerated.
 // </auto-generated>
 // ----------------------------------------------------------------------
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Defines constants that can be used to indicate a data object's type.

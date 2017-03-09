@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -31,9 +31,9 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Data
+namespace PDS.WITSMLstudio.Data
 {
     /// <summary>
     /// Provides a method of generating blank XML data object templates.

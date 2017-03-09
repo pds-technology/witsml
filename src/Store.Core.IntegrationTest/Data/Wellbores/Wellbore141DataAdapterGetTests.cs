@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Server.Data.Wellbores
+namespace PDS.WITSMLstudio.Store.Data.Wellbores
 {
     /// <summary>
     /// Wellbore141DataAdapter Get tests.

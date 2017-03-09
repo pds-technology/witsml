@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,17 +26,17 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Server.Transactions;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Transactions;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions.
     /// </summary>
     /// <typeparam name="TObject">The type of the object.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataProvider{TObject}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IEtpDataProvider{TObject}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IEtpDataProvider" />
     public abstract class WitsmlDataProvider<TObject> : IEtpDataProvider<TObject>, IEtpDataProvider
     {
         /// <summary>

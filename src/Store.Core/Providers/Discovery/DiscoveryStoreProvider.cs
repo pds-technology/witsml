@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,7 +25,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
 
-namespace PDS.Witsml.Server.Providers.Discovery
+namespace PDS.WITSMLstudio.Store.Providers.Discovery
 {
     /// <summary>
     /// Process messages received for the Store role of the Discovery protocol.

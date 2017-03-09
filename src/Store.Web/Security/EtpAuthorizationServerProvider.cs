@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using System.Web.Security;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
 
-namespace PDS.Witsml.Server.Security
+namespace PDS.WITSMLstudio.Store.Security
 {
     /// <summary>
     /// Provides JSON Web Token (JWT) authorization services using an ASP.NET membership provider for authentication.

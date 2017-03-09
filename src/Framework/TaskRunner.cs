@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PDS.Framework
+namespace PDS.WITSMLstudio.Framework
 {
     /// <summary>
     /// Manages the execution and cancellation of asynchronous tasks.

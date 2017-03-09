@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,9 +21,9 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     [TestClass]
     public class WitsmlStore141Tests

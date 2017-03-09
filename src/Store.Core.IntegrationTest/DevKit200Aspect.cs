@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,11 +23,11 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Logs;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     public class DevKit200Aspect : DevKitAspect
     {

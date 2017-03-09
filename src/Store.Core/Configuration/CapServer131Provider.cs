@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,14 +22,14 @@ using System.Linq;
 using System.Xml.Linq;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using PDS.Witsml.Server.Properties;
+using PDS.WITSMLstudio.Store.Properties;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Provides common WITSML server capabilities for data schema version 1.3.1.1.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{CapServers}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Configuration.CapServerProvider{CapServers}" />
     [Export(typeof(ICapServerProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>

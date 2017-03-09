@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,15 +18,15 @@
 
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Data provider that implements support for ETP API functions.
     /// </summary>
     /// <typeparam name="TObject">The type of the object.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TObject}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{TObject}" />
     public abstract class EtpDataProvider<TObject> : WitsmlDataProvider<TObject>
         where TObject : Witsml200.AbstractObject
     {

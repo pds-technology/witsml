@@ -1,5 +1,5 @@
-//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+﻿//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,11 +23,11 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 using System.Xml.Linq;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Data;
 using WITSML141 = Energistics.DataAccess.WITSML141;
 using WITSML131 = Energistics.DataAccess.WITSML131;
 
-namespace PDS.Witsml.Query
+namespace PDS.WITSMLstudio.Query
 {
     /// <summary>
     /// Provides helper methods to create query templates for WITSML data objects.

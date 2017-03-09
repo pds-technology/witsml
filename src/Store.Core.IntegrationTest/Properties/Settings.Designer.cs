@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.IntegrationTest {
+namespace PDS.WITSMLstudio.Store.IntegrationTest {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

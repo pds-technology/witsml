@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using System.Security;
 using System.Web.Http.Filters;
 using log4net;
 
-namespace PDS.Framework.Web.Services
+namespace PDS.WITSMLstudio.Framework.Web.Services
 {
     /// <summary>
     /// Logs unhandled exceptions in Web API services.

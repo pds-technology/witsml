@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Dispatcher;
 
-namespace PDS.Framework.Web.Services
+namespace PDS.WITSMLstudio.Framework.Web.Services
 {
     /// <summary>
     /// Service extension initializer implementation.

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Framework.Properties {
+namespace PDS.WITSMLstudio.Framework.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,7 +25,7 @@ namespace PDS.Framework.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Framework")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Framework")]
         public string DefaultEncryptionKey {
             get {
                 return ((string)(this["DefaultEncryptionKey"]));

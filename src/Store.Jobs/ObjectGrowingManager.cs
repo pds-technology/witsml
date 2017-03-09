@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,10 +20,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using log4net;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
-namespace PDS.Witsml.Server.Jobs
+namespace PDS.WITSMLstudio.Store.Jobs
 {
     /// <summary>
     /// Job to manage the updating of the object growing flag in growing objects.

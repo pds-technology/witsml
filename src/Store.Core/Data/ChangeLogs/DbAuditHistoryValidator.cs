@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,15 +18,15 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
 
-namespace PDS.Witsml.Server.Data.ChangeLogs
+namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
 {
     /// <summary>
     /// Provides validation for <see cref="DbAuditHistory" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{DbAuditHistory}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{DbAuditHistory}" />
     [Export(typeof(IDataObjectValidator<DbAuditHistory>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class DbAuditHistoryValidator : DataObjectValidator<DbAuditHistory>

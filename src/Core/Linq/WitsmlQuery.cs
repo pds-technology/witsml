@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,7 +26,7 @@ using Energistics.DataAccess;
 using log4net;
 using Ast = LinqExtender.Ast;
 
-namespace PDS.Witsml.Linq
+namespace PDS.WITSMLstudio.Linq
 {
     /// <summary>
     /// Default context to be queried.

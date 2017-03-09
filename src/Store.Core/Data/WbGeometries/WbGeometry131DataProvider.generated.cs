@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -28,17 +28,17 @@ using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
 using WbGeometry = Energistics.DataAccess.WITSML131.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML131.WellboreGeometryList;
 
-namespace PDS.Witsml.Server.Data.WbGeometries
+namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
     [Export131(ObjectTypes.WbGeometry, typeof(IEtpDataProvider))]

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,7 +18,7 @@
 
 using System;
 
-namespace PDS.Witsml.Data.Channels
+namespace PDS.WITSMLstudio.Data.Channels
 {
     /// <summary>
     /// Encapsulates the index information for unified log data chunk

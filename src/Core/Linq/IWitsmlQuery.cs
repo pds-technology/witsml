@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,7 +19,7 @@
 using System;
 using System.Linq;
 
-namespace PDS.Witsml.Linq
+namespace PDS.WITSMLstudio.Linq
 {
     /// <summary>
     /// Defines the properties and methods for a WITSML query.

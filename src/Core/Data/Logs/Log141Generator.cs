@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,12 +23,12 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 
-namespace PDS.Witsml.Data.Logs
+namespace PDS.WITSMLstudio.Data.Logs
 {
     /// <summary>
     /// Generates data for a 141 Log.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataGenerator" />
     public class Log141Generator : DataGenerator
     {
         /// <summary>

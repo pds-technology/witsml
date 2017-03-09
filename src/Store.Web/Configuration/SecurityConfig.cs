@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,11 +23,11 @@ using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
-using PDS.Witsml.Server.Security;
+using PDS.WITSMLstudio.Store.Security;
 
-[assembly: OwinStartup(typeof(PDS.Witsml.Server.Configuration.SecurityConfig))]
+[assembly: OwinStartup(typeof(PDS.WITSMLstudio.Store.Configuration.SecurityConfig))]
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Configures JSON Web Token (JWT) authorization.

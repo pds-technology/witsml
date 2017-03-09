@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,14 +27,14 @@ using System.Xml.Linq;
 using Energistics.DataAccess;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Compatibility;
-using PDS.Witsml.Data;
-using PDS.Witsml.Properties;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Data;
+using PDS.WITSMLstudio.Properties;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     public abstract class DevKitAspect : DataGenerator
     {

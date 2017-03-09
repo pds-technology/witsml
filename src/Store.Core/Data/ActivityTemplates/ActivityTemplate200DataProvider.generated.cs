@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -28,14 +28,14 @@ using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.ActivityTemplates
+namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="ActivityTemplate"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{ActivityTemplate}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{ActivityTemplate}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<ActivityTemplate>))]
     [Export200(ObjectTypes.ActivityTemplate, typeof(IEtpDataProvider))]

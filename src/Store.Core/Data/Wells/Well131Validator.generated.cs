@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,14 +24,14 @@
 // ----------------------------------------------------------------------
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Wells
+namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     /// <summary>
     /// Provides validation for <see cref="Well" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Well}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Well}" />
     [Export(typeof(IDataObjectValidator<Well>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class Well131Validator : DataObjectValidator<Well>

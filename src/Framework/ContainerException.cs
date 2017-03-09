@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,7 +19,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace PDS.Framework
+namespace PDS.WITSMLstudio.Framework
 {
     /// <summary>
     /// Represents errors that occur during dependency resolution.

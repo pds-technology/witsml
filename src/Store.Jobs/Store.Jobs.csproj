@@ -7,8 +7,8 @@
     <ProjectGuid>{006F1A29-952B-4264-8E91-0D445F74B183}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Witsml.Server.Jobs</RootNamespace>
-    <AssemblyName>PDS.Witsml.Server.Jobs</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio.Store.Jobs</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Store.Jobs</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

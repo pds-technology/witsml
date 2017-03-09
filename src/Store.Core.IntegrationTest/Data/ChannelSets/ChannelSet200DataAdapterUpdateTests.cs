@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,11 +23,11 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Data;
-using PDS.Witsml.Server.Data.Channels;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
+using PDS.WITSMLstudio.Store.Data.Channels;
 
-namespace PDS.Witsml.Server.Data.ChannelSets
+namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 {
     /// <summary>
     /// ChannelSet200DataAdapter Update tests.

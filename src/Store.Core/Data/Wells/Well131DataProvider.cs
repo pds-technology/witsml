@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,7 +19,7 @@
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Server.Data.Wells
+namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.

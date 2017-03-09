@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,9 +23,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PDS.Witsml.Server.Jobs")]
+[assembly: AssemblyTitle("PDS.WITSMLstudio.Store.Jobs")]
 [assembly: AssemblyDescription("PDS WITSML Server Jobs Library")]
-[assembly: AssemblyProduct("PDS.Witsml.Server")]
+[assembly: AssemblyProduct("PDS WITSMLstudio Store")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -35,6 +35,6 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("006f1a29-952b-4264-8e91-0d445f74b183")]
 
-[assembly: InternalsVisibleTo("PDS.Witsml.Server.IntegrationTest")]
-[assembly: InternalsVisibleTo("PDS.Witsml.Server.MongoDb.IntegrationTest")]
-[assembly: InternalsVisibleTo("PDS.Witsml.UnitTest")]
+[assembly: InternalsVisibleTo("PDS.WITSMLstudio.Store.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.WITSMLstudio.Store.MongoDb.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.WITSMLstudio.UnitTest")]

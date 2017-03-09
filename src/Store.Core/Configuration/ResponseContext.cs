@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -16,9 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using PDS.Witsml.Data.Channels;
+using PDS.WITSMLstudio.Data.Channels;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Encapsulates data for responses to WITSML Store API methods.

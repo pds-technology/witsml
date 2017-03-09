@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,10 +25,10 @@ using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using log4net;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Transactions;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Transactions;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// Provides contextual properties of WITSML requests and responses.

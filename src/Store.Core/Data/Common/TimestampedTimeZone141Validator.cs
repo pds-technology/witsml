@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,14 +23,14 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Common
+namespace PDS.WITSMLstudio.Store.Data.Common
 {
     /// <summary>
     /// Performs validtion on recurring elements of type TimestampedTimeZone from the WITSML 1.4.1.1 schema.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Common.IRecurringElementValidator" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Common.IRecurringElementValidator" />
     [Export141("TimestampedTimeZone", typeof(IRecurringElementValidator))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class TimestampedTimeZone141Validator : DataObjectValidator<TimestampedTimeZone>, IRecurringElementValidator

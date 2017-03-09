@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using LinqExtender;
 using Ast = LinqExtender.Ast;
 
 
-namespace PDS.Witsml.Linq
+namespace PDS.WITSMLstudio.Linq
 {
     /// <summary>
     /// Manages the evaluation of an <see cref="Ast.Expression"/>

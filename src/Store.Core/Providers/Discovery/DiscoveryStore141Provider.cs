@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,16 +26,16 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Providers.Discovery
+namespace PDS.WITSMLstudio.Store.Providers.Discovery
 {
     /// <summary>
     /// Provides information about resources available in a WITSML store for version 1.4.1.1.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Providers.Discovery.IDiscoveryStoreProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Providers.Discovery.IDiscoveryStoreProvider" />
     [Export(typeof(IDiscoveryStoreProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStore141Provider : IDiscoveryStoreProvider

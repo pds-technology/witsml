@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,15 +24,15 @@ using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
-using PDS.Framework;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Providers.Store
+namespace PDS.WITSMLstudio.Store.Providers.Store
 {
     /// <summary>
     /// Defines methods that can be used to perform CRUD operations via ETP for WITSML 1.4.1.1 objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Providers.Store.IStoreStoreProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Providers.Store.IStoreStoreProvider" />
     [Export141(typeof(IStoreStoreProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class StoreStore141Provider : IStoreStoreProvider

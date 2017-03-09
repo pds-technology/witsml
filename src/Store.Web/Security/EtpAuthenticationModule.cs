@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,15 +21,15 @@ using System.Configuration;
 using System.IdentityModel.Tokens;
 using log4net;
 using Microsoft.Owin.Security.DataHandler.Encoder;
-using PDS.Framework.Web.Security;
+using PDS.WITSMLstudio.Framework.Web.Security;
 using Thinktecture.IdentityModel.Tokens;
 
-namespace PDS.Witsml.Server.Security
+namespace PDS.WITSMLstudio.Store.Security
 {
     /// <summary>
     /// Provides Basic and JSON Web Token (JWT) authentication for ETP.
     /// </summary>
-    /// <seealso cref="PDS.Framework.Web.Security.BasicAuthenticationModule" />
+    /// <seealso cref="PDS.WITSMLstudio.Framework.Web.Security.BasicAuthenticationModule" />
     public class EtpAuthenticationModule : BasicAuthenticationModule
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(EtpAuthenticationModule));

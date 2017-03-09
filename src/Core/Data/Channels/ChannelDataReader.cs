@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -28,15 +28,15 @@ using log4net;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Data.Channels
+namespace PDS.WITSMLstudio.Data.Channels
 {
     /// <summary>
     /// Data reader used to parse and read Channel Data for processing.
     /// </summary>
     /// <seealso cref="System.Data.IDataReader" />
-    /// <seealso cref="PDS.Witsml.Data.Channels.IChannelDataRecord" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.Channels.IChannelDataRecord" />
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
         /// <summary>

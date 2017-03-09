@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,8 +23,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -32,7 +32,7 @@ using Witsml131Schemas = Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Witsml141Schemas = Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Witsml200Schemas = Energistics.DataAccess.WITSML200.ComponentSchemas;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Provides extension methods for common WITSML data objects.

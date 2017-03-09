@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -37,9 +37,9 @@ using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// Common base class for all ETP integration tests.

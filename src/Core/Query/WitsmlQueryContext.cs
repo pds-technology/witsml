@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,11 +24,11 @@ using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Data;
-using PDS.Witsml.Linq;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
+using PDS.WITSMLstudio.Linq;
 
-namespace PDS.Witsml.Query
+namespace PDS.WITSMLstudio.Query
 {
     /// <summary>
     ///  Manages the context for WITSML connections and data.

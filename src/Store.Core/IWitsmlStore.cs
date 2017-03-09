@@ -8,13 +8,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// Generated WitsmlStore service interface
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(Namespace="http://www.witsml.org/wsdl/120", ConfigurationName="PDS.Witsml.Server.IWitsmlStore")]
+    [System.ServiceModel.ServiceContractAttribute(Namespace="http://www.witsml.org/wsdl/120", ConfigurationName="PDS.WITSMLstudio.Store.IWitsmlStore")]
     public interface IWitsmlStore
     {
         /// <summary>
@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_AddToStore")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_AddToStoreResponse WMLS_AddToStore(PDS.Witsml.Server.WMLS_AddToStoreRequest request);
+        PDS.WITSMLstudio.Store.WMLS_AddToStoreResponse WMLS_AddToStore(PDS.WITSMLstudio.Store.WMLS_AddToStoreRequest request);
 
         /// <summary>
         /// Returns the response for deleting one WITSML data-object to the server.
@@ -35,7 +35,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_DeleteFromStore")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_DeleteFromStoreResponse WMLS_DeleteFromStore(PDS.Witsml.Server.WMLS_DeleteFromStoreRequest request);
+        PDS.WITSMLstudio.Store.WMLS_DeleteFromStoreResponse WMLS_DeleteFromStore(PDS.WITSMLstudio.Store.WMLS_DeleteFromStoreRequest request);
 
         /// <summary>
         /// Returns a string containing only the fixed (base) message text associated with a defined Return Value.
@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the wrapper namespace (http://www.witsml.org/message/120) of message WMLS_GetBaseMsgRequest does not match the default value (http://www.witsml.org/wsdl/120)
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_GetBaseMsg")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(PDS.Witsml.Server.WMLS_GetBaseMsgRequest request);
+        PDS.WITSMLstudio.Store.WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(PDS.WITSMLstudio.Store.WMLS_GetBaseMsgRequest request);
 
         /// <summary>
         /// Returns the capServer object that describes the capabilities of the server for one Data Schema Version.
@@ -55,7 +55,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_GetCap")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_GetCapResponse WMLS_GetCap(PDS.Witsml.Server.WMLS_GetCapRequest request);
+        PDS.WITSMLstudio.Store.WMLS_GetCapResponse WMLS_GetCap(PDS.WITSMLstudio.Store.WMLS_GetCapRequest request);
 
         /// <summary>
         /// Returns one or more WITSML data-objects from the server.
@@ -67,7 +67,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_GetFromStore")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_GetFromStoreResponse WMLS_GetFromStore(PDS.Witsml.Server.WMLS_GetFromStoreRequest request);
+        PDS.WITSMLstudio.Store.WMLS_GetFromStoreResponse WMLS_GetFromStore(PDS.WITSMLstudio.Store.WMLS_GetFromStoreRequest request);
 
         /// <summary>
         /// Returns a string containing the Data Schema Version(s) that a server supports.
@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the wrapper namespace (http://www.witsml.org/message/120) of message WMLS_GetVersionRequest does not match the default value (http://www.witsml.org/wsdl/120)
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_GetVersion")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_GetVersionResponse WMLS_GetVersion(PDS.Witsml.Server.WMLS_GetVersionRequest request);
+        PDS.WITSMLstudio.Store.WMLS_GetVersionResponse WMLS_GetVersion(PDS.WITSMLstudio.Store.WMLS_GetVersionRequest request);
 
         /// <summary>
         /// Returns the response for updating one WITSML data-object to the server.
@@ -87,7 +87,7 @@ namespace PDS.Witsml.Server
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="http://www.witsml.org/action/120/Store.WMLS_UpdateInStore")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        PDS.Witsml.Server.WMLS_UpdateInStoreResponse WMLS_UpdateInStore(PDS.Witsml.Server.WMLS_UpdateInStoreRequest request);
+        PDS.WITSMLstudio.Store.WMLS_UpdateInStoreResponse WMLS_UpdateInStore(PDS.WITSMLstudio.Store.WMLS_UpdateInStoreRequest request);
     }
 
     /// <summary>

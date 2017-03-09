@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,9 +22,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PDS.Witsml.UnitTest")]
+[assembly: AssemblyTitle("PDS.WITSMLstudio.UnitTest")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyProduct("PDS.Witsml")]
+[assembly: AssemblyProduct("PDS WITSMLstudio Core")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

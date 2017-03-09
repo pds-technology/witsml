@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.WITSMLstudio.Store.Data.Channels
 {
     /// <summary>
     /// Channel200TestBase

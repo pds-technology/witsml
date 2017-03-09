@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace PDS.Framework.Web
+namespace PDS.WITSMLstudio.Framework.Web
 {
     /// <summary>
     /// Represents a controller factory with knowledge of the composition container.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,11 +22,11 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.ChangeLogs
+namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="DbAuditHistory" />.

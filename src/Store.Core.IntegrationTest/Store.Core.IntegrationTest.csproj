@@ -6,8 +6,8 @@
     <ProjectGuid>{C050AB68-0543-4A23-870C-2D07F872484B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Witsml.Server</RootNamespace>
-    <AssemblyName>PDS.Witsml.Server.IntegrationTest</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio.Store</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Store.IntegrationTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -761,7 +761,7 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>PDS.Witsml.Server.IntegrationTest</CustomToolNamespace>
+      <CustomToolNamespace>PDS.WITSMLstudio.Store.IntegrationTest</CustomToolNamespace>
     </None>
     <None Include="Witsml.Server.IntegrationTest.nuspec" />
   </ItemGroup>

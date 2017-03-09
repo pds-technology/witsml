@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -28,14 +28,14 @@ using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Messages
+namespace PDS.WITSMLstudio.Store.Data.Messages
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
     [Export131(ObjectTypes.Message, typeof(IEtpDataProvider))]

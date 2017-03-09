@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,12 +22,12 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 
-namespace PDS.Framework
+namespace PDS.WITSMLstudio.Framework
 {
     /// <summary>
     /// Provides access to the composition container used for dependency injection.
     /// </summary>
-    /// <seealso cref="PDS.Framework.IContainer" />
+    /// <seealso cref="PDS.WITSMLstudio.Framework.IContainer" />
     public class Container : IContainer
     {
         private readonly CompositionContainer _container;

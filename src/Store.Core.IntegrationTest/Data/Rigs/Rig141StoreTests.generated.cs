@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -31,7 +31,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace PDS.Witsml.Server.Data.Rigs
+namespace PDS.WITSMLstudio.Store.Data.Rigs
 {
     [TestClass]
     public partial class Rig141StoreTests : Rig141TestBase

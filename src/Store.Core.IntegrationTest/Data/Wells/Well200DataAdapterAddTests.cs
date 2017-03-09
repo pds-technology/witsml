@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Server.Data.Wells
+namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     [TestClass]
     public partial class Well200DataAdapterAddTests : Well200TestBase
@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Wells
                         <Title>" + wellTitle + @"</Title>
                         <Originator>DevKit200Aspect</Originator>
                         <Creation>2016-03-16T05:05:08.8416296Z</Creation>
-                        <Format>PDS.Witsml.Server.IntegrationTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Format>
+                        <Format>PDS.WITSMLstudio.Store.IntegrationTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Format>
                     </Citation>
                     <PcInterest uom=""%"">100</PcInterest>
                     <TimeZone>-06:00</TimeZone>

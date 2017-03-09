@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -29,9 +29,9 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Xml.XPath;
-using PDS.Framework.Properties;
+using PDS.WITSMLstudio.Framework.Properties;
 
-namespace PDS.Framework
+namespace PDS.WITSMLstudio.Framework
 {
     /// <summary>
     /// Provides custom extension methods for .NET framework types.

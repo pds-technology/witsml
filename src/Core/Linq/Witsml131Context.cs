@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,12 +23,12 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Linq
+namespace PDS.WITSMLstudio.Linq
 {
     /// <summary>
     /// Manages the context for version 131 of WITSML connections and data.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Linq.WitsmlContext" />
+    /// <seealso cref="PDS.WITSMLstudio.Linq.WitsmlContext" />
     public class Witsml131Context : WitsmlContext
     {
         /// <summary>

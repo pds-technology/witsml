@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,15 +20,15 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.Security
+namespace PDS.WITSMLstudio.Store.Data.Security
 {
     /// <summary>
     /// Provides a base implementation of <see cref="IUserAuthorizationProvider"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Security.IUserAuthorizationProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Security.IUserAuthorizationProvider" />
     [Export(typeof(IUserAuthorizationProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class UserAuthorizationProvider : IUserAuthorizationProvider

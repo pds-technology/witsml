@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,7 +19,7 @@
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 
-namespace PDS.Witsml.Server.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
     /// <summary>
     /// Defines properties used to configure channel streaming.

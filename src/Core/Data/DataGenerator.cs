@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 
-namespace PDS.Witsml.Data
+namespace PDS.WITSMLstudio.Data
 {
     /// <summary>
     /// Provides methods to generate data.

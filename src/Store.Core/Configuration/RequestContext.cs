@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using PDS.Witsml.Server.Logging;
+using PDS.WITSMLstudio.Store.Logging;
 
-namespace PDS.Witsml.Server.Configuration
+namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
     /// Encapsulates all of the input parameters for each of the WITSML Store API methods.

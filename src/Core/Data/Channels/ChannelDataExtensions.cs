@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,13 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.Validation;
 using log4net;
-using PDS.Witsml.Compatibility;
-using PDS.Witsml.Data.Logs;
+using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Data.Logs;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 
-namespace PDS.Witsml.Data.Channels
+namespace PDS.WITSMLstudio.Data.Channels
 {
     /// <summary>
     /// Provides extension methods to work with channel data.  Many methods will create a

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,17 +24,17 @@
 // ----------------------------------------------------------------------
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
 using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML141.WellboreGeometryList;
 
-namespace PDS.Witsml.Server.Data.WbGeometries
+namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     /// <summary>
     /// Provides validation for <see cref="WbGeometry" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{WbGeometry}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{WbGeometry}" />
     [Export(typeof(IDataObjectValidator<WbGeometry>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public partial class WbGeometry141Validator : DataObjectValidator<WbGeometry, Wellbore, Well>

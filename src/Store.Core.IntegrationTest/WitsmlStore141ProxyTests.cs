@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,7 +23,7 @@ using Energistics.DataAccess.WITSML141.ReferenceData;
 using System;
 using Energistics.DataAccess;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     [TestClass]
     public class WitsmlStore141ProxyTests

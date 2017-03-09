@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -30,10 +30,10 @@ using Energistics.Protocol;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 using Shouldly;
 
-namespace PDS.Witsml.Server.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
     [TestClass]
     [ProtocolRole(Protocols.ChannelStreaming, "consumer", "producer")]

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections;
-using PDS.Witsml.Server.IntegrationTest;
+using PDS.WITSMLstudio.Store.IntegrationTest;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// Defines static fields for the ETP test settings.

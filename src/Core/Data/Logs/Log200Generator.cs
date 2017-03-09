@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,15 +23,15 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Newtonsoft.Json;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
 
-namespace PDS.Witsml.Data.Logs
+namespace PDS.WITSMLstudio.Data.Logs
 {
     /// <summary>
     /// Generates data for a 200 Log.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataGenerator" />
     public class Log200Generator : DataGenerator
     {
         /// <summary>

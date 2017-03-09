@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,7 +19,7 @@
 using System;
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Server.Transactions
+namespace PDS.WITSMLstudio.Store.Transactions
 {
     /// <summary>
     /// Defines the wrapper that can be used for abstracting a data storage specific transaction implementation.

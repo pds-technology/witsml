@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,12 +18,12 @@
 
 using System;
 using Hangfire;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Jobs.Configuration
+namespace PDS.WITSMLstudio.Store.Jobs.Configuration
 {
     /// <summary>
-    /// Custom class to override the Hangfire JobActivator to use the PDS.Framework IoC container.
+    /// Custom class to override the Hangfire JobActivator to use the PDS.WITSMLstudio.Framework IoC container.
     /// </summary>
     /// <seealso cref="Hangfire.JobActivator" />
     public class ContainerJobActivator : JobActivator

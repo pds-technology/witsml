@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,15 +22,15 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data.Common
+namespace PDS.WITSMLstudio.Store.Data.Common
 {
     /// <summary>
     /// Performs validtion on recurring elements of type ParameterTemplate from the Common 2.1 schema.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{ParameterTemplate}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.Common.IRecurringElementValidator" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{ParameterTemplate}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Common.IRecurringElementValidator" />
     [Export200("ParameterTemplate", typeof(IRecurringElementValidator))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ParameterTemplate200Validator : DataObjectValidator<ParameterTemplate>, IRecurringElementValidator

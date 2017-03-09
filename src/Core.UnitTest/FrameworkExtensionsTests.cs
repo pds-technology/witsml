@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,10 +21,10 @@ using System.Collections.Generic;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 using Shouldly;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     [TestClass]
     public class FrameworkExtensionsTests

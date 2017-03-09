@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Framework, 2017.1
+// PDS WITSMLstudio Framework, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 
-namespace PDS.Framework.Web
+namespace PDS.WITSMLstudio.Framework.Web
 {
     /// <summary>
     /// Provides helper methods for configuring dependency injection for web applications.

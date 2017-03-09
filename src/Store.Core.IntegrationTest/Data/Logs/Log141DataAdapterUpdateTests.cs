@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,14 +27,14 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Compatibility;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.Jobs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
+using PDS.WITSMLstudio.Store.Jobs;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     /// <summary>
     /// Log141DataAdapter Update tests.

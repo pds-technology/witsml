@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -41,7 +41,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WbGeometry = Energistics.DataAccess.WITSML131.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML131.WellboreGeometryList;
 
-namespace PDS.Witsml.Server.Data.WbGeometries
+namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     [TestClass]
     public partial class WbGeometry131EtpTests : WbGeometry131TestBase

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,10 +27,10 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Compatibility;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Compatibility;
 
-namespace PDS.Witsml.Data
+namespace PDS.WITSMLstudio.Data
 {
     /// <summary>
     /// Provides a framework for navigating a WITSML document while providing additional data object type information.

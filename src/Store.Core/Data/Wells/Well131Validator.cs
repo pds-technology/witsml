@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,7 +21,7 @@ using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Server.Data.Wells
+namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     /// <summary>
     /// Provides validation for <see cref="Well" /> data objects.

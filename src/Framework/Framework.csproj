@@ -7,8 +7,8 @@
     <ProjectGuid>{FAE228AA-4917-4B02-B239-0A24DF883898}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Framework</RootNamespace>
-    <AssemblyName>PDS.Framework</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio.Framework</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Framework</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\PDS.Framework.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\PDS.WITSMLstudio.Framework.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\PDS.Framework.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\PDS.WITSMLstudio.Framework.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,14 +18,14 @@
 
 using System;
 using System.Xml.Linq;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml
+namespace PDS.WITSMLstudio
 {
     /// <summary>
     /// Encapsulates common properties used for parsing WITSML elements.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigationContext" />
     public abstract class WitsmlParserContext : DataObjectNavigationContext
     {
         /// <summary>
@@ -56,7 +56,7 @@ namespace PDS.Witsml
     /// Encapsulates common properties used for parsing WITSML elements for a specific data object type.
     /// </summary>
     /// <typeparam name="T">The type of the data object.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigationContext" />
     public class WitsmlParserContext<T> : WitsmlParserContext
     {
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,7 +18,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Server.Data.ChannelSets
+namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 {
     /// <summary>
     /// ChannelSet200DataAdapter Delete tests.

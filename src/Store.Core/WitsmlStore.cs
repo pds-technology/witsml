@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -23,19 +23,19 @@ using System.Linq;
 using System.ServiceModel.Web;
 using Energistics.DataAccess;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Data.Security;
-using PDS.Witsml.Server.Logging;
-using PDS.Witsml.Server.Properties;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
+using PDS.WITSMLstudio.Store.Data.Security;
+using PDS.WITSMLstudio.Store.Logging;
+using PDS.WITSMLstudio.Store.Properties;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// The WITSML Store API server implementation.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.IWitsmlStore" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.IWitsmlStore" />
     [Export(typeof(IWitsmlStore))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class WitsmlStore : IWitsmlStore

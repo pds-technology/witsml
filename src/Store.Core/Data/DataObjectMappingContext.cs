@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,14 +18,14 @@
 
 using System;
 using System.Collections.Generic;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Encapsulates common properties for mapping data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigationContext" />
     public class DataObjectMappingContext<T> : DataObjectNavigationContext
     {
         /// <summary>

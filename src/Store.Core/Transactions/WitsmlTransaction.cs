@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using System.Threading;
 using Energistics.Datatypes;
 using log4net;
 
-namespace PDS.Witsml.Server.Transactions
+namespace PDS.WITSMLstudio.Store.Transactions
 {
     /// <summary>
     /// Wraps a data storage specific transaction implementation.

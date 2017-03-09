@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,7 +18,7 @@
 
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Server.Data.GrowingObjects
+namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
 {
     /// <summary>
     /// Defines methods specific to growing object data adapters.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,12 +21,12 @@ using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 
-namespace PDS.Witsml.Data.Trajectories
+namespace PDS.WITSMLstudio.Data.Trajectories
 {
     /// <summary>
     /// Generates data for a 141 Trajectory.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataGenerator" />
     public class Trajectory141Generator : DataGenerator
     {
         /// <summary>

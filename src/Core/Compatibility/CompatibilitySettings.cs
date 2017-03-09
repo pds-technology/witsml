@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using PDS.Witsml.Properties;
+using PDS.WITSMLstudio.Properties;
 
-namespace PDS.Witsml.Compatibility
+namespace PDS.WITSMLstudio.Compatibility
 {
     /// <summary>
     /// Provides central access to all compatibility settings.

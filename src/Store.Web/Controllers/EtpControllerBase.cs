@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -31,11 +31,11 @@ using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Controllers
+namespace PDS.WITSMLstudio.Store.Controllers
 {
     /// <summary>
     /// Defines the Web API methods used to initiate an ETP Web Socket connection.
