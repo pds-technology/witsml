@@ -253,7 +253,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -320,7 +320,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -356,7 +356,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -394,7 +394,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -461,7 +461,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -575,7 +575,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.AttachmentList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -613,7 +613,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -680,7 +680,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -716,7 +716,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -754,7 +754,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -821,7 +821,7 @@ namespace PDS.WITSMLstudio.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
