@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,16 +25,16 @@ using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// An abstract class that encloses methods to update Mongo collection and its helper methods
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbUpdateContext}" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigator{MongoDbUpdateContext}" />
     public abstract class MongoDbWrite<T> : DataObjectNavigator<MongoDbUpdateContext<T>>
     {
         /// <summary>

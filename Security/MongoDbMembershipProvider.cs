@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -31,9 +31,9 @@ using System.Web.Http;
 using System.Web.Security;
 using log4net;
 using MongoDB.Driver;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server.Security
+namespace PDS.WITSMLstudio.Store.Security
 {
     /// <summary>
     /// Manages storage of membership information for an ASP.NET application in a Mongo database.

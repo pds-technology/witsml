@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,9 +25,9 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using MongoDB.Driver;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Encloses MongoDb merge method and its helper methods

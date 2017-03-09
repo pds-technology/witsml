@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,21 +26,21 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Datatypes.Object;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Data;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Providers.Store;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Data.Logs;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.Channels;
+using PDS.WITSMLstudio.Store.Models;
+using PDS.WITSMLstudio.Store.Providers.Store;
 
-namespace PDS.Witsml.Server.Data.ChannelSets
+namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSet" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Channels.IChannelDataProvider" />
     [Export200(ObjectTypes.ChannelSet, typeof(IChannelDataProvider))]
     public partial class ChannelSet200DataAdapter : IChannelDataProvider
     {

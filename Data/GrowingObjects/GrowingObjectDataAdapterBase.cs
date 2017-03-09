@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,16 +20,16 @@ using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Data.Transactions;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data.Transactions;
 
-namespace PDS.Witsml.Server.Data.GrowingObjects
+namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
 {
     /// <summary>
     /// Provides properties and methods common to all growing data objects.
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{T}" />
     public abstract class GrowingObjectDataAdapterBase<T> : MongoDbDataAdapter<T>, IGrowingObjectDataAdapter
     {
         private IGrowingObjectDataProvider _dbGrowingObjectDataAdapter;

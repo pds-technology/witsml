@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,13 +24,13 @@ using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
-using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Data.Transactions;
-using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Models;
+using PDS.WITSMLstudio.Store.Data.Transactions;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Initializes MongoDb class and member mappings.

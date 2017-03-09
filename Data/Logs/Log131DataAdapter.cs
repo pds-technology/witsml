@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,15 +27,15 @@ using Energistics.Datatypes.ChannelData;
 using Energistics.Datatypes.Object;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.Providers.Store;
-using PDS.Witsml.Server.Data.Transactions;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Data.Logs;
+using PDS.WITSMLstudio.Store.Data.Channels;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
+using PDS.WITSMLstudio.Store.Providers.Store;
+using PDS.WITSMLstudio.Store.Data.Transactions;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,19 +26,19 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     /// <summary>
     /// MongoDb data adapter that encapsulates CRUD functionality for Trajectory objects.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TChild">The type of the child.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{T}" />
     public abstract class TrajectoryDataAdapter<T, TChild> : GrowingObjectDataAdapterBase<T> where T : IWellboreObject where TChild : IUniqueId
     {
         /// <summary>The field to query Mongo File</summary>

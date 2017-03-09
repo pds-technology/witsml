@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -20,15 +20,15 @@ using System;
 using System.ComponentModel.Composition;
 using System.Configuration;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.MongoDb;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.MongoDb;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Provides access to a MongoDb data store.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.IDatabaseProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDatabaseProvider" />
     [Export(typeof(IDatabaseProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DatabaseProvider : IDatabaseProvider

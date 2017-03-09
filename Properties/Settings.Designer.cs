@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.MongoDb {
+namespace PDS.WITSMLstudio.Store.MongoDb {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

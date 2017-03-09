@@ -7,8 +7,8 @@
     <ProjectGuid>{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDS.Witsml.Server</RootNamespace>
-    <AssemblyName>PDS.Witsml.Server.MongoDb</AssemblyName>
+    <RootNamespace>PDS.WITSMLstudio.Store</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Store.MongoDb</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\PDS.Witsml.Server.MongoDb.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\PDS.WITSMLstudio.Store.MongoDb.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\PDS.Witsml.Server.MongoDb.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\PDS.WITSMLstudio.Store.MongoDb.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
@@ -299,7 +299,8 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>PDS.Witsml.Server.MongoDb</CustomToolNamespace>
+      <CustomToolNamespace>PDS.WITSMLstudio.Store.MongoDb</CustomToolNamespace>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -30,18 +30,18 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using LinqToQuerystring;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 
 using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML141.WellboreGeometryList;
 
-namespace PDS.Witsml.Server.Data.WbGeometries
+namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="WbGeometry" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{WbGeometry}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{WbGeometry}" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<WbGeometry>))]
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataAdapter))]

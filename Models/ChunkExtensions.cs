@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,10 +19,10 @@
 using System;
 using System.Collections.Generic;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.WITSMLstudio.Store.Models
 {
     /// <summary>
     /// Provides static helper methods that can be used to process <see cref="ChannelDataChunk"/> data.

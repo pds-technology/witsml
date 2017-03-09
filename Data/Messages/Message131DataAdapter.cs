@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,7 +18,7 @@
 
 using Energistics.DataAccess.WITSML131;
 
-namespace PDS.Witsml.Server.Data.Messages
+namespace PDS.WITSMLstudio.Store.Data.Messages
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />.

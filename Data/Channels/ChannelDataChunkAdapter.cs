@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,18 +25,18 @@ using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Transactions;
-using PDS.Witsml.Server.Models;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.Transactions;
+using PDS.WITSMLstudio.Store.Models;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.WITSMLstudio.Store.Data.Channels
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for channel data.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelDataChunk}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{ChannelDataChunk}" />
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {

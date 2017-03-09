@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.Witsml.Server.MongoDb" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.WITSMLstudio.Store.MongoDb" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="DefaultConnectionString" Type="System.String" Scope="Application">

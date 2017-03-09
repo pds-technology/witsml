@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,10 +22,10 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
 
-namespace PDS.Witsml.Server.Data.GrowingObjects
+namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
 {
     /// <summary>
     /// Manages storage of DbGrowingDataObject in the Mongo Db
