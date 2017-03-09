@@ -1,4 +1,4 @@
-PDS.Witsml, 2017.1
+PDS WITSMLstudio, 2017.1
 Copyright 2017 Petrotechnical Data Systems
 
 PDS.Witsml incorporates ETP, WITSML™, PRODML™ and RESQML™ technology and standards

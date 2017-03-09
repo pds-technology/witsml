@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.Web", "Framework.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Core", "Store.Core\Store.Core.csproj", "{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Core.IntegrationTest", "Store.Core.IntegrationTest\Store.Core.IntegrationTest.csproj", "{C050AB68-0543-4A23-870C-2D07F872484B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.IntegrationTest", "Store.Core.IntegrationTest\Store.IntegrationTest.csproj", "{C050AB68-0543-4A23-870C-2D07F872484B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{006F1A29-952B-4264-8E91-0D445F74B183} = {006F1A29-952B-4264-8E91-0D445F74B183}
 	EndProjectSection

@@ -7,15 +7,15 @@
 [Downloads](https://witsml.pds.technology/docs/downloads) |
 [Support](https://witsml.pds.technology/docs/support)
 
-The “PDS.Witsml” solution provides reusable components referenced by all PDS WITSML applications containing the following projects: 
+The “PDS.WITSMLstudio” solution provides reusable components referenced by all PDS WITSMLstudio applications containing the following projects: 
 
-##### PDS.Framework
+##### Framework
 Provides the composition container used to resolve dependencies.
 
-##### PDS.Framework.Web
+##### Framework.Web
 Configures the composition container to resolve dependencies for web projects and provides security.
 
-##### PDS.Witsml
+##### Core
 Contains common classes related to WITSML that are referenced by other projects, including but not limited to the following:
 
 - ChannelDataReader - facilitates parsing and reading of log channel data
@@ -171,8 +171,8 @@ Contains common classes related to WITSML that are referenced by other projects,
     }
 ````
 
-##### PDS.Witsml.Server
-Hosts WITSML store service implementation, including service interfaces and high level data provider implementation, including:
+##### Store.Core
+Hosts WITSMLstudio Store service implementation, including service interfaces and high level data provider implementation, including:
 
 - WitsmlDataAdapter – encapsulates basic CRUD functionality for WITSML data objects
 ````C#
@@ -244,14 +244,17 @@ Hosts WITSML store service implementation, including service interfaces and high
     }
 ```` 
 
-##### PDS.Witsml.Server.Integration.Test
-Contains integration tests for PDS.Witsml.Server.
+##### Core.UnitTest
+Contains unit tests for PDS WITSMLstudio.
 
-##### PDS.Witsml.Server.Web
+##### Store.IntegrationTest
+Contains integration tests for PDS WITSMLstudio Store.
+
+##### Store.Jobs
+Implements scheduled and recurring jobs for PDS WITSMLstudio Store.
+
+##### Store.Web
 Implements configuration and security for WITSML and ETP endpoints.
-
-##### PDS.Witsml.Server.UnitTest
-Contains unit tests for the solution.
 
 ---
 
