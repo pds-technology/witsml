@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml, 2017.1
 //
-// Copyright 2016 Petrotechnical Data Systems
+// Copyright 2017 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -219,12 +219,12 @@ namespace PDS.Witsml.Query
         /// Provides helper methods to create Witsml131 query templates.
         /// </summary>
         public static class Witsml131
-        {          
+        {
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for log.    
             /// </summary>          
             public static class Log
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
                 private static XDocument _headerOnly;
@@ -253,7 +253,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -293,7 +293,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for message.    
             /// </summary>          
             public static class Message
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -320,7 +320,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -329,7 +329,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for rig.    
             /// </summary>          
             public static class Rig
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -356,7 +356,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -365,7 +365,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for trajectory.    
             /// </summary>          
             public static class Trajectory
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
                 private static XDocument _headerOnly;
@@ -394,7 +394,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -434,7 +434,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for wbGeometry.    
             /// </summary>          
             public static class WbGeometry
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -461,7 +461,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -470,7 +470,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for well.    
             /// </summary>          
             public static class Well
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -506,7 +506,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml131 query templates for wellbore.    
             /// </summary>          
             public static class Wellbore
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -533,7 +533,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML131.WellboreList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -543,12 +543,12 @@ namespace PDS.Witsml.Query
         /// Provides helper methods to create Witsml141 query templates.
         /// </summary>
         public static class Witsml141
-        {          
+        {
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for attachment.    
             /// </summary>          
             public static class Attachment
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -575,7 +575,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.AttachmentList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -584,7 +584,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for log.    
             /// </summary>          
             public static class Log
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
                 private static XDocument _headerOnly;
@@ -613,7 +613,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -653,7 +653,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for message.    
             /// </summary>          
             public static class Message
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -680,7 +680,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -689,7 +689,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for rig.    
             /// </summary>          
             public static class Rig
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -716,7 +716,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -725,7 +725,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for trajectory.    
             /// </summary>          
             public static class Trajectory
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
                 private static XDocument _headerOnly;
@@ -754,7 +754,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -794,7 +794,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for wbGeometry.    
             /// </summary>          
             public static class WbGeometry
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -821,7 +821,7 @@ namespace PDS.Witsml.Query
 
                         if (_idOnly != null) return Clone(_idOnly);
                         _idOnly = _template.Create<WITSML141.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWell']");
+                        _template.RemoveAll(_idOnly, "/*/*/*[name()!='name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
                     }
                 }
@@ -830,7 +830,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for well.    
             /// </summary>          
             public static class Well
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
@@ -866,7 +866,7 @@ namespace PDS.Witsml.Query
             /// Provides helper methods to create Witsml141 query templates for wellbore.    
             /// </summary>          
             public static class Wellbore
-            { 
+            {
                 private static XDocument _all;
                 private static XDocument _idOnly;
 
