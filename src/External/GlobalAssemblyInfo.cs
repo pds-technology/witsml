@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,7 +18,7 @@
 
 using System.Reflection;
 
-[assembly: AssemblyProduct("PDS.Witsml.Server")]
+[assembly: AssemblyProduct("PDS WITSMLstudio Store")]
 [assembly: AssemblyCopyright("Copyright © 2017")]
 [assembly: AssemblyCompany("Petrotechnical Data Systems")]
 [assembly: AssemblyConfiguration("")]

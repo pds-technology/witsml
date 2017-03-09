@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -30,15 +30,15 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using LinqToQuerystring;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]

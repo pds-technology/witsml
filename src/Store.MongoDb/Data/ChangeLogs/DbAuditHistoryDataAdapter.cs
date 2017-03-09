@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -26,16 +26,16 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using LinqToQuerystring;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.ChangeLogs
+namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="DbAuditHistory" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{DbAuditHistory}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{DbAuditHistory}" />
     [Export(typeof(IWitsmlDataAdapter<DbAuditHistory>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]

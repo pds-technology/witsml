@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,12 +22,12 @@ using System.Linq;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 using Energistics.Datatypes;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Utility class that encapsulates helper methods for parsing element in query and update

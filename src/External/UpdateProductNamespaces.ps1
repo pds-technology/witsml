@@ -14,9 +14,10 @@ $pattern11 = "PDS\.Framework"
 $pattern12 = "PDS\.Witsml\.Utility"
 $pattern13 = "PDS\.Witsml\.Studio"
 $pattern14 = "PDS\.Witsml\.Server"
-$pattern15 = "PDS\.Witsml"
+$pattern15 = "PDS\.Witsml\.Web"
+$pattern16 = "PDS\.Witsml"
 
-ls (Split-Path $dte.Solution.FileName -Parent) -Recurse -include *.cs, *.csproj, *.config |
+ls (Split-Path $dte.Solution.FileName -Parent) -Recurse -include *.cs, *.csproj, *.config, *.settings, *.nuspec |
   foreach {
     $content = cat $_.FullName | Out-String
     $origContent = $content
@@ -37,7 +38,8 @@ ls (Split-Path $dte.Solution.FileName -Parent) -Recurse -include *.cs, *.csproj,
     $content = $content -creplace $pattern12, "PDS.WITSMLstudio.Utility"
     $content = $content -creplace $pattern13, "PDS.WITSMLstudio.Desktop"
     $content = $content -creplace $pattern14, "PDS.WITSMLstudio.Store"
-    $content = $content -creplace $pattern15, "PDS.WITSMLstudio"
+    $content = $content -creplace $pattern15, "PDS.WITSMLstudio.Store"
+    $content = $content -creplace $pattern16, "PDS.WITSMLstudio"
 
     if ($origContent -ne $content)
     {	

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,10 +27,10 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Data.Common;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data.Common;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Encloses MongoDb update method and its helper methods

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,15 +19,15 @@
 using System;
 using System.Collections.Generic;
 using MongoDB.Driver;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Encapsulates common properties used for querying the data store.
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigationContext" />
     public class MongoDbQueryContext<T> : DataObjectNavigationContext
     {
         /// <summary>

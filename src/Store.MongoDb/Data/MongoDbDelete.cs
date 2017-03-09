@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -27,16 +27,16 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Data;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// Encloses MongoDb partial delete method and its helper methods
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbDeleteContext}" />
+    /// <seealso cref="PDS.WITSMLstudio.Data.DataObjectNavigator{MongoDbDeleteContext}" />
     public class MongoDbDelete<T> : DataObjectNavigator<MongoDbDeleteContext<T>>
     {
         private readonly IMongoCollection<T> _collection;

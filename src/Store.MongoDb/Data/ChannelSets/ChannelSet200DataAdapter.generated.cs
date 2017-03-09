@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -30,16 +30,16 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using LinqToQuerystring;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Channels;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.Channels;
 
-namespace PDS.Witsml.Server.Data.ChannelSets
+namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSet" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelSet}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{ChannelSet}" />
     [Export(typeof(IWitsmlDataAdapter<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]

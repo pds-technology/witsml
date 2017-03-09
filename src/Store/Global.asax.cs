@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -24,15 +24,14 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using log4net.Config;
 using Hangfire.Mongo;
-using PDS.Framework;
-using PDS.Framework.Web;
-using PDS.Witsml.Server;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Jobs.Configuration;
-using PDS.Witsml.Web.Controllers;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Framework.Web;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data;
+using PDS.WITSMLstudio.Store.Jobs.Configuration;
+using PDS.WITSMLstudio.Store.Controllers;
 
-namespace PDS.Witsml.Web
+namespace PDS.WITSMLstudio.Store
 {
     public class WebApiApplication : System.Web.HttpApplication
     {

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,12 +22,12 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NConcern;
-using PDS.Witsml.Server.Aspects;
-using PDS.Witsml.Server.Data.Logs;
-using PDS.Witsml.Server.Data.Wellbores;
+using PDS.WITSMLstudio.Store.Aspects;
+using PDS.WITSMLstudio.Store.Data.Logs;
+using PDS.WITSMLstudio.Store.Data.Wellbores;
 using Shouldly;
 
-namespace PDS.Witsml.Server.Data.Transactions
+namespace PDS.WITSMLstudio.Store.Data.Transactions
 {
     [TestClass]
     public class MongoTransactionTests : MultiObject141TestBase

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -17,24 +17,23 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
-using PDS.Witsml.Server;
 
-namespace PDS.Witsml.Web
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// A wrapper for the WITSML Store API that can be hosted as a WCF service.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.IWitsmlStore" />
-    public class WitsmlStore : IWitsmlStore
+    /// <seealso cref="PDS.WITSMLstudio.Store.IWitsmlStore" />
+    public class WitsmlStoreService : IWitsmlStore
     {
         private readonly IWitsmlStore _store;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WitsmlStore"/> class.
+        /// Initializes a new instance of the <see cref="WitsmlStoreService"/> class.
         /// </summary>
         /// <param name="store">A WITSML store instance.</param>
         [ImportingConstructor]
-        public WitsmlStore(IWitsmlStore store)
+        public WitsmlStoreService(IWitsmlStore store)
         {
             _store = store;
         }

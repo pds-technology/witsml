@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,10 +22,10 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Data.Logs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data.Logs;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// MongoDbExtensions tests.

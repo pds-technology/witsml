@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,9 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using PDS.Witsml.Data.Channels;
+using PDS.WITSMLstudio.Data.Channels;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.WITSMLstudio.Store.Models
 {
     /// <summary>
     /// Model class for unified log data

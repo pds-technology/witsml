@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -18,16 +18,16 @@
 
 using System.Web.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework.Web;
-using PDS.Witsml.Server.Data;
+using PDS.WITSMLstudio.Framework.Web;
+using PDS.WITSMLstudio.Store.Data;
 
-namespace PDS.Witsml.Server
+namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
     /// Defines properties and methods that can be used to provide
     /// configuration settings for integration tests.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.ITestContextProvider" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.ITestContextProvider" />
     public class TestContextProvider : ITestContextProvider
     {
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,11 +21,11 @@ using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,10 +22,10 @@ using System.Linq;
 using Energistics.Datatypes;
 using LinqToQuerystring;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
 
-namespace PDS.Witsml.Server.Data.Transactions
+namespace PDS.WITSMLstudio.Store.Data.Transactions
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a <see cref="MongoDbTransaction"/>

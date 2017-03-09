@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,9 +22,9 @@ using System.Diagnostics;
 using System.Reflection;
 using log4net;
 using NConcern;
-using PDS.Framework;
+using PDS.WITSMLstudio.Framework;
 
-namespace PDS.Witsml.Server.Aspects
+namespace PDS.WITSMLstudio.Store.Aspects
 {
     public static class Throws
     {

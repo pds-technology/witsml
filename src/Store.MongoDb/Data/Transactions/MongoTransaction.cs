@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,10 +25,10 @@ using Energistics.Datatypes;
 using log4net;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using PDS.Witsml.Server.MongoDb;
-using PDS.Witsml.Server.Transactions;
+using PDS.WITSMLstudio.Store.MongoDb;
+using PDS.WITSMLstudio.Store.Transactions;
 
-namespace PDS.Witsml.Server.Data.Transactions
+namespace PDS.WITSMLstudio.Store.Data.Transactions
 {
     /// <summary>
     /// Encapsulates transaction-like behavior on MongoDb

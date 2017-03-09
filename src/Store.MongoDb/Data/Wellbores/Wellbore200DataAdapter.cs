@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -19,10 +19,10 @@
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Bson;
-using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.Data.Transactions;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
+using PDS.WITSMLstudio.Store.Data.Transactions;
 
-namespace PDS.Witsml.Server.Data.Wellbores
+namespace PDS.WITSMLstudio.Store.Data.Wellbores
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />

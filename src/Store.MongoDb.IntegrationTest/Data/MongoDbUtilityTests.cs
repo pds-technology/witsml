@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2017.1
+// PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -21,15 +21,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Data.Logs;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data.Logs;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// MongoDbUtility tests.

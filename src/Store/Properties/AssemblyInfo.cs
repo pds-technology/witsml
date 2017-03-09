@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PDS.Witsml.Web")]
+[assembly: AssemblyTitle("PDS WITSMLstudio Store")]
 [assembly: AssemblyDescription("PDS WITSMLstudio Store Web Application")]
 
 // Setting ComVisible to false makes the types in this assembly not visible

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -25,13 +25,13 @@ using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using PDS.Framework;
-using PDS.Witsml.Data.ChangeLogs;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.ChangeLogs;
-using PDS.Witsml.Server.Data.Transactions;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Data.Transactions;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
     /// MongoDb data adapter that encapsulates CRUD functionality for WITSML objects.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
@@ -30,15 +30,15 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using LinqToQuerystring;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Trajectory}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Trajectory}" />
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
