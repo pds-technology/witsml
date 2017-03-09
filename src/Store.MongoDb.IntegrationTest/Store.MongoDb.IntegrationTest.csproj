@@ -200,23 +200,23 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Witsml.Server.IntegrationTest\Witsml.Server.IntegrationTest.csproj">
+    <ProjectReference Include="..\..\ext\witsml\src\Store.IntegrationTest\Store.IntegrationTest.csproj">
       <Project>{c050ab68-0543-4a23-870c-2d07f872484b}</Project>
       <Name>Witsml.Server.IntegrationTest</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Witsml.Server\Witsml.Server.csproj">
+    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Witsml.UnitTest\Witsml.UnitTest.csproj">
+    <ProjectReference Include="..\..\ext\witsml\src\Core.UnitTest\Core.UnitTest.csproj">
       <Project>{750f795f-0c36-4cb3-9372-c4a5a716c635}</Project>
       <Name>Witsml.UnitTest</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Witsml\Witsml.csproj">
+    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.Server.MongoDb\Store.MongoDb.csproj">
+    <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
       <Name>Store.MongoDb</Name>
     </ProjectReference>
