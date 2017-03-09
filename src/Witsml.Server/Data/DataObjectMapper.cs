@@ -241,7 +241,7 @@ namespace PDS.Witsml.Server.Data
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .ToArray();
 
-                if (childProperties.Any())
+                if (childProperties.Any() && sourceValue != null)
                 {
                     targetValue = _isTargetCreated
                         ? Activator.CreateInstance(propertyInfo.PropertyType)
