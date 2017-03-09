@@ -179,7 +179,7 @@ Hosts WITSMLstudio Store service implementation, including service interfaces an
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Well}" />
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]

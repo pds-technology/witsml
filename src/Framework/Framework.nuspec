@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>PDS.Framework</id>
+    <id>PDS.WITSMLstudio.Framework</id>
     <version>$version$</version>
     <authors>Petrotechnical Data Systems</authors>
     <description>PDS .NET Framework Extensions</description>
@@ -15,8 +15,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Framework.dll" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Framework.pdb" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Framework.xml" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.xml" target="lib/net45" />
   </files>
 </package>

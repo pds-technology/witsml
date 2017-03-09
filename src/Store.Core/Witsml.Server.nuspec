@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>PDS.Witsml.Server</id>
+    <id>PDS.WITSMLstudio.Store</id>
     <version>$version$</version>
     <authors>Petrotechnical Data Systems</authors>
     <description>PDS WITSML Server Library</description>
@@ -11,13 +11,13 @@
     <dependencies>
       <group targetFramework="net45">
         <dependency id="Fare" version="1.0.2" />
-        <dependency id="PDS.Witsml" version="$version$" />
+        <dependency id="PDS.WITSMLstudio.Core" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Witsml.Server.dll" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.pdb" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.xml" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.xml" target="lib/net45" />
   </files>
 </package>

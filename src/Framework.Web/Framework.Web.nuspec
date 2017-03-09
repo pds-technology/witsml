@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>PDS.Framework.Web</id>
+    <id>PDS.WITSMLstudio.Framework.Web</id>
     <version>$version$</version>
     <authors>Petrotechnical Data Systems</authors>
     <description>PDS .NET Framework Web Extensions</description>
@@ -19,13 +19,13 @@
         <dependency id="Microsoft.AspNet.WebPages" version="3.2.3" />
         <dependency id="Microsoft.Web.Infrastructure" version="1.0.0.0" />
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="PDS.Framework" version="$BuildNumber$" />
+        <dependency id="PDS.WITSMLstudio.Framework" version="$BuildNumber$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Framework.Web.dll" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Framework.Web.pdb" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Framework.Web.xml" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.Web.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.Web.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Framework.Web.xml" target="lib/net45" />
   </files>
 </package>

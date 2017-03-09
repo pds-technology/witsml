@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>PDS.Witsml.Server.IntegrationTest</id>
+    <id>PDS.WITSMLstudio.Store.IntegrationTest</id>
     <version>$version$</version>
     <authors>Petrotechnical Data Systems</authors>
     <description>PDS WITSML Server Library Integration Tests</description>
@@ -10,14 +10,14 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="PDS.Witsml.Server" version="$version$" />
+        <dependency id="PDS.WITSMLstudio.Store" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll.config" target="lib/net45" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.IntegrationTest.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.IntegrationTest.dll.config" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.WITSMLstudio.Store.IntegrationTest.pdb" target="lib/net45" />
     <file src="TestData/**/*" target="content" />
   </files>
 </package>
