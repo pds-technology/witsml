@@ -1,4 +1,4 @@
-## WITSML Server
+## PDS WITSMLstudio Store
 
 **Quick Links:**&nbsp;
 [Blog](https://witsml.pds.technology/blog) |
@@ -9,9 +9,12 @@
 
 > **Note:** Be sure to perform a recursive clone of the repository to retrieve the `witsml` submodule.
 
-The "PDS.Witsml.Web" solution builds PDS WITSML Server with MongoDB for data storage and configures Witsml.Web as an IIS web application. It contains the following projects: 
+The "PDS.WITSMLstudio.Store" solution builds PDS WITSMLstudio Store with MongoDB for data storage and configures Store as an IIS web application. It contains the following projects: 
 
-##### PDS.Witsml.Server.MongoDb
+##### Store
+Configures and hosts PDS WITSMLstudio Store on IIS.
+
+##### Store.MongoDb
 Contains the WitsmlDataAdapter implementation for MongoDB.
 
 - MongoDbDataAdapter - is a data adapter that encapsulates CRUD functionality for WITSML objects.
@@ -63,11 +66,8 @@ Contains the WitsmlDataAdapter implementation for MongoDB.
     }
 ````
 
-##### PDS.Witsml.Server.MongoDb.IntegrationTest
-Integration tests for PDS.Witsml.Server.MongoDb.
-
-##### PDS.Witsml.Web
-Configures and hosts PDS WITSML Server on IIS.
+##### Store.MongoDb.IntegrationTest
+Integration tests for Store.MongoDb.
 
 ---
 

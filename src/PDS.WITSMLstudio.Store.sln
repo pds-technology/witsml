@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Web", "Witsml.Web\Witsml.Web.csproj", "{9E51075C-D571-42F5-A311-0589231DBA9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store", "Witsml.Web\Store.csproj", "{9E51075C-D571-42F5-A311-0589231DBA9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb", "Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj", "{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb", "Witsml.Server.MongoDb\Store.MongoDb.csproj", "{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb.IntegrationTest", "Witsml.Server.MongoDb.IntegrationTest\Witsml.Server.MongoDb.IntegrationTest.csproj", "{F0BB0099-5016-4206-8385-312B9664DDEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb.IntegrationTest", "Witsml.Server.MongoDb.IntegrationTest\Store.MongoDb.IntegrationTest.csproj", "{F0BB0099-5016-4206-8385-312B9664DDEC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B01AE4D3-D6E0-4E02-8051-FDB4AB7B7518}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,9 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B0
 		..\README.md = ..\README.md
 		External\UpdateCopyrightVersion.ps1 = External\UpdateCopyrightVersion.ps1
 		External\UpdatePackageHintPaths.ps1 = External\UpdatePackageHintPaths.ps1
+		External\UpdateProductNamespaces.ps1 = External\UpdateProductNamespaces.ps1
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PDS.Witsml", "PDS.Witsml", "{A5268269-F5F0-4B28-A9B5-A2A86D45C916}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PDS.WITSMLstudio", "PDS.WITSMLstudio", "{A5268269-F5F0-4B28-A9B5-A2A86D45C916}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "..\ext\witsml\src\Framework\Framework.csproj", "{FAE228AA-4917-4B02-B239-0A24DF883898}"
 EndProject
