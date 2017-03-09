@@ -136,7 +136,7 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml\Witsml.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
     </ProjectReference>

@@ -684,15 +684,15 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.Server.Jobs\Witsml.Server.Jobs.csproj">
+    <ProjectReference Include="..\Store.Jobs\Store.Jobs.csproj">
       <Project>{006F1A29-952B-4264-8E91-0D445F74B183}</Project>
       <Name>Witsml.Server.Jobs</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
+    <ProjectReference Include="..\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml\Witsml.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
     </ProjectReference>
