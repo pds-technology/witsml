@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml.Server, 2017.1
+// PDS.Witsml, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
 // 
