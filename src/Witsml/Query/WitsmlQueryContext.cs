@@ -74,7 +74,7 @@ namespace PDS.Witsml.Query
             : base(url, username, password, timeoutInMinutes, version)
         {
         }
-       
+
         /// <summary>
         /// Gets all wells.
         /// </summary>
@@ -119,7 +119,7 @@ namespace PDS.Witsml.Query
             SetFilterCriteria(objectType, queryIn, parentUri);
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
-        }        
+        }
 
         /// <summary>
         /// Gets the growing object header only.
@@ -147,7 +147,11 @@ namespace PDS.Witsml.Query
         {
             var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
             SetFilterCriteria(objectType, queryIn, parentUri);
-            _template.Add(queryIn, "//log", "objectGrowing");
+
+            if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
+                _template.Add(queryIn, "//log", "objectGrowing");
+            else if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType))
+                _template.Add(queryIn, "//trajectory", "objectGrowing");
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -192,12 +196,12 @@ namespace PDS.Witsml.Query
             var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.All);
             SetFilterCriteria(objectType, queryIn, uri);
 
-            var filteredOptionsIn = new List<OptionsIn> {OptionsIn.ReturnElements.Requested};
+            var filteredOptionsIn = new List<OptionsIn> { OptionsIn.ReturnElements.Requested };
 
             optionsIn.ForEach(o =>
             {
                 if (o.Value != OptionsIn.ReturnElements.All.Value)
-                    filteredOptionsIn.Add(o); 
+                    filteredOptionsIn.Add(o);
             });
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), filteredOptionsIn.ToArray()).FirstOrDefault();
@@ -214,7 +218,7 @@ namespace PDS.Witsml.Query
         public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, params OptionsIn[] optionsIn) where T : IDataObject
         {
             var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn));
-            var dataObjects = (IEnumerable<T>) result?.Items ?? Enumerable.Empty<T>();
+            var dataObjects = (IEnumerable<T>)result?.Items ?? Enumerable.Empty<T>();
             return dataObjects.OrderBy(x => x.Name);
         }
 
