@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PDS WITSMLstudio Framework")]
-[assembly: AssemblyDescription("PDS .NET Framework Extensions")]
+[assembly: AssemblyDescription("PDS WITSMLstudio .NET Framework Extensions")]
 [assembly: AssemblyProduct("PDS WITSMLstudio Framework")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

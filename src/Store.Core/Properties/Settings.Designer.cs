@@ -25,15 +25,6 @@ namespace PDS.WITSMLstudio.Store.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Store")]
-        public string DefaultServerName {
-            get {
-                return ((string)(this["DefaultServerName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string OverrideServerVersion {
             get {
@@ -79,7 +70,7 @@ namespace PDS.WITSMLstudio.Store.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSML Server (SOAP + ETP)")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Store (SOAP + ETP)")]
         public string DefaultServerDescription {
             get {
                 return ((string)(this["DefaultServerDescription"]));
@@ -417,6 +408,15 @@ namespace PDS.WITSMLstudio.Store.Properties {
         public string DefaultTimeZone {
             get {
                 return ((string)(this["DefaultTimeZone"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Store")]
+        public string DefaultServerName {
+            get {
+                return ((string)(this["DefaultServerName"]));
             }
         }
     }

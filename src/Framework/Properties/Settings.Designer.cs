@@ -25,7 +25,7 @@ namespace PDS.WITSMLstudio.Framework.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Framework")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Framework")]
         public string DefaultEncryptionKey {
             get {
                 return ((string)(this["DefaultEncryptionKey"]));
