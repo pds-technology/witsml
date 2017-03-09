@@ -1,0 +1,443 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PDS.Witsml.Server</RootNamespace>
+    <AssemblyName>PDS.Witsml.Server</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\Debug\PDS.Witsml.Server.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PDS.Witsml.Server.xml</DocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Avro, Version=0.9.0.0, Culture=neutral, PublicKeyToken=b1248d7eeb9d0814, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20170202.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20170309.1\lib\net452\ETP.DevKit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.1.5.0.0\lib\ETP.Messages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Fare, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Fare.1.0.3\lib\net35\Fare.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentValidationNA, Version=1.2.16.24816, Culture=neutral, PublicKeyToken=0950390b87309e14, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\FluentValidationNA.1.2.16\lib\net40\FluentValidationNA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketBase, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketBase.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketEngine, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperWebSocket, Version=0.9.0.0, Culture=neutral, PublicKeyToken=7ba53b9a7cef5d1c, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperWebSocket.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Linq.Dynamic, Version=1.1.14.15853, Culture=neutral, PublicKeyToken=b72be0322d1b32a8, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\System.Linq.Dynamic.Library.1.1.14\lib\net40\System.Linq.Dynamic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Configuration\CapServer141Provider.cs" />
+    <Compile Include="Configuration\CapServer131Provider.cs" />
+    <Compile Include="Configuration\CapServerProvider.cs" />
+    <Compile Include="Configuration\RequestContext.cs" />
+    <Compile Include="Configuration\RequestExtensions.cs" />
+    <Compile Include="Configuration\ResponseContext.cs" />
+    <Compile Include="Configuration\ResponseExtensions.cs" />
+    <Compile Include="Configuration\WitsmlEndpointTypes.cs" />
+    <Compile Include="Configuration\WitsmlSettings.cs" />
+    <Compile Include="Configuration\WitsmlValidator.cs" />
+    <Compile Include="Data\Activities\Activity200DataProvider.cs" />
+    <Compile Include="Data\Activities\Activity200DataProvider.generated.cs">
+      <DependentUpon>Activity200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200Validator.cs" />
+    <Compile Include="Data\Activities\Activity200Validator.generated.cs">
+      <DependentUpon>Activity200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataProvider.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataProvider.generated.cs">
+      <DependentUpon>ActivityTemplate200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200Validator.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200Validator.generated.cs">
+      <DependentUpon>ActivityTemplate200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment141DataProvider.cs" />
+    <Compile Include="Data\Attachments\Attachment141DataProvider.generated.cs">
+      <DependentUpon>Attachment141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment141Validator.cs" />
+    <Compile Include="Data\Attachments\Attachment141Validator.generated.cs">
+      <DependentUpon>Attachment141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment200DataProvider.cs" />
+    <Compile Include="Data\Attachments\Attachment200DataProvider.generated.cs">
+      <DependentUpon>Attachment200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment200Validator.cs" />
+    <Compile Include="Data\Attachments\Attachment200Validator.generated.cs">
+      <DependentUpon>Attachment200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryDataProvider.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryValidator.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.generated.cs">
+      <DependentUpon>ChannelSet200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200Validator.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200Validator.generated.cs">
+      <DependentUpon>ChannelSet200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200DataProvider.cs" />
+    <Compile Include="Data\Channels\Channel200DataProvider.generated.cs">
+      <DependentUpon>Channel200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200Validator.cs" />
+    <Compile Include="Data\Channels\Channel200Validator.generated.cs">
+      <DependentUpon>Channel200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\IChannelDataProvider.cs" />
+    <Compile Include="Data\Common\IRecurringElementValidator.cs" />
+    <Compile Include="Data\Common\ParameterTemplate200Validator.cs" />
+    <Compile Include="Data\Common\AbstractActivityParameter200Validator.cs" />
+    <Compile Include="Data\Common\TimestampedTimeZone141Validator.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataProvider.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataProvider.generated.cs">
+      <DependentUpon>DataAssuranceRecord200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200Validator.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200Validator.generated.cs">
+      <DependentUpon>DataAssuranceRecord200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataObjectMapper.cs" />
+    <Compile Include="Data\DataObjectMappingContext.cs" />
+    <Compile Include="Data\DataObjectValidationContext.cs" />
+    <Compile Include="Data\DataObjectValidator.cs" />
+    <Compile Include="Configuration\ICapServerProvider.cs" />
+    <Compile Include="Data\DataObjectValidatorOfT.cs" />
+    <Compile Include="Data\GrowingObjects\IGrowingObjectDataAdapter.cs" />
+    <Compile Include="Data\GrowingObjects\IGrowingObjectDataProvider.cs" />
+    <Compile Include="Data\GrowingObjects\IWellboreDataAdapter.cs" />
+    <Compile Include="Data\IEtpDataProviderOfT.cs" />
+    <Compile Include="Data\IWitsmlDataAdapter.cs" />
+    <Compile Include="Data\Logs\Log131DataProvider.generated.cs">
+      <DependentUpon>Log131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log131Validator.generated.cs">
+      <DependentUpon>Log131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log141DataProvider.generated.cs">
+      <DependentUpon>Log141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log141Validator.generated.cs">
+      <DependentUpon>Log141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log200DataProvider.cs" />
+    <Compile Include="Data\Logs\Log200DataProvider.generated.cs">
+      <DependentUpon>Log200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log200Validator.generated.cs">
+      <DependentUpon>Log200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\LogExtensions.cs" />
+    <Compile Include="Data\Messages\Message131DataProvider.cs" />
+    <Compile Include="Data\Messages\Message131DataProvider.generated.cs">
+      <DependentUpon>Message131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message131Validator.cs" />
+    <Compile Include="Data\Messages\Message131Validator.generated.cs">
+      <DependentUpon>Message131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message141DataProvider.cs" />
+    <Compile Include="Data\Messages\Message141DataProvider.generated.cs">
+      <DependentUpon>Message141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message141Validator.cs" />
+    <Compile Include="Data\Messages\Message141Validator.generated.cs">
+      <DependentUpon>Message141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig131DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig131DataProvider.generated.cs">
+      <DependentUpon>Rig131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig131Validator.cs" />
+    <Compile Include="Data\Rigs\Rig131Validator.generated.cs">
+      <DependentUpon>Rig131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig141DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig141DataProvider.generated.cs">
+      <DependentUpon>Rig141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig141Validator.cs" />
+    <Compile Include="Data\Rigs\Rig141Validator.generated.cs">
+      <DependentUpon>Rig141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig200DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig200DataProvider.generated.cs">
+      <DependentUpon>Rig200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig200Validator.cs" />
+    <Compile Include="Data\Rigs\Rig200Validator.generated.cs">
+      <DependentUpon>Rig200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataProvider.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataProvider.generated.cs">
+      <DependentUpon>RigUtilization200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200Validator.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200Validator.generated.cs">
+      <DependentUpon>RigUtilization200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Security\IUserAuthorizationAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataProvider.generated.cs">
+      <DependentUpon>Trajectory131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory131Validator.generated.cs">
+      <DependentUpon>Trajectory131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory141DataProvider.generated.cs">
+      <DependentUpon>Trajectory141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory141Validator.generated.cs">
+      <DependentUpon>Trajectory141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200DataProvider.generated.cs">
+      <DependentUpon>Trajectory200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200DataProvider.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataProvider.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141DataProvider.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200Validator.generated.cs">
+      <DependentUpon>Trajectory200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\TrajectoryExtensions.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131DataProvider.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131DataProvider.generated.cs">
+      <DependentUpon>WbGeometry131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry131Validator.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131Validator.generated.cs">
+      <DependentUpon>WbGeometry131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141DataProvider.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141DataProvider.generated.cs">
+      <DependentUpon>WbGeometry141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141Validator.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141Validator.generated.cs">
+      <DependentUpon>WbGeometry141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131DataProvider.generated.cs">
+      <DependentUpon>Wellbore131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131Validator.generated.cs">
+      <DependentUpon>Wellbore131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore141DataProvider.generated.cs">
+      <DependentUpon>Wellbore141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore141Validator.generated.cs">
+      <DependentUpon>Wellbore141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore200DataProvider.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200DataProvider.generated.cs">
+      <DependentUpon>Wellbore200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore200Validator.generated.cs">
+      <DependentUpon>Wellbore200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well131DataProvider.generated.cs">
+      <DependentUpon>Well131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well131Validator.generated.cs">
+      <DependentUpon>Well131Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well141DataProvider.generated.cs">
+      <DependentUpon>Well141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well141Validator.generated.cs">
+      <DependentUpon>Well141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well200DataProvider.generated.cs">
+      <DependentUpon>Well200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well200Validator.generated.cs">
+      <DependentUpon>Well200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WitsmlDataProvider.cs" />
+    <Compile Include="Data\EtpDataProvider.cs" />
+    <Compile Include="Data\IDataObjectValidator.cs" />
+    <Compile Include="Data\IEtpDataProvider.cs" />
+    <Compile Include="Data\IWitsmlDataAdapterOfT.cs" />
+    <Compile Include="Data\Logs\Log131DataProvider.cs" />
+    <Compile Include="Data\Logs\Log131Validator.cs" />
+    <Compile Include="Data\Logs\Log141DataProvider.cs" />
+    <Compile Include="Data\Logs\Log200Validator.cs" />
+    <Compile Include="Data\Logs\Log141Validator.cs" />
+    <Compile Include="Data\Wellbores\Wellbore131Validator.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200Validator.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141Validator.cs" />
+    <Compile Include="Data\Wellbores\Wellbore131DataProvider.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141DataProvider.cs" />
+    <Compile Include="Data\Wells\Well131DataProvider.cs" />
+    <Compile Include="Data\Wells\Well131Validator.cs" />
+    <Compile Include="Data\Wells\Well200DataProvider.cs" />
+    <Compile Include="Data\Wells\Well200Validator.cs" />
+    <Compile Include="Data\Wells\Well141Validator.cs" />
+    <Compile Include="Data\WitsmlDataAdapter.cs" />
+    <Compile Include="Data\IWitsmlDataProvider.cs" />
+    <Compile Include="Data\WitsmlQueryParser.cs" />
+    <Compile Include="Data\Wells\Well141DataProvider.cs" />
+    <Compile Include="Data\WitsmlDataProviderOfTList.cs" />
+    <Compile Include="Configuration\IWitsml131Configuration.cs" />
+    <Compile Include="Configuration\IWitsml141Configuration.cs" />
+    <Compile Include="Data\WitsmlQueryTemplate.cs" />
+    <Compile Include="IWitsmlStore.cs" />
+    <Compile Include="Logging\DebugExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingContext.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingTypes.cs" />
+    <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
+    <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
+    <Compile Include="Data\WitsmlExtensions.cs" />
+    <Compile Include="Providers\EtpExtensions.cs" />
+    <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
+    <Compile Include="Providers\Store\StoreStore131Provider.cs" />
+    <Compile Include="Providers\Store\StoreStore200Provider.cs" />
+    <Compile Include="Providers\Store\StoreStore141Provider.cs" />
+    <Compile Include="Providers\Store\StoreStoreProvider.cs" />
+    <Compile Include="Data\Security\IUserAuthorizationProvider.cs" />
+    <Compile Include="Data\Security\UserAuthorizationProvider.cs" />
+    <Compile Include="Transactions\IWitsmlTransaction.cs" />
+    <Compile Include="Transactions\WitsmlTransaction.cs" />
+    <Compile Include="WitsmlOperationContext.cs" />
+    <Compile Include="WitsmlResult.cs" />
+    <Compile Include="WitsmlStore.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Framework\Framework.csproj">
+      <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml\Witsml.csproj">
+      <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
+      <Name>Witsml</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Witsml.Server.nuspec" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
