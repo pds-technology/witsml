@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PDS.Witsml</RootNamespace>
+    <AssemblyName>PDS.Witsml</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\Debug\PDS.Witsml.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PDS.Witsml.xml</DocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Avro, Version=0.9.0.0, Culture=neutral, PublicKeyToken=b1248d7eeb9d0814, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20170202.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20170309.1\lib\net452\ETP.DevKit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.1.5.0.0\lib\ETP.Messages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FluentValidationNA, Version=1.2.16.24816, Culture=neutral, PublicKeyToken=0950390b87309e14, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\FluentValidationNA.1.2.16\lib\net40\FluentValidationNA.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="LinqExtender, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\LinqExtender.3.0.1\lib\LinqExtender.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketBase, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketBase.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketEngine, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperWebSocket, Version=0.9.0.0, Culture=neutral, PublicKeyToken=7ba53b9a7cef5d1c, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperWebSocket.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Linq.Dynamic, Version=1.1.14.15853, Culture=neutral, PublicKeyToken=b72be0322d1b32a8, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\System.Linq.Dynamic.Library.1.1.14\lib\net40\System.Linq.Dynamic.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Compatibility\CompatibilitySettings.cs" />
+    <Compile Include="Compatibility\InvalidDataRowSetting.cs" />
+    <Compile Include="Compatibility\UnknownElementSetting.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistory.cs" />
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryList.cs" />
+    <Compile Include="Data\DataObjectNavigationContext.cs" />
+    <Compile Include="Data\DataObjectNavigator.cs" />
+    <Compile Include="Data\Channels\ChannelDataBlock.cs" />
+    <Compile Include="Data\Channels\ChannelDataExtensions.cs" />
+    <Compile Include="Data\Channels\ChannelDataReader.cs" />
+    <Compile Include="Data\Channels\ChannelIndexInfo.cs" />
+    <Compile Include="Data\Channels\IChannelDataRecord.cs" />
+    <Compile Include="Data\Channels\IQueryContext.cs" />
+    <Compile Include="Data\DataGenerator.cs" />
+    <Compile Include="Data\DataObjectTemplate.cs" />
+    <Compile Include="Data\Logs\Log131Generator.cs" />
+    <Compile Include="Data\Logs\Log141Generator.cs" />
+    <Compile Include="Data\Logs\LogExtensions.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131Generator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141Generator.cs" />
+    <Compile Include="EtpContentTypes.cs" />
+    <Compile Include="ErrorCodes.cs" />
+    <Compile Include="Export131Attribute.cs" />
+    <Compile Include="Export200Attribute.cs" />
+    <Compile Include="ExportType.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Functions.cs" />
+    <Compile Include="Data\Logs\Log200Generator.cs" />
+    <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\IWitsmlContext.cs" />
+    <Compile Include="Linq\IWitsmlQuery.cs" />
+    <Compile Include="Linq\Witsml131Context.cs" />
+    <Compile Include="Linq\Witsml141Context.cs" />
+    <Compile Include="Linq\WitsmlContext.cs" />
+    <Compile Include="Linq\WitsmlQuery.cs" />
+    <Compile Include="Linq\WitsmlQueryExtensions.cs" />
+    <Compile Include="ObjectFolders.cs" />
+    <Compile Include="ObjectName.cs" />
+    <Compile Include="Export141Attribute.cs" />
+    <Compile Include="ObjectNames.cs" />
+    <Compile Include="ObjectNames.generated.cs">
+      <DependentUpon>ObjectNames.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ObjectTypes.cs" />
+    <Compile Include="ObjectTypes.generated.cs">
+      <DependentUpon>ObjectTypes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="OptionsIn.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="EtpUris.cs" />
+    <Compile Include="Query\QueryTemplates.cs" />
+    <Compile Include="Query\QueryTemplates.generated.cs">
+      <DependentUpon>QueryTemplates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Query\WitsmlQueryContext.cs" />
+    <Compile Include="Range.cs" />
+    <Compile Include="Units.cs" />
+    <Compile Include="WitsmlException.cs" />
+    <Compile Include="WitsmlParser.cs" />
+    <Compile Include="WitsmlParserContext.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Framework\Framework.csproj">
+      <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Witsml.nuspec" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
