@@ -310,11 +310,11 @@
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
-      <Name>Witsml.Server</Name>
+      <Name>Store.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
-      <Name>Witsml</Name>
+      <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
@@ -325,8 +325,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
-    xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y
-    xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y
+    xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
+    xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

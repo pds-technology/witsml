@@ -290,19 +290,19 @@
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Store.Jobs\Store.Jobs.csproj">
       <Project>{006f1a29-952b-4264-8e91-0d445f74b183}</Project>
-      <Name>Witsml.Server.Jobs</Name>
+      <Name>Store.Jobs</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Store.Web\Store.Web.csproj">
       <Project>{5ff377f4-56c5-49d9-ba0a-1955a33c4902}</Project>
-      <Name>Witsml.Server.Web</Name>
+      <Name>Store.Web</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
-      <Name>Witsml.Server</Name>
+      <Name>Store.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
-      <Name>Witsml</Name>
+      <Name>Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
