@@ -2894,6 +2894,57 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.UpdateAndAssert(updateLog, ErrorCodes.ErrorRowDataCount);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Update_Channels_With_Blank_Data()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            var mnemonicList = DevKit.Mnemonics(Log);
+            var unitList = DevKit.Units(Log);
+
+            // Initialize data 
+            DevKit.InitData(Log, mnemonicList, unitList, 0, 0, 0);
+            DevKit.InitData(Log, mnemonicList, unitList, 1, 1, 1);
+            DevKit.InitData(Log, mnemonicList, unitList, 2, 2, 2);
+            DevKit.InitData(Log, mnemonicList, unitList, 3, 3, 3);
+            DevKit.InitData(Log, mnemonicList, unitList, 4, 4, 4);
+
+            DevKit.AddAndAssert(Log);
+
+            var updateLog = DevKit.CreateLog(Log);
+            DevKit.InitData(updateLog, mnemonicList, unitList, 0, 0, 0);
+            DevKit.InitData(updateLog, mnemonicList, unitList, 1, null, 1);
+            DevKit.InitData(updateLog, mnemonicList, unitList, 2, null, 2);
+            DevKit.InitData(updateLog, mnemonicList, unitList, 3, 3, null);
+            DevKit.InitData(updateLog, mnemonicList, unitList, 4, 4, null);
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var queryLog = DevKit.CreateLog(Log);
+            var results = DevKit.QueryAndAssert<LogList, Log>(queryLog);
+
+            Assert.IsNotNull(results);
+            Assert.IsNotNull(results.LogData);
+            Assert.AreEqual(Log.LogData.Count, results.LogData.Count);
+            Assert.AreEqual(Log.LogData[0].Data.Count, results.LogData[0].Data.Count);
+
+            var row1 = results.LogData[0].Data[1].Split(',');
+            var row2 = results.LogData[0].Data[2].Split(',');
+            var row3 = results.LogData[0].Data[3].Split(',');
+            var row4 = results.LogData[0].Data[4].Split(',');
+
+            // Row 1 & 2, Curve 1 should be empty now
+            Assert.IsTrue(string.IsNullOrEmpty(row1[1]));
+            Assert.IsTrue(string.IsNullOrEmpty(row2[1]));
+
+            // Row 3 & 4, Curve 2 should still have a value
+            Assert.IsTrue(!string.IsNullOrEmpty(row3[2]));
+            Assert.IsTrue(!string.IsNullOrEmpty(row4[2]));
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()

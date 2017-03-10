@@ -483,7 +483,8 @@ namespace PDS.WITSMLstudio.Data.Channels
                             var value = update.GetValue(updateIndex + Depth);
                             if (index < row.Count)
                             {
-                                if (!IsNull(value, index))
+                                var range = update.GetChannelIndexRange(updateIndex + Depth);
+                                if (!IsNull(value, index) || range.Contains(GetIndexValue()))
                                     row[index] = value;
                             }
                             else
