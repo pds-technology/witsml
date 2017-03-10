@@ -76,6 +76,16 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlQueryContext"/> class.
+        /// </summary>
+        /// <param name="connection">The w itsml web service connection.</param>
+        /// <param name="version">The version.</param>
+        public WitsmlQueryContext(WITSMLWebServiceConnection connection, WMLSVersion version)
+            : base(connection, version)
+        {
+        }
+
+        /// <summary>
         /// Gets all wells.
         /// </summary>
         /// <returns>

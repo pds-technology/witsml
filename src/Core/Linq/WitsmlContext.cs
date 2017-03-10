@@ -76,6 +76,17 @@ namespace PDS.WITSMLstudio.Linq
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlContext"/> class.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="version">The version.</param>
+        protected WitsmlContext(WITSMLWebServiceConnection connection, WMLSVersion version)
+        {
+            Connection = connection;
+            SetDataSchemaVersion(version);
+        }
+
+        /// <summary>
         /// Prevents a default instance of the <see cref="WitsmlContext"/> class from being created.
         /// </summary>
         private WitsmlContext()
@@ -206,7 +217,7 @@ namespace PDS.WITSMLstudio.Linq
         /// <param name="optionsIn">The options in.</param>
         /// <returns></returns>
         protected virtual IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, params OptionsIn[] optionsIn) where T : IDataObject
-        {            
+        {
             var filters = new List<string>();
             var values = new List<object>();
             var count = 0;
@@ -246,7 +257,7 @@ namespace PDS.WITSMLstudio.Linq
             }
 
             return dataObjects.OrderBy(x => x.Name);
-        }       
+        }
 
         /// <summary>
         /// Formats the WITSML query.
