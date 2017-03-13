@@ -125,8 +125,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The wellbore objects of specified type.</returns>
         public override IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, parentUri);
+            var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -139,8 +138,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object identifier.</returns>
         public override IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, uri);
+            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
         }
@@ -153,8 +151,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The header for the specified growing objects.</returns>
         public override IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, uri);
+            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
         }
@@ -169,8 +166,7 @@ namespace PDS.WITSMLstudio.Query
         /// </returns>
         public override IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, parentUri);
+            var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
 
             if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
                 _template.Add(queryIn, "//log", "objectGrowing");
@@ -188,10 +184,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, uri);
-
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.All).FirstOrDefault();
+            return GetObjectDetails(objectType, uri, OptionsIn.ReturnElements.All);
         }
 
         /// <summary>
@@ -203,8 +196,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, uri);
+            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
         }
@@ -266,6 +258,13 @@ namespace PDS.WITSMLstudio.Query
                 LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
                 return result;
             }
+        }
+        private XDocument GetTemplateAndSetIds(string objectType, EtpUri uri, OptionsIn.ReturnElements templateType)
+        {
+            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, templateType);
+            SetFilterCriteria(objectType, queryIn, uri);
+
+            return queryIn;
         }
 
         private void SetFilterCriteria(string objectType, XDocument document, EtpUri uri)
