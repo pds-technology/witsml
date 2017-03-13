@@ -83,7 +83,7 @@ namespace PDS.WITSMLstudio
             Assert.IsNull(actual);
 
             dt = new DateTime(2016, 1, 1, 0, 0, 0, 1);
-            dt = dt.Value.AddHours(TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours);
+            dt = dt.Value.AddHours(TimeZoneInfo.Local.GetUtcOffset(dt.Value).Hours);
             actual = dt.ToUnixTimeMicroseconds();
 
             Assert.IsNotNull(actual);
