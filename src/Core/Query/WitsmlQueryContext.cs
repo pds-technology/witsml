@@ -132,6 +132,20 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Gets the object identifier only.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The object identifier.</returns>
+        public override IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
+        {
+            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
+            SetFilterCriteria(objectType, queryIn, uri);
+
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets the growing object header only.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -139,10 +153,10 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The header for the specified growing objects.</returns>
         public override IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.HeaderOnly);
+            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
             SetFilterCriteria(objectType, queryIn, uri);
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested).FirstOrDefault();
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
         }
 
         /// <summary>
@@ -167,20 +181,6 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
-        /// Gets the object identifier only.
-        /// </summary>
-        /// <param name="objectType">Type of the object.</param>
-        /// <param name="uri">The URI.</param>
-        /// <returns>The object identifier.</returns>
-        public override IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
-        {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
-            SetFilterCriteria(objectType, queryIn, uri);
-
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested).FirstOrDefault();
-        }
-
-        /// <summary>
         /// Gets the object details.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -188,10 +188,10 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.All);
+            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
             SetFilterCriteria(objectType, queryIn, uri);
 
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested).FirstOrDefault();
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.All).FirstOrDefault();
         }
 
         /// <summary>
@@ -203,18 +203,10 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.All);
+            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
             SetFilterCriteria(objectType, queryIn, uri);
 
-            var filteredOptionsIn = new List<OptionsIn> { OptionsIn.ReturnElements.Requested };
-
-            optionsIn.ForEach(o =>
-            {
-                if (o.Value != OptionsIn.ReturnElements.All.Value)
-                    filteredOptionsIn.Add(o);
-            });
-
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), filteredOptionsIn.ToArray()).FirstOrDefault();
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
         }
 
         /// <summary>
