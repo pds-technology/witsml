@@ -59,6 +59,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                 return 0;
 
             var range = GetQueryIndexRange(parser);
+            var maxDataNodes = context?.MaxDataNodes;
 
             entity.TrajectoryStation = range.Start.HasValue
                 ? range.End.HasValue
@@ -68,12 +69,13 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                     ? stations.Where(s => s.MD.Value <= range.End.Value).ToList()
                     : stations;
 
-            if (entity.TrajectoryStation.Count > WitsmlSettings.TrajectoryMaxDataNodesGet)
+            SortStationData(entity.TrajectoryStation);
+
+            if (maxDataNodes != null && entity.TrajectoryStation.Count > maxDataNodes.Value)
             {
                 Logger.Debug($"Truncating trajectory stations with {entity.TrajectoryStation.Count}.");
-                entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, WitsmlSettings.TrajectoryMaxDataNodesGet);
-                if (context != null) 
-                    context.DataTruncated = true;
+                entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, maxDataNodes.Value);
+                context.DataTruncated = true;
             }
 
             return entity.TrajectoryStation.Count;
