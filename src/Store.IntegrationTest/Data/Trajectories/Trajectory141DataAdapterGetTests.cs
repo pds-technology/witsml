@@ -235,6 +235,15 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             Assert.IsNotNull(traj);
             Assert.AreEqual(maxDataNodes, traj.TrajectoryStation.Count);
         }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_GetFromStore_Results_Are_Limited_To_MaxReturnNodes_OptionsIn()
+        {
+            Trajectory141DataAdapter_GetFromStore_Results_Are_Limited_To_MaxReturnNodes_OptionsIn(10);
+            TestReset(20);
+            Trajectory141DataAdapter_GetFromStore_Results_Are_Limited_To_MaxReturnNodes_OptionsIn(25);
+        }
+
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Returns_Data_Only_On_Chunked_Data()
         {
@@ -848,6 +857,31 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
             result.TrajectoryStation.ForEach(s => DevKit.AssertRequestedElements(s, new[] { "md", "azi", "incl", "Uid" }));
+        }
+
+        private void Trajectory141DataAdapter_GetFromStore_Results_Are_Limited_To_MaxReturnNodes_OptionsIn(int numberOfStations)
+        {
+            AddParents();
+            var maxDataNodes = 5;
+
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes + numberOfStations, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            short errorCode;
+            var result = DevKit.QueryWithErrorCode<TrajectoryList, Trajectory>(
+                new Trajectory() { Uid = Trajectory.Uid, UidWell = Trajectory.UidWell, UidWellbore = Trajectory.UidWellbore },
+                out errorCode,
+                ObjectTypes.Trajectory,
+                null,
+                OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.MaxReturnNodes.Eq(maxDataNodes)));
+
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Returning partial data.");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            var trajectory = result[0];
+            Assert.IsNotNull(trajectory);
+            Assert.AreEqual(maxDataNodes, trajectory.TrajectoryStation.Count);
         }
 
         #region Helper Methods
