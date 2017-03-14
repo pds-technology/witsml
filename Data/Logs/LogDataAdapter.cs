@@ -1572,8 +1572,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
         private UpdateDefinition<T> UpdateDateTimeIndexRange(UpdateDefinition<T> logHeaderUpdate, int arrayIndex, Range<double?> range, bool increasing, bool isIndexCurve, TimeSpan? offset)
         {
-            var minDate = string.Empty;
-            var maxDate = string.Empty;
+            string minDate = null;
+            string maxDate = null;
 
             // Sort range in min/max order
             range = range.Sort();
@@ -1581,20 +1581,20 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             if (range.Start.HasValue)
             {
                 minDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).ToOffsetTime(offset).ToString("o");
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndex", minDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndexSpecified", true);
-                // NOTE: logging here is too verbose!
-                //Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
             }
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndex", minDate);
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinDateTimeIndexSpecified", minDate != null);
+            // NOTE: logging here is too verbose!
+            //Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
 
             if (range.End.HasValue)
             {
                 maxDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).ToOffsetTime(offset).ToString("o");
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndex", maxDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndexSpecified", true);
-                // NOTE: logging here is too verbose!
-                //Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);
             }
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndex", maxDate);
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndexSpecified", maxDate != null);
+            // NOTE: logging here is too verbose!
+            //Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);
 
             if (isIndexCurve)
             {
@@ -1602,10 +1602,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 var endDate = increasing ? maxDate : minDate;
 
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "StartDateTimeIndex", startDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "StartDateTimeIndexSpecified", true);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "StartDateTimeIndexSpecified", minDate != null);
 
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "EndDateTimeIndex", endDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "EndDateTimeIndexSpecified", true);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "EndDateTimeIndexSpecified", maxDate != null);
             }
 
             return logHeaderUpdate;
