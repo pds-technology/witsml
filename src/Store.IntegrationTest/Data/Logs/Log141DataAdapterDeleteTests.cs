@@ -1324,6 +1324,41 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DeleteLog(Log, delete, ErrorCodes.ErrorDeletingIndexCurve);
         }
 
+        [TestMethod, Description("Tests that a time log can be queried after removing all data and all DateTimeIndexSpecified flags are false")]
+        public void Log141DataAdapter_DeleteFromStore_Can_Query_TimeLog_After_Deleting_All_Data()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10, 1, false);
+
+            var response = DevKit.AddAndAssert(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert that we can retrieve the time log that was just added
+            var queryLog = DevKit.CreateLog(Log);
+            var logWithData = DevKit.GetAndAssert(queryLog);
+
+            // Assert that all time indexes are specified
+            DevKit.AssertTimeIndexSpecified(logWithData, true);
+
+            var deleteLogData = DevKit.CreateLog(Log);
+            deleteLogData.StartDateTimeIndex = logWithData.StartDateTimeIndex;
+            deleteLogData.EndDateTimeIndex = logWithData.EndDateTimeIndex;
+
+            // Delete the full index range of data.
+            DevKit.DeleteAndAssert(deleteLogData, partialDelete: true);
+
+            // Get and Assert that we are able to retrieve the time log after all of the data has been deleted
+            var logWithoutData = DevKit.GetAndAssert(queryLog);
+
+            // Assert that there is no data
+            Assert.AreEqual(0, logWithoutData.LogData.Count);
+
+            // Assert that all time indexes are no longer specified
+            DevKit.AssertTimeIndexSpecified(logWithoutData, false);
+        }
+
         #region Helper Methods
 
         private void DeleteLog(Log log, string delete, ErrorCodes error = ErrorCodes.Success)
