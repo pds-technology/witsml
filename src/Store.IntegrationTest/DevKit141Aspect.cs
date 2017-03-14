@@ -1094,5 +1094,17 @@ namespace PDS.WITSMLstudio.Store
             Uom = "m",
             Value = $"1{id}.0"
         };
+
+        public void AssertTimeIndexSpecified(Log log, bool isIndexSpecified)
+        {
+            Assert.AreEqual(isIndexSpecified, log.StartDateTimeIndexSpecified);
+            Assert.AreEqual(isIndexSpecified, log.EndDateTimeIndexSpecified);
+
+            foreach (var logCurveInfo in log.LogCurveInfo)
+            {
+                Assert.AreEqual(isIndexSpecified, logCurveInfo.MinDateTimeIndexSpecified);
+                Assert.AreEqual(isIndexSpecified, logCurveInfo.MaxDateTimeIndexSpecified);
+            }
+        }
     }
 }
