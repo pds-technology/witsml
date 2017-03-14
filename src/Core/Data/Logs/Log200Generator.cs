@@ -376,15 +376,19 @@ namespace PDS.WITSMLstudio.Data.Logs
         private string GenerateChannelValues(Random random, ChannelSet channelSet)
         {
             var channelValues = string.Empty;
+            var nullCount = 0;
             foreach (Channel channel in channelSet.Channel)
             {
                 channelValues = channelValues == string.Empty ? " [" : channelValues + ", ";
 
                 var column = string.Empty;
                 bool setToNull = (random.Next() % 5 == 0);
-                if (setToNull)
+
+                // Don't allow all channels to have a null value
+                if (setToNull && nullCount < (channelSet.Channel.Count - 1))
                 {
                     column += "null";
+                    nullCount++;
                 }
                 else
                 {
