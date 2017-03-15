@@ -31,5 +31,13 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="uri">The URI.</param>
         /// <param name="isGrowing">The objectGrowing flag of a growing object is set to this value.</param>
         void UpdateObjectGrowing(EtpUri uri, bool isGrowing);
+
+        /// <summary>
+        /// Determines whether this instance can save the data portion of the growing object.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
+        /// </returns>
+        bool CanSaveData();
     }
 }
