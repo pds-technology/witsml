@@ -55,6 +55,7 @@ namespace PDS.WITSMLstudio.Store.Data
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
             var op = WitsmlOperationContext.Current;
+            op.Function = Functions.GetFromStore;
             var parser = new WitsmlQueryParser(op.Document.Root, context.ObjectType, context.Options);
             var childParsers = parser.ForkElements().ToArray();
 
@@ -96,7 +97,9 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             Logger.DebugFormat("Adding {0}", typeof(TObject).Name);
 
-            var root = WitsmlOperationContext.Current.Document.Root;
+            var op = WitsmlOperationContext.Current;
+            op.Function = Functions.AddToStore;
+            var root = op.Document.Root;
             var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
 
             return Add(parser);
@@ -113,7 +116,9 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             Logger.DebugFormat("Updating {0}", typeof(TObject).Name);
 
-            var root = WitsmlOperationContext.Current.Document.Root;
+            var op = WitsmlOperationContext.Current;
+            op.Function = Functions.UpdateInStore;
+            var root = op.Document.Root;
             var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
 
             return Update(parser);
@@ -130,7 +135,9 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
 
-            var root = WitsmlOperationContext.Current.Document.Root;
+            var op = WitsmlOperationContext.Current;
+            op.Function = Functions.DeleteFromStore;
+            var root = op.Document.Root;
             var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
 
             WitsmlOperationContext.Current.IsCascadeDelete = parser.CascadedDelete();
