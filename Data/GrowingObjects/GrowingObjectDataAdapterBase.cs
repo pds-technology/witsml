@@ -75,6 +75,17 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         }
 
         /// <summary>
+        /// Determines whether this instance can save the data portion of the growing object.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool CanSaveData()
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Determines whether the objectGrowing flag is true for the specified entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
