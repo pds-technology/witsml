@@ -24,6 +24,7 @@ using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
+using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -119,6 +120,17 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             }
 
             return entities;
+        }
+
+        /// <summary>
+        /// Determines whether this instance can save the data portion of the growing object.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanSaveData()
+        {
+            return WitsmlOperationContext.Current.Function != Functions.PutObject || CompatibilitySettings.LogAllowPutObjectWithData;
         }
 
         /// <summary>

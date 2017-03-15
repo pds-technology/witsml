@@ -58,8 +58,13 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 var readers = ExtractDataReaders(dataObject);
                 // Insert log header
                 InsertEntity(dataObject);
-                // Update log data and index ranges
-                UpdateLogDataAndIndexRange(dataObject.GetUri(), readers);
+
+                if (CanSaveData())
+                {
+                    // Update log data and index ranges
+                    UpdateLogDataAndIndexRange(dataObject.GetUri(), readers);
+                }
+
                 // Commit transaction
                 transaction.Commit();
             }
@@ -110,8 +115,13 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 var readers = ExtractDataReaders(dataObject);
                 // Replace log header
                 ReplaceEntity(dataObject, uri);
-                // Update log data and index ranges
-                UpdateLogDataAndIndexRange(uri, readers, originalMnemonics);
+
+                if (CanSaveData())
+                {
+                    // Update log data and index ranges
+                    UpdateLogDataAndIndexRange(uri, readers, originalMnemonics);
+                }
+
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
