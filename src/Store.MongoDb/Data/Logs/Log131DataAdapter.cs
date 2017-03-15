@@ -66,9 +66,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 {
                     // Update log data and index ranges
                     UpdateLogDataAndIndexRange(uri, new[] {reader});
-                    // Update the DataRowCount for the Log
-                    UpdateDataRowCount(uri);
                 }
+
+                // Update the DataRowCount for the Log
+                UpdateDataRowCount(uri);
 
                 // Commit transaction
                 transaction.Commit();
@@ -128,9 +129,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     // Update log data and index ranges
                     UpdateLogDataAndIndexRange(uri, new[] {reader}, originalMnemonics);
                     // Update the DataRowCount for the Log
-                    UpdateDataRowCount(uri);
-                    // Validate log header result
                 }
+
+                UpdateDataRowCount(uri);
+                // Validate log header result
 
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
