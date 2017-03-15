@@ -26,6 +26,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -141,6 +142,12 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(uri);
+
+                if (!CanSaveData())
+                {
+                    ClearTrajectoryStations(dataObject);
+                }
+
                 SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 InsertEntity(dataObject);
@@ -182,6 +189,12 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         public override void Replace(WitsmlQueryParser parser, T dataObject)
         {
             var uri = dataObject.GetUri();
+
+            if (!CanSaveData())
+            {
+                ClearTrajectoryStations(dataObject);
+            }
+
             UpdateTrajectoryWithStations(parser, dataObject, uri);
         }
 
@@ -239,6 +252,17 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
    
                 transaction.Commit();
             }
+        }
+
+        /// <summary>
+        /// Determines whether this instance can save the data portion of the growing object.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanSaveData()
+        {
+            return WitsmlOperationContext.Current.Function != Functions.PutObject || CompatibilitySettings.TrajectoryAllowPutObjectWithData;
         }
 
         /// <summary>
