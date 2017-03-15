@@ -76,5 +76,32 @@ namespace PDS.WITSMLstudio.Properties {
                 return ((string)(this["InvalidDataRowSetting"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LogAllowPutObjectWithData {
+            get {
+                return ((bool)(this["LogAllowPutObjectWithData"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TrajectoryAllowPutObjectWithData {
+            get {
+                return ((bool)(this["TrajectoryAllowPutObjectWithData"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MudLogAllowPutObjectWithData {
+            get {
+                return ((bool)(this["MudLogAllowPutObjectWithData"]));
+            }
+        }
     }
 }

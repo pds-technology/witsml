@@ -32,6 +32,21 @@ namespace PDS.WITSMLstudio.Compatibility
         public static bool AllowDuplicateNonRecurringElements;
 
         /// <summary>
+        /// Allow Log data to be saved during the put of a data object.
+        /// </summary>
+        public static bool LogAllowPutObjectWithData;
+
+        /// <summary>
+        /// Allow Trajectory stations to be saved during the put of a data object.
+        /// </summary>
+        public static bool TrajectoryAllowPutObjectWithData;
+
+        /// <summary>
+        /// Allow Mud Log data to be saved during the put of a data object.
+        /// </summary>
+        public static bool MudLogAllowPutObjectWithData;
+
+        /// <summary>
         /// The invalid data row setting.
         /// </summary>
         public static InvalidDataRowSetting InvalidDataRowSetting;
@@ -47,6 +62,9 @@ namespace PDS.WITSMLstudio.Compatibility
         static CompatibilitySettings()
         {
             AllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+            LogAllowPutObjectWithData = Settings.Default.LogAllowPutObjectWithData;
+            TrajectoryAllowPutObjectWithData = Settings.Default.TrajectoryAllowPutObjectWithData;
+            MudLogAllowPutObjectWithData = Settings.Default.MudLogAllowPutObjectWithData;
             Enum.TryParse(Settings.Default.InvalidDataRowSetting, out InvalidDataRowSetting);
             Enum.TryParse(Settings.Default.UnknownElementSetting, out UnknownElementSetting);
         }
