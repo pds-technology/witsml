@@ -57,7 +57,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             dataObject.Uuid = dataObject.NewUuid();
             dataObject.Citation = dataObject.Citation.Create();
-            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
+            dataObject.SchemaVersion = dataObject.SchemaVersion ?? OptionsIn.DataVersion.Version200.Value;
         }
 
         /// <summary>
