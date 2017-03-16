@@ -577,6 +577,14 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
         private void InitializeChannelDataProviders()
         {
+            var providers = _container.ResolveAll<IChannelDataProvider>();
+
+            if (!providers.Any())
+            {
+                Logger.Warn("No IChannelDataProvider instances found.");
+                return;
+            }
+
             _providers = new Dictionary<string, List<IChannelDataProvider>>
             {
                 {OptionsIn.DataVersion.Version131.Value, new List<IChannelDataProvider>{_container.Resolve<IChannelDataProvider>(ObjectNames.Log131)}},
