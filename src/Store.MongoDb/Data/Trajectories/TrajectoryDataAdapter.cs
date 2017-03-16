@@ -262,7 +262,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// </returns>
         public override bool CanSaveData()
         {
-            return WitsmlOperationContext.Current.Function != Functions.PutObject || CompatibilitySettings.TrajectoryAllowPutObjectWithData;
+            return WitsmlOperationContext.Current.Request.Function != Functions.PutObject || CompatibilitySettings.TrajectoryAllowPutObjectWithData;
         }
 
         /// <summary>
