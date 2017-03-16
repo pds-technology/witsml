@@ -21,8 +21,8 @@
                 <ModulePath>.*Energistics.DataAccess.*</ModulePath>  
                 <ModulePath>.*Etp.DevKit.*</ModulePath>  
                 <ModulePath>.*LinqExtender.*</ModulePath>  
-                <ModulePath>.*PDS\.*Test\.dll$</ModulePath>  
-                <ModulePath>.*PDS\.WITSMLstudio\.Framework\.Web\.dll$</ModulePath>  
+                <ModulePath>.*PDS.*Test\.dll$</ModulePath>  
+                <ModulePath>.*PDS.*Web\.dll$</ModulePath>  
                 <ModulePath>.*super.*socket.*</ModulePath>  
                 <ModulePath>.*antlr.*</ModulePath>  
               </Exclude>  
