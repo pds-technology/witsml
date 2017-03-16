@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
@@ -32,6 +33,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
+    [Export(typeof(IChannelDataProvider))]
     [Export200(ObjectTypes.Log, typeof(IChannelDataProvider))]
     public partial class Log200DataAdapter : IChannelDataProvider
     {

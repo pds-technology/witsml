@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
@@ -35,6 +36,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Channel" />
     /// </summary>
+    [Export(typeof(IChannelDataProvider))]
     [Export200(ObjectTypes.Channel, typeof(IChannelDataProvider))]
     public partial class Channel200DataAdapter : IChannelDataProvider
     {
