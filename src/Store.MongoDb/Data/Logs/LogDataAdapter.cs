@@ -130,7 +130,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// </returns>
         public override bool CanSaveData()
         {
-            return WitsmlOperationContext.Current.Function != Functions.PutObject || CompatibilitySettings.LogAllowPutObjectWithData;
+            return WitsmlOperationContext.Current.Request.Function != Functions.PutObject || CompatibilitySettings.LogAllowPutObjectWithData;
         }
 
         /// <summary>
