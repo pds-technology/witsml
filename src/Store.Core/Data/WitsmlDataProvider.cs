@@ -104,8 +104,6 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A collection of data objects.</returns>
         IList IEtpDataProvider.GetAll(EtpUri? parentUri)
         {
-            var context = WitsmlOperationContext.Current;
-            context.Function = Functions.GetObject;
             return GetAll(parentUri);
         }
 
@@ -116,8 +114,6 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A collection of data objects.</returns>
         public virtual List<TObject> GetAll(EtpUri? parentUri = null)
         {
-            var context = WitsmlOperationContext.Current;
-            context.Function = Functions.GetObject;
             return DataAdapter.GetAll(parentUri);
         }
 
@@ -128,8 +124,6 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>The data object instance.</returns>
         object IEtpDataProvider.Get(EtpUri uri)
         {
-            var context = WitsmlOperationContext.Current;
-            context.Function = Functions.GetObject;
             return Get(uri);
         }
 
@@ -140,8 +134,6 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>The data object instance.</returns>
         public virtual TObject Get(EtpUri uri)
         {
-            var context = WitsmlOperationContext.Current;
-            context.Function = Functions.GetObject;
             return DataAdapter.Get(uri);
         }
 
@@ -152,7 +144,6 @@ namespace PDS.WITSMLstudio.Store.Data
         public virtual void Put(DataObject dataObject)
         {
             var context = WitsmlOperationContext.Current;
-            context.Function = Functions.PutObject;
             context.Document = WitsmlParser.Parse(context.Request.Xml);
 
             var parser = new WitsmlQueryParser(context.Document.Root, context.Request.ObjectType, null);
@@ -197,7 +188,6 @@ namespace PDS.WITSMLstudio.Store.Data
                 parser.RemoveSubElements();
 
                 var context = WitsmlOperationContext.Current;
-                context.Function = Functions.DeleteObject;
                 context.Document = parser.Root.Document;
 
                 Delete(parser);

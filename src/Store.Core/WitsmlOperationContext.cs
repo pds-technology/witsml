@@ -100,11 +100,6 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
-        /// Gets or sets the function for the operation.
-        /// </summary>
-        public Functions Function { get; set; }
-
-        /// <summary>
         /// Gets or sets the transaction.
         /// </summary>
         /// <value>The transaction.</value>
