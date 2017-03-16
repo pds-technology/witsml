@@ -140,7 +140,10 @@ namespace PDS.WITSMLstudio.Query
         {
             var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
 
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
+            var queryOptionsIn = IsVersion131(uri)
+                ? OptionsIn.ReturnElements.Requested
+                : OptionsIn.ReturnElements.IdOnly;
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
         }
 
         /// <summary>
@@ -196,7 +199,10 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
         {
-            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
+            var templateOptionsIn = IsVersion131(uri)
+                ? OptionsIn.ReturnElements.All
+                : OptionsIn.ReturnElements.IdOnly;
+            var queryIn = GetTemplateAndSetIds(objectType, uri, templateOptionsIn);
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
         }
@@ -280,6 +286,11 @@ namespace PDS.WITSMLstudio.Query
 
             if (objectIds.ContainsKey(ObjectTypes.Wellbore) && !ObjectTypes.Wellbore.EqualsIgnoreCase(objectType))
                 _template.Set(document, "//@uidWellbore", objectIds[ObjectTypes.Wellbore]);
+        }
+
+        private bool IsVersion131(EtpUri uri)
+        {
+            return uri.Version.Equals(OptionsIn.DataVersion.Version131.Value);
         }
     }
 }
