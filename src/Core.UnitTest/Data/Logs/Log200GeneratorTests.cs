@@ -74,18 +74,19 @@ namespace PDS.WITSMLstudio.Data.Logs
         public void Log200Generator_Can_Generate_Depth_Log_Data_Increasing()
         {
             var channelSetList = new List<ChannelSet> {_depthLogChannelSet};
+            var numDataValue = 150;
 
-            _logGenerator.GenerateChannelData(channelSetList);
+            _logGenerator.GenerateChannelData(channelSetList, numDataValue);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
             var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
-            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(numDataValue, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
 
-            for (var i = 0; i < 5; i++)
+            for (var i = 0; i < numDataValue; i++)
             {
                 var channel = dataValues[i][1][0];
                 if (channel != null)
@@ -104,12 +105,13 @@ namespace PDS.WITSMLstudio.Data.Logs
             var channelSetList = new List<ChannelSet>();
             channelSetList.Add(_depthLogChannelSet);
 
-            _logGenerator.GenerateChannelData(channelSetList);
+            var numDataValue = 150;
+            _logGenerator.GenerateChannelData(channelSetList, numDataValue);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
             var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
-            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(numDataValue, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
         }
 
@@ -122,20 +124,21 @@ namespace PDS.WITSMLstudio.Data.Logs
             channelSet2.Channel.Add(_logGenerator.CreateChannel(_depthLog, channelSet2.Index, "GR", "GR", UnitOfMeasure.gAPI, "gamma_ray", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
 
             var channelSetList = new List<ChannelSet> {_depthLogChannelSet, channelSet2};
+            var numDataValue = 150;
 
-            _logGenerator.GenerateChannelData(channelSetList);
+            _logGenerator.GenerateChannelData(channelSetList, numDataValue);
             Assert.AreEqual(2, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
             Assert.AreEqual(1, channelSetList[1].Channel.Count);
 
             var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
-            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(numDataValue, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
 
             dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[1].GetData());
-            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(numDataValue, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(1, dataValues[0][1].Count);
@@ -144,19 +147,20 @@ namespace PDS.WITSMLstudio.Data.Logs
         [TestMethod]
         public void Log200Generator_Can_Generate_Time_Log_Data()
         {
-            var channelSetList = new List<ChannelSet> {_timeLogChannelSet};       
+            var channelSetList = new List<ChannelSet> {_timeLogChannelSet};
+            var numDataValue = 150;
 
-            _logGenerator.GenerateChannelData(channelSetList);
+            _logGenerator.GenerateChannelData(channelSetList, numDataValue);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
             var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
-            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(numDataValue, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);
             Assert.AreEqual(1, dataValues[0][1].Count);
 
-            for (var i = 0; i < 5; i++)
+            for (var i = 0; i < numDataValue; i++)
             {
                 var channel = dataValues[i][1][0];
                 if (channel != null)

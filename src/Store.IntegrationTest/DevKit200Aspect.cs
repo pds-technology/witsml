@@ -173,7 +173,7 @@ namespace PDS.WITSMLstudio.Store
         /// <param name="indexList">The index list.</param>
         /// <param name="loggingMethod">The logging method.</param>
         /// <param name="numDataValue">The number data value.</param>
-        public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.computed, int numDataValue = 5)
+        public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.computed, int numDataValue = 150)
         {
             ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
             channelSet.Index = indexList;

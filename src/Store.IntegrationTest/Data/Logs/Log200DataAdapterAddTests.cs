@@ -113,7 +113,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         {
             AddParents();
 
-            var numDataValue = 20;
+            var numDataValue = 150;
             var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
 
@@ -165,7 +165,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         {
             AddParents();
 
-            var numDataValue = 20;
+            var numDataValue = 150;
             var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             var mdChannelIndexDecreasing = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
             DevKit.InitHeader(Log, LoggingMethod.surface, mdChannelIndexDecreasing);
