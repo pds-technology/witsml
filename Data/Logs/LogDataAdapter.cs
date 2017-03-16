@@ -41,6 +41,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// <typeparam name="TChild">The type of the child.</typeparam>
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{T}" />
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.Channels.IChannelDataProvider" />
+    [Export(typeof(IChannelDataProvider))]
     public abstract class LogDataAdapter<T, TChild> : GrowingObjectDataAdapterBase<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
         /// <summary>
