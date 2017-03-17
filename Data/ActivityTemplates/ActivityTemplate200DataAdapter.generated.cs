@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,22 +38,27 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ActivityTemplate" />
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{ActivityTemplate}" />
+
     [Export(typeof(IWitsmlDataAdapter<ActivityTemplate>))]
     [Export200(ObjectTypes.ActivityTemplate, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class ActivityTemplate200DataAdapter : MongoDbDataAdapter<ActivityTemplate>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ActivityTemplate200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
+
         [ImportingConstructor]
         public ActivityTemplate200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.ActivityTemplate200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
+
         }
 
         /// <summary>
@@ -68,6 +73,7 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
+
         }
 
         /// <summary>
@@ -81,6 +87,7 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
 
             if (parentUri != null)
             {
+
                 //var uidWellbore = parentUri.Value.ObjectId;
                 //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
 

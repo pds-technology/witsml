@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,24 +38,31 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Log}" />
+
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export200(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataAdapter : MongoDbDataAdapter<Log>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
+
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
+
         [ImportingConstructor]
         public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
             : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
+
             ChannelSetDataAdapter = channelSetDataAdapter;
+
         }
 
         /// <summary>
@@ -75,6 +82,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
+
         }
 
         /// <summary>
@@ -88,6 +96,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             if (parentUri != null)
             {
+
                 var uidWellbore = parentUri.Value.ObjectId;
 
                 if (!string.IsNullOrWhiteSpace(uidWellbore))

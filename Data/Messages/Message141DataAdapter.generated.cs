@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,23 +38,29 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Message}" />
+
     [Export(typeof(IWitsml141Configuration))]
+
     [Export(typeof(IWitsmlDataAdapter<Message>))]
     [Export141(ObjectTypes.Message, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message141DataAdapter : MongoDbDataAdapter<Message>, IWitsml141Configuration
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message141DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
+
         [ImportingConstructor]
         public Message141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Message141)
         {
             Logger.Debug("Instance created.");
+
         }
 
         /// <summary>
@@ -69,6 +75,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             capServer.Add(Functions.AddToStore, ObjectTypes.Message);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Message);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Message);
+
       }
 
         /// <summary>
@@ -83,6 +90,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
+
         }
 
         /// <summary>
@@ -96,6 +104,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
 
             if (parentUri != null)
             {
+
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];

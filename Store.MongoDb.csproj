@@ -261,6 +261,10 @@
     <Compile Include="Data\Wellbores\Wellbore200DataAdapter.generated.cs">
       <DependentUpon>Wellbore200DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.generated.cs">
+      <DependentUpon>WellCompletion200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well131DataAdapter.cs" />
     <Compile Include="Data\Wells\Well131DataAdapter.generated.cs">
       <DependentUpon>Well131DataAdapter.cs</DependentUpon>
