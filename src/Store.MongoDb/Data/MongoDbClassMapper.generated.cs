@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -90,6 +90,9 @@ namespace PDS.WITSMLstudio.Store.Data
             Register<Witsml131.Wellbore>();
             Register<Witsml141.Wellbore>();
             Register2<Witsml200.Wellbore>();
+
+            // wellCompletion
+            Register2<Witsml200.WellCompletion>();
 
         }
     }

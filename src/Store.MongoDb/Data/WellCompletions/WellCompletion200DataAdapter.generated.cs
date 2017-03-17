@@ -26,94 +26,72 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess.WITSML131;
-using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.WITSMLstudio.Store.Data.Logs
+namespace PDS.WITSMLstudio.Store.Data.WellCompletions
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="WellCompletion" />
     /// </summary>
 
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{WellCompletion}" />
 
-    [Export(typeof(IWitsml131Configuration))]
-
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export131(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<WellCompletion>))]
+    [Export200(ObjectTypes.WellCompletion, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml131Configuration
+    public partial class WellCompletion200DataAdapter : MongoDbDataAdapter<WellCompletion>
 
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log131DataAdapter" /> class.
+        /// Initializes a new instance of the <see cref="WellCompletion200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
 
         [ImportingConstructor]
-        public Log131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
-            : base(container, databaseProvider, ObjectNames.Log131)
+        public WellCompletion200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
+            : base(container, databaseProvider, ObjectNames.WellCompletion200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
 
         }
 
         /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-
-      }
-
-        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Log> GetAll(EtpUri? parentUri)
+        public override List<WellCompletion> GetAll(EtpUri? parentUri)
         {
-            Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
+            Logger.DebugFormat("Fetching all WellCompletions; Parent URI: {0}", parentUri);
 
             return GetAllQuery(parentUri)
-                .OrderBy(x => x.Name)
+                .OrderBy(x => x.Citation.Title)
                 .ToList();
 
         }
 
         /// <summary>
-        /// Gets an <see cref="IQueryable{Log}" /> instance to by used by the GetAll method.
+        /// Gets an <see cref="IQueryable{WellCompletion}" /> instance to by used by the GetAll method.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>An executable query.</returns>
-        protected override IQueryable<Log> GetAllQuery(EtpUri? parentUri)
+        protected override IQueryable<WellCompletion> GetAllQuery(EtpUri? parentUri)
         {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
             {
 
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
-                var uidWellbore = ids[ObjectTypes.Wellbore];
-                var uidWell = ids[ObjectTypes.Well];
+                var uidWell = parentUri.Value.ObjectId;
 
                 if (!string.IsNullOrWhiteSpace(uidWell))
-                    query = query.Where(x => x.UidWell == uidWell);
-
-                if (!string.IsNullOrWhiteSpace(uidWellbore))
-                    query = query.Where(x => x.UidWellbore == uidWellbore);
+                    query = query.Where(x => x.Well.Uuid == uidWell);
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,23 +38,29 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
+
     [Export(typeof(IWitsml141Configuration))]
+
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
+
         [ImportingConstructor]
         public Log141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Log141)
         {
             Logger.Debug("Instance created.");
+
         }
 
         /// <summary>
@@ -70,6 +76,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesUpdate, WitsmlSettings.LogMaxDataPointsUpdate);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesDelete, WitsmlSettings.LogMaxDataPointsDelete);
             capServer.SetGrowingTimeoutPeriod(ObjectTypes.Log, WitsmlSettings.LogGrowingTimeoutPeriod);
+
       }
 
         /// <summary>
@@ -84,6 +91,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
+
         }
 
         /// <summary>
@@ -97,6 +105,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             if (parentUri != null)
             {
+
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];
