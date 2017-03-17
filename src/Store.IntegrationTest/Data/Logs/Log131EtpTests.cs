@@ -30,7 +30,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// </summary>
     public partial class Log131EtpTests
     {
-
         [TestMethod, Description("Tests that 131 Log Data can be added when Compatibility Setting LogAllowPutObjectWithData is True")]
         public async Task Log131_PutObject_Can_Add_Log_Data_With_LogAllowPutObjectWithData_True()
         {
@@ -74,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             // Verify that the Log was saved
             Assert.IsNotNull(result);
 
-            // Verify that the Log Data was saved.
+            // Verify the number of Log Data saved.
             var rowsExpected = allowPutData ? numRows : 0;
             Assert.IsNotNull(result.LogData);
             Assert.AreEqual(rowsExpected, result.LogData.Count);

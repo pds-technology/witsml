@@ -215,6 +215,19 @@ namespace PDS.WITSMLstudio.Store
             return CreateLog(log.Uid, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
         }
 
+        public Trajectory CreateTrajectory(Trajectory trajectory)
+        {
+            return new Trajectory
+            {
+                Uid = trajectory.Uid,
+                Name = trajectory.Name,
+                UidWell = trajectory.UidWell,
+                NameWell = trajectory.NameWell,
+                UidWellbore = trajectory.UidWellbore,
+                NameWellbore = trajectory.NameWellbore
+            };
+        }
+
         public void AddLogWithData(Log log, LogIndexType indexType, int numRows, bool hasEmptyChannel)
         {
             InitHeader(log, indexType);

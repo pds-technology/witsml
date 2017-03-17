@@ -16,6 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+using Energistics.DataAccess.WITSML131;
+using Energistics.Protocol.Store;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.WITSMLstudio.Compatibility;
+
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     /// <summary>
@@ -23,5 +29,52 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// </summary>
     public partial class Trajectory131EtpTests
     {
+        [TestMethod, Description("Tests that 131 Trajectory Data can be added when Compatibility Setting TrajectoryAllowPutObjectWithData is True")]
+        public async Task Trajectory131_PutObject_Can_Add_Trajectory_Data_With_TrajectoryAllowPutObjectWithData_True()
+        {
+            const int numStations = 10;
+            const bool allowPutData = true;
+
+            await Trajectory131_PutObject_Can_Add_Trajectory_Data_With_TrajectoryAllowPutObjectWithData(numStations, allowPutData);
+        }
+
+        [TestMethod, Description("Tests that 131 Trajectory Data cannot be added when Compatibility Setting TrajectoryAllowPutObjectWithData is False")]
+        public async Task Trajectory131_PutObject_Can_Add_Trajectory_Data_With_TrajectoryAllowPutObjectWithData_False()
+        {
+            const int numStations = 10;
+            const bool allowPutData = false;
+
+            await Trajectory131_PutObject_Can_Add_Trajectory_Data_With_TrajectoryAllowPutObjectWithData(numStations, allowPutData);
+        }
+
+        private async Task Trajectory131_PutObject_Can_Add_Trajectory_Data_With_TrajectoryAllowPutObjectWithData(int numStations, bool allowPutData)
+        {
+            AddParents();
+
+            // Allow for Log data to be saved during a Put
+            CompatibilitySettings.TrajectoryAllowPutObjectWithData = allowPutData;
+
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Trajectory.GetUri();
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(numStations, 0);
+
+            var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
+
+            // Put Object
+            await PutAndAssert(handler, dataObject);
+
+            // Get Object
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(DevKit.CreateTrajectory(Trajectory));
+
+            // Verify that the Trajectory was saved.
+            Assert.IsNotNull(result);
+
+            // Verify the number of Stations saved.
+            var stationsExpected = allowPutData ? numStations : 0;
+            Assert.IsNotNull(result.TrajectoryStation);
+            Assert.AreEqual(stationsExpected, result.TrajectoryStation.Count);
+        }
     }
 }
