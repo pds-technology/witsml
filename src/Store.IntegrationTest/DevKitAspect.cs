@@ -39,6 +39,9 @@ namespace PDS.WITSMLstudio.Store
     public abstract class DevKitAspect : DataGenerator
     {
         public static readonly bool DefaultAllowDuplicateNonRecurringElements;
+        public static readonly bool DefaultLogAllowPutObjectWithData;
+        public static readonly bool DefaultTrajectoryAllowPutObjectWithData;
+        public static readonly bool DefaultMudLogAllowPutObjectWithData;
         public static readonly InvalidDataRowSetting DefaultInvalidDataRowSetting;
         public static readonly UnknownElementSetting DefaultUnknownElementSetting;
 
@@ -72,6 +75,9 @@ namespace PDS.WITSMLstudio.Store
         static DevKitAspect()
         {
             DefaultAllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+            DefaultLogAllowPutObjectWithData = Settings.Default.LogAllowPutObjectWithData;
+            DefaultTrajectoryAllowPutObjectWithData = Settings.Default.TrajectoryAllowPutObjectWithData;
+            DefaultMudLogAllowPutObjectWithData = Settings.Default.MudLogAllowPutObjectWithData;
             Enum.TryParse(Settings.Default.InvalidDataRowSetting, out DefaultInvalidDataRowSetting);
             Enum.TryParse(Settings.Default.UnknownElementSetting, out DefaultUnknownElementSetting);
         }

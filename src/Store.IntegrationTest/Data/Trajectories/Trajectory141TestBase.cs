@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
@@ -32,6 +33,10 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
         partial void AfterEachTest()
         {
+            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
+            CompatibilitySettings.TrajectoryAllowPutObjectWithData = DevKitAspect.DefaultTrajectoryAllowPutObjectWithData;
+            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
+
             WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
             WitsmlSettings.TrajectoryMaxDataNodesGet = DevKitAspect.DefaultTrajectoryMaxDataNodesGet;
             WitsmlSettings.TrajectoryMaxDataNodesAdd = DevKitAspect.DefaultTrajectoryMaxDataNodesAdd;
