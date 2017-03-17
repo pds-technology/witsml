@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AddParents();
 
             // Allow for Log data to be saved during a Put
-            CompatibilitySettings.LogAllowPutObjectWithData = true;
+            CompatibilitySettings.LogAllowPutObjectWithData = allowPutData;
 
             await RequestSessionAndAssert();
 
