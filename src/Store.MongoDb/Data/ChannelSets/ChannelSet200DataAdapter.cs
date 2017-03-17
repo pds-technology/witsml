@@ -69,7 +69,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             }
 
             return metaDatas;
-        }       
+        }
 
         private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(ChannelSet entity, params EtpUri[] uris)
         {
@@ -142,11 +142,11 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             };
 
             // Get the ranges for the query mnemonics
-            var curveRanges = 
+            var curveRanges =
                 GetCurrentIndexRange(entity)
                 .Where(c => queryMnemonics.Contains(c.Key))
-                .Select(r => r.Value).ToList(); 
-            
+                .Select(r => r.Value).ToList();
+
             var indexChannel = entity.Index.FirstOrDefault();
             var increasing = indexChannel.IsIncreasing();
             var isTimeIndex = entity.IsTimeIndex();
@@ -183,7 +183,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
                 Dictionary<string, Range<double?>> ranges;
-                logData = reader.GetData(context, mnemonicIndexes, queryMnemonics, units, dataTypes, nullValues, out ranges);
+                logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
 
 
                 // Test if we're finished reading data
@@ -484,7 +484,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             return new SortedDictionary<int, string>(dataTypeIndexes.ToDictionary(x => x.Index, x => x.DataType));
         }
-       
+
         // TODO: See if this can be refactored to be common with LogDataAdapter.GetNullValueList
         private IDictionary<int, string> GetNullValueList(ChannelSet entity, int[] slices)
         {

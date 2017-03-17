@@ -72,7 +72,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
             var isRequestingData = parser.IncludeLogData();
-            
+
             // If requesting data limit selection to Ids only for validation
             var entities = isRequestingData
                 ? QueryEntities(parser.Clone(OptionsIn.ReturnElements.IdOnly))
@@ -152,7 +152,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             return metadata;
         }
-        
+
         /// <summary>
         /// Gets the channel data records for the specified data object URI and range.
         /// </summary>
@@ -516,7 +516,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// <param name="uri">The URI.</param>
         protected virtual void UpdateDataRowCount(EtpUri uri)
         {
-            
+
         }
 
         /// <summary>
@@ -590,7 +590,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     if (defaultRange.Start.HasValue)
                     {
                         start = defaultRange.Start;
-                        end = defaultRange.End;                      
+                        end = defaultRange.End;
                     }
                     else
                     {
@@ -753,7 +753,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         protected UpdateDefinition<T> GetIndexRangeUpdate(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-            
+
             var increasing = IsIncreasing(entity);
             UpdateDefinition<T> logHeaderUpdate = null;
 
@@ -769,7 +769,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
 
                 var currentRange = GetIndexRange(curve, increasing, isTimeLog);
-                var updateRange = isDelete? range: GetUpdateRange(currentRange, range, increasing);
+                var updateRange = isDelete ? range : GetUpdateRange(currentRange, range, increasing);
 
                 logHeaderUpdate = isTimeLog
                     ? UpdateDateTimeIndexRange(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, offset)
@@ -804,7 +804,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             changeHistory.UpdatedHeader = true;
 
             if (!ToDeleteAllDataByMnemonic(parser)) return;
-            
+
             var removeMnemonics = string.Join(",", GetLogCurves(log).Select(x => x.Uid));
 
             // If the logCurveInfo didn't specifiy the UID then it will not remove the mnemonic
@@ -1064,7 +1064,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var optimizeRangeStart = logCurveRanges.GetOptimizeRangeStart(increasing);
             var rangeEnd = logCurveRanges.GetMaxRangeEnd(increasing);
             var rangeStepSize = WitsmlSettings.GetRangeStepSize(isTimeIndex);
-            var mnemonicFilter = queryMnemonics.Length > 0 ? queryMnemonics : mnemonicIndexes.Values.ToArray();
 
             bool finished;
             const int maxRequestFactor = 3;
@@ -1093,7 +1092,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 using (var reader = records.GetReader())
                 {
                     // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                    logData = reader.GetData(context, mnemonicIndexes, mnemonicFilter, units, dataTypes, nullValues, out ranges);
+                    logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
                 }
 
                 // Test if we're finished reading data
@@ -1330,10 +1329,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             // The increasing value passed in may be flipped we need to send in a reverse
             //... flag to signal that there was a flip because not all code paths should be reversed.
             var chunks = ChannelDataChunkAdapter.GetData(
-                uri, indexChannel, range, 
-                requestLatestValues.HasValue 
-                    ? !increasing 
-                    : increasing, 
+                uri, indexChannel, range,
+                requestLatestValues.HasValue
+                    ? !increasing
+                    : increasing,
                 reverse: requestLatestValues.HasValue);
 
             return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
@@ -1492,11 +1491,11 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             // Return if value is not a string
             if (!(value is string)) return value;
 
-            return value.ToString().Contains(delimiter) 
-                ? $"\"{value}\"" 
+            return value.ToString().Contains(delimiter)
+                ? $"\"{value}\""
                 : value;
         }
-        
+
         private void FormatLogHeader(T log, string[] mnemonics)
         {
             var logCurves = GetLogCurves(log);
