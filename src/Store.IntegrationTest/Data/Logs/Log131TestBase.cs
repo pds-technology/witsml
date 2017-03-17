@@ -42,8 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         {
             CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
             CompatibilitySettings.LogAllowPutObjectWithData = DevKitAspect.DefaultLogAllowPutObjectWithData;
-            CompatibilitySettings.TrajectoryAllowPutObjectWithData = DevKitAspect.DefaultTrajectoryAllowPutObjectWithData;
-            CompatibilitySettings.MudLogAllowPutObjectWithData = DevKitAspect.DefaultMudLogAllowPutObjectWithData;
             CompatibilitySettings.InvalidDataRowSetting = DevKitAspect.DefaultInvalidDataRowSetting;
             CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
 
