@@ -42,6 +42,20 @@ namespace PDS.WITSMLstudio.Store.Data
         bool Exists(EtpUri uri);
 
         /// <summary>
+        /// Gets the count of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The count of related data objects.</returns>
+        int Count(EtpUri? parentUri);
+
+        /// <summary>
+        /// Determines if the specified URI has child data objects.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>If there are any related data objects.</returns>
+        bool Any(EtpUri? parentUri);
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

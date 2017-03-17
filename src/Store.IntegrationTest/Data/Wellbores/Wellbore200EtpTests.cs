@@ -16,6 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using System.Threading.Tasks;
+using Energistics.Protocol.Store;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.WITSMLstudio.Store.Data.Wellbores
 {
     /// <summary>
@@ -23,5 +28,27 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     /// </summary>
     public partial class Wellbore200EtpTests
     {
+        [Ignore]
+        [TestMethod]
+        public async Task Wellbore200_PutObject_Can_Add_200_Wellbores()
+        {
+            AddParents();
+
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+
+            foreach (var i in Enumerable.Range(1, 200))
+            {
+                Wellbore.Uuid = DevKit.Uid();
+                Wellbore.Citation = DevKit.Citation("Wellbore");
+                Wellbore.Citation.Title = "Wellbore " + i.ToString().PadLeft(3, '0');
+
+                var dataObject = CreateDataObject(Wellbore.GetUri(), Wellbore);
+
+                // Put Object
+                await PutAndAssert(handler, dataObject);
+            }
+        }
     }
 }

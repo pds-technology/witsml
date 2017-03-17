@@ -419,5 +419,14 @@ namespace PDS.WITSMLstudio.Store.Properties {
                 return ((string)(this["DefaultServerName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int MaxGetResourcesResponse {
+            get {
+                return ((int)(this["MaxGetResourcesResponse"]));
+            }
+        }
     }
 }

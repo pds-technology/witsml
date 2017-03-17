@@ -16,11 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
@@ -38,36 +40,26 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
     public class DiscoveryStore200Provider : IDiscoveryStoreProvider
     {
         private readonly IContainer _container;
-        private readonly IEtpDataProvider<Well> _wellDataProvider;
-        private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
         private readonly IEtpDataProvider<Log> _logDataProvider;
         private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
-        private readonly IEtpDataProvider<RigUtilization> _rigUtilizationDataProvider;
+        private readonly IList<EtpContentType> _contentTypes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
-        /// <param name="wellDataProvider">The well data Provider.</param>
-        /// <param name="wellboreDataProvider">The wellbore data Provider.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
-        /// <param name="rigUtilizationDataProvider">The rig utilization data provider.</param>
         [ImportingConstructor]
         public DiscoveryStore200Provider(
             IContainer container,
-            IEtpDataProvider<Well> wellDataProvider,
-            IEtpDataProvider<Wellbore> wellboreDataProvider,
             IEtpDataProvider<Log> logDataProvider,
-            IEtpDataProvider<ChannelSet> channelSetDataProvider,
-            IEtpDataProvider<RigUtilization> rigUtilizationDataProvider)
+            IEtpDataProvider<ChannelSet> channelSetDataProvider)
         {
             _container = container;
-            _wellDataProvider = wellDataProvider;
-            _wellboreDataProvider = wellboreDataProvider;
             _logDataProvider = logDataProvider;
             _channelSetDataProvider = channelSetDataProvider;
-            _rigUtilizationDataProvider = rigUtilizationDataProvider;
+            _contentTypes = new List<EtpContentType>();
         }
 
         /// <summary>
@@ -111,40 +103,57 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             if (uri.IsBaseUri)
             {
-                ObjectFolders.TopLevelObjects
-                    .Select(item => DiscoveryStoreProvider.NewFolder(item.Key.Parent, item.Key.ObjectType, item.Value))
+                CreateFoldersByObjectType(uri)
                     .ForEach(args.Context.Add);
             }
-            //else if (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
-            //{
-            //    _wellDataProvider.GetAll(uri)
-            //        .ForEach(x => args.Context.Add(ToResource(x)));
-            //}
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
             {
+                var wellboreUri = parentUri.Parent;
+
+                // Append query string, if any
+                if (!string.IsNullOrWhiteSpace(uri.Query))
+                    wellboreUri = new EtpUri(wellboreUri + uri.Query);
+
                 if (ObjectFolders.Logs.EqualsIgnoreCase(uri.ObjectType))
                 {
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time));
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth));
+                    var logs = _logDataProvider.GetAll(wellboreUri);
+                    var timeCount = logs.Count(x => ObjectFolders.Time.EqualsIgnoreCase(x.TimeDepth));
+                    var depthCount = logs.Count(x => ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth));
+                    var otherCount = logs.Count - (timeCount + depthCount);
+
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time, timeCount));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth, depthCount));
+
+                    if (otherCount > 0)
+                    {
+                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Other, otherCount));
+                    }
                 }
                 else if (ObjectFolders.Logs.EqualsIgnoreCase(parentUri.ObjectType) &&
-                    (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType)))
+                    (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Other.EqualsIgnoreCase(uri.ObjectType)))
                 {
-                    var wellboreUri = parentUri.Parent;
+                    var logs = _logDataProvider.GetAll(wellboreUri).AsEnumerable();
 
-                    // Append query string, if any
-                    if (!string.IsNullOrWhiteSpace(uri.Query))
-                        wellboreUri = new EtpUri(wellboreUri + uri.Query);
+                    logs = ObjectFolders.Other.EqualsIgnoreCase(uri.ObjectType)
+                        ? logs.Where(x => !ObjectFolders.Time.EqualsIgnoreCase(x.TimeDepth) && !ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth))
+                        : logs.Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType));
 
-                    _logDataProvider.GetAll(wellboreUri)
-                        .Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType))
-                        .ForEach(x => args.Context.Add(ToResource(x)));
+                    logs.ForEach(x => args.Context.Add(ToResource(x)));
+                }
+                else if (ObjectFolders.ChannelSets.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
+                {
+                    var log = _logDataProvider.Get(parentUri);
+                    log?.ChannelSet?.ForEach(x => args.Context.Add(ToResource(x)));
+                }
+                else if (ObjectFolders.Channels.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
+                {
+                    var set = _channelSetDataProvider.Get(parentUri);
+                    set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
                 }
                 else
                 {
-                    var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
-                    var hasChildren = ObjectTypes.ParentObjects.ContainsIgnoreCase(objectType) ? -1 : 0;
-                    var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
+                    var dataProvider = GetDataProvider(uri.ObjectType);
+                    var hasChildren = uri.IsRelatedTo(EtpUris.Eml210) ? 0 : -1;
 
                     dataProvider
                         .GetAll(parentUri)
@@ -152,83 +161,102 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                         .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
                 }
             }
-            else if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
-                _wellboreDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                var log = _logDataProvider.Get(uri);
+                var hasChildren = log?.ChannelSet?.Count ?? 0;
+
+                CreateFoldersByObjectType(uri, "Log", ObjectTypes.ChannelSet, hasChildren)
+                    .ForEach(args.Context.Add);
             }
-            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType))
+            {
+                var set = _channelSetDataProvider.Get(uri);
+                var hasChildren = set?.Channel?.Count ?? 0;
+
+                CreateFoldersByObjectType(uri, "ChannelSet", ObjectTypes.Channel, hasChildren)
+                    .ForEach(args.Context.Add);
+            }
+            else
+            {
+                var propertyName = ObjectTypes.PluralToSingle(uri.ObjectType).ToPascalCase();
+
+                CreateFoldersByObjectType(uri, propertyName)
+                    .ForEach(args.Context.Add);
+            }
+        }
+
+        private IList<Resource> CreateFoldersByObjectType(EtpUri uri, string propertyName = null, string additionalObjectType = null, int childCount = 0)
+        {
+            if (!_contentTypes.Any())
             {
                 var contentTypes = new List<EtpContentType>();
                 Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
 
                 contentTypes
-                    .Where(x => x.Version == DataSchemaVersion && ObjectTypes.GetObjectType(x.ObjectType, DataSchemaVersion)?.GetProperty("Wellbore") != null)
+                    .Where(x => x.IsRelatedTo(EtpContentTypes.Eml210) || x.IsRelatedTo(EtpContentTypes.Witsml200))
                     .OrderBy(x => x.ObjectType)
-                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x.ObjectType, ObjectTypes.SingleToPlural(x.ObjectType, false))));
+                    .ForEach(_contentTypes.Add);
             }
-            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
-            {
-                var log = _logDataProvider.Get(uri);
-                log.ChannelSet.ForEach(x => args.Context.Add(ToResource(x)));
-            }
-            else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType))
-            {
-                //var uid = uri.GetObjectIds()
-                //    .Where(x => x.Key == ObjectTypes.Log)
-                //    .Select(x => x.Value)
-                //    .FirstOrDefault();
-                //
-                //var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
 
-                var set = _channelSetDataProvider.Get(uri);
-                set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
-            }
-            else if (ObjectTypes.Rig.EqualsIgnoreCase(uri.ObjectType))
-            {
-                _rigUtilizationDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
-            }
+            return _contentTypes
+                .Select(x => new
+                {
+                    ContentType = x,
+                    DataType = ObjectTypes.GetObjectType(x.ObjectType, DataSchemaVersion)
+                })
+                .Select(x => new
+                {
+                    x.ContentType,
+                    x.DataType,
+                    PropertyInfo = string.IsNullOrWhiteSpace(propertyName) ? null : x.DataType.GetProperty(propertyName),
+                    ReferenceInfo = x.DataType.GetProperties().FirstOrDefault(p => p.PropertyType == typeof(DataObjectReference))
+                })
+                .Where(x =>
+                {
+                    // Top level folders
+                    if (string.IsNullOrWhiteSpace(uri.ObjectId) || string.IsNullOrWhiteSpace(propertyName))
+                        return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200) || x.ReferenceInfo == null;
+
+                    // Data object sub folders, e.g. Well and Wellbore
+                    return (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210) && x.ReferenceInfo != null) ||
+                           x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
+                           x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType);
+                })
+                .Select(x =>
+                {
+                    var folderName = ObjectTypes.SingleToPlural(x.ContentType.ObjectType, false).ToPascalCase();
+                    var dataProvider = GetDataProvider(x.ContentType.ObjectType);
+                    var hasChildren = childCount;
+                    var baseUri = uri;
+
+                    if (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210))
+                    {
+                        if (x.ReferenceInfo != null && !string.IsNullOrWhiteSpace(uri.ObjectId))
+                        {
+                            baseUri = EtpUris.Eml210.Append(x.ContentType.ObjectType);
+                            var queryUri = new EtpUri($"{baseUri}?$filter={x.ReferenceInfo.Name}/Uuid%20eq%20'{uri.ObjectId}'");
+
+                            hasChildren = dataProvider.Count(queryUri);
+                            return DiscoveryStoreProvider.NewDecoratorFolder(queryUri, folderName, hasChildren);
+                        }
+
+                        baseUri = EtpUris.Eml210.Append(x.ContentType.ObjectType, uri.ObjectId);
+                    }
+
+                    // Query for child object count if this is not the specified "additionalObjectType"
+                    if (!x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
+                        hasChildren = dataProvider.Count(baseUri);
+
+                    return DiscoveryStoreProvider.NewFolder(baseUri, x.ContentType.ObjectType, folderName, hasChildren);
+                })
+                .ToList();
         }
 
-        private Resource ToResource(Well entity)
+        private IEtpDataProvider GetDataProvider(string objectType)
         {
-            return DiscoveryStoreProvider.New(
-                uuid: entity.Uuid,
-                uri: entity.GetUri(),
-                resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title,
-                count: -1);
-        }
-
-        private Resource ToResource(Wellbore entity)
-        {
-            return DiscoveryStoreProvider.New(
-                uuid: entity.Uuid,
-                uri: entity.GetUri(),
-                resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title,
-                count: -1);
-        }
-
-        private Resource ToResource(Log entity)
-        {
-            return DiscoveryStoreProvider.New(
-                uuid: entity.Uuid,
-                uri: entity.GetUri(),
-                resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title,
-                count: -1);
-        }
-
-        private Resource ToResource(ChannelSet entity)
-        {
-            return DiscoveryStoreProvider.New(
-                uuid: entity.Uuid,
-                uri: entity.GetUri(),
-                resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title,
-                count: -1);
+            objectType = ObjectTypes.PluralToSingle(objectType);
+            return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
         }
 
         private Resource ToResource(ChannelSet channelSet, Channel entity)
@@ -237,17 +265,24 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uuid: entity.Uuid,
                 uri: entity.GetUri(channelSet),
                 resourceType: ResourceTypes.DataObject,
-                name: entity.Mnemonic);
+                name: entity.Mnemonic,
+                lastChanged: GetLastChanged(entity));
         }
 
-        private Resource ToResource(AbstractObject entity, int hasChildren = 0)
+        private Resource ToResource(AbstractObject entity, int hasChildren = -1)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
-                count: hasChildren);
+                count: hasChildren,
+                lastChanged: GetLastChanged(entity));
+        }
+
+        private long GetLastChanged(AbstractObject entity)
+        {
+            return entity?.Citation?.LastUpdate?.ToUnixTimeMicroseconds() ?? 0;
         }
     }
 }

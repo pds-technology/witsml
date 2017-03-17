@@ -98,6 +98,26 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
+        /// Gets the count of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The count of related data objects.</returns>
+        public virtual int Count(EtpUri? parentUri)
+        {
+            return DataAdapter.Count(parentUri);
+        }
+
+        /// <summary>
+        /// Determines if the specified URI has child data objects.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>If there are any related data objects.</returns>
+        public virtual bool Any(EtpUri? parentUri)
+        {
+            return DataAdapter.Any(parentUri);
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
