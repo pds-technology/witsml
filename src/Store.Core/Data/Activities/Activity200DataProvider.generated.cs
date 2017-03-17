@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,12 +35,14 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Activity"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{Activity}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Activity>))]
     [Export200(ObjectTypes.Activity, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Activity200DataProvider : EtpDataProvider<Activity>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Activity200DataProvider"/> class.

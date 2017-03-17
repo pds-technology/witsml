@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,9 +35,11 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     public abstract partial class Log200TestBase : IntegrationTestBase
     {
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Log Log { get; set; }
+
         public DevKit200Aspect DevKit { get; set; }
 
         [TestInitialize]
@@ -50,23 +52,29 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
+
                 GeographicLocationWGS84 = DevKit.Location(),
                 SchemaVersion = "2.0",
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
+
                 Well = DevKit.DataObjectReference(Well),
                 SchemaVersion = "2.0"
+
             };
             Log = new Log
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Log"),
+
                 Wellbore = DevKit.DataObjectReference(Wellbore),
                 SchemaVersion = EtpUris.GetUriFamily(typeof(Log)).Version,
+
             };
 
             BeforeEachTest();
@@ -92,8 +100,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert(Well);
             DevKit.AddAndAssert(Wellbore);
+
         }
     }
 }

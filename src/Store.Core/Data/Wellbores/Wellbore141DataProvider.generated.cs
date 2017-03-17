@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,6 +35,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -42,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore141DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141DataProvider"/> class.

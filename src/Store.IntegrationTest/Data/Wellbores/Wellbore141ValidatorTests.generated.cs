@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -125,6 +125,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             AddParents();
 
             Wellbore.UidWell = null;
+
             DevKit.AddAndAssert(Wellbore, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -165,6 +166,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+
                 $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
@@ -528,6 +530,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         {
 
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -581,9 +584,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         {
 
             AddParents();
+
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
@@ -601,9 +606,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

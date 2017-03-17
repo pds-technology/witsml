@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -163,6 +163,11 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 Wellbore.
         /// </summary>
         public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 WellCompletion.
+        /// </summary>
+        public static readonly ObjectName WellCompletion200 = new ObjectName(ObjectTypes.WellCompletion, Version200);
 
     }
 }

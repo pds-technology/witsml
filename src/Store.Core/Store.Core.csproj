@@ -321,6 +321,14 @@
     <Compile Include="Data\Wellbores\Wellbore200Validator.generated.cs">
       <DependentUpon>Wellbore200Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion200DataProvider.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion200DataProvider.generated.cs">
+      <DependentUpon>WellCompletion200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion200Validator.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion200Validator.generated.cs">
+      <DependentUpon>WellCompletion200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well131DataProvider.generated.cs">
       <DependentUpon>Well131DataProvider.cs</DependentUpon>
     </Compile>

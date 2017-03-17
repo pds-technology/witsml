@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -98,6 +98,11 @@ namespace PDS.WITSMLstudio
         /// The data object type for a Wellbore.
         /// </summary>
         public const string Wellbore = "wellbore";
+
+        /// <summary>
+        /// The data object type for a WellCompletion.
+        /// </summary>
+        public const string WellCompletion = "wellCompletion";
 
     }
 }

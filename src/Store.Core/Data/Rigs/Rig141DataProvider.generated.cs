@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,6 +35,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -42,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     [Export141(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig141DataProvider : WitsmlDataProvider<RigList, Rig>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig141DataProvider"/> class.

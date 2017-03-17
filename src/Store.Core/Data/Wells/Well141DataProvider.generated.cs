@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,6 +35,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
@@ -42,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     [Export141(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well141DataProvider : WitsmlDataProvider<WellList, Well>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataProvider"/> class.

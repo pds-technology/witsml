@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,7 +35,9 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
 {
     public abstract partial class Activity200TestBase : IntegrationTestBase
     {
+
         public Activity Activity { get; set; }
+
         public DevKit200Aspect DevKit { get; set; }
 
         [TestInitialize]
@@ -46,7 +48,9 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
 
             Activity = new Activity
             {
+
                 SchemaVersion = EtpUris.GetUriFamily(typeof(Activity)).Version,
+
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Activity")
             };
@@ -74,6 +78,7 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
 
         protected virtual void AddParents()
         {
+
         }
     }
 }

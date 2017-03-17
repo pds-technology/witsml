@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,12 +35,14 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
     [Export200(ObjectTypes.Attachment, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment200DataProvider : EtpDataProvider<Attachment>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment200DataProvider"/> class.

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,12 +35,14 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{Channel}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Channel>))]
     [Export200(ObjectTypes.Channel, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Channel200DataProvider : EtpDataProvider<Channel>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Channel200DataProvider"/> class.

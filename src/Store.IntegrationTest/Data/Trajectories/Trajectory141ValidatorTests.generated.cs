@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -132,6 +132,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             AddParents();
 
             Trajectory.UidWellbore = null;
+
             DevKit.AddAndAssert(Trajectory, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -172,6 +173,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+
                 $"<name>{Trajectory.Name}</name><name>{Trajectory.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, nonConformingXml, null, null);
@@ -461,7 +463,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             DevKit.AddAndAssert(Trajectory);
 
-                        var updateXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
+            var updateXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
 
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
@@ -535,6 +537,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
 
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -590,9 +593,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
 
             AddParents();
+
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, nonConformingXml, null, null);
@@ -610,9 +615,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

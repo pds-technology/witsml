@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,17 +35,21 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
     public abstract partial class Trajectory131TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<trajectorys version=\"1.3.1.1\"><trajectory /></trajectorys>";
         public const string QueryInvalidNamespace = "<trajectorys xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></trajectorys>";
         public const string QueryMissingVersion = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\"></trajectorys>";
         public const string QueryEmptyRoot = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></trajectorys>";
         public const string QueryEmptyObject = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><trajectory /></trajectorys>";
+
         public const string BasicXMLTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</trajectory></trajectorys>";
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Trajectory Trajectory { get; set; }
+
         public DevKit131Aspect DevKit { get; set; }
+
         public List<Trajectory> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -62,24 +66,29 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MDCurrent = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+
             };
             Trajectory = new Trajectory
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Trajectory"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
+
             };
 
             QueryEmptyList = DevKit.List(new Trajectory());
@@ -107,8 +116,10 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,15 +35,19 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     public abstract partial class Well131TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<wells version=\"1.3.1.1\"><well /></wells>";
         public const string QueryInvalidNamespace = "<wells xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></wells>";
         public const string QueryMissingVersion = "<wells xmlns=\"http://www.witsml.org/schemas/131\"></wells>";
         public const string QueryEmptyRoot = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></wells>";
         public const string QueryEmptyObject = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><well /></wells>";
+
         public const string BasicXMLTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><well uid=\"{0}\">{1}</well></wells>";
 
         public Well Well { get; set; }
+
         public DevKit131Aspect DevKit { get; set; }
+
         public List<Well> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -60,6 +64,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
 
@@ -88,6 +93,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
         protected virtual void AddParents()
         {
+
         }
     }
 }
