@@ -94,8 +94,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             Assert.IsNotNull(records);
             using (var reader = records.GetReader())
             {
-                var logData = reader.GetData(new ResponseContext() { HasAllRequestedValues = false, RequestLatestValues = null }, mnemonicFilterDictionary, 
-                    mnemonicFilter, unitDictionary, dataTypeDictionary, nullValueDictionary, out ranges);
+                var logData = reader.GetData(new ResponseContext() { HasAllRequestedValues = false, RequestLatestValues = null }, mnemonicFilterDictionary, unitDictionary, dataTypeDictionary, nullValueDictionary, out ranges);
                 Assert.AreEqual(1, logData.Count);
                 Assert.AreEqual(2, logData[0].Count);
                 Assert.AreEqual(1, logData[0][0].Count);
@@ -482,7 +481,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                     var logData =
                         reader.GetData(
                             new ResponseContext() { HasAllRequestedValues = false, RequestLatestValues = null },
-                            mnemonicFilterDictionary, mnemonicFilter, unitDictionary, dataTypeDictionary, nullValueDictionary, out ranges);
+                            mnemonicFilterDictionary, unitDictionary, dataTypeDictionary, nullValueDictionary, out ranges);
                     Assert.AreEqual(1, logData.Count);
                     Assert.AreEqual(2, logData[0].Count);
                     Assert.AreEqual(1, logData[0][0].Count);

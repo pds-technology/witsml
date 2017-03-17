@@ -1376,7 +1376,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             Units = null;
             DataTypes = null;
             NullValues = null;
-            
+
             var allUnits = GetAllUnits();
             var allDataTypes = GetAllDataTypes();
             var allNulls = GetAllNullValues();
@@ -1430,14 +1430,13 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </summary>
         /// <param name="context">The query context.</param>
         /// <param name="mnemonicSlices">The index map for requested mnemonics in current log.</param>
-        /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
         /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="ranges">The ranges map.</param>
         /// <returns>The channel data managed by the reader.</returns>
         public List<List<List<object>>> GetData(
-            IQueryContext context, IDictionary<int, string> mnemonicSlices, string[] mnemonics, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues, out Dictionary<string, Range<double?>> ranges)
+            IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues, out Dictionary<string, Range<double?>> ranges)
         {
             _log.Debug("Getting the sliced channel data.");
 
@@ -1556,8 +1555,10 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
+
+
             using (
-                var reader = new ChannelDataReader(channelData, mnemonics.Skip(Depth).ToArray(),
+                var reader = new ChannelDataReader(channelData, mnemonicSlices.Values.ToArray().Skip(Depth).ToArray(),
                         units.Values.Skip(Depth).ToArray(), dataTypes.Values.Skip(Depth).ToArray(),
                         nullValues.Values.Skip(Depth).ToArray())
                     .WithIndices(Indices))
@@ -1568,7 +1569,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 var resliceContext = context.Clone();
                 resliceContext.RequestLatestValues = null;
 
-                channelData = reader.GetData(resliceContext, mnemonicSlices, mnemonics, units, dataTypes, nullValues, out ranges);
+                channelData = reader.GetData(resliceContext, mnemonicSlices, units, dataTypes, nullValues, out ranges);
             }
 
             return channelData;
