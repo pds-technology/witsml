@@ -1412,7 +1412,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_Requested()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1438,7 +1438,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_All()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_With_Requested_Elements_All()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1578,7 +1578,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_Requested()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_StartIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1608,7 +1608,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_All()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_StartIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1638,7 +1638,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_Requested()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1668,7 +1668,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_All()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
                 .AddSampleData(TestContext);
@@ -1763,7 +1763,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
                  .AddSampleData(TestContext);
@@ -1797,7 +1797,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_All()
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MnemonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
                  .AddSampleData(TestContext);
@@ -1828,6 +1828,33 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(1, logData.Count);
             Assert.AreEqual(4, logData[0].MnemonicList.Split(',').Length);
             Assert.AreEqual(13, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Query_Empty_And_Data_Curves_From_Log_With_Empty_Channel()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
+
+            DevKit.AddAndAssert(Log);
+
+            var query = DevKit.CreateLog(Log);
+            query.LogData = new List<LogData>() { new LogData() };
+            query.LogData.First().MnemonicList = "ROP, GR";
+
+            var resultLog = DevKit.GetAndAssert(query, true, null, true);
+            var logData = resultLog.LogData;
+
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(1, logData.Count);
+
+            var mnemonicList = logData[0].MnemonicList.Split(',');
+            Assert.AreEqual(2, mnemonicList.Length);
+            Assert.AreEqual(5, logData[0].Data.Count);
+            Assert.AreEqual("MD", mnemonicList[0]);
+            Assert.AreEqual("GR", mnemonicList[1]);
         }
 
         [TestMethod]
