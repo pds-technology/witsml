@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Trajectory}" />
-
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory200DataAdapter : MongoDbDataAdapter<Trajectory>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Trajectory200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Trajectory200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,11 +81,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             if (parentUri != null)
             {
+                var objectType = parentUri.Value.ObjectType;
+                var objectId = parentUri.Value.ObjectId;
 
-                var uidWellbore = parentUri.Value.ObjectId;
-
-                if (!string.IsNullOrWhiteSpace(uidWellbore))
-                    query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                if (ObjectTypes.Wellbore.EqualsIgnoreCase(objectType) && !string.IsNullOrWhiteSpace(objectId))
+                    query = query.Where(x => x.Wellbore.Uuid == objectId);
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);

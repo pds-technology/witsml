@@ -38,29 +38,23 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Wellbore}" />
-
     [Export(typeof(IWitsml131Configuration))]
-
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Wellbore131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Wellbore131)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -75,7 +69,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
-
       }
 
         /// <summary>
@@ -90,7 +83,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -104,7 +96,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
 
             if (parentUri != null)
             {
-
                 var uidWell = parentUri.Value.ObjectId;
 
                 if (!string.IsNullOrWhiteSpace(uidWell))

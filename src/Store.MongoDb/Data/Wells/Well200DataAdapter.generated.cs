@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Well}" />
-
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export200(ObjectTypes.Well, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well200DataAdapter : MongoDbDataAdapter<Well>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Well200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Well200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,7 +81,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             if (parentUri != null)
             {
-
                 // no ObjectId parameters
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))

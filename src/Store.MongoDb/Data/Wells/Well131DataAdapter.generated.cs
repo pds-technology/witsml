@@ -38,29 +38,23 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Well}" />
-
     [Export(typeof(IWitsml131Configuration))]
-
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well131DataAdapter : MongoDbDataAdapter<Well>, IWitsml131Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well131DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Well131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Well131)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -75,7 +69,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
-
       }
 
         /// <summary>
@@ -90,7 +83,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -104,7 +96,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             if (parentUri != null)
             {
-
                 // no ObjectId parameters
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))

@@ -38,29 +38,23 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Rig" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Rig}" />
-
     [Export(typeof(IWitsml141Configuration))]
-
     [Export(typeof(IWitsmlDataAdapter<Rig>))]
     [Export141(ObjectTypes.Rig, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig141DataAdapter : MongoDbDataAdapter<Rig>, IWitsml141Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig141DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Rig141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Rig141)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -75,7 +69,6 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             capServer.Add(Functions.AddToStore, ObjectTypes.Rig);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Rig);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Rig);
-
       }
 
         /// <summary>
@@ -90,7 +83,6 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -104,7 +96,6 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 
             if (parentUri != null)
             {
-
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];

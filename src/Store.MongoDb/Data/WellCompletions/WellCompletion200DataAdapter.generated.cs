@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.WellCompletions
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="WellCompletion" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{WellCompletion}" />
-
     [Export(typeof(IWitsmlDataAdapter<WellCompletion>))]
     [Export200(ObjectTypes.WellCompletion, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WellCompletion200DataAdapter : MongoDbDataAdapter<WellCompletion>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WellCompletion200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public WellCompletion200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WellCompletion200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.WellCompletions
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,7 +81,6 @@ namespace PDS.WITSMLstudio.Store.Data.WellCompletions
 
             if (parentUri != null)
             {
-
                 var uidWell = parentUri.Value.ObjectId;
 
                 if (!string.IsNullOrWhiteSpace(uidWell))

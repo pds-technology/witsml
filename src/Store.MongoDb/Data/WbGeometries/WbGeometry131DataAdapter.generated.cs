@@ -41,29 +41,23 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="WbGeometry" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{WbGeometry}" />
-
     [Export(typeof(IWitsml131Configuration))]
-
     [Export(typeof(IWitsmlDataAdapter<WbGeometry>))]
     [Export131(ObjectTypes.WbGeometry, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry131DataAdapter : MongoDbDataAdapter<WbGeometry>, IWitsml131Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry131DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public WbGeometry131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WbGeometry131)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -78,7 +72,6 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             capServer.Add(Functions.AddToStore, ObjectTypes.WbGeometry);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.WbGeometry);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.WbGeometry);
-
       }
 
         /// <summary>
@@ -93,7 +86,6 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -107,7 +99,6 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
             if (parentUri != null)
             {
-
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];
