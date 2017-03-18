@@ -38,29 +38,23 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.Trajectories.TrajectoryDataAdapter{Trajectory,TrajectoryStation}" />
-
     [Export(typeof(IWitsml131Configuration))]
-
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export131(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory131DataAdapter : TrajectoryDataAdapter<Trajectory, TrajectoryStation>, IWitsml131Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory131DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Trajectory131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Trajectory131)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -75,7 +69,6 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             capServer.Add(Functions.AddToStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory);
-
       }
 
         /// <summary>
@@ -90,7 +83,6 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -104,7 +96,6 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             if (parentUri != null)
             {
-
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];

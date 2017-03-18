@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="DataAssuranceRecord" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{DataAssuranceRecord}" />
-
     [Export(typeof(IWitsmlDataAdapter<DataAssuranceRecord>))]
     [Export200(ObjectTypes.DataAssuranceRecord, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class DataAssuranceRecord200DataAdapter : MongoDbDataAdapter<DataAssuranceRecord>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DataAssuranceRecord200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public DataAssuranceRecord200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.DataAssuranceRecord200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,7 +81,6 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
 
             if (parentUri != null)
             {
-
                 //var uidWellbore = parentUri.Value.ObjectId;
                 //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
 

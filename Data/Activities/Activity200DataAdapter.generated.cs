@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Activity" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Activity}" />
-
     [Export(typeof(IWitsmlDataAdapter<Activity>))]
     [Export200(ObjectTypes.Activity, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Activity200DataAdapter : MongoDbDataAdapter<Activity>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Activity200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Activity200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Activity200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,7 +81,6 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
 
             if (parentUri != null)
             {
-
                 //var uidWellbore = parentUri.Value.ObjectId;
                 //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
 

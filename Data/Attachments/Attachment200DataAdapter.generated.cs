@@ -38,27 +38,22 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Attachment" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Attachment}" />
-
     [Export(typeof(IWitsmlDataAdapter<Attachment>))]
     [Export200(ObjectTypes.Attachment, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment200DataAdapter : MongoDbDataAdapter<Attachment>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Attachment200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Attachment200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -73,7 +68,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -87,11 +81,11 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
 
             if (parentUri != null)
             {
+                var objectType = parentUri.Value.ObjectType;
+                var objectId = parentUri.Value.ObjectId;
 
-                var uidWellbore = parentUri.Value.ObjectId;
-
-                if (!string.IsNullOrWhiteSpace(uidWellbore))
-                    query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                if (ObjectTypes.Wellbore.EqualsIgnoreCase(objectType) && !string.IsNullOrWhiteSpace(objectId))
+                    query = query.Where(x => x.Wellbore.Uuid == objectId);
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);

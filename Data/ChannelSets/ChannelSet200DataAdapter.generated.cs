@@ -32,7 +32,6 @@ using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
-
 using PDS.WITSMLstudio.Store.Data.Channels;
 
 namespace PDS.WITSMLstudio.Store.Data.ChannelSets
@@ -40,31 +39,24 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSet" />
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{ChannelSet}" />
-
     [Export(typeof(IWitsmlDataAdapter<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         /// <param name="channelDataChunkAdapter">The channel data chunk adapter.</param>
-
         [ImportingConstructor]
         public ChannelSet200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter)
             : base(container, databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-
             ChannelDataChunkAdapter = channelDataChunkAdapter;
-
         }
 
         /// <summary>
@@ -84,7 +76,6 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -98,11 +89,11 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             if (parentUri != null)
             {
+                var objectType = parentUri.Value.ObjectType;
+                var objectId = parentUri.Value.ObjectId;
 
-                var uidWellbore = parentUri.Value.ObjectId;
-
-                if (!string.IsNullOrWhiteSpace(uidWellbore))
-                    query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                if (ObjectTypes.Wellbore.EqualsIgnoreCase(objectType) && !string.IsNullOrWhiteSpace(objectId))
+                    query = query.Where(x => x.Wellbore.Uuid == objectId);
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);
