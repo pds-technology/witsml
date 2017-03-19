@@ -103,7 +103,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <returns>The resource instance.</returns>
         public static Resource New(string uuid, EtpUri uri, ResourceTypes resourceType, string name, int count = 0, long lastChanged = 0)
         {
-            return new Resource()
+            return new Resource
             {
                 Uuid = uuid,
                 Uri = uri,
@@ -112,7 +112,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 ContentType = uri.ContentType,
                 ResourceType = resourceType.ToString(),
                 CustomData = new Dictionary<string, string>(),
-                LastChanged = lastChanged
+                LastChanged = lastChanged,
+                ChannelSubscribable = uri.IsChannelSubscribable(),
+                ObjectNotifiable = uri.IsObjectNotifiable()
             };
         }
 
@@ -139,14 +141,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="objectType">Type of the object.</param>
         /// <param name="folderName">Name of the folder.</param>
         /// <param name="hasChildren">The child count.</param>
-        /// <returns>The resource instance.</returns>
+        /// <returns>A new <see cref="Resource"/> instance.</returns>
         public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName, int hasChildren = -1)
         {
             var resource = New(
                 uuid: Guid.NewGuid().ToString(),
                 uri: parentUri.Append(folderName),
                 resourceType: ResourceTypes.Folder,
-                name: hasChildren > -1 ? $"{folderName} ({hasChildren})" : folderName,
+                name: folderName,
                 count: hasChildren);
 
             resource.ContentType = new EtpContentType(resource.ContentType).For(objectType);
@@ -160,14 +162,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="uri">The URI.</param>
         /// <param name="folderName">The name of the folder.</param>
         /// <param name="hasChildren">The child count.</param>
-        /// <returns>The resource instance.</returns>
+        /// <returns>A new <see cref="Resource"/> instance.</returns>
         public static Resource NewDecoratorFolder(EtpUri uri, string folderName, int hasChildren = -1)
         {
             return New(
                 uuid: Guid.NewGuid().ToString(),
                 uri: uri,
                 resourceType: ResourceTypes.DecoratorFolder,
-                name: hasChildren > -1 ? $"{folderName} ({hasChildren})" : folderName,
+                name: folderName,
                 count: hasChildren);
         }
     }
