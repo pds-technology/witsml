@@ -809,6 +809,8 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 AuditHistoryAdapter?.ReplaceEntity(auditHistory, auditHistory.GetUri());
             }
+
+            AuditHistoryAdapter?.SendNotifications(auditHistory);
         }
 
         /// <summary>

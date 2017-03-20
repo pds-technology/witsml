@@ -25,6 +25,7 @@ using Energistics.Datatypes;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
+using Energistics.Protocol.StoreNotification;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Controllers
@@ -70,6 +71,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
             handler.Register(() => Container.Resolve<IChannelStreamingConsumer>());
             handler.Register(() => Container.Resolve<IDiscoveryStore>());
             handler.Register(() => Container.Resolve<IStoreStore>());
+            handler.Register(() => Container.Resolve<IStoreNotificationStore>());
         }
     }
 }

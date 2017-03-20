@@ -308,6 +308,10 @@
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
       <Name>Store.MongoDb</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj">
+      <Project>{987b6304-b4a6-4d57-acc3-7209175286a6}</Project>
+      <Name>Store.Notifications</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
