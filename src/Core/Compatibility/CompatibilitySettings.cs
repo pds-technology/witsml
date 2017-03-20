@@ -65,8 +65,13 @@ namespace PDS.WITSMLstudio.Compatibility
             LogAllowPutObjectWithData = Settings.Default.LogAllowPutObjectWithData;
             TrajectoryAllowPutObjectWithData = Settings.Default.TrajectoryAllowPutObjectWithData;
             MudLogAllowPutObjectWithData = Settings.Default.MudLogAllowPutObjectWithData;
-            Enum.TryParse(Settings.Default.InvalidDataRowSetting, out InvalidDataRowSetting);
-            Enum.TryParse(Settings.Default.UnknownElementSetting, out UnknownElementSetting);
+
+            // TODO: Use hard coded settings until we can find out why we're getting an error accessing 
+            // TODO: ...InvalidDataRowSetting and UnknownElementSetting.
+            InvalidDataRowSetting = InvalidDataRowSetting.Ignore;
+            UnknownElementSetting = UnknownElementSetting.Ignore;
+            //Enum.TryParse(Settings.Default.InvalidDataRowSetting, out InvalidDataRowSetting);
+            //Enum.TryParse(Settings.Default.UnknownElementSetting, out UnknownElementSetting);
         }
     }
 }
