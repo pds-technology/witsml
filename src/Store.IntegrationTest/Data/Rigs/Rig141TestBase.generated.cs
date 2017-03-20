@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,17 +35,21 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 {
     public abstract partial class Rig141TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<rigs version=\"1.4.1.1\"><rig /></rigs>";
         public const string QueryInvalidNamespace = "<rigs xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></rigs>";
         public const string QueryMissingVersion = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\"></rigs>";
         public const string QueryEmptyRoot = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></rigs>";
         public const string QueryEmptyObject = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><rig /></rigs>";
+
         public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><rig uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</rig></rigs>";
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Rig Rig { get; set; }
+
         public DevKit141Aspect DevKit { get; set; }
+
         public List<Rig> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -62,24 +66,29 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+
             };
             Rig = new Rig
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Rig"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
+
             };
 
             QueryEmptyList = DevKit.List(new Rig());
@@ -107,8 +116,10 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
     }
 }

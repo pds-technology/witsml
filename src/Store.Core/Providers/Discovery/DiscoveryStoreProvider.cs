@@ -24,6 +24,7 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
+using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Providers.Discovery
 {
@@ -42,6 +43,22 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         [ImportMany]
         public IEnumerable<IDiscoveryStoreProvider> Providers { get; set; }
 
+        /// <summary>
+        /// Gets the capabilities supported by the protocol handler.
+        /// </summary>
+        /// <returns>A collection of protocol capabilities.</returns>
+        public override IDictionary<string, DataValue> GetCapabilities()
+        {
+            var capabilities = base.GetCapabilities();
+
+            capabilities[MaxGetResourcesResponse] = new DataValue
+            {
+                Item = WitsmlSettings.MaxGetResourcesResponse
+            };
+
+            return capabilities;
+        }
+
         /// <summary>
         /// Handles the GetResources message of the Discovery protocol.
         /// </summary>
@@ -59,10 +76,19 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 }
             }
 
+            var max = WitsmlSettings.MaxGetResourcesResponse;
+
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
             {
+                // TODO: Optimize inside each version specific provider
+                if (args.Context.Count >= max) break;
+
                 provider.GetResources(args);
             }
+
+            // Limit max number of GetResourcesResponse returned to customer
+            while (args.Context.Count > max)
+                args.Context.RemoveAt(args.Context.Count - 1);
         }
 
         /// <summary>
@@ -73,10 +99,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="resourceType">Type of the resource.</param>
         /// <param name="name">The name.</param>
         /// <param name="count">The count.</param>
+        /// <param name="lastChanged">The last changed in microseconds.</param>
         /// <returns>The resource instance.</returns>
-        public static Resource New(string uuid, EtpUri uri, ResourceTypes resourceType, string name, int count = 0)
+        public static Resource New(string uuid, EtpUri uri, ResourceTypes resourceType, string name, int count = 0, long lastChanged = 0)
         {
-            return new Resource()
+            return new Resource
             {
                 Uuid = uuid,
                 Uri = uri,
@@ -85,7 +112,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 ContentType = uri.ContentType,
                 ResourceType = resourceType.ToString(),
                 CustomData = new Dictionary<string, string>(),
-                LastChanged = 0 // TODO: provide LastChanged
+                LastChanged = lastChanged,
+                ChannelSubscribable = uri.IsChannelSubscribable(),
+                ObjectNotifiable = uri.IsObjectNotifiable()
             };
         }
 
@@ -111,19 +140,37 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="parentUri">The parent URI.</param>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="folderName">Name of the folder.</param>
-        /// <returns>The resource instance.</returns>
-        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName)
+        /// <param name="hasChildren">The child count.</param>
+        /// <returns>A new <see cref="Resource"/> instance.</returns>
+        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName, int hasChildren = -1)
         {
             var resource = New(
                 uuid: Guid.NewGuid().ToString(),
                 uri: parentUri.Append(folderName),
                 resourceType: ResourceTypes.Folder,
                 name: folderName,
-                count: -1);
+                count: hasChildren);
 
             resource.ContentType = new EtpContentType(resource.ContentType).For(objectType);
 
             return resource;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="folderName">The name of the folder.</param>
+        /// <param name="hasChildren">The child count.</param>
+        /// <returns>A new <see cref="Resource"/> instance.</returns>
+        public static Resource NewDecoratorFolder(EtpUri uri, string folderName, int hasChildren = -1)
+        {
+            return New(
+                uuid: Guid.NewGuid().ToString(),
+                uri: uri,
+                resourceType: ResourceTypes.DecoratorFolder,
+                name: folderName,
+                count: hasChildren);
         }
     }
 }

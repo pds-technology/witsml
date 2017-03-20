@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,6 +35,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
@@ -42,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log141DataProvider : WitsmlDataProvider<LogList, Log>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataProvider"/> class.

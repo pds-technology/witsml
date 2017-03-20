@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -152,6 +152,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             DevKit.AddAndAssert<WellList, Well>(Well);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+
                 $"<name>{Well.Name}</name><name>{Well.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Well, nonConformingXml, null, null);
@@ -225,6 +226,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void Well131Validator_UpdateInStore_Error_468_Well_No_Schema_Version_Declared()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             var response = DevKit.UpdateInStore(ObjectTypes.Well, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -250,9 +252,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void Well131Validator_UpdateInStore_Error_484_Well_Update_Will_Delete_Required_Element()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Well, nonConformingXml, null, null);
@@ -268,9 +272,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
 
             var xmlIn = string.Format(BasicXMLTemplate, Well.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

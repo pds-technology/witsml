@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,7 +35,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     public abstract partial class Well200TestBase : IntegrationTestBase
     {
+
         public Well Well { get; set; }
+
         public DevKit200Aspect DevKit { get; set; }
 
         [TestInitialize]
@@ -48,8 +50,10 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
+
                 GeographicLocationWGS84 = DevKit.Location(),
                 SchemaVersion = "2.0",
+
                 TimeZone = DevKit.TimeZone
             };
 
@@ -76,6 +80,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
         protected virtual void AddParents()
         {
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,6 +38,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -45,6 +46,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry141DataProvider"/> class.

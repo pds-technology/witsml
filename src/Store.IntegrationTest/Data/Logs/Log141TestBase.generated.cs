@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,17 +35,21 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     public abstract partial class Log141TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<logs version=\"1.4.1.1\"><log /></logs>";
         public const string QueryInvalidNamespace = "<logs xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></logs>";
         public const string QueryMissingVersion = "<logs xmlns=\"http://www.witsml.org/schemas/1series\"></logs>";
         public const string QueryEmptyRoot = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></logs>";
         public const string QueryEmptyObject = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><log /></logs>";
+
         public const string BasicXMLTemplate = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><log uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</log></logs>";
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Log Log { get; set; }
+
         public DevKit141Aspect DevKit { get; set; }
+
         public List<Log> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -62,24 +66,29 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+
             };
             Log = new Log
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Log"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
+
             };
 
             QueryEmptyList = DevKit.List(new Log());
@@ -107,8 +116,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
     }
 }

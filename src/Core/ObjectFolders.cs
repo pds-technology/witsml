@@ -16,9 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Energistics.Datatypes;
-
 namespace PDS.WITSMLstudio
 {
     /// <summary>
@@ -100,22 +97,5 @@ namespace PDS.WITSMLstudio
         /// An ObjectFolders identifier for Wellbores.
         /// </summary>
         public const string Wellbores = "Wellbores";
-
-        /// <summary>
-        /// The folder names for all top level objects.
-        /// </summary>
-        public static readonly IReadOnlyDictionary<EtpUri, string> TopLevelObjects = new Dictionary<EtpUri, string>
-        {
-            { EtpUris.Eml210.Append(ObjectTypes.Activity), Activities },
-            { EtpUris.Eml210.Append(ObjectTypes.ActivityTemplate), ActivityTemplates },
-            { EtpUris.Witsml200.Append(ObjectTypes.Channel), Channels },
-            { EtpUris.Witsml200.Append(ObjectTypes.ChannelSet), ChannelSets },
-            { EtpUris.Eml210.Append(ObjectTypes.DataAssuranceRecord), DataAssuranceRecords },
-            { EtpUris.Witsml200.Append(ObjectTypes.Log), Logs },
-            { EtpUris.Witsml200.Append(ObjectTypes.Rig), Rigs },
-            { EtpUris.Witsml200.Append(ObjectTypes.Trajectory), Trajectories },
-            { EtpUris.Witsml200.Append(ObjectTypes.Well), Wells },
-            { EtpUris.Witsml200.Append(ObjectTypes.Wellbore), Wellbores }
-        };
     }
 }

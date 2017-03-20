@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -128,6 +128,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             AddParents();
 
             WbGeometry.UidWellbore = null;
+
             DevKit.AddAndAssert(WbGeometry, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -168,6 +169,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
+
                 $"<name>{WbGeometry.Name}</name><name>{WbGeometry.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, nonConformingXml, null, null);
@@ -457,7 +459,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
             DevKit.AddAndAssert(WbGeometry);
 
-                        var updateXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
+            var updateXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
 
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
@@ -531,6 +533,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
         {
 
             AddParents();
+
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -586,9 +589,11 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
         {
 
             AddParents();
+
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, nonConformingXml, null, null);
@@ -606,9 +611,11 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

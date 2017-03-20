@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,6 +35,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{TrajectoryList, Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
@@ -42,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     [Export131(ObjectTypes.Trajectory, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory131DataProvider : WitsmlDataProvider<TrajectoryList, Trajectory>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory131DataProvider"/> class.

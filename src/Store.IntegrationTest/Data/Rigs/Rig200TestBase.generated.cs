@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,7 +35,9 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 {
     public abstract partial class Rig200TestBase : IntegrationTestBase
     {
+
         public Rig Rig { get; set; }
+
         public DevKit200Aspect DevKit { get; set; }
 
         [TestInitialize]
@@ -46,7 +48,9 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 
             Rig = new Rig
             {
+
                 SchemaVersion = EtpUris.GetUriFamily(typeof(Rig)).Version,
+
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Rig")
             };
@@ -74,6 +78,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
 
         protected virtual void AddParents()
         {
+
         }
     }
 }

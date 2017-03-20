@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,7 +35,9 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
 {
     public abstract partial class DataAssuranceRecord200TestBase : IntegrationTestBase
     {
+
         public DataAssuranceRecord DataAssuranceRecord { get; set; }
+
         public DevKit200Aspect DevKit { get; set; }
 
         [TestInitialize]
@@ -46,7 +48,9 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
 
             DataAssuranceRecord = new DataAssuranceRecord
             {
+
                 SchemaVersion = EtpUris.GetUriFamily(typeof(DataAssuranceRecord)).Version,
+
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("DataAssuranceRecord")
             };
@@ -74,6 +78,7 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
 
         protected virtual void AddParents()
         {
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -125,6 +125,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             AddParents();
 
             Rig.UidWellbore = null;
+
             DevKit.AddAndAssert(Rig, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -165,6 +166,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             DevKit.AddAndAssert<RigList, Rig>(Rig);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+
                 $"<name>{Rig.Name}</name><name>{Rig.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Rig, nonConformingXml, null, null);
@@ -242,6 +244,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
         {
 
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             var response = DevKit.UpdateInStore(ObjectTypes.Rig, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -297,9 +300,11 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
         {
 
             AddParents();
+
             DevKit.AddAndAssert<RigList, Rig>(Rig);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Rig, nonConformingXml, null, null);
@@ -317,9 +322,11 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

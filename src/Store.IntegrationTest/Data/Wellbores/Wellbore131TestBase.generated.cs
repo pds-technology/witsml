@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,16 +35,20 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
 {
     public abstract partial class Wellbore131TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<wellbores version=\"1.3.1.1\"><wellbore /></wellbores>";
         public const string QueryInvalidNamespace = "<wellbores xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></wellbores>";
         public const string QueryMissingVersion = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\"></wellbores>";
         public const string QueryEmptyRoot = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></wellbores>";
         public const string QueryEmptyObject = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wellbore /></wellbores>";
+
         public const string BasicXMLTemplate = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wellbore uidWell=\"{0}\" uid=\"{1}\">{2}</wellbore></wellbores>";
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
+
         public DevKit131Aspect DevKit { get; set; }
+
         public List<Wellbore> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -61,15 +65,18 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MDCurrent = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+
             };
 
             QueryEmptyList = DevKit.List(new Wellbore());
@@ -97,7 +104,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
+
         }
     }
 }

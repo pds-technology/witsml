@@ -229,6 +229,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static string DefaultTimeZone = Properties.Settings.Default.DefaultTimeZone;
 
         /// <summary>
+        /// The maximum number of GetResourcesResponse messages to return.
+        /// </summary>
+        public static int MaxGetResourcesResponse = Properties.Settings.Default.MaxGetResourcesResponse;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

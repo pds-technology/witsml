@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -35,12 +35,14 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="DataAssuranceRecord"/>.
     /// </summary>
+
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{DataAssuranceRecord}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<DataAssuranceRecord>))]
     [Export200(ObjectTypes.DataAssuranceRecord, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class DataAssuranceRecord200DataProvider : EtpDataProvider<DataAssuranceRecord>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DataAssuranceRecord200DataProvider"/> class.

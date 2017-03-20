@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -125,6 +125,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             AddParents();
 
             Message.UidWellbore = null;
+
             DevKit.AddAndAssert(Message, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -165,6 +166,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             DevKit.AddAndAssert<MessageList, Message>(Message);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+
                 $"<name>{Message.Name}</name><name>{Message.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Message, nonConformingXml, null, null);
@@ -454,7 +456,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
 
             DevKit.AddAndAssert(Message);
 
-                        var updateXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+            var updateXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
 
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
@@ -528,6 +530,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
         {
 
             AddParents();
+
             DevKit.AddAndAssert<MessageList, Message>(Message);
             var response = DevKit.UpdateInStore(ObjectTypes.Message, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -583,9 +586,11 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
         {
 
             AddParents();
+
             DevKit.AddAndAssert<MessageList, Message>(Message);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Message, nonConformingXml, null, null);
@@ -603,9 +608,11 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 

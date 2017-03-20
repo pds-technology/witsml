@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -38,17 +38,21 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     public abstract partial class WbGeometry141TestBase : IntegrationTestBase
     {
+
         public const string QueryMissingNamespace = "<wbGeometrys version=\"1.4.1.1\"><wbGeometry /></wbGeometrys>";
         public const string QueryInvalidNamespace = "<wbGeometrys xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></wbGeometrys>";
         public const string QueryMissingVersion = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\"></wbGeometrys>";
         public const string QueryEmptyRoot = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></wbGeometrys>";
         public const string QueryEmptyObject = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wbGeometry /></wbGeometrys>";
+
         public const string BasicXMLTemplate = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wbGeometry uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</wbGeometry></wbGeometrys>";
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public WbGeometry WbGeometry { get; set; }
+
         public DevKit141Aspect DevKit { get; set; }
+
         public List<WbGeometry> QueryEmptyList { get; set; }
 
         [TestInitialize]
@@ -65,24 +69,29 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
+
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+
             };
             WbGeometry = new WbGeometry
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("WbGeometry"),
+
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
+
             };
 
             QueryEmptyList = DevKit.List(new WbGeometry());
@@ -110,8 +119,10 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
         protected virtual void AddParents()
         {
+
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
     }
 }
