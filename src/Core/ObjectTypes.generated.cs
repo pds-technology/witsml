@@ -70,6 +70,11 @@ namespace PDS.WITSMLstudio
         public const string Message = "message";
 
         /// <summary>
+        /// The data object type for a MudLog.
+        /// </summary>
+        public const string MudLog = "mudLog";
+
+        /// <summary>
         /// The data object type for a Rig.
         /// </summary>
         public const string Rig = "rig";

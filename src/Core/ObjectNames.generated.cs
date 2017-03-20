@@ -90,6 +90,16 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName Message141 = new ObjectName(ObjectTypes.Message, Version141);
 
         /// <summary>
+        /// The data object name for a 1.3.1.1 MudLog.
+        /// </summary>
+        public static readonly ObjectName MudLog131 = new ObjectName(ObjectTypes.MudLog, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 MudLog.
+        /// </summary>
+        public static readonly ObjectName MudLog141 = new ObjectName(ObjectTypes.MudLog, Version141);
+
+        /// <summary>
         /// The data object name for a 1.3.1.1 Rig.
         /// </summary>
         public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, Version131);
