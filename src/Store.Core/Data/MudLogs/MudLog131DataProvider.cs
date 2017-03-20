@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML131;
+
 namespace PDS.WITSMLstudio.Store.Data.MudLogs
 {
     /// <summary>
@@ -23,5 +25,14 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     /// </summary>
     public partial class MudLog131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(MudLog dataObject)
+        {
+            // Ensure ObjectGrowing is false during AddToStore
+            dataObject.ObjectGrowing = false;
+        }
     }
 }

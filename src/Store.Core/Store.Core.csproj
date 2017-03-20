@@ -244,6 +244,7 @@
     <Compile Include="Data\MudLogs\MudLog141Validator.generated.cs">
       <DependentUpon>MudLog141Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\MudLogs\MudLogExtensions.cs" />
     <Compile Include="Data\Rigs\Rig131DataProvider.cs" />
     <Compile Include="Data\Rigs\Rig131DataProvider.generated.cs">
       <DependentUpon>Rig131DataProvider.cs</DependentUpon>
