@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     public partial class MudLog141DataAdapter
     {
         /// <summary>
-        /// Formats the mudlog station data.
+        /// Formats the mudlog geology interval data.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The query parser.</param>
@@ -47,16 +47,16 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
 
         /// <summary>
-        /// Filters the station data based on query parameters.
+        /// Filters the geology interval data based on query parameters.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        /// <param name="stations">The mudlog geology intervals.</param>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="context">The query context.</param>
         /// <returns>The count of mudlog geology intervals after filtering.</returns>
-        protected override int FilterGeologyIntervalData(MudLog entity, List<GeologyInterval> stations, WitsmlQueryParser parser = null, IQueryContext context = null)
+        protected override int FilterGeologyIntervalData(MudLog entity, List<GeologyInterval> geologyIntervals, WitsmlQueryParser parser = null, IQueryContext context = null)
         {
-            if (stations == null || stations.Count == 0)
+            if (geologyIntervals == null || geologyIntervals.Count == 0)
                 return 0;
 
             var range = GetQueryIndexRange(parser);
@@ -66,11 +66,11 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             // TODO: Update logic
             entity.GeologyInterval = range.Start.HasValue
                 ? range.End.HasValue
-                    ? stations.Where(s => s.MDBottom.Value >= range.Start.Value && s.MDTop.Value <= range.End.Value).ToList()
-                    : stations.Where(s => s.MDBottom.Value >= range.Start.Value).ToList()
+                    ? geologyIntervals.Where(s => s.MDBottom.Value >= range.Start.Value && s.MDTop.Value <= range.End.Value).ToList()
+                    : geologyIntervals.Where(s => s.MDBottom.Value >= range.Start.Value).ToList()
                 : range.End.HasValue
-                    ? stations.Where(s => s.MDBottom.Value <= range.End.Value).ToList()
-                    : stations;
+                    ? geologyIntervals.Where(s => s.MDBottom.Value <= range.End.Value).ToList()
+                    : geologyIntervals;
 
             SortGeologyIntervalData(entity.GeologyInterval);
 
@@ -85,7 +85,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Filters the station data with the query structural range.
+        /// Filters the geology interval data with the query structural range.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The parser.</param>
@@ -100,7 +100,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Check if need to query mongo file for station data.
+        /// Check if need to query mongo file for geology interval data.
         /// </summary>
         /// <param name="entity">The result data object.</param>
         /// <param name="header">The full header object.</param>
@@ -170,11 +170,11 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         /// <summary>
         /// Sorts the geology intervals by MdTop.
         /// </summary>
-        /// <param name="stations">The mudlog geology intervals.</param>
-        protected override void SortGeologyIntervalData(List<GeologyInterval> stations)
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
+        protected override void SortGeologyIntervalData(List<GeologyInterval> geologyIntervals)
         {
-            // Sort stations by MD
-            stations.Sort((x, y) => (x.MDTop?.Value ?? -1).CompareTo(y.MDTop?.Value ?? -1));
+            // Sort geology intervals by MD
+            geologyIntervals.Sort((x, y) => (x.MDTop?.Value ?? -1).CompareTo(y.MDTop?.Value ?? -1));
         }
 
         /// <summary>
@@ -188,14 +188,14 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Sets the mudlog station.
+        /// Sets the mudlog geology interval.
         /// </summary>
         /// <param name="dataObject">The mudlog data object.</param>
-        /// <param name="stations">The mudlog geology intervals.</param>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
         /// <returns>The mudlog.</returns>
-        protected override MudLog SetGeologyIntervals(MudLog dataObject, List<GeologyInterval> stations)
+        protected override MudLog SetGeologyIntervals(MudLog dataObject, List<GeologyInterval> geologyIntervals)
         {
-            dataObject.GeologyInterval = stations;
+            dataObject.GeologyInterval = geologyIntervals;
             return dataObject;
         }
 

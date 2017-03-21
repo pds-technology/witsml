@@ -266,27 +266,27 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Formats the trajectory station data.
+        /// Formats the mudlog geology interval data.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The query parser.</param>
-        /// <returns>A collection of formatted trajectory stations.</returns>
+        /// <returns>A collection of formatted mudlog geology intervals.</returns>
         protected virtual List<TChild> FormatGeologyIntervalData(T entity, WitsmlQueryParser parser)
         {
             var returnElements = parser.ReturnElements();
-            var stations = GetGeologyIntervals(entity);
+            var geologyIntervals = GetGeologyIntervals(entity);
 
             if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
                 OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
                 !parser.IncludeGeologyIntervals())
-                return stations;
+                return geologyIntervals;
 
             var geologyIntervalParser = parser
                 .ForkProperties(ObjectTypes.GeologyInterval, ObjectTypes.GeologyInterval)
                 .FirstOrDefault();
 
             if ((geologyIntervalParser != null && !geologyIntervalParser.HasElements() && !geologyIntervalParser.Element().HasAttributes))
-                return stations;
+                return geologyIntervals;
 
             const string prefix = "GeologyInterval.";
 
@@ -296,7 +296,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
                 .ToList();
 
             var mapper = new DataObjectMapper<TChild>(Container, geologyIntervalParser, fields);
-            return mapper.Map(stations);
+            return mapper.Map(geologyIntervals);
         }
 
         /// <summary>
@@ -393,30 +393,30 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Clears the trajectory stations.
+        /// Clears the mudlog geology intervals.
         /// </summary>
         /// <param name="entity">The entity.</param>
         protected abstract void ClearGeologyIntervals(T entity);
 
         /// <summary>
-        /// Filters the station data based on query parameters.
+        /// Filters the geology interval data based on query parameters.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="context">The query context.</param>
-        /// <returns>The count of trajectory stations after filtering.</returns>
-        protected abstract int FilterGeologyIntervalData(T entity, List<TChild> stations, WitsmlQueryParser parser = null, IQueryContext context = null);
+        /// <returns>The count of mudlog geology intervals after filtering.</returns>
+        protected abstract int FilterGeologyIntervalData(T entity, List<TChild> geologyIntervals, WitsmlQueryParser parser = null, IQueryContext context = null);
 
         /// <summary>
-        /// Filters the station data with the query structural range.
+        /// Filters the geology interval data with the query structural range.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The parser.</param>
         protected abstract void FilterGeologyIntervalData(T entity, WitsmlQueryParser parser);
 
         /// <summary>
-        /// Check if need to query mongo file for station data.
+        /// Check if need to query mongo file for geology interval data.
         /// </summary>
         /// <param name="entity">The result data object.</param>
         /// <param name="header">The full header object.</param>
@@ -434,36 +434,36 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         /// <summary>
         /// Gets the MD index ranges.
         /// </summary>
-        /// <param name="geologyIntervals">The trajectory stations.</param>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
         /// <param name="uom">The unit of measure.</param>
         /// <returns>The start and end index range.</returns>
         protected abstract Range<double?> GetIndexRange(List<TChild> geologyIntervals, out string uom);
 
         /// <summary>
-        /// Sorts the stations by MD.
+        /// Sorts the geology intervals by MD.
         /// </summary>
-        /// <param name="stations">The trajectory stations.</param>
-        protected abstract void SortGeologyIntervalData(List<TChild> stations);
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
+        protected abstract void SortGeologyIntervalData(List<TChild> geologyIntervals);
 
         /// <summary>
-        /// Gets the trajectory station.
+        /// Gets the mudlog geology interval.
         /// </summary>
-        /// <param name="dataObject">The trajectory data object.</param>
-        /// <returns>The trajectory station collection.</returns>
+        /// <param name="dataObject">The mudlog data object.</param>
+        /// <returns>The mudlog geology interval collection.</returns>
         protected abstract List<TChild> GetGeologyIntervals(T dataObject);
 
         /// <summary>
-        /// Sets the trajectory station.
+        /// Sets the mudlog geology interval.
         /// </summary>
-        /// <param name="dataObject">The trajectory data object.</param>
-        /// <param name="stations">The trajectory stations.</param>
-        /// <returns>The trajectory.</returns>
-        protected abstract T SetGeologyIntervals(T dataObject, List<TChild> stations);
+        /// <param name="dataObject">The mudlog data object.</param>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
+        /// <returns>The mudlog.</returns>
+        protected abstract T SetGeologyIntervals(T dataObject, List<TChild> geologyIntervals);
 
         private bool IsUpdatingGeologyIntervals(T dataObject)
         {
-            var stations = GetGeologyIntervals(dataObject);
-            return stations.Any();
+            var geologyIntervals = GetGeologyIntervals(dataObject);
+            return geologyIntervals.Any();
         }
 
         private bool IsDeletingGeologyIntervals(WitsmlQueryParser parser)
@@ -560,23 +560,23 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
         private int QueryGeologyIntervals(T entity, T header, WitsmlQueryParser parser, IQueryContext context)
         {
-            var stations = GetGeologyIntervals(entity);
+            var geologyIntervals = GetGeologyIntervals(entity);
             var chunked = IsQueryingGeologyIntervalFile(entity, header);
 
             if (chunked)
             {
                 var uri = entity.GetUri();
-                stations = GetMongoFileGeologyIntervalData(uri);
+                geologyIntervals = GetMongoFileGeologyIntervalData(uri);
             }
 
-            SetGeologyIntervals(entity, stations);
+            SetGeologyIntervals(entity, geologyIntervals);
 
             var ignored = parser.IsStructuralRangeQuery() ? new List<string> { "mdBottom" } : null;
             var query = new MongoDbQuery<T>(Container, GetCollection(), parser, null, ignored);
             query.Navigate(OptionsIn.ReturnElements.IdOnly.Value);
             query.FilterRecurringElements(entity.AsList());
 
-            var count = FilterGeologyIntervalData(entity, stations, parser, context);
+            var count = FilterGeologyIntervalData(entity, geologyIntervals, parser, context);
             SetIndexRange(entity, parser, false);
             FormatGeologyIntervalData(entity, parser);
 
@@ -637,20 +637,20 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
             if (chunked)
             {
-                var stations = GetMongoFileGeologyIntervalData(uri);
-                FilterGeologyIntervalData(current, stations);
+                var geologyIntervals = GetMongoFileGeologyIntervalData(uri);
+                FilterGeologyIntervalData(current, geologyIntervals);
             }
 
-            var stationsCurrent = new List<TChild>(GetGeologyIntervals(current));
+            var geologyIntervalsCurrent = new List<TChild>(GetGeologyIntervals(current));
 
             FilterGeologyIntervalData(current, parser);
             MergeEntity(current, parser, true);
 
-            var stationsAfterMerge = GetGeologyIntervals(current).Select(s => s.Uid).ToArray();
-            var stationsDeleted = stationsCurrent.FindAll(s => !stationsAfterMerge.ContainsIgnoreCase(s.Uid));
+            var geologyIntervalsAfterMerge = GetGeologyIntervals(current).Select(s => s.Uid).ToArray();
+            var geologyIntervalsDeleted = geologyIntervalsCurrent.FindAll(s => !geologyIntervalsAfterMerge.ContainsIgnoreCase(s.Uid));
 
             string uomIndex;
-            var rangeIn = GetIndexRange(stationsDeleted, out uomIndex);
+            var rangeIn = GetIndexRange(geologyIntervalsDeleted, out uomIndex);
 
             using (var transaction = GetTransaction())
             {
@@ -691,7 +691,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             // Currently not growing with start/end indexes changed
             AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex, endIndex, indexUom);
 
-            // Currently not growing with stations updated/appended/deleted
+            // Currently not growing with mudlog geology intervals updated/appended/deleted
             var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
             UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
