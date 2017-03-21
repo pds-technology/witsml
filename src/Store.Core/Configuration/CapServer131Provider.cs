@@ -74,10 +74,12 @@ namespace PDS.WITSMLstudio.Store.Configuration
                     OptionsIn.MaxReturnNodes.Keyword,
                     OptionsIn.RequestLatestValues.Keyword,
                     OptionsIn.RequestObjectSelectionCapability.Keyword,
-                    OptionsIn.DataVersion.Keyword);
+                    OptionsIn.DataVersion.Keyword,
+                    OptionsIn.IntervalRangeInclusion.Keyword);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);
+                ValidateIntervalRangeInclusion(optionsIn, request.ObjectType);
                 ValidateSelectionCriteria(document);
             }
             else if (request.Function == Functions.AddToStore)

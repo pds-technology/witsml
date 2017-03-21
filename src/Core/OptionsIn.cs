@@ -341,6 +341,50 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Defines the choices for the IntervalRangeInclusion configuration option value. (applies only to mudlog data objects)
+        /// </summary>
+        /// <seealso cref="PDS.WITSMLstudio.OptionsIn" />
+        public class IntervalRangeInclusion : OptionsIn
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="PDS.WITSMLstudio.OptionsIn.IntervalRangeInclusion"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
+            public IntervalRangeInclusion(string value) : base(Keyword, value) { }
+
+            /// <summary>
+            /// The keyword for IntervalRangeInclusion OptionsIn
+            /// </summary>
+            public const string Keyword = "intervalRangeInclusion";
+
+            /// <summary>
+            /// The nodes will be included if the interval minimum is within the range. (applies only to mudlog data objects)
+            /// </summary>
+            public static readonly IntervalRangeInclusion MinimumPoint = new IntervalRangeInclusion("minimum-point");
+
+            /// <summary>
+            /// The nodes will be included if the whole interval is within the range. (applies only to mudlog data objects)
+            /// </summary>
+            public static readonly IntervalRangeInclusion WholeInterval = new IntervalRangeInclusion("whole-interval");
+
+            /// <summary>
+            /// The nodes will be included if any part of the interval overlaps the range. (applies only to mudlog data objects)
+            /// </summary>
+            public static readonly IntervalRangeInclusion AnyPart = new IntervalRangeInclusion("any-part");
+
+            /// <summary>
+            /// Gets a collection of IntervalRangeInclusion option values.
+            /// </summary>
+            /// <returns>A collection of all IntervalRangeInclusion option values.</returns>
+            public static IEnumerable<IntervalRangeInclusion> GetValues()
+            {
+                yield return MinimumPoint;
+                yield return WholeInterval;
+                yield return AnyPart;
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OptionsIn"/> class.
         /// </summary>
         /// <param name="key">The key.</param>

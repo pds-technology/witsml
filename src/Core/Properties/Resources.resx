@@ -525,4 +525,8 @@
     <value>The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than or equal to the MaxRequestLatestValue.</value>
     <comment>-1054</comment>
   </data>
+  <data name="InvalidOptionForMudLogObjectOnly" xml:space="preserve">
+    <value>For WMLS_GetFromStore, the OptionsIn keyword ‘intervalRangeInclusion’ may only be used on a mudlog data-object.</value>
+    <comment>-1055</comment>
+  </data>
 </root>

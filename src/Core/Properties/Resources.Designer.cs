@@ -538,6 +538,15 @@ namespace PDS.WITSMLstudio.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_GetFromStore, the OptionsIn keyword ‘intervalRangeInclusion’ may only be used on a mudlog data-object..
+        /// </summary>
+        internal static string InvalidOptionForMudLogObjectOnly {
+            get {
+                return ResourceManager.GetString("InvalidOptionForMudLogObjectOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be specified with any other OptionsIn keyword..
         /// </summary>
         internal static string InvalidOptionsInCombination {

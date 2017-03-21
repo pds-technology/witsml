@@ -565,6 +565,16 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Adds mudLog object and test the return code
+        /// </summary>
+        /// <param name="mudLog">the mudLog</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(MudLog mudLog, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<MudLogList, MudLog>(mudLog, errorCode);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -619,16 +629,28 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
-        /// Does get query for single trajectory object and test for result count equal to 1 and is not null
+        /// Does get query for single attachment object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="attachment">the attachment with UIDs for well and wellbore</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
-        /// <returns>The first trajectory from the response</returns>
+        /// <returns>The first attachment from the response</returns>
         public Attachment GetAndAssert(Attachment attachment, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<AttachmentList, Attachment>(attachment, isNotNull, optionsIn, queryByExample);
+        }
+        /// <summary>
+        /// Does get query for single mudLog object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="mudLog">the mudLog with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first mudLog from the response</returns>
+        public MudLog GetAndAssert(MudLog mudLog, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<MudLogList, MudLog>(mudLog, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -733,6 +755,16 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Does UpdateInStore on mudLog object and test the return code
+        /// </summary>
+        /// <param name="mudLog">the mudLog</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(MudLog mudLog, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<MudLogList, MudLog>(mudLog, errorCode);
+        }
+
+        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>
@@ -818,6 +850,17 @@ namespace PDS.WITSMLstudio.Store
         public void DeleteAndAssert(Attachment attachment, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
             DeleteAndAssert<AttachmentList, Attachment>(attachment, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the mudLog and test the return code
+        /// </summary>
+        /// <param name="mudLog">The mudLog.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(MudLog mudLog, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<MudLogList, MudLog>(mudLog, errorCode, partialDelete);
         }
 
         public void AssertChangeHistoryTimesUnique(object entity)
