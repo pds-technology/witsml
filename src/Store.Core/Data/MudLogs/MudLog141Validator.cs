@@ -125,9 +125,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         /// <summary>
-        /// Validates the mudLog stations.
+        /// Validates the mudLog geology intervals.
         /// </summary>
-        /// <param name="geologyInterval">The mudLog stations.</param>
+        /// <param name="geologyInterval">The mudLog geology intervals.</param>
         /// <returns>
         /// A collection of validation results.
         /// </returns>
