@@ -25,10 +25,55 @@ namespace PDS.WITSMLstudio.Store.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1:2181")]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1:9092")]
         public string KafkaBrokerList {
             get {
                 return ((string)(this["KafkaBrokerList"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int KafkaPollingIntervalInMilliseconds {
+            get {
+                return ((int)(this["KafkaPollingIntervalInMilliseconds"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("StoreNotification-Upsert")]
+        public string KafkaUpsertTopicName {
+            get {
+                return ((string)(this["KafkaUpsertTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("StoreNotification-Delete")]
+        public string KafkaDeleteTopicName {
+            get {
+                return ((string)(this["KafkaDeleteTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string KafkaDebugContexts {
+            get {
+                return ((string)(this["KafkaDebugContexts"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool KafkaEnableAutoCommit {
+            get {
+                return ((bool)(this["KafkaEnableAutoCommit"]));
             }
         }
     }

@@ -3,7 +3,22 @@
   <Profiles />
   <Settings>
     <Setting Name="KafkaBrokerList" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">127.0.0.1:2181</Value>
+      <Value Profile="(Default)">127.0.0.1:9092</Value>
+    </Setting>
+    <Setting Name="KafkaPollingIntervalInMilliseconds" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="KafkaUpsertTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Upsert</Value>
+    </Setting>
+    <Setting Name="KafkaDeleteTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Delete</Value>
+    </Setting>
+    <Setting Name="KafkaDebugContexts" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KafkaEnableAutoCommit" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

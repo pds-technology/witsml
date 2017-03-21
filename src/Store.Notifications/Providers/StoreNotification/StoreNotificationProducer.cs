@@ -16,15 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using log4net;
 using PDS.WITSMLstudio.Data.ChangeLogs;
-using PDS.WITSMLstudio.Store.Properties;
+using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 {
@@ -45,8 +47,12 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// </summary>
         public StoreNotificationProducer()
         {
-            _config = new Dictionary<string, object> { { "bootstrap.servers", Settings.Default.KafkaBrokerList } };
             _serializer = new StringSerializer(Encoding.UTF8);
+            _config = new Dictionary<string, object>
+            {
+                {KafkaSettings.DebugKey, KafkaSettings.DebugContexts},
+                {KafkaSettings.BrokerListKey, KafkaSettings.BrokerList}
+            };
         }
 
         /// <summary>
@@ -59,19 +65,28 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
             var uri = auditHistory.Uri.ToLowerInvariant();
             var xml = WitsmlParser.ToXml(entity);
-            var topic = "test";
 
-            Task.Run(async() =>
+            var topic = auditHistory.LastChangeType == ChangeInfoType.delete
+                ? KafkaSettings.DeleteTopicName
+                : KafkaSettings.UpsertTopicName;
+
+            Task.Run(() =>
             {
-                using (var producer = new Producer<string, string>(_config, _serializer, _serializer))
+                try
                 {
-                    _log.Debug($"{producer.Name} producing on {topic}.");
+                    using (var producer = new Producer<string, string>(_config, _serializer, _serializer))
+                    {
+                        _log.Debug($"{producer.Name} producing on {topic}.");
 
-                    var result = await producer.ProduceAsync(topic, uri, xml);
+                        var task = producer.ProduceAsync(topic, uri, xml);
+                        var result = task.Result;
 
-                    _log.Debug($"Partition: {result.Partition}, Offset: {result.Offset}");
-
-                    producer.Flush();
+                        _log.Debug($"Partition: {result.Partition}; Offset: {result.Offset}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _log.Warn($"Error producing on topic: {topic}", ex);
                 }
             });
         }

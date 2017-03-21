@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -29,23 +30,68 @@ using PDS.WITSMLstudio.Store.Providers.Store;
 
 namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 {
+    /// <summary>
+    /// Provides a common framework for all Store Notification Store provider implementations.
+    /// </summary>
+    /// <seealso cref="Energistics.Protocol.StoreNotification.StoreNotificationStoreHandler" />
     public abstract class StoreNotificationStoreProviderBase : StoreNotificationStoreHandler
     {
+        private List<NotificationRequest> _requests;
+
+        /// <summary>
+        /// Gets the collection of notification requests.
+        /// </summary>
+        /// <value>The collection of notification requests.</value>
+        protected List<NotificationRequest> Requests
+            => _requests ?? (_requests = new List<NotificationRequest>());
+
+        /// <summary>
+        /// Handles the notification request.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="request">The request.</param>
         protected override void HandleNotificationRequest(MessageHeader header, NotificationRequest request)
         {
             base.HandleNotificationRequest(header, request);
             EnsureConnection();
 
-            // TODO: Keep track of notification subscriptions
+            if (Requests.Any(x => x.Request.Uuid.EqualsIgnoreCase(request.Request.Uuid)))
+            {
+                // TODO: Should this be an error?
+            }
+            else
+            {
+                Requests.Add(request);
+            }
         }
 
+        /// <summary>
+        /// Handles the cancel notification.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="request">The request.</param>
         protected override void HandleCancelNotification(MessageHeader header, CancelNotification request)
         {
             base.HandleCancelNotification(header, request);
 
-            // TODO: Remove notification subscription by UUID
+            var message = Requests.FirstOrDefault(x => x.Request.Uuid.EqualsIgnoreCase(request.RequestUuid));
+
+            if (message == null)
+            {
+                // TODO: Should this be an error?
+            }
+            else
+            {
+                Requests.Remove(message);
+            }
         }
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///   <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -56,31 +102,41 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Ensures the connection to the message broker.
+        /// </summary>
         protected virtual void EnsureConnection()
         {
         }
 
+        /// <summary>
+        /// Disconnects from the message broker.
+        /// </summary>
         protected virtual void Disconnect()
         {
         }
 
-        protected virtual void OnNotifyUpsert(string objectType, object dataObject, DateTime dateTime)
+        protected virtual void OnNotifyUpserted(string uri, object dataObject, DateTime dateTime)
         {
+            var etpUri = new EtpUri(uri);
+
             ChangeNotification(new ObjectChange
             {
                 ChangeType = ObjectChangeTypes.Upsert,
                 ChangeTime = dateTime.ToUnixTimeMicroseconds(),
-                DataObject = GetDataObject(objectType, OptionsIn.DataVersion.Version141.Value, dataObject)
+                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject)
             });
         }
 
-        protected virtual void OnNofityDeleted(string objectType, object dataObject, DateTime dateTime)
+        protected virtual void OnNotifyDeleted(string uri, object dataObject, DateTime dateTime)
         {
+            var etpUri = new EtpUri(uri);
+
             DeleteNotification(new ObjectChange
             {
                 ChangeType = ObjectChangeTypes.Delete,
                 ChangeTime = dateTime.ToUnixTimeMicroseconds(),
-                DataObject = GetDataObject(objectType, OptionsIn.DataVersion.Version141.Value, dataObject)
+                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject)
             });
         }
 
@@ -88,23 +144,27 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
             var jObject = dataObject as JObject;
 
-            if (jObject != null)
+            if (jObject != null || dataObject is string)
             {
-                // TODO: Map Web API service type to WITSML object type
                 var type = ObjectTypes.GetObjectGroupType(objectType, version) ??
                            ObjectTypes.GetObjectType(objectType, version);
 
-                dataObject = jObject.ToObject(type);
+                dataObject = jObject?.ToObject(type) ??
+                    WitsmlParser.Parse(type, WitsmlParser.Parse(dataObject.ToString()).Root);
             }
 
             var collection = dataObject as IEnergisticsCollection;
             var iDataObject = collection?.Items?.OfType<IDataObject>().FirstOrDefault();
+            var cDataObject = iDataObject as ICommonDataObject;
             var aDataObject = dataObject as Witsml200.AbstractObject;
+
             var uri = iDataObject?.GetUri() ?? aDataObject?.GetUri() ?? new EtpUri();
             var name = iDataObject?.Name ?? aDataObject?.Citation?.Title;
+            var lastChanged = cDataObject?.CommonData?.DateTimeLastChange?.ToUnixTimeMicroseconds() ??
+                              aDataObject?.Citation?.LastUpdate?.ToUnixTimeMicroseconds();
 
             var etpDataObject = new DataObject();
-            StoreStoreProvider.SetDataObject(etpDataObject, dataObject, uri, name);
+            StoreStoreProvider.SetDataObject(etpDataObject, dataObject, uri, name, -1, lastChanged.GetValueOrDefault());
 
             // TODO: Remove DataObject.Data if not requested in original subscription
 
