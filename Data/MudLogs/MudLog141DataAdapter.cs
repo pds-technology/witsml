@@ -16,12 +16,208 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
+
+
 namespace PDS.WITSMLstudio.Store.Data.MudLogs
 {
     /// <summary>
-    /// MudLog141DataAdapter
+    /// Data adapter that encapsulates CRUD functionality for <see cref="MudLog" />
     /// </summary>
+    [Export141(ObjectTypes.MudLog, typeof(IGrowingObjectDataAdapter))]
     public partial class MudLog141DataAdapter
     {
+        /// <summary>
+        /// Formats the mudlog station data.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>A collection of formatted mudlog geology intervals.</returns>
+        protected override List<GeologyInterval> FormatGeologyIntervalData(MudLog entity, WitsmlQueryParser parser)
+        {
+            entity.GeologyInterval = base.FormatGeologyIntervalData(entity, parser);
+            return entity.GeologyInterval;
+        }
+
+
+        /// <summary>
+        /// Filters the station data based on query parameters.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="stations">The mudlog geology intervals.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="context">The query context.</param>
+        /// <returns>The count of mudlog geology intervals after filtering.</returns>
+        protected override int FilterGeologyIntervalData(MudLog entity, List<GeologyInterval> stations, WitsmlQueryParser parser = null, IQueryContext context = null)
+        {
+            if (stations == null || stations.Count == 0)
+                return 0;
+
+            var range = GetQueryIndexRange(parser);
+            var maxDataNodes = context?.MaxDataNodes;
+
+
+            // TODO: Update logic
+            entity.GeologyInterval = range.Start.HasValue
+                ? range.End.HasValue
+                    ? stations.Where(s => s.MDBottom.Value >= range.Start.Value && s.MDTop.Value <= range.End.Value).ToList()
+                    : stations.Where(s => s.MDBottom.Value >= range.Start.Value).ToList()
+                : range.End.HasValue
+                    ? stations.Where(s => s.MDBottom.Value <= range.End.Value).ToList()
+                    : stations;
+
+            SortGeologyIntervalData(entity.GeologyInterval);
+
+            if (maxDataNodes != null && entity.GeologyInterval.Count > maxDataNodes.Value)
+            {
+                Logger.Debug($"Truncating mudlog geology intervals with {entity.GeologyInterval.Count}.");
+                entity.GeologyInterval = entity.GeologyInterval.GetRange(0, maxDataNodes.Value);
+                context.DataTruncated = true;
+            }
+
+            return entity.GeologyInterval.Count;
+        }
+
+        /// <summary>
+        /// Filters the station data with the query structural range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The parser.</param>
+        protected override void FilterGeologyIntervalData(MudLog entity, WitsmlQueryParser parser)
+        {
+            if (!entity.GeologyInterval.Any())
+                return;
+
+            var range = GetQueryIndexRange(parser);
+            // TODO : Update logic
+            entity.GeologyInterval.RemoveAll(s => WithinRange(s.MDBottom.Value, range));
+        }
+
+        /// <summary>
+        /// Check if need to query mongo file for station data.
+        /// </summary>
+        /// <param name="entity">The result data object.</param>
+        /// <param name="header">The full header object.</param>
+        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
+        protected override bool IsQueryingGeologyIntervalFile(MudLog entity, MudLog header)
+        {
+            return header.StartMD != null && entity.GeologyInterval == null;
+        }
+
+        /// <summary>
+        /// Sets the md index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="force">if set to <c>true</c> force the index range update.</param>
+        protected override void SetIndexRange(MudLog dataObject, WitsmlQueryParser parser, bool force = true)
+        {
+            Logger.Debug("Set mudlog MD ranges.");
+
+            if (dataObject.GeologyInterval == null || dataObject.GeologyInterval.Count <= 0)
+            {
+                dataObject.StartMD = null;
+                dataObject.EndMD = null;
+                return;
+            }
+
+            SortGeologyIntervalData(dataObject.GeologyInterval);
+
+            var returnElements = parser.ReturnElements();
+            var alwaysInclude = force ||
+                                OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements);
+
+            if (alwaysInclude || parser.Contains("startMd"))
+            {
+                dataObject.StartMD = dataObject.GeologyInterval.First().MDTop;
+            }
+
+            if (alwaysInclude || parser.Contains("endMd"))
+            {
+                dataObject.EndMD = dataObject.GeologyInterval.Last().MDBottom;
+            }
+        }
+
+        /// <summary>
+        /// Gets the MD index ranges.
+        /// </summary>
+        /// <param name="geologyIntervals">The mudlog geology intervals.</param>
+        /// <param name="uom">The unit of measure.</param>
+        /// <returns>The start and end index range.</returns>
+        protected override Range<double?> GetIndexRange(List<GeologyInterval> geologyIntervals, out string uom)
+        {
+            uom = string.Empty;
+
+            if (geologyIntervals == null || geologyIntervals.Count == 0)
+                return new Range<double?>(null, null);
+
+            SortGeologyIntervalData(geologyIntervals);
+
+            var mdTop = geologyIntervals.First().MDTop;
+            var mdBottom = geologyIntervals.Last().MDBottom;
+            uom = mdTop?.Uom.ToString() ?? string.Empty;
+
+            return new Range<double?>(mdTop?.Value, mdBottom?.Value);
+        }
+
+        /// <summary>
+        /// Sorts the geology intervals by MdTop.
+        /// </summary>
+        /// <param name="stations">The mudlog geology intervals.</param>
+        protected override void SortGeologyIntervalData(List<GeologyInterval> stations)
+        {
+            // Sort stations by MD
+            stations.Sort((x, y) => (x.MDTop?.Value ?? -1).CompareTo(y.MDTop?.Value ?? -1));
+        }
+
+        /// <summary>
+        /// Gets the mudlog geology intervals.
+        /// </summary>
+        /// <param name="dataObject">The mudlog data object.</param>
+        /// <returns>The mudlog geology intervals collection.</returns>
+        protected override List<GeologyInterval> GetGeologyIntervals(MudLog dataObject)
+        {
+            return dataObject.GeologyInterval;
+        }
+
+        /// <summary>
+        /// Sets the mudlog station.
+        /// </summary>
+        /// <param name="dataObject">The mudlog data object.</param>
+        /// <param name="stations">The mudlog geology intervals.</param>
+        /// <returns>The mudlog.</returns>
+        protected override MudLog SetGeologyIntervals(MudLog dataObject, List<GeologyInterval> stations)
+        {
+            dataObject.GeologyInterval = stations;
+            return dataObject;
+        }
+
+        /// <summary>
+        /// Clears the mudlog geology intervals.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        protected override void ClearGeologyIntervals(MudLog entity)
+        {
+            entity.GeologyInterval = null;
+        }
+
+        /// <summary>
+        /// Determines whether the objectGrowing flag is true for the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        ///   <c>true</c> if the objectGrowing flag is true for the specified entity; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool IsObjectGrowing(MudLog entity)
+        {
+            return entity.ObjectGrowing.GetValueOrDefault();
+        }
     }
 }
