@@ -780,7 +780,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
-            var current = GetEntity(uri, GetAuditProjectionPropertyNames());
+            var current = GetEntity(uri); //, GetAuditProjectionPropertyNames());
             var auditHistory = AuditHistoryAdapter.GetAuditHistory(uri, current, changeType);
             var isNewEntry = string.IsNullOrWhiteSpace(auditHistory.Uid);
 
@@ -790,16 +790,17 @@ namespace PDS.WITSMLstudio.Store.Data
                 auditHistory.Name = auditHistory.Uid;
             }
 
-            AuditEntity(auditHistory, isNewEntry);
+            AuditEntity(current, auditHistory, isNewEntry);
         }
 
         /// <summary>
         /// Audits the entity. Override this method to adjust the audit record
         /// before it is submitted to the database or to prevent the audit.
         /// </summary>
+        /// <param name="entity">The changed entity.</param>
         /// <param name="auditHistory">The audit history.</param>
         /// <param name="isNewEntry">if set to <c>true</c> add a new entry.</param>
-        protected virtual void AuditEntity(DbAuditHistory auditHistory, bool isNewEntry)
+        protected virtual void AuditEntity(T entity, DbAuditHistory auditHistory, bool isNewEntry)
         {
             if (isNewEntry)
             {
@@ -810,7 +811,7 @@ namespace PDS.WITSMLstudio.Store.Data
                 AuditHistoryAdapter?.ReplaceEntity(auditHistory, auditHistory.GetUri());
             }
 
-            AuditHistoryAdapter?.SendNotifications(auditHistory);
+            AuditHistoryAdapter?.QueueNotification(entity, auditHistory);
         }
 
         /// <summary>

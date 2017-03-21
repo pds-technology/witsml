@@ -221,11 +221,17 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         }
 
         /// <summary>
-        /// Sends change notification messages to any subscribers.
+        /// Queues a change notification message for sending.
         /// </summary>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <param name="entity">The changed entity.</param>
         /// <param name="auditHistory">The audit history.</param>
-        public void SendNotifications(DbAuditHistory auditHistory)
+        public void QueueNotification<T>(T entity, DbAuditHistory auditHistory)
         {
+            // TODO: Implement a queue that is processed when the transaction is committed
+
+            StoreNotificationProducers?
+                .ForEach(x => x.SendNotifications(entity, auditHistory));
         }
 
         /// <summary>
@@ -303,9 +309,10 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         /// Audits the entity. Override this method to adjust the audit record
         /// before it is submitted to the database or to prevent the audit.
         /// </summary>
+        /// <param name="entity">The changed entity.</param>
         /// <param name="auditHistory">The audit history.</param>
         /// <param name="isNewEntry">if set to <c>true</c> add a new entry.</param>
-        protected override void AuditEntity(DbAuditHistory auditHistory, bool isNewEntry)
+        protected override void AuditEntity(DbAuditHistory entity, DbAuditHistory auditHistory, bool isNewEntry)
         {
             // Excluding DbAuditHistory from audit history
         }
