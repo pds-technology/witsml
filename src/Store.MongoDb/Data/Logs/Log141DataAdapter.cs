@@ -505,8 +505,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var isTimeLog = IsTimeLog(entity, true);
             var curveIndexes = GetCurrentIndexRange(entity);
             var dataObject = new DataObject();
+            var unixTime = entity.CommonData.DateTimeLastChange.ToUnixTimeMicroseconds();
 
-            StoreStoreProvider.SetDataObject(dataObject, curve, uri, curve.Mnemonic.Value, 0);
+            StoreStoreProvider.SetDataObject(dataObject, curve, uri, curve.Mnemonic.Value, 0, unixTime.GetValueOrDefault());
 
             return new ChannelMetadataRecord()
             {
