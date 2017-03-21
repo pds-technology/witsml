@@ -592,6 +592,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 {OptionsIn.DataVersion.Version200.Value, new List<IChannelDataProvider>
                 {
                     _container.Resolve<IChannelDataProvider>(ObjectNames.Log200),
+                    _container.Resolve<IChannelDataProvider>(ObjectNames.Trajectory200),
                     _container.Resolve<IChannelDataProvider>(ObjectNames.Channel200)
                 }}
             };
