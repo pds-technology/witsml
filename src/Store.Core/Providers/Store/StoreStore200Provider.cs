@@ -70,8 +70,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             var uri = new EtpUri(args.Message.Uri);
             var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
             var entity = dataAdapter.Get(uri) as Witsml200.AbstractObject;
+            var lastChanged = (entity?.Citation.LastUpdate).ToUnixTimeMicroseconds().GetValueOrDefault();
 
-            StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));
+            StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity), lastChanged: lastChanged);
         }
 
         private string GetName(Witsml200.AbstractObject entity)

@@ -73,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             var entity = dataAdapter.Get(uri) as IDataObject;
             var list = GetList(entity, uri);
 
-            StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity));
+            StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity), lastChanged: GetLastChanged(entity));
         }
 
         private IEnergisticsCollection GetList(IDataObject entity, EtpUri uri)
@@ -97,6 +97,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         private string GetName(IDataObject entity)
         {
             return entity == null ? string.Empty : entity.Name;
+        }
+
+        private long GetLastChanged(IDataObject entity)
+        {
+            var commonDataObject = entity as ICommonDataObject;
+            var unixTime = commonDataObject?.CommonData.DateTimeLastChange.ToUnixTimeMicroseconds();
+
+            return unixTime.GetValueOrDefault();
         }
     }
 }

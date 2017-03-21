@@ -94,6 +94,9 @@ namespace PDS.WITSMLstudio.Store.Providers
             // e.g. eml://witsml20/Channel{s} or eml://witsml20/Channel(uid)
             if (ObjectTypes.Channel.EqualsIgnoreCase(objectType)) return true;
 
+            // e.g. eml://witsml20/Trajectory{s} or eml://witsml20/Trajectory(uid)
+            if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType)) return true;
+
             return false;
         }
 

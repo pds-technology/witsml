@@ -62,7 +62,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <param name="uri">The URI.</param>
         /// <param name="name">The name.</param>
         /// <param name="childCount">The child count.</param>
-        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1)
+        /// <param name="lastChanged">The last changed in microseconds.</param>
+        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0)
         {
             if (entity == null)
             {
@@ -86,7 +87,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 ContentType = uri.ContentType,
                 ResourceType = ResourceTypes.DataObject.ToString(),
                 CustomData = new Dictionary<string, string>(),
-                LastChanged = 0 // TODO: provide LastChanged
+                LastChanged = lastChanged,
+                ChannelSubscribable = uri.IsChannelSubscribable(),
+                ObjectNotifiable = uri.IsObjectNotifiable()
             };
         }
 
