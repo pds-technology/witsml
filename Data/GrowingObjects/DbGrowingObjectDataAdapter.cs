@@ -161,9 +161,10 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// Audits the entity. Override this method to adjust the audit record
         /// before it is submitted to the database or to prevent the audit.
         /// </summary>
+        /// <param name="entity">The changed entity.</param>
         /// <param name="auditHistory">The audit history.</param>
         /// <param name="exists">if set to <c>true</c> the entry exists.</param>
-        protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        protected override void AuditEntity(DbGrowingObject entity, DbAuditHistory auditHistory, bool exists)
         {
             // Excluding DbGrowingObject from audit history
         }
