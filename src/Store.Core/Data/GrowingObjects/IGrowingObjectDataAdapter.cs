@@ -16,7 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 
 namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
 {
@@ -39,5 +41,45 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         ///   <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
         /// </returns>
         bool CanSaveData();
+
+        /// <summary>
+        /// Gets the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        /// <returns></returns>
+        DataObject GetGrowingPart(EtpUri uri, string uid);
+
+        /// <summary>
+        /// Gets the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <returns></returns>
+        List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex);
+
+        /// <summary>
+        /// Puts the growing part for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="contentType">Type of the content.</param>
+        /// <param name="data">The data.</param>
+        void PutGrowingPart(EtpUri uri, string contentType, byte[] data);
+
+        /// <summary>
+        /// Deletes the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        void DeleteGrowingPart(EtpUri uri, string uid);
+
+        /// <summary>
+        /// Deletes the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        void DeleteGrowingParts(EtpUri uri, object startIndex, object endIndex);
     }
 }

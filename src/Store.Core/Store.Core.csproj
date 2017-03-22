@@ -395,6 +395,7 @@
     <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
     <Compile Include="Data\WitsmlExtensions.cs" />
     <Compile Include="Providers\EtpExtensions.cs" />
+    <Compile Include="Providers\GrowingObject\GrowingObjectStoreProvider.cs" />
     <Compile Include="Providers\StoreNotification\IStoreNotificationProducer.cs" />
     <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
     <Compile Include="Providers\Store\StoreStore131Provider.cs" />
