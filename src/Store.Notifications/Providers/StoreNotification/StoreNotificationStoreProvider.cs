@@ -63,7 +63,8 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// </summary>
         protected override void EnsureConnection()
         {
-            if (_consumer != null) return;
+            // No action if consumer already subscribed or broker list not configured
+            if (_consumer != null || string.IsNullOrWhiteSpace(KafkaSettings.BrokerList)) return;
 
             // Set the group identifier
             _config[KafkaSettings.GroupIdKey] = Session.ApplicationName;
@@ -102,7 +103,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
                 }
                 catch (Exception ex)
                 {
-                    Logger?.Warn($"Error polling message broker", ex);
+                    Logger?.Warn("Error polling message broker", ex);
                 }
             });
         }
@@ -124,16 +125,16 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             // Extract message values
             var uri = message.Key;
             var dataObject = message.Value;
-            var timestamp = message.Timestamp.DateTime;
+            var timestamp = DateTime.UtcNow;
 
             // Detect Upsert/Delete based on topic name
             if (KafkaSettings.DeleteTopicName.EqualsIgnoreCase(message.Topic))
             {
-                OnNotifyDeleted(uri, dataObject, timestamp);
+                OnNotifyDelete(uri, dataObject, timestamp);
             }
             else
             {
-                OnNotifyUpserted(uri, dataObject, timestamp);
+                OnNotifyUpsert(uri, dataObject, timestamp);
             }
         }
     }

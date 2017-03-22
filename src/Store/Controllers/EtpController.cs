@@ -71,7 +71,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
             handler.Register(() => Container.Resolve<IChannelStreamingConsumer>());
             handler.Register(() => Container.Resolve<IDiscoveryStore>());
             handler.Register(() => Container.Resolve<IStoreStore>());
-            handler.Register(() => Container.Resolve<IStoreNotificationStore>());
+            //handler.Register(() => Container.Resolve<IStoreNotificationStore>());
         }
     }
 }

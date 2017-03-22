@@ -63,6 +63,9 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// <param name="auditHistory">The audit history.</param>
         public void SendNotifications<T>(T entity, DbAuditHistory auditHistory)
         {
+            // No action if broker list not configured
+            if (string.IsNullOrWhiteSpace(KafkaSettings.BrokerList)) return;
+
             var uri = auditHistory.Uri.ToLowerInvariant();
             var xml = WitsmlParser.ToXml(entity);
 

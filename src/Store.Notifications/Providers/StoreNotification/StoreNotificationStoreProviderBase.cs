@@ -36,14 +36,17 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     /// <seealso cref="Energistics.Protocol.StoreNotification.StoreNotificationStoreHandler" />
     public abstract class StoreNotificationStoreProviderBase : StoreNotificationStoreHandler
     {
-        private List<NotificationRequest> _requests;
+        private readonly Dictionary<string, MessageHeader> _headers;
+        private readonly List<NotificationRequest> _requests;
 
         /// <summary>
-        /// Gets the collection of notification requests.
+        /// Initializes a new instance of the <see cref="StoreNotificationStoreProviderBase"/> class.
         /// </summary>
-        /// <value>The collection of notification requests.</value>
-        protected List<NotificationRequest> Requests
-            => _requests ?? (_requests = new List<NotificationRequest>());
+        protected StoreNotificationStoreProviderBase()
+        {
+            _headers = new Dictionary<string, MessageHeader>();
+            _requests = new List<NotificationRequest>();
+        }
 
         /// <summary>
         /// Handles the notification request.
@@ -55,13 +58,14 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             base.HandleNotificationRequest(header, request);
             EnsureConnection();
 
-            if (Requests.Any(x => x.Request.Uuid.EqualsIgnoreCase(request.Request.Uuid)))
+            if (_requests.Any(x => x.Request.Uuid.EqualsIgnoreCase(request.Request.Uuid)))
             {
                 // TODO: Should this be an error?
             }
             else
             {
-                Requests.Add(request);
+                _headers[request.Request.Uuid] = header;
+                _requests.Add(request);
             }
         }
 
@@ -74,7 +78,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
             base.HandleCancelNotification(header, request);
 
-            var message = Requests.FirstOrDefault(x => x.Request.Uuid.EqualsIgnoreCase(request.RequestUuid));
+            var message = _requests.FirstOrDefault(x => x.Request.Uuid.EqualsIgnoreCase(request.RequestUuid));
 
             if (message == null)
             {
@@ -82,7 +86,8 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             }
             else
             {
-                Requests.Remove(message);
+                _requests.Remove(message);
+                _headers.Remove(message.Request.Uuid);
             }
         }
 
@@ -116,31 +121,35 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
         }
 
-        protected virtual void OnNotifyUpserted(string uri, object dataObject, DateTime dateTime)
+        protected virtual void OnNotifyUpsert(string uri, object dataObject, DateTime dateTime)
         {
+            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeTypes.Upsert);
+        }
+
+        protected virtual void OnNotifyDelete(string uri, object dataObject, DateTime dateTime)
+        {
+            OnNotify(DeleteNotification, uri, dataObject, dateTime, ObjectChangeTypes.Delete);
+        }
+
+        protected virtual void OnNotify(Func<MessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeTypes changeType)
+        {
+            var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
+            if (request == null) return;
+
+            MessageHeader header;
+            if (!_headers.TryGetValue(request.Request.Uuid, out header)) return;
+
             var etpUri = new EtpUri(uri);
 
-            ChangeNotification(new ObjectChange
+            action(header, new ObjectChange
             {
-                ChangeType = ObjectChangeTypes.Upsert,
+                ChangeType = changeType,
                 ChangeTime = dateTime.ToUnixTimeMicroseconds(),
-                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject)
+                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject, request.Request.IncludeObjectData)
             });
         }
 
-        protected virtual void OnNotifyDeleted(string uri, object dataObject, DateTime dateTime)
-        {
-            var etpUri = new EtpUri(uri);
-
-            DeleteNotification(new ObjectChange
-            {
-                ChangeType = ObjectChangeTypes.Delete,
-                ChangeTime = dateTime.ToUnixTimeMicroseconds(),
-                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject)
-            });
-        }
-
-        protected virtual DataObject GetDataObject(string objectType, string version, object dataObject)
+        protected virtual DataObject GetDataObject(string objectType, string version, object dataObject, bool includeObjectData)
         {
             var jObject = dataObject as JObject;
 
@@ -164,9 +173,15 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
                               aDataObject?.Citation?.LastUpdate?.ToUnixTimeMicroseconds();
 
             var etpDataObject = new DataObject();
-            StoreStoreProvider.SetDataObject(etpDataObject, dataObject, uri, name, -1, lastChanged.GetValueOrDefault());
 
-            // TODO: Remove DataObject.Data if not requested in original subscription
+            // Do not return DataObject.Data if not requested in original subscription
+            StoreStoreProvider.SetDataObject(
+                etpDataObject,
+                includeObjectData ? dataObject : null,
+                uri,
+                name,
+                -1,
+                lastChanged.GetValueOrDefault());
 
             return etpDataObject;
         }

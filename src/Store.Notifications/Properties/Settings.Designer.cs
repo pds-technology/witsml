@@ -61,7 +61,7 @@ namespace PDS.WITSMLstudio.Store.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("all")]
         public string KafkaDebugContexts {
             get {
                 return ((string)(this["KafkaDebugContexts"]));
