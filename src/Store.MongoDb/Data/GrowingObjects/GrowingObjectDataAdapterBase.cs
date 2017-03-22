@@ -16,8 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
@@ -83,6 +86,66 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         public virtual bool CanSaveData()
         {
             return true;
+        }
+
+        /// <summary>
+        /// Gets the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public DataObject GetGrowingPart(EtpUri uri, string uid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Puts the growing part for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="contentType">Type of the content.</param>
+        /// <param name="data">The data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public void DeleteGrowingPart(EtpUri uri, string uid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public void DeleteGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

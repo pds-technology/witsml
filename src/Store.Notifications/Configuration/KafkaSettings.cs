@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using PDS.WITSMLstudio.Store.Properties;
+using PDS.WITSMLstudio.Store.Notifications;
 
 namespace PDS.WITSMLstudio.Store.Configuration
 {

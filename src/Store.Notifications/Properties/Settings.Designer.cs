@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.WITSMLstudio.Store.Properties {
+namespace PDS.WITSMLstudio.Store.Notifications {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,7 +25,7 @@ namespace PDS.WITSMLstudio.Store.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1:9092")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string KafkaBrokerList {
             get {
                 return ((string)(this["KafkaBrokerList"]));
