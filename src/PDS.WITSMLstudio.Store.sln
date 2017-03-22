@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Jobs", "..\ext\witsml
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Web", "..\ext\witsml\src\Store.Web\Store.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Notifications", "Store.Notifications\Store.Notifications.csproj", "{987B6304-B4A6-4D57-ACC3-7209175286A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987B6304-B4A6-4D57-ACC3-7209175286A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987B6304-B4A6-4D57-ACC3-7209175286A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987B6304-B4A6-4D57-ACC3-7209175286A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987B6304-B4A6-4D57-ACC3-7209175286A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

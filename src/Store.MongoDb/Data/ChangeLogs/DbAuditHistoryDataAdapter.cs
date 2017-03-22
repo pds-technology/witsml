@@ -29,6 +29,7 @@ using LinqToQuerystring;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.ChangeLogs;
 using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Providers.StoreNotification;
 
 namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
 {
@@ -54,6 +55,13 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         }
 
         /// <summary>
+        /// Gets or sets the collection of store notification producers.
+        /// </summary>
+        /// <value>The collection of store notification producers.</value>
+        [ImportMany]
+        public List<IStoreNotificationProducer> StoreNotificationProducers { get; set; }
+
+        /// <summary>
         /// Gets the supported capabilities for the <see cref="DbAuditHistory"/> object.
         /// </summary>
         /// <param name="capServer">The capServer instance.</param>
@@ -62,26 +70,6 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
             Logger.DebugFormat("Getting the supported capabilities for ChangeLog data version {0}.", capServer.Version);
 
             capServer.Add(Functions.GetFromStore, ObjectTypes.ChangeLog);
-        }
-
-        /// <summary>
-        /// Retrieves data objects from the data store using the specified parser.
-        /// </summary>
-        /// <param name="parser">The query template parser.</param>
-        /// <param name="context">The response context.</param>
-        /// <returns>A collection of data objects retrieved from the data store.</returns>
-        public override List<DbAuditHistory> Query(WitsmlQueryParser parser, ResponseContext context)
-        {
-            var entities = base.Query(parser, context);
-            var returnElements = parser.ReturnElements();
-
-            // Only return full changeHistory if requested
-            if (!OptionsIn.ReturnElements.All.Equals(returnElements) && !parser.Contains("changeHistory"))
-            {
-                entities.ForEach(x => x.ChangeHistory = null);
-            }
-
-            return entities;
         }
 
         /// <summary>
@@ -233,6 +221,40 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         }
 
         /// <summary>
+        /// Queues a change notification message for sending.
+        /// </summary>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <param name="entity">The changed entity.</param>
+        /// <param name="auditHistory">The audit history.</param>
+        public void QueueNotification<T>(T entity, DbAuditHistory auditHistory)
+        {
+            // TODO: Implement a queue that is processed when the transaction is committed
+
+            StoreNotificationProducers?
+                .ForEach(x => x.SendNotifications(entity, auditHistory));
+        }
+
+        /// <summary>
+        /// Retrieves data objects from the data store using the specified parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <param name="context">The response context.</param>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
+        public override List<DbAuditHistory> Query(WitsmlQueryParser parser, ResponseContext context)
+        {
+            var entities = base.Query(parser, context);
+            var returnElements = parser.ReturnElements();
+
+            // Only return full changeHistory if requested
+            if (!OptionsIn.ReturnElements.All.Equals(returnElements) && !parser.Contains("changeHistory"))
+            {
+                entities.ForEach(x => x.ChangeHistory = null);
+            }
+
+            return entities;
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -287,9 +309,10 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         /// Audits the entity. Override this method to adjust the audit record
         /// before it is submitted to the database or to prevent the audit.
         /// </summary>
+        /// <param name="entity">The changed entity.</param>
         /// <param name="auditHistory">The audit history.</param>
-        /// <param name="exists">if set to <c>true</c> the entry exists.</param>
-        protected override void AuditEntity(DbAuditHistory auditHistory, bool exists)
+        /// <param name="isNewEntry">if set to <c>true</c> add a new entry.</param>
+        protected override void AuditEntity(DbAuditHistory entity, DbAuditHistory auditHistory, bool isNewEntry)
         {
             // Excluding DbAuditHistory from audit history
         }
