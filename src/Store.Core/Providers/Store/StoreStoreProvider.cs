@@ -69,6 +69,10 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             {
                 dataObject.SetString(null);
             }
+            else if (entity is string)
+            {
+                dataObject.SetString(entity.ToString());
+            }
             else
             {
                 var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)

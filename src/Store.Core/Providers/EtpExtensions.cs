@@ -71,6 +71,8 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// </returns>
         public static bool IsChannelSubscribable(this EtpUri uri)
         {
+            if (!uri.IsValid) return false;
+
             // e.g. "/" or eml://witsml20 or eml://witsml14 or eml://witsml13
             if (EtpUri.RootUri.Equals(uri) || uri.IsBaseUri) return true;
 
@@ -109,7 +111,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// </returns>
         public static bool IsObjectNotifiable(this EtpUri uri)
         {
-            return false;
+            return uri.IsValid && !string.IsNullOrWhiteSpace(uri.ObjectId);
         }
     }
 }
