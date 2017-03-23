@@ -194,7 +194,7 @@ namespace PDS.WITSMLstudio.Data.Logs
                 Uom = uom,
                 ChannelClass = ToPropertyKindReference(channelClass),
                 LoggingMethod = log.LoggingMethod,
-                LoggingCompanyName = log.LoggingCompanyName,
+                LoggingCompanyName = log.LoggingCompanyName ?? "PDS",
                 Source = log.LoggingMethod.ToString(),
                 DataType = etpDataType,
                 GrowingStatus = ChannelStatus.active,
