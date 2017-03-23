@@ -32,6 +32,7 @@ using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
@@ -42,7 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Trajectory200DataAdapter : MongoDbDataAdapter<Trajectory>
+    public partial class Trajectory200DataAdapter : GrowingObjectDataAdapterBase<Trajectory>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory200DataAdapter" /> class.

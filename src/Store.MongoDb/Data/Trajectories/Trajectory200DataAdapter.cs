@@ -19,15 +19,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Energistics.Common;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Datatypes.Object;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
+using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.Channels;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
+using PDS.WITSMLstudio.Store.Data.Transactions;
 using PDS.WITSMLstudio.Store.Providers.Store;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
@@ -36,8 +46,55 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     [Export200(ObjectTypes.Trajectory, typeof(IChannelDataProvider))]
+    [Export200(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]    
     public partial class Trajectory200DataAdapter : IChannelDataProvider
     {
+        private const string FileQueryField = "Uri";
+        private const string FileName = "FileName";
+
+        /// <summary>
+        /// Adds a data object to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
+        public override void Add(WitsmlQueryParser parser, Trajectory dataObject)
+        {
+            var uri = dataObject.GetUri();
+
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(uri);
+
+                if (!CanSaveData())
+                {
+                    ClearTrajectoryStations(dataObject);
+                }
+
+                SetIndexRange(dataObject, parser);
+                UpdateMongoFile(dataObject, false);
+                InsertEntity(dataObject);
+                UpdateGrowingObject(uri);
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Replaces a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public override void Replace(WitsmlQueryParser parser, Trajectory dataObject)
+        {
+            var uri = dataObject.GetUri();
+
+            if (!CanSaveData())
+            {
+                ClearTrajectoryStations(dataObject);
+            }
+
+            UpdateTrajectoryWithStations(parser, dataObject, uri);
+        }
+
         /// <summary>
         /// Gets the channel metadata.
         /// </summary>
@@ -89,6 +146,167 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <param name="reader">A reader for the channel data</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+        }
+
+        /// <summary>
+        /// Determines whether this instance can save the data portion of the growing object.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this instance can save the data portion of the growing object; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanSaveData()
+        {
+            return WitsmlOperationContext.Current.Request.Function != Functions.PutObject || CompatibilitySettings.TrajectoryAllowPutObjectWithData;
+        }
+
+        /// <summary>
+        /// Puts the growing part for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="contentType">Type of the content.</param>
+        /// <param name="data">The data.</param>
+        public override void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
+        {
+            var dataObject = new DataObject() {Data = data};
+
+            // Convert byte array to TrajectoryStation
+            var trajectoryStationXml = dataObject.GetString();
+            var tsDocument = WitsmlParser.Parse(trajectoryStationXml);
+            var trajectoryStation = WitsmlParser.Parse<TrajectoryStation>(tsDocument.Root);
+
+            // Merge TrajectoryStation into the Trajectory if it is not null
+            if (trajectoryStation != null)
+            {
+                // Get the Trajectory for the uri
+                var entity = GetEntity(uri);
+                entity.TrajectoryStation = trajectoryStation.AsList();
+
+                var document = WitsmlParser.Parse(WitsmlParser.ToXml(entity));
+                var parser = new WitsmlQueryParser(document.Root, ObjectTypes.GetObjectType<Trajectory>(), null);
+                UpdateTrajectoryWithStations(parser, entity, uri, true);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the objectGrowing flag is true for the specified entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        /// <c>true</c> if the objectGrowing flag is true for the specified entity; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool IsObjectGrowing(Trajectory entity)
+        {
+            return entity.GrowingStatus.HasValue && entity.GrowingStatus.Value == ChannelStatus.active;
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="uri">The growing object's URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected override void UpdateWellboreIsActive(EtpUri uri, bool isActive)
+        {
+            var entity = GetEntity(uri, "Wellbore");
+            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(uri.Version));
+            dataAdapter.UpdateIsActive(entity.Wellbore.GetUri(), isActive);
+        }
+
+        private void ClearTrajectoryStations(Trajectory entity)
+        {
+            entity.TrajectoryStation = null;
+        }
+
+        private void SetIndexRange(Trajectory dataObject, WitsmlQueryParser parser, bool force = true)
+        {
+            Logger.Debug("Set trajectory MD ranges.");
+
+            if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count <= 0)
+            {
+                dataObject.MDMin = null;
+                dataObject.MDMax = null;
+                return;
+            }
+
+            SortStationData(dataObject.TrajectoryStation);
+
+            var returnElements = parser.ReturnElements();
+            var alwaysInclude = force ||
+                                OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements);
+
+            if (alwaysInclude || parser.Contains("mdMn"))
+            {
+                dataObject.MDMin = dataObject.TrajectoryStation.First().MD;
+            }
+
+            if (alwaysInclude || parser.Contains("mdMx"))
+            {
+                dataObject.MDMax = dataObject.TrajectoryStation.Last().MD;
+            }
+        }
+
+        private void SortStationData(List<TrajectoryStation> stations)
+        {
+            // Sort stations by MD
+            stations.Sort((x, y) => (x.MD?.Value ?? -1).CompareTo(y.MD?.Value ?? -1));
+        }
+
+        private void UpdateMongoFile(Trajectory entity, bool deleteFile = true)
+        {
+            var uri = entity.GetUri();
+            Logger.Debug($"Updating MongoDb Trajectory Stations files: {uri}");
+
+            var bucket = GetMongoFileBucket();
+            var stations = entity.TrajectoryStation; //GetTrajectoryStations(entity);
+
+            if (stations != null && stations.Count >= WitsmlSettings.MaxStationCount)
+            {
+                var bytes = Encoding.UTF8.GetBytes(stations.ToJson());
+
+                var loadOptions = new GridFSUploadOptions
+                {
+                    Metadata = new BsonDocument
+                    {
+                        { FileName, Guid.NewGuid().ToString() },
+                        { FileQueryField, uri.ToString() },
+                        { "DataBytes", bytes.Length }
+                    }
+                };
+
+                if (deleteFile)
+                    DeleteMongoFile(bucket, uri);
+
+                bucket.UploadFromBytes(uri, bytes, loadOptions);
+                ClearTrajectoryStations(entity);
+            }
+            else
+            {
+                if (deleteFile)
+                    DeleteMongoFile(bucket, uri);
+            }
+        }
+
+        private IGridFSBucket GetMongoFileBucket()
+        {
+            var db = DatabaseProvider.GetDatabase();
+            return new GridFSBucket(db, new GridFSBucketOptions
+            {
+                BucketName = DbCollectionName,
+                ChunkSizeBytes = WitsmlSettings.ChunkSizeBytes
+            });
+        }
+
+        private void DeleteMongoFile(IGridFSBucket bucket, string fileId)
+        {
+            Logger.Debug($"Deleting MongoDb Channel Data file: {fileId}");
+
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileQueryField], fileId);
+            var mongoFile = bucket.Find(filter).FirstOrDefault();
+
+            if (mongoFile == null)
+                return;
+
+            bucket.Delete(mongoFile.Id);
         }
 
         private List<Trajectory> GetChannelsByUris(params EtpUri[] uris)
@@ -184,6 +402,166 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                 default:
                     return ChannelStatuses.Closed;
             }
+        }
+
+        private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, Trajectory dataObject, EtpUri uri, bool merge = false)
+        {
+            var current = GetEntity(uri);
+            var chunked = IsQueryingStationFile(current);
+            var stations = dataObject.TrajectoryStation;
+            var isAppending = false;
+
+            string uomIndex;
+            var rangeIn = GetIndexRange(stations, out uomIndex);
+
+            if (merge)
+            {
+                if (chunked)
+                {
+                    stations = GetMongoFileStationData(uri);
+                    FilterStationData(current, stations);
+                }
+
+                var savedStations = current.TrajectoryStation
+                    .Select(x => x.Uid)
+                    .ToArray();
+
+                isAppending = dataObject.TrajectoryStation
+                    .Any(x => !savedStations.ContainsIgnoreCase(x.Uid));
+
+                MergeEntity(current, parser);
+                dataObject = current;
+            }
+
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(uri);
+
+                if (chunked)
+                {
+                    var bucket = GetMongoFileBucket();
+                    DeleteMongoFile(bucket, uri);
+                }
+
+                SetIndexRange(dataObject, parser);
+                UpdateMongoFile(dataObject, false);
+                ReplaceEntity(dataObject, uri, false);
+                UpdateGrowingObject(dataObject, false, isAppending, rangeIn.Start, rangeIn.End, uomIndex);
+                transaction.Commit();
+            }
+        }
+
+        private bool IsQueryingStationFile(Trajectory entity)
+        {
+            return entity.MDMin != null && entity.TrajectoryStation == null;
+        }
+
+        private Range<double?> GetIndexRange(List<TrajectoryStation> stations, out string uom)
+        {
+            uom = string.Empty;
+
+            if (stations == null || stations.Count == 0)
+                return new Range<double?>(null, null);
+
+            SortStationData(stations);
+
+            var mdMin = stations.First().MD;
+            var mdMax = stations.Last().MD;
+            uom = mdMin?.Uom.ToString() ?? string.Empty;
+
+            return new Range<double?>(mdMin?.Value, mdMax?.Value);
+        }
+
+        private List<TrajectoryStation> GetMongoFileStationData(string uri)
+        {
+            Logger.Debug("Getting MongoDb Trajectory Station files.");
+
+            var bucket = GetMongoFileBucket();
+
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileQueryField], uri);
+            var mongoFile = bucket.Find(filter).FirstOrDefault();
+
+            if (mongoFile == null)
+                return null;
+
+            var bytes = bucket.DownloadAsBytes(mongoFile.Id);
+            var json = Encoding.UTF8.GetString(bytes);
+
+            return BsonSerializer.Deserialize<List<TrajectoryStation>>(json);
+        }
+
+        private int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null,
+            IQueryContext context = null)
+        {
+            if (stations == null || stations.Count == 0)
+                return 0;
+
+            var range = GetQueryIndexRange(parser);
+            var maxDataNodes = context?.MaxDataNodes;
+
+            entity.TrajectoryStation = range.Start.HasValue
+                ? range.End.HasValue
+                    ? stations.Where(s => s.MD.Value >= range.Start.Value && s.MD.Value <= range.End.Value).ToList()
+                    : stations.Where(s => s.MD.Value >= range.Start.Value).ToList()
+                : range.End.HasValue
+                    ? stations.Where(s => s.MD.Value <= range.End.Value).ToList()
+                    : stations;
+
+            SortStationData(entity.TrajectoryStation);
+
+            if (maxDataNodes != null && entity.TrajectoryStation.Count > maxDataNodes.Value)
+            {
+                Logger.Debug($"Truncating trajectory stations with {entity.TrajectoryStation.Count}.");
+                entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, maxDataNodes.Value);
+                context.DataTruncated = true;
+            }
+
+            return entity.TrajectoryStation.Count;
+        }
+
+        private Range<double?> GetQueryIndexRange(WitsmlQueryParser parser)
+        {
+            if (parser == null)
+                return new Range<double?>(null, null);
+
+            var mdMn = parser.Properties("mdMn").FirstOrDefault()?.Value;
+            var mdMx = parser.Properties("mdMx").FirstOrDefault()?.Value;
+
+            if (string.IsNullOrEmpty(mdMn) && string.IsNullOrEmpty(mdMx))
+                return new Range<double?>(null, null);
+
+            if (string.IsNullOrEmpty(mdMn))
+                return new Range<double?>(null, double.Parse(mdMx));
+
+            return string.IsNullOrEmpty(mdMx)
+                ? new Range<double?>(double.Parse(mdMn), null)
+                : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
+        }
+
+        private void UpdateGrowingObject(Trajectory current, bool isHeaderUpdateOnly, bool? isAppending = null, double? startIndex = null, double? endIndex = null, string indexUom = null)
+        {
+            // Currently growing
+            if (IsObjectGrowing(current))
+            {
+                return;
+            }
+
+            var changeHistory = AuditHistoryAdapter.GetCurrentChangeHistory();
+            changeHistory.UpdatedHeader = true;
+
+            // Currently not growing with header only update
+            if (isHeaderUpdateOnly)
+            {
+                UpdateGrowingObject(current.GetUri());
+                return;
+            }
+
+            // Currently not growing with start/end indexes changed
+            AuditHistoryAdapter.SetChangeHistoryIndexes(changeHistory, startIndex, endIndex, indexUom);
+
+            // Currently not growing with stations updated/appended/deleted
+            var isObjectGrowingToggled = isAppending.GetValueOrDefault() ? true : (bool?)null;
+            UpdateGrowingObject(current, null, isObjectGrowingToggled);
         }
     }
 }
