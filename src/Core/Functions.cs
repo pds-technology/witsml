@@ -85,6 +85,36 @@ namespace PDS.WITSMLstudio
         /// Delete Object
         /// </summary>
         [Description("Delete Object")]
-        DeleteObject
+        DeleteObject,
+
+        /// <summary>
+        /// Growing Object Get
+        /// </summary>
+        [Description("Growing Object Get")]
+        GrowingObjectGet,
+
+        /// <summary>
+        /// Growing Object Get Range
+        /// </summary>
+        [Description("Growing Object Get Range")]
+        GrowingObjectGetRange,
+
+        /// <summary>
+        /// Growing Object Put
+        /// </summary>
+        [Description("Growing Object Put")]
+        GrowingObjectPut,
+
+        /// <summary>
+        /// Growing Object Delete
+        /// </summary>
+        [Description("Growing Object Delete")]
+        GrowingObjectDelete,
+
+        /// <summary>
+        /// Growing Object Delete Range
+        /// </summary>
+        [Description("Growing Object Delete Range")]
+        GrowingObjectDeleteRange
     }
 }
