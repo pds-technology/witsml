@@ -64,6 +64,10 @@ namespace PDS.WITSMLstudio.Store.Data
             Register<Witsml131.Message>();
             Register<Witsml141.Message>();
 
+            // mudLog
+            Register<Witsml131.MudLog>();
+            Register<Witsml141.MudLog>();
+
             // rig
             Register<Witsml131.Rig>();
             Register<Witsml141.Rig>();

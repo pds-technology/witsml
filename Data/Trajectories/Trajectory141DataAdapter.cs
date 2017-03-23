@@ -22,7 +22,6 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
-using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
