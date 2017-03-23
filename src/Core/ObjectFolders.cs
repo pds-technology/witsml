@@ -69,6 +69,11 @@ namespace PDS.WITSMLstudio
         public const string Other = "Other";
 
         /// <summary>
+        /// An ObjectFolders identifier for All.
+        /// </summary>
+        public const string All = "All";
+
+        /// <summary>
         /// An ObjectFolders identifier for Messages.
         /// </summary>
         public const string Messages = "Messages";

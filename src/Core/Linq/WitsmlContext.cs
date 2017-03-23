@@ -167,11 +167,12 @@ namespace PDS.WITSMLstudio.Linq
         /// Gets the growing objects id-only with object growing status.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
-        /// <param name="uri">The URI.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <param name="indexType">Type of the index.</param>
         /// <returns> The wellbore objects of specified type with header. </returns>
-        public virtual IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri uri)
+        public virtual IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri, string indexType = null)
         {
-            return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly);
+            return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.HeaderOnly);
         }
 
         /// <summary>

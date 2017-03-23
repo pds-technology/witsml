@@ -88,10 +88,7 @@ namespace PDS.WITSMLstudio.Query
         /// <summary>
         /// Gets all wells.
         /// </summary>
-        /// <returns>
-        /// The wells.
-        /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <returns> The wells.</returns>
         public override IEnumerable<IDataObject> GetAllWells()
         {
             var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Well, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
@@ -103,10 +100,7 @@ namespace PDS.WITSMLstudio.Query
         /// Gets the wellbores.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
-        /// <returns>
-        /// The wellbores.
-        /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
+        /// <returns>The wellbores. </returns>
         public override IEnumerable<IWellObject> GetWellbores(EtpUri parentUri)
         {
             var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Wellbore, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
@@ -163,18 +157,21 @@ namespace PDS.WITSMLstudio.Query
         /// Gets the growing objects id-only with active status.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
-        /// <param name="parentUri">The URI.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <param name="indexType">Type of the index.</param>
         /// <returns>
         /// The wellbore objects of specified type with header.
         /// </returns>
-        public override IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri)
+        public override IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri, string indexType = null)
         {
             var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
+            _template.Add(queryIn, $"//{objectType}", "objectGrowing");
 
-            if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
-                _template.Add(queryIn, "//log", "objectGrowing");
-            else if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType))
-                _template.Add(queryIn, "//trajectory", "objectGrowing");
+            if (ObjectTypes.Log.EqualsIgnoreCase(objectType) && !string.IsNullOrEmpty(indexType))
+            {
+                _template.Add(queryIn, "//log", "indexType");
+                _template.Set(queryIn, "//log/indexType", indexType);
+            }
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
