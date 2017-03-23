@@ -76,12 +76,14 @@ namespace PDS.WITSMLstudio.Store.Configuration
                     OptionsIn.RequestPrivateGroupOnly.Keyword,
                     OptionsIn.RequestObjectSelectionCapability.Keyword,
                     OptionsIn.CompressionMethod.Keyword,
-                    OptionsIn.DataVersion.Keyword);
+                    OptionsIn.DataVersion.Keyword,
+                    OptionsIn.IntervalRangeInclusion.Keyword);
                 ValidateRequestMaxReturnNodes(optionsIn);
                 ValidateRequestRequestLatestValue(optionsIn);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);
+                ValidateIntervalRangeInclusion(optionsIn, request.ObjectType);
                 ValidateSelectionCriteria(document);
             }
             else if (request.Function == Functions.AddToStore)

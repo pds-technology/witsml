@@ -411,6 +411,36 @@ namespace PDS.WITSMLstudio.Store.Configuration
         }
 
         /// <summary>
+        /// Validates the intervalRangeInclusion option.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        public void ValidateIntervalRangeInclusion(Dictionary<string, string> options, string objectType)
+        {
+            _log.DebugFormat("Validating interval range inclusion for {0}", objectType);
+
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.IntervalRangeInclusion.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate value 
+            if (!OptionsIn.IntervalRangeInclusion.GetValues().Any(x => x.Equals(optionValue)))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+
+            // IntervalRangeInclusion is only for mudlog data objects
+            if (ObjectTypes.MudLog != objectType)
+            {
+                throw new WitsmlException(ErrorCodes.InvalidOptionForMudLogObjectOnly);
+            }
+        }
+
+        /// <summary>
         /// Validates the selection criteria.
         /// </summary>
         /// <param name="document">The queryIn XML document.</param>

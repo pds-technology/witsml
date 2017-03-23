@@ -93,6 +93,19 @@ namespace PDS.WITSMLstudio.Query
 
                     break;
 
+                case "mudLog":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.MudLog.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.MudLog.IdOnly;
+
+                    if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.MudLog.HeaderOnly;
+                    else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.MudLog.DataOnly;
+
+                    break;
+
                 case "rig":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Rig.All;
@@ -182,6 +195,19 @@ namespace PDS.WITSMLstudio.Query
                         xDocument = Witsml141.Message.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Message.IdOnly;
+
+                    break;
+
+                case "mudLog":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.MudLog.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.MudLog.IdOnly;
+
+                    if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.MudLog.HeaderOnly;
+                    else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.MudLog.DataOnly;
 
                     break;
 
@@ -347,6 +373,79 @@ namespace PDS.WITSMLstudio.Query
                         _idOnly = _template.Create<WITSML131.MessageList>();
                         _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
+                    }
+                }
+
+            }
+
+            /// <summary>
+            /// Provides helper methods to create Witsml131 query templates for mudLog.    
+            /// </summary>          
+            public static class MudLog
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
+
+                private static XDocument _headerOnly;
+                private static XDocument _dataOnly;
+
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML131.MudLogList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+
+                        if (_idOnly != null) return Clone(_idOnly);
+                        _idOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        return Clone(_idOnly);
+                    }
+                }
+
+                /// <summary>
+                /// Create a header only query template.
+                /// </summary>
+                /// <returns></returns>
+                public static XDocument HeaderOnly
+                {
+                    get
+                    {
+
+                        if (_headerOnly != null) return Clone(_headerOnly);
+                        _headerOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.Remove(_headerOnly, "");
+                        return Clone(_headerOnly);
+                    }
+                }
+
+                /// <summary>
+                ///  Create a data only query template.
+                /// </summary>
+                /// <returns></returns>
+                public static XDocument DataOnly
+                {
+                    get
+                    {
+
+                        if (_dataOnly != null) return Clone(_dataOnly);
+                        _dataOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.RemoveAll(_dataOnly, "");
+                        return Clone(_dataOnly);
                     }
                 }
 
@@ -729,6 +828,79 @@ namespace PDS.WITSMLstudio.Query
                         _idOnly = _template.Create<WITSML141.MessageList>();
                         _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
                         return Clone(_idOnly);
+                    }
+                }
+
+            }
+
+            /// <summary>
+            /// Provides helper methods to create Witsml141 query templates for mudLog.    
+            /// </summary>          
+            public static class MudLog
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
+
+                private static XDocument _headerOnly;
+                private static XDocument _dataOnly;
+
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML141.MudLogList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+
+                        if (_idOnly != null) return Clone(_idOnly);
+                        _idOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        return Clone(_idOnly);
+                    }
+                }
+
+                /// <summary>
+                /// Create a header only query template.
+                /// </summary>
+                /// <returns></returns>
+                public static XDocument HeaderOnly
+                {
+                    get
+                    {
+
+                        if (_headerOnly != null) return Clone(_headerOnly);
+                        _headerOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.Remove(_headerOnly, "");
+                        return Clone(_headerOnly);
+                    }
+                }
+
+                /// <summary>
+                ///  Create a data only query template.
+                /// </summary>
+                /// <returns></returns>
+                public static XDocument DataOnly
+                {
+                    get
+                    {
+
+                        if (_dataOnly != null) return Clone(_dataOnly);
+                        _dataOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.RemoveAll(_dataOnly, "");
+                        return Clone(_dataOnly);
                     }
                 }
 

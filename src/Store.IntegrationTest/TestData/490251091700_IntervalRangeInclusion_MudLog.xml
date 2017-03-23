@@ -1,0 +1,35 @@
+﻿<mudLogs xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/terms/" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <mudLog uidWell="490251091700" uidWellbore="25-LX-11" uid="h45a">
+    <nameWell>a</nameWell>
+    <nameWellbore>b</nameWellbore>
+    <name>mudLog</name>
+    <objectGrowing>false</objectGrowing>
+    <startMd uom="ft">5010</startMd>
+    <endMd uom="ft">5020</endMd>
+    <geologyInterval uid="gi122">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="ft">5010</mdTop>
+      <mdBottom uom="ft">5012</mdBottom>
+    </geologyInterval>
+    <geologyInterval uid="gi123">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="ft">5012</mdTop>
+      <mdBottom uom="ft">5014</mdBottom>
+    </geologyInterval>
+    <geologyInterval uid="gi124">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="ft">5014</mdTop>
+      <mdBottom uom="ft">5016</mdBottom>
+    </geologyInterval>
+    <geologyInterval uid="gi125">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="ft">5016</mdTop>
+      <mdBottom uom="ft">5018</mdBottom>
+    </geologyInterval>
+    <geologyInterval uid="gi126">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="ft">5018</mdTop>
+      <mdBottom uom="ft">5020</mdBottom>s
+    </geologyInterval>
+  </mudLog>
+</mudLogs>

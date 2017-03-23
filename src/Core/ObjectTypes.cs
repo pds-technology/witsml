@@ -114,11 +114,6 @@ namespace PDS.WITSMLstudio
         public const string ChannelIndex = "channelIndex";
 
         /// <summary>
-        /// The ObjectType identifier for a MudLog.
-        /// </summary>
-        public const string MudLog = "mudLog";
-
-        /// <summary>
         /// The ObjectType identifier for a WellboreGeometry.
         /// </summary>
         public const string WellboreGeometry = "wellboreGeometry";

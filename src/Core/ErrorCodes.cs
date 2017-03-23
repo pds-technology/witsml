@@ -565,6 +565,11 @@ namespace PDS.WITSMLstudio
         /// <summary>
         /// -1054 The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than or equal to the MaxRequestLatestValue.
         /// </summary>
-        InvalidRequestLatestValue = -1054
+        InvalidRequestLatestValue = -1054,
+
+        /// <summary>
+        /// -1055 For WMLS_GetFromStore, the OptionsIn keyword ‘intervalRangeInclusion’ may only be used on a mudlog data-object.
+        /// </summary>
+        InvalidOptionForMudLogObjectOnly = -1055
     }
 }

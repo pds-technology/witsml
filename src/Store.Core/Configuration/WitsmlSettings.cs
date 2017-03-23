@@ -199,6 +199,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static int MaxStationCount = Properties.Settings.Default.MaxStationCount;
 
         /// <summary>
+        /// The maximum geology interval count
+        /// </summary>
+        public static int MaxGeologyIntervalCount = Properties.Settings.Default.MaxGeologyIntervalCount;
+
+        /// <summary>
         /// The time in milliseconds to wait during the StreamChannelData loop
         /// </summary>
         public static int StreamChannelDataDelayMilliseconds = Properties.Settings.Default.StreamChannelDataDelayMilliseconds;
