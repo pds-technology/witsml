@@ -36,7 +36,7 @@ namespace PDS.WITSMLstudio.Query
     public class WitsmlQueryContext : WitsmlContext
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlQueryContext));
-        private static readonly DataObjectTemplate _template = new DataObjectTemplate();
+        private readonly DataObjectTemplate _template = new DataObjectTemplate();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlQueryContext"/> class.
@@ -262,6 +262,7 @@ namespace PDS.WITSMLstudio.Query
                 return result;
             }
         }
+
         private XDocument GetTemplateAndSetIds(string objectType, EtpUri uri, OptionsIn.ReturnElements templateType)
         {
             var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, templateType);

@@ -80,7 +80,7 @@ namespace PDS.WITSMLstudio.Linq
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="version">The version.</param>
-        protected WitsmlContext(WITSMLWebServiceConnection connection, WMLSVersion version)
+        protected WitsmlContext(WITSMLWebServiceConnection connection, WMLSVersion version) : this()
         {
             Connection = connection;
             SetDataSchemaVersion(version);
