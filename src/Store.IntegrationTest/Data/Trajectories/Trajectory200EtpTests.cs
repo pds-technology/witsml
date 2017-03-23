@@ -17,12 +17,14 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Compatibility;
@@ -74,12 +76,9 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             Assert.AreEqual(numStations - 1, result.MDMax.Value);
         }
 
-
         [TestMethod]
         public async Task Trajectory200_PutGrowingPart_Can_Add_TrajectoryStation()
         {
-            var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
-
             AddParents();
             await RequestSessionAndAssert();
 
@@ -92,11 +91,13 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             await PutAndAssert(handler, dataObject);
 
             // Create a TrajectoryStation and Encode it
-            var trajectoryStation = CreateTrajectoryStation("TrajStation-1", LengthUom.ft, "TestDatum", 1);
+            var uid = "TrajStation-1";
+            var trajectoryStation = CreateTrajectoryStation(uid, LengthUom.ft, "TestDatum", 1);
             var data = Encoding.UTF8.GetBytes(WitsmlParser.ToXml(trajectoryStation));
             var contentType = EtpContentTypes.Witsml200.For(ObjectTypes.TrajectoryStation);
 
             // Call PutGrowingPart to add the TrajectoryStation to the Trajectory
+            var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
             dataAdapter.PutGrowingPart(uri, contentType, data);
 
             // Get the Trajectory Object from the store
@@ -112,6 +113,104 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.MDMin);
             Assert.AreEqual(1, result.MDMin.Value);
+
+            var dataObjectGet = dataAdapter.GetGrowingPart(uri, uid);
+
+            var trajectoryStationObject = GetTrajectoryStation(dataObjectGet);
+
+            Assert.IsNotNull(trajectoryStationObject);
+            Assert.IsNotNull(trajectoryStationObject.MD);
+            Assert.IsNotNull(trajectoryStationObject.Incl);
+            Assert.IsNotNull(trajectoryStationObject.Azi);
+            Assert.AreEqual(trajectoryStation.MD.Value, trajectoryStationObject.MD.Value);
+            Assert.AreEqual(trajectoryStation.Incl.Value, trajectoryStationObject.Incl.Value);
+            Assert.AreEqual(trajectoryStation.Azi.Value, trajectoryStationObject.Azi.Value);
+        }
+
+        [TestMethod]
+        public async Task Trajectory200_GetGrowingParts_Can_Retrieve_Trajectory_Station_Range()
+        {
+            AddParents();
+
+            // Allow for Log data to be saved during a Put
+            CompatibilitySettings.TrajectoryAllowPutObjectWithData = true;
+
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Trajectory.GetUri();
+
+            // Add Trajectory Stations
+            const int numStations = 150;
+            Trajectory.TrajectoryStation =
+                CreateTrajectoryStations(numStations, uom: LengthUom.ft, datum: "Test Datum");
+
+            var dataObject = CreateDataObject(uri, Trajectory);
+
+            // Put Object for Add
+            await PutAndAssert(handler, dataObject);
+
+            // Get GrowingParts (range)
+            const int rangeStart = 10;
+            const int rangeEnd = 109;
+            var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
+            var growingParts = dataAdapter.GetGrowingParts(uri, rangeStart, rangeEnd);
+
+
+            // Assert that we retrieved the total number of stations expected
+            Assert.IsNotNull(growingParts);
+            Assert.AreEqual(rangeEnd - rangeStart + 1, growingParts.Count);
+
+            var firstStation = GetTrajectoryStation(growingParts.First());
+            var lastStation = GetTrajectoryStation(growingParts.Last());
+
+            // Assert that it's the correct range
+            Assert.AreEqual(rangeStart, firstStation.MD.Value);
+            Assert.AreEqual(rangeEnd, lastStation.MD.Value);
+        }
+
+        [TestMethod]
+        public async Task Trajectory200_GetGrowingPart_Can_Execute_Against_Trajectory_Without_Stations()
+        {
+            AddParents();
+
+            // Allow for Log data to be saved during a Put
+            CompatibilitySettings.TrajectoryAllowPutObjectWithData = true;
+
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Trajectory.GetUri();
+
+            // Trajectory without stations
+            var dataObject = CreateDataObject(uri, Trajectory);
+
+            // Put Object for Add
+            await PutAndAssert(handler, dataObject);
+
+            // Resolve the data adapter for Trajectory200
+            var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
+
+            // Assert that GetGrowingPart does not fail without stations to return
+            var dataObjectStation = dataAdapter.GetGrowingPart(uri, string.Empty);
+            Assert.IsNotNull(dataObjectStation);
+            var trajectoryStationObject = GetTrajectoryStation(dataObjectStation);
+            Assert.IsNull(trajectoryStationObject);
+
+            // Assert that GetGrowingParts does not fail without stations to return
+            var dataObjectStations = dataAdapter.GetGrowingParts(uri, 0, 100);
+            Assert.IsNotNull(dataObjectStations);
+            Assert.AreEqual(0, dataObjectStations.Count);
+        }
+
+        private static TrajectoryStation GetTrajectoryStation(DataObject dataObjectGet)
+        {
+            if (dataObjectGet.Data == null)
+                return null;
+
+            var growingPartXml = dataObjectGet.GetString();
+            var trajectoryStationObject = WitsmlParser.Parse<TrajectoryStation>(WitsmlParser.Parse(growingPartXml).Root);
+            return trajectoryStationObject;
         }
 
         private List<TrajectoryStation> CreateTrajectoryStations(int numStations, LengthUom uom, string datum)
