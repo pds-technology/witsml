@@ -95,7 +95,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="uid">The growing part's uid.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public DataObject GetGrowingPart(EtpUri uri, string uid)
+        public virtual DataObject GetGrowingPart(EtpUri uri, string uid)
         {
             throw new NotImplementedException();
         }
@@ -108,7 +108,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="endIndex">The end index.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        public virtual List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
         {
             throw new NotImplementedException();
         }
@@ -120,7 +120,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="contentType">Type of the content.</param>
         /// <param name="data">The data.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        public void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
+        public virtual void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
         {
             throw new NotImplementedException();
         }
@@ -131,7 +131,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="uri">The growing obejct's URI.</param>
         /// <param name="uid">The growing part's uid.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        public void DeleteGrowingPart(EtpUri uri, string uid)
+        public virtual void DeleteGrowingPart(EtpUri uri, string uid)
         {
             throw new NotImplementedException();
         }

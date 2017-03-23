@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Energistics.Common;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
@@ -44,6 +46,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
     [Export200(ObjectTypes.Trajectory, typeof(IChannelDataProvider))]
+    [Export200(ObjectTypes.Trajectory, typeof(IGrowingObjectDataAdapter))]    
     public partial class Trajectory200DataAdapter : IChannelDataProvider
     {
         private const string FileQueryField = "Uri";
@@ -157,6 +160,34 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         }
 
         /// <summary>
+        /// Puts the growing part for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="contentType">Type of the content.</param>
+        /// <param name="data">The data.</param>
+        public override void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
+        {
+            var dataObject = new DataObject() {Data = data};
+
+            // Convert byte array to TrajectoryStation
+            var trajectoryStationXml = dataObject.GetString();
+            var tsDocument = WitsmlParser.Parse(trajectoryStationXml);
+            var trajectoryStation = WitsmlParser.Parse<TrajectoryStation>(tsDocument.Root);
+
+            // Merge TrajectoryStation into the Trajectory if it is not null
+            if (trajectoryStation != null)
+            {
+                // Get the Trajectory for the uri
+                var entity = GetEntity(uri);
+                entity.TrajectoryStation = trajectoryStation.AsList();
+
+                var document = WitsmlParser.Parse(WitsmlParser.ToXml(entity));
+                var parser = new WitsmlQueryParser(document.Root, ObjectTypes.GetObjectType<Trajectory>(), null);
+                UpdateTrajectoryWithStations(parser, entity, uri, true);
+            }
+        }
+
+        /// <summary>
         /// Determines whether the objectGrowing flag is true for the specified entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -166,6 +197,18 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         protected override bool IsObjectGrowing(Trajectory entity)
         {
             return entity.GrowingStatus.HasValue && entity.GrowingStatus.Value == ChannelStatus.active;
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="uri">The growing object's URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        protected override void UpdateWellboreIsActive(EtpUri uri, bool isActive)
+        {
+            var entity = GetEntity(uri, "Wellbore");
+            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(uri.Version));
+            dataAdapter.UpdateIsActive(entity.Wellbore.GetUri(), isActive);
         }
 
         private void ClearTrajectoryStations(Trajectory entity)
