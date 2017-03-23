@@ -143,7 +143,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         /// <param name="startIndex">The start index.</param>
         /// <param name="endIndex">The end index.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        public void DeleteGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        public virtual void DeleteGrowingParts(EtpUri uri, object startIndex, object endIndex)
         {
             throw new NotImplementedException();
         }

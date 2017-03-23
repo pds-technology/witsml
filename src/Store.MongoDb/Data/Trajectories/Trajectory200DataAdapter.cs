@@ -160,6 +160,36 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         }
 
         /// <summary>
+        /// Gets the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        /// <returns></returns>
+        public override DataObject GetGrowingPart(EtpUri uri, string uid)
+        {
+            var entity = GetEntity(uri);
+            var trajectoryStation = GetStation(entity, uid);
+            var childUri = uri.Append(ObjectTypes.TrajectoryStation, uid);
+
+            var dataObject = new DataObject();
+            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0);
+
+            return dataObject;
+        }
+
+        /// <summary>
+        /// Gets the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <returns></returns>
+        public override List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        {
+            return base.GetGrowingParts(uri, startIndex, endIndex);
+        }
+
+        /// <summary>
         /// Puts the growing part for a growing object.
         /// </summary>
         /// <param name="uri">The growing obejct's URI.</param>
@@ -185,6 +215,27 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                 var parser = new WitsmlQueryParser(document.Root, ObjectTypes.GetObjectType<Trajectory>(), null);
                 UpdateTrajectoryWithStations(parser, entity, uri, true);
             }
+        }
+
+        /// <summary>
+        /// Deletes the growing part having the specified UID for a growing object.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="uid">The growing part's uid.</param>
+        public override void DeleteGrowingPart(EtpUri uri, string uid)
+        {
+            base.DeleteGrowingPart(uri, uid);
+        }
+
+        /// <summary>
+        /// Deletes the growing parts for a growing object within the specified index range.
+        /// </summary>
+        /// <param name="uri">The growing obejct's URI.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        public override void DeleteGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        {
+            base.DeleteGrowingParts(uri, startIndex, endIndex);
         }
 
         /// <summary>
@@ -402,6 +453,19 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                 default:
                     return ChannelStatuses.Closed;
             }
+        }
+
+        private TrajectoryStation GetStation(Trajectory entity, string uid)
+        {
+            var chunked = IsQueryingStationFile(entity);
+
+            if (chunked)
+            {
+                var stations = GetMongoFileStationData(entity.GetUri());
+                FilterStationData(entity, stations);
+            }
+
+            return entity.TrajectoryStation.FirstOrDefault(ts => ts.Uid.Equals(uid, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, Trajectory dataObject, EtpUri uri, bool merge = false)
