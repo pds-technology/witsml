@@ -751,6 +751,9 @@
     <Content Include="TestData\49025109020000_13346_Slicing_Time_Log.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestData\490251091700_IntervalRangeInclusion_MudLog.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\EnergisticsWell2016-B_Well.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
