@@ -180,6 +180,8 @@ namespace PDS.WITSMLstudio
 
             if (root == null) return string.Empty;
 
+            root = root.UpdateRootElementName(obj.GetType());
+
             foreach (var element in root.Elements())
             {
                 RemoveEmptyElements(element, nilOnly);

@@ -372,6 +372,44 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Updates the name of the root element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>A new <see cref="XElement"/> instance.</returns>
+        public static XElement UpdateRootElementName(this XElement element, Type type)
+        {
+            var xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
+            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+            var elementName = type.Name;
+
+            if (!string.IsNullOrWhiteSpace(xmlRoot?.ElementName))
+                elementName = xmlRoot.ElementName;
+
+            else if (!string.IsNullOrWhiteSpace(xmlType?.TypeName))
+                elementName = xmlType.TypeName;
+
+            if (element.Name.LocalName.Equals(elementName))
+                return element;
+
+            var xElementName = !string.IsNullOrWhiteSpace(xmlRoot?.Namespace)
+                ? XNamespace.Get(xmlRoot.Namespace).GetName(elementName)
+                : elementName;
+
+            // Update element name to match XSD type name
+            var clone = new XElement(element)
+            {
+                Name = xElementName
+            };
+
+            // Remove xsi:type attribute used for abstract types
+            var xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+            clone.Attribute(xsi.GetName("type"))?.Remove();
+
+            return clone;
+        }
+
+        /// <summary>
         /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.
         /// </summary>
         /// <param name="element">The element.</param>

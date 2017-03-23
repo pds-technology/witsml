@@ -476,16 +476,7 @@ namespace PDS.WITSMLstudio.Data
             if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
                 throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
 
-            // update element name to match XSD type name
-            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-            var clone = new XElement(element)
-            {
-                Name = xmlType == null ? type.Name : xmlType.TypeName
-            };
-
-            // Remove xsi:type attribute used for abstract types
-            clone.Attribute(Xsi("type"))?.Remove();
-
+            var clone = element.UpdateRootElementName(type);
             return WitsmlParser.Parse(type, clone);
         }
 

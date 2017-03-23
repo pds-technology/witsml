@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
@@ -25,6 +26,7 @@ using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
@@ -66,9 +68,50 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             var result = Parse<Trajectory>(xml);
 
             Assert.IsNotNull(result);
-            // TODO: Add back in when 2.0 Put is fixed to update MDMin/MDMax
-            //Assert.AreEqual(0, result.MDMin);
-            //Assert.AreEqual(numStations - 1, result.MDMin);
+            Assert.IsNotNull(result.MDMin);
+            Assert.IsNotNull(result.MDMax);
+            Assert.AreEqual(0, result.MDMin.Value);
+            Assert.AreEqual(numStations - 1, result.MDMax.Value);
+        }
+
+
+        [TestMethod]
+        public async Task Trajectory200_PutGrowingPart_Can_Add_TrajectoryStation()
+        {
+            var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
+
+            AddParents();
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Trajectory.GetUri();
+
+            var dataObject = CreateDataObject(uri, Trajectory);
+
+            // Put a Trajectory with no stations in the store.
+            await PutAndAssert(handler, dataObject);
+
+            // Create a TrajectoryStation and Encode it
+            var trajectoryStation = CreateTrajectoryStation("TrajStation-1", LengthUom.ft, "TestDatum", 1);
+            var data = Encoding.UTF8.GetBytes(WitsmlParser.ToXml(trajectoryStation));
+            var contentType = EtpContentTypes.Witsml200.For(ObjectTypes.TrajectoryStation);
+
+            // Call PutGrowingPart to add the TrajectoryStation to the Trajectory
+            dataAdapter.PutGrowingPart(uri, contentType, data);
+
+            // Get the Trajectory Object from the store
+            var args = await GetAndAssert(handler, uri);
+
+            // Check Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var xml = args.Message.DataObject.GetString();
+
+            var result = Parse<Trajectory>(xml);
+
+            // Validate that the Trajectory could be retrieved from the store and the MDMin matches the station that was entered.
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.MDMin);
+            Assert.AreEqual(1, result.MDMin.Value);
         }
 
         private List<TrajectoryStation> CreateTrajectoryStations(int numStations, LengthUom uom, string datum)
@@ -77,17 +120,22 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             for (var i = 0; i < numStations; i++)
             {
-                trajectoryStations.Add(new TrajectoryStation()
-                {
-                    Uid = $"TrajStation-{i}",
-                    MD = new MeasuredDepthCoord() { Datum = datum, Uom = uom, Value = i },
-                    Incl = new PlaneAngleMeasure() { Uom = PlaneAngleUom.rad, Value = 0.005 },
-                    Azi = new PlaneAngleMeasure() { Uom = PlaneAngleUom.rad, Value = 0.002 },
-                    TypeTrajStation = new TrajStationType?(TrajStationType.MDINCLandAZI)
-                });
+                trajectoryStations.Add(CreateTrajectoryStation($"TrajStation-{i}", uom, datum, i));
             }
 
             return trajectoryStations;
+        }
+
+        private TrajectoryStation CreateTrajectoryStation(string uid, LengthUom uom, string datum, double value)
+        {
+            return new TrajectoryStation()
+            {
+                Uid = uid,
+                MD = new MeasuredDepthCoord() { Datum = datum, Uom = uom, Value = value },
+                Incl = new PlaneAngleMeasure() { Uom = PlaneAngleUom.rad, Value = 0.005 },
+                Azi = new PlaneAngleMeasure() { Uom = PlaneAngleUom.rad, Value = 0.002 },
+                TypeTrajStation = TrajStationType.MDINCLandAZI
+            };
         }
     }
 }
