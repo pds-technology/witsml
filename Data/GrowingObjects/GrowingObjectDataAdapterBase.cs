@@ -193,9 +193,19 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
             if (!isObjectGrowing.GetValueOrDefault()) return;
 
             // Update dbGrowingObject timestamp
-            DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
+            DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, GetWellboreUri(uri));
             // Update Wellbore isActive
             UpdateWellboreIsActive(uri, true);
+        }
+
+        /// <summary>
+        /// Gets the wellbore URI from the specified childUri
+        /// </summary>
+        /// <param name="childUri">The child URI.</param>
+        /// <returns>The wellbore uri from a specified childUri</returns>
+        protected virtual EtpUri GetWellboreUri(EtpUri childUri)
+        {
+            return childUri.Parent;
         }
 
         /// <summary>
@@ -241,7 +251,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         protected virtual void UpdateWellboreIsActive(EtpUri uri, bool isActive)
         {
             var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(uri.Version));
-            dataAdapter.UpdateIsActive(uri.Parent, isActive);
+            dataAdapter.UpdateIsActive(GetWellboreUri(uri), isActive);
         }
 
         /// <summary>

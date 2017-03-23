@@ -251,15 +251,14 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         }
 
         /// <summary>
-        /// Updates the IsActive field of a wellbore.
+        /// Gets the wellbore URI from the specified childUri
         /// </summary>
-        /// <param name="uri">The growing object's URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri uri, bool isActive)
+        /// <param name="childUri">The child URI.</param>
+        /// <returns>The wellbore uri from a specified childUri</returns>
+        protected override EtpUri GetWellboreUri(EtpUri childUri)
         {
-            var entity = GetEntity(uri, "Wellbore");
-            var dataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(uri.Version));
-            dataAdapter.UpdateIsActive(entity.Wellbore.GetUri(), isActive);
+            var childEntity = GetEntity(childUri);            
+            return childEntity.Wellbore.GetUri();
         }
 
         private void ClearTrajectoryStations(Trajectory entity)
