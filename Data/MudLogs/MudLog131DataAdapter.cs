@@ -61,15 +61,36 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             var range = GetQueryIndexRange(parser);
             var maxDataNodes = context?.MaxDataNodes;
 
-
-            // TODO: Update logic
-            entity.GeologyInterval = range.Start.HasValue
+            switch (parser?.RequestIntervalRangeInclusion())
+            {
+                default:
+                    entity.GeologyInterval = range.Start.HasValue
+                ? range.End.HasValue
+                    ? geologyIntervals.Where(s => s.MDTop.Value >= range.Start.Value && s.MDTop.Value <= range.End.Value).ToList()
+                    : geologyIntervals.Where(s => s.MDTop.Value >= range.Start.Value).ToList()
+                : range.End.HasValue
+                    ? geologyIntervals.Where(s => s.MDTop.Value <= range.End.Value).ToList()
+                    : geologyIntervals;
+                    break;
+                case "whole-interval":
+                    entity.GeologyInterval = range.Start.HasValue
+                ? range.End.HasValue
+                    ? geologyIntervals.Where(s => s.MDTop.Value >= range.Start.Value && s.MDBottom.Value <= range.End.Value).ToList()
+                    : geologyIntervals.Where(s => s.MDTop.Value >= range.Start.Value).ToList()
+                : range.End.HasValue
+                    ? geologyIntervals.Where(s => s.MDBottom.Value <= range.End.Value).ToList()
+                    : geologyIntervals;
+                    break;
+                case "any-part":
+                    entity.GeologyInterval = range.Start.HasValue
                 ? range.End.HasValue
                     ? geologyIntervals.Where(s => s.MDBottom.Value >= range.Start.Value && s.MDTop.Value <= range.End.Value).ToList()
                     : geologyIntervals.Where(s => s.MDBottom.Value >= range.Start.Value).ToList()
                 : range.End.HasValue
                     ? geologyIntervals.Where(s => s.MDBottom.Value <= range.End.Value).ToList()
                     : geologyIntervals;
+                    break;
+            }
 
             SortGeologyIntervalData(entity.GeologyInterval);
 
@@ -94,8 +115,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
                 return;
 
             var range = GetQueryIndexRange(parser);
-            // TODO : Update logic
-            entity.GeologyInterval.RemoveAll(s => WithinRange(s.MDBottom.Value, range));
+            entity.GeologyInterval.RemoveAll(s => WithinRange(s.MDTop.Value, range));
         }
 
         /// <summary>
