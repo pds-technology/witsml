@@ -169,12 +169,8 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
             var entity = GetEntity(uri);
             var trajectoryStation = GetStation(entity, uid);
-            var childUri = uri.Append(ObjectTypes.TrajectoryStation, uid);
 
-            var dataObject = new DataObject();
-            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0);
-
-            return dataObject;
+            return ToDataObject(entity, trajectoryStation);
         }
 
         /// <summary>
@@ -186,7 +182,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <returns></returns>
         public override List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
         {
-            return base.GetGrowingParts(uri, startIndex, endIndex);
+            var entity = GetEntity(uri);
+            var trajectoryStations = GetStations(entity, ToTrajectoryIndex(startIndex), ToTrajectoryIndex(endIndex));
+            return trajectoryStations
+                .Select(ts => ToDataObject(entity, ts))
+                .ToList();
         }
 
         /// <summary>
@@ -456,6 +456,45 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
         private TrajectoryStation GetStation(Trajectory entity, string uid)
         {
+            GetSavedStations(entity);
+
+            return entity.TrajectoryStation.FirstOrDefault(ts => ts.Uid.Equals(uid, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private List<TrajectoryStation> GetStations(Trajectory entity, double? startIndex, double? endIndex)
+        {
+            if (!startIndex.HasValue || !endIndex.HasValue)
+                return new List<TrajectoryStation>();
+
+            GetSavedStations(entity);
+
+            return entity.TrajectoryStation
+                .Where(ts => ts.MD.Value >= startIndex && ts.MD.Value <= endIndex)
+                .ToList();
+        }
+
+        private double? ToTrajectoryIndex(object index)
+        {
+            var convertible = index as IConvertible;
+            return convertible?.ToDouble(null);
+        }
+
+        private static DataObject ToDataObject(Trajectory entity, TrajectoryStation trajectoryStation)
+        {
+            var dataObject = new DataObject();
+
+            if (entity == null || trajectoryStation == null)
+                return dataObject;
+
+            var uri = entity.GetUri();
+            var childUri = uri.Append(ObjectTypes.TrajectoryStation, trajectoryStation.Uid);
+            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0);
+
+            return dataObject;
+        }
+
+        private void GetSavedStations(Trajectory entity)
+        {
             var chunked = IsQueryingStationFile(entity);
 
             if (chunked)
@@ -463,8 +502,6 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
                 var stations = GetMongoFileStationData(entity.GetUri());
                 FilterStationData(entity, stations);
             }
-
-            return entity.TrajectoryStation.FirstOrDefault(ts => ts.Uid.Equals(uid, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, Trajectory dataObject, EtpUri uri, bool merge = false)
