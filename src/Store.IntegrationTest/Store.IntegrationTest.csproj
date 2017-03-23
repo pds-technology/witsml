@@ -368,6 +368,8 @@
     <Compile Include="Data\MudLogs\MudLog131ValidatorTests.generated.cs">
       <DependentUpon>MudLog131ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\MudLogs\MudLog141DataAdapterAddTests.cs" />
+    <Compile Include="Data\MudLogs\MudLog141DataAdapterGetTests.cs" />
     <Compile Include="Data\MudLogs\MudLog141EtpTests.cs" />
     <Compile Include="Data\MudLogs\MudLog141EtpTests.generated.cs">
       <DependentUpon>MudLog141EtpTests.cs</DependentUpon>

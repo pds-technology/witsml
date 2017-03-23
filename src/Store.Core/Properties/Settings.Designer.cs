@@ -428,5 +428,14 @@ namespace PDS.WITSMLstudio.Store.Properties {
                 return ((int)(this["MaxGetResourcesResponse"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int MaxGeologyIntervalCount {
+            get {
+                return ((int)(this["MaxGeologyIntervalCount"]));
+            }
+        }
     }
 }

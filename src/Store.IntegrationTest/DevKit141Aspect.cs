@@ -28,6 +28,7 @@ using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Logs;
+using PDS.WITSMLstudio.Data.MudLogs;
 using PDS.WITSMLstudio.Data.Trajectories;
 
 namespace PDS.WITSMLstudio.Store
@@ -56,11 +57,14 @@ namespace PDS.WITSMLstudio.Store
         {
             LogGenerator = new Log141Generator();
             TrajectoryGenerator = new Trajectory141Generator();
+            MudLogGenerator = new MudLog141Generator();
         }
 
         public Log141Generator LogGenerator { get; }
 
         public Trajectory141Generator TrajectoryGenerator { get; }
+
+        public MudLog141Generator MudLogGenerator { get; }
 
         public override string DataSchemaVersion
         {

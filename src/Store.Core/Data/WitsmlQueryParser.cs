@@ -101,6 +101,15 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
+        /// Get the interval range inclusion.
+        /// </summary>
+        /// <returns>The IntervalRangeInclusion.</returns>
+        public string IntervalRangeInclusion()
+        {
+            return OptionsIn.GetValue(Options, OptionsIn.IntervalRangeInclusion.MinimumPoint);
+        }
+
+        /// <summary>
         /// Requests the object selection capability.
         /// </summary>
         /// <returns>The capability value.</returns>
