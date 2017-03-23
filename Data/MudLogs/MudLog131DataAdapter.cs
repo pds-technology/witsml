@@ -61,7 +61,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             var range = GetQueryIndexRange(parser);
             var maxDataNodes = context?.MaxDataNodes;
 
-            switch (parser?.RequestIntervalRangeInclusion())
+            switch (parser?.IntervalRangeInclusion())
             {
                 default:
                     entity.GeologyInterval = range.Start.HasValue
