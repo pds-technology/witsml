@@ -48,12 +48,15 @@ namespace PDS.WITSMLstudio.Store.Data
             RegisterActivityParameterTypes();
 
             Register3<Witsml141.ChangeLog>();
+
             Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
             Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();
             Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
             Register3<Witsml200.ComponentSchemas.DepthIndexValue>();
             Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
             RegisterId<Witsml200.ComponentSchemas.ChannelIndex>("Mnemonic");
+            RegisterId<Witsml141.ComponentSchemas.LithostratigraphyStruct>("Kind");
+            RegisterId<Witsml141.ComponentSchemas.ChronostratigraphyStruct>("Kind");
 
             // Custom
             Register3<ChannelDataChunk>();

@@ -206,6 +206,15 @@
     <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\MongoDbUpdate.cs" />
     <Compile Include="Data\MongoDbWrite.cs" />
+    <Compile Include="Data\MudLogs\MudLog131DataAdapter.cs" />
+    <Compile Include="Data\MudLogs\MudLog131DataAdapter.generated.cs">
+      <DependentUpon>MudLog131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MudLogs\MudLog141DataAdapter.cs" />
+    <Compile Include="Data\MudLogs\MudLog141DataAdapter.generated.cs">
+      <DependentUpon>MudLog141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MudLogs\MudLogDataAdapter.cs" />
     <Compile Include="Data\RecurringElementFilter.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapter.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapter.generated.cs">
