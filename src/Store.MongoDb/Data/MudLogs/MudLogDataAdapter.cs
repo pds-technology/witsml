@@ -490,7 +490,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             var bucket = GetMongoFileBucket();
             var geologyIntervals = GetGeologyIntervals(entity);
 
-            if (geologyIntervals != null && geologyIntervals.Count >= WitsmlSettings.MaxStationCount)
+            if (geologyIntervals != null && geologyIntervals.Count >= WitsmlSettings.MaxGeologyIntervalCount)
             {
                 var bytes = Encoding.UTF8.GetBytes(geologyIntervals.ToJson());
 
