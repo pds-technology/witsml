@@ -113,16 +113,25 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     metadata.ForEach(m =>
                     {
                         // Check by uri if we have the metadata in our dictionary.
-                        var channelMetadataRecord =
-                            Channels.Values.Select(c => c.Item2).FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
+                        var channelMetadataRecord = Channels.Values
+                            .Select(c => c.Item2)
+                            .FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
 
                         // if not add it and set its channelId
                         if (channelMetadataRecord == null)
                         {
+                            var channelUri = new EtpUri(m.ChannelUri);
+                            var parentUri = channelUri.Parent;
+
+                            // e.g. Trajectory channels
+                            if (string.IsNullOrWhiteSpace(parentUri.ObjectId))
+                                parentUri = channelUri;
+
                             m.ChannelId = Channels.Keys.Count;
-                            Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri).Parent, m));
+                            Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(parentUri, m));
                             channelMetadataRecord = m;
                         }
+
                         args.Context.Add(channelMetadataRecord);
                     });
                 }
@@ -162,13 +171,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             base.HandleChannelRangeRequest(header, channelRangeRequest);
 
             Request = header;
+
             if (_tokenSource == null)
                 _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
 
             Logger.Debug("Channel Range Request starting.");
             Task.Run(() => StartChannelRangeRequest(channelRangeRequest.ChannelRanges, token), token);
-
         }
 
         /// <summary>
@@ -291,7 +300,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 from x in streamingContextList
                 group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
 
-
             // Start a Task for each context group
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
         }
@@ -340,7 +348,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     .Where(l => channelIds.Contains(l.ChannelId))
                     .Select(c => c.ChannelMetadata))
                 .ToArray();
-
         }
 
         private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, CancellationToken token)
