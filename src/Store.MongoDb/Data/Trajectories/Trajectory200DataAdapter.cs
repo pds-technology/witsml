@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Energistics.Common;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
@@ -37,7 +36,6 @@ using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.Channels;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
-using PDS.WITSMLstudio.Store.Data.Transactions;
 using PDS.WITSMLstudio.Store.Providers.Store;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
@@ -51,6 +49,24 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     {
         private const string FileQueryField = "Uri";
         private const string FileName = "FileName";
+
+        /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
+        /// <returns>The data object instance.</returns>
+        public override Trajectory Get(EtpUri uri, params string[] fields)
+        {
+            var entity = GetEntity(uri, fields);
+
+            if (entity != null)
+            {
+                ClearTrajectoryStations(entity);
+            }
+
+            return entity;
+        }
 
         /// <summary>
         /// Adds a data object to the data store.
@@ -136,7 +152,23 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <returns></returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
-            return new List<List<List<object>>>();
+            var entity = GetEntity(uri);
+            var stations = GetStations(entity, range.Start, range.End);
+
+            if (requestLatestValues.HasValue)
+            {
+                stations = stations.AsEnumerable().Reverse() // Pick from the bottom
+                    .Take(requestLatestValues.Value).Reverse() // Revert to original sort
+                    .ToList();
+            }
+
+            return stations
+                .Select(x => new List<List<object>>
+                {
+                    new List<object> { x.MD.Value },
+                    new List<object> { WitsmlParser.ToXml(x) }
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -184,6 +216,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
             var entity = GetEntity(uri);
             var trajectoryStations = GetStations(entity, ToTrajectoryIndex(startIndex), ToTrajectoryIndex(endIndex));
+
             return trajectoryStations
                 .Select(ts => ToDataObject(entity, ts))
                 .ToList();
@@ -257,7 +290,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <returns>The wellbore uri from a specified childUri</returns>
         protected override EtpUri GetWellboreUri(EtpUri childUri)
         {
-            var childEntity = GetEntity(childUri);            
+            var childEntity = GetEntity(childUri);
             return childEntity.Wellbore.GetUri();
         }
 
@@ -367,6 +400,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             var channelUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Trajectory);
             var wellboreUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Wellbore);
             var wellUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Well);
+
             if (wellUris.Any())
             {
                 var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
@@ -422,7 +456,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             {
                 ChannelUri = uri,
                 ContentType = uri.ContentType,
-                DataType = EtpDataType.bytes.GetName(),
+                DataType = EtpDataType.@string.GetName(),
                 Description = entity.Citation.Description ?? entity.Citation.Title,
                 ChannelName = entity.Citation.Title,
                 Uom = Units.GetUnit(entity.MDMin?.Uom.ToString()),
@@ -463,10 +497,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
         private List<TrajectoryStation> GetStations(Trajectory entity, double? startIndex, double? endIndex)
         {
-            if (!startIndex.HasValue || !endIndex.HasValue)
-                return new List<TrajectoryStation>();
-
             GetSavedStations(entity);
+
+            // Allow for open ended ranges
+            startIndex = startIndex ?? double.MinValue;
+            endIndex = endIndex ?? double.MaxValue;
 
             return entity.TrajectoryStation
                 .Where(ts => ts.MD.Value >= startIndex && ts.MD.Value <= endIndex)
@@ -590,8 +625,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             return BsonSerializer.Deserialize<List<TrajectoryStation>>(json);
         }
 
-        private int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null,
-            IQueryContext context = null)
+        private int FilterStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null, IQueryContext context = null)
         {
             if (stations == null || stations.Count == 0)
                 return 0;
