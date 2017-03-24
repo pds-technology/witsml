@@ -992,6 +992,28 @@ namespace PDS.WITSMLstudio.Store
             CollectionAssert.AreEqual(logMnemonics, changLogMnemonics);
         }
 
+        public WMLS_AddToStoreResponse Add_MudLog_from_file(string xmlfile)
+        {
+            var xmlin = File.ReadAllText(xmlfile);
+
+            var mudLogList = EnergisticsConverter.XmlToObject<MudLogList>(xmlin);
+            Assert.IsNotNull(mudLogList);
+            Assert.IsTrue(mudLogList.MudLog.Count > 0);
+
+            var mudLog = new MudLog() { Uid = mudLogList.MudLog[0].Uid, UidWell = mudLogList.MudLog[0].UidWell, UidWellbore = mudLogList.MudLog[0].UidWellbore };
+            var result = Query<MudLogList, MudLog>(mudLog);
+            Assert.IsNotNull(result);
+            if (result.Count > 0)
+            {
+                // Do not add if the mudLog already exists.
+                return null;
+            }
+
+            var response = AddToStore(ObjectTypes.MudLog, xmlin, null, null);
+            Assert.IsNotNull(response);
+            return response;
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);

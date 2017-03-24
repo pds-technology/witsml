@@ -42,15 +42,15 @@ namespace PDS.WITSMLstudio.Store
             _dataDir =  new DirectoryInfo(@".\TestData").FullName;
         }
 
-
         /// <summary>
         /// Tests logs can be added from XML file
         /// </summary>
         [TestMethod]
         public void WitsmlDataProvider_AddToStore_Can_Add_Wells_Wellbores_Logs_From_File()
         {
-            Add_parents();
-            Add_logs();
+            AddParents();
+            AddLogs();
+            AddMudLogs();
         }
 
         #region Helper Methods
@@ -59,11 +59,12 @@ namespace PDS.WITSMLstudio.Store
         {
             TestContext = context;
             TestSetUp();
-            Add_parents();
-            Add_logs();
+            AddParents();
+            AddLogs();
+            AddMudLogs();
         }
 
-        private void Add_parents()
+        private void AddParents()
         {
             var wellFiles = Directory.GetFiles(_dataDir, "*_Well.xml");
 
@@ -87,13 +88,27 @@ namespace PDS.WITSMLstudio.Store
             }
         }
 
-        private void Add_logs()
+        private void AddLogs()
         {
             var logFiles = Directory.GetFiles(_dataDir, "*_Log.xml");
 
             foreach (var xmlfile in logFiles)
             {
                 var response = _devKit.Add_Log_from_file(xmlfile);
+                if (response != null)
+                {
+                    Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+                }
+            }
+        }
+
+        private void AddMudLogs()
+        {
+            var logFiles = Directory.GetFiles(_dataDir, "*_MudLog.xml");
+
+            foreach (var xmlfile in logFiles)
+            {
+                var response = _devKit.Add_MudLog_from_file(xmlfile);
                 if (response != null)
                 {
                     Assert.AreEqual((short)ErrorCodes.Success, response.Result);
