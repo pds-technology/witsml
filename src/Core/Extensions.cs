@@ -18,8 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using Energistics.DataAccess;
+using Witsml131ReferenceData = Energistics.DataAccess.WITSML131.ReferenceData;
+using Witsml141ReferenceData = Energistics.DataAccess.WITSML141.ReferenceData;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -276,6 +279,78 @@ namespace PDS.WITSMLstudio
             var wellbore141 = dataObject as Witsml141.Wellbore;
 
             return wellbore141?.IsActive;
+        }
+
+        /// <summary>
+        /// Gets the start index.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        public static string GetStartIndex(this IWellboreObject dataObject)
+        {
+            var startIndex = string.Empty;
+
+            var log131 = dataObject as Witsml131.Log;
+            var log141 = dataObject as Witsml141.Log;
+            var trajectory131 = dataObject as Witsml131.Trajectory;
+            var trajectory141 = dataObject as Witsml141.Trajectory;
+
+            if (log131 != null || log141 != null)
+            {
+                if (log131?.IndexType == Witsml131ReferenceData.LogIndexType.datetime ||
+                    log141?.IndexType == Witsml141ReferenceData.LogIndexType.datetime)
+                {
+                    var isStartIndexSpecified = log131?.StartDateTimeIndexSpecified ?? log141.StartDateTimeIndexSpecified;
+
+                    if (isStartIndexSpecified)
+                        startIndex = log131?.StartDateTimeIndex.ToString() ?? log141.StartDateTimeIndex.ToString();
+                }
+                else
+                    startIndex = log131?.StartIndex.ToString() ?? log141.StartIndex.ToString();
+            }
+
+            if (trajectory131 != null || trajectory141 != null)
+            {
+                startIndex = trajectory131?.MDMin.Value.ToString(CultureInfo.InvariantCulture) ?? trajectory141.MDMin.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return startIndex;
+        }
+
+        /// <summary>
+        /// Gets the end index.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        public static string GetEndIndex(this IWellboreObject dataObject)
+        {
+            var endIndex = string.Empty;
+
+            var log131 = dataObject as Witsml131.Log;
+            var log141 = dataObject as Witsml141.Log;
+            var trajectory131 = dataObject as Witsml131.Trajectory;
+            var trajectory141 = dataObject as Witsml141.Trajectory;
+
+            if (log131 != null || log141 != null)
+            {
+                if (log131?.IndexType == Witsml131ReferenceData.LogIndexType.datetime ||
+                    log141?.IndexType == Witsml141ReferenceData.LogIndexType.datetime)
+                {
+                    var isEndIndexSpecified = log131?.EndDateTimeIndexSpecified ?? log141.EndDateTimeIndexSpecified;
+
+                    if (isEndIndexSpecified)
+                        endIndex = log131?.EndDateTimeIndex.ToString() ?? log141.EndDateTimeIndex.ToString();
+                }
+                else
+                    endIndex = log131?.StartIndex.ToString() ?? log141.StartIndex.ToString();
+            }
+
+            if (trajectory131 != null || trajectory141 != null)
+            {
+                endIndex = trajectory131?.MDMax.Value.ToString(CultureInfo.InvariantCulture) ?? trajectory141.MDMax.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return endIndex;
         }
     }
 }
