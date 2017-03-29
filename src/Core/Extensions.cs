@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
@@ -103,7 +104,7 @@ namespace PDS.WITSMLstudio
         /// <param name="type">The data object type.</param>
         /// <param name="version">The data schema version.</param>
         /// <returns>An <see cref="IEnergisticsCollection"/> instance.</returns>
-        public static IEnergisticsCollection BuildEmtpyQuery(this WITSMLWebServiceConnection connection, Type type, string version)
+        public static IEnergisticsCollection BuildEmptyQuery(this WITSMLWebServiceConnection connection, Type type, string version)
         {
             var method = connection.GetType()
                 .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)
@@ -113,6 +114,32 @@ namespace PDS.WITSMLstudio
             query.SetVersion(version);
 
             return query;
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IEnergisticsCollection"/> container and wraps the current entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>A <see cref="IEnergisticsCollection"/> instance.</returns>
+        public static IEnergisticsCollection CreateCollection(this IDataObject entity)
+        {
+            if (entity == null)
+                return null;
+
+            var type = entity.GetType();
+            var objectType = ObjectTypes.GetObjectType(type);
+            var version = ObjectTypes.GetVersion(type);
+
+            var groupType = ObjectTypes.GetObjectGroupType(objectType, version);
+            var property = ObjectTypes.GetObjectTypeListPropertyInfo(objectType, version);
+            var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
+            var list = Activator.CreateInstance(property.PropertyType) as IList;
+            if (list == null) return group;
+
+            list.Add(entity);
+            property.SetValue(group, list);
+
+            return group;
         }
 
         /// <summary>

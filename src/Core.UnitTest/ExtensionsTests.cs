@@ -106,13 +106,13 @@ namespace PDS.WITSMLstudio
             var connection = new WITSMLWebServiceConnection(string.Empty, WMLSVersion.WITSML131);
 
             var collection131 = new Energistics.DataAccess.WITSML131.DtsMeasurementList();
-            var query = connection.BuildEmtpyQuery(collection131.GetType(), "1.3.1.1");
+            var query = connection.BuildEmptyQuery(collection131.GetType(), "1.3.1.1");
             Assert.IsNotNull(query);
 
             connection = new WITSMLWebServiceConnection(string.Empty, WMLSVersion.WITSML141);
 
             var collection141 = new Energistics.DataAccess.WITSML141.LogList();
-            query = connection.BuildEmtpyQuery(collection141.GetType(), "1.4.1.1");
+            query = connection.BuildEmptyQuery(collection141.GetType(), "1.4.1.1");
             Assert.IsNotNull(query);
         }
 
