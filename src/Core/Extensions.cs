@@ -369,7 +369,7 @@ namespace PDS.WITSMLstudio
                         endIndex = log131?.EndDateTimeIndex.ToString() ?? log141.EndDateTimeIndex.ToString();
                 }
                 else
-                    endIndex = log131?.StartIndex.ToString() ?? log141.StartIndex.ToString();
+                    endIndex = log131?.EndIndex.ToString() ?? log141.EndIndex.ToString();
             }
 
             if (trajectory131 != null || trajectory141 != null)
