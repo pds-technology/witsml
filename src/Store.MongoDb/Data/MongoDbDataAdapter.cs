@@ -811,7 +811,16 @@ namespace PDS.WITSMLstudio.Store.Data
                 AuditHistoryAdapter?.ReplaceEntity(auditHistory, auditHistory.GetUri());
             }
 
-            AuditHistoryAdapter?.QueueNotification(entity, auditHistory);
+            var dataObject = entity as IDataObject;
+            if (dataObject != null)
+            {
+                var collection = dataObject.CreateCollection();
+                AuditHistoryAdapter?.QueueNotification(collection, auditHistory);
+            }
+            else
+            {
+                AuditHistoryAdapter?.QueueNotification(entity, auditHistory);
+            }
         }
 
         /// <summary>
