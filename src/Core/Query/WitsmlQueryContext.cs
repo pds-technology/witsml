@@ -94,7 +94,7 @@ namespace PDS.WITSMLstudio.Query
         {
             var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Well, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
 
-            return GetObjects<IDataObject>(ObjectTypes.Well, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
+            return GetObjects<IDataObject>(ObjectTypes.Well, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly);
         }
 
         /// <summary>
