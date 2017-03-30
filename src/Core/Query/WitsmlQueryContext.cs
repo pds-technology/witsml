@@ -22,6 +22,7 @@ using System.Linq;
 using System.Security;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using log4net;
 using PDS.WITSMLstudio.Framework;
@@ -169,8 +170,16 @@ namespace PDS.WITSMLstudio.Query
 
             if (ObjectTypes.Log.EqualsIgnoreCase(objectType) && !string.IsNullOrEmpty(indexType))
             {
-                _template.Add(queryIn, "//log", "indexType");
-                _template.Set(queryIn, "//log/indexType", indexType);
+                try
+                {
+                    var indexTypeName = (LogIndexType)typeof(LogIndexType).ParseEnum(indexType);
+                    _template.Add(queryIn, "//log", "indexType");
+                    _template.Set(queryIn, "//log/indexType", indexTypeName.GetName());
+                }
+                catch
+                {
+                    //ignore 
+                }
             }
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
