@@ -544,7 +544,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 Uom = Units.GetUnit(curve.Unit),
                 MeasureClass = curve.ClassWitsml?.Name ?? ObjectTypes.Unknown,
                 Source = curve.DataSource ?? ObjectTypes.Unknown,
-                Uuid = curve.Mnemonic,
                 DomainObject = dataObject,
                 Status = entity.ObjectGrowing.GetValueOrDefault() ? ChannelStatuses.Active : ChannelStatuses.Inactive,
                 StartIndex = curveIndexes[curve.Mnemonic].Start.IndexToScale(indexMetadata.Scale, isTimeLog),
