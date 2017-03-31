@@ -24,6 +24,7 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
+using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Providers.Discovery
@@ -65,7 +66,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (!EtpUri.IsRoot(args.Message.Uri))
+            if (!EtpUris.IsRootUri(args.Message.Uri))
             {
                 var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
 
@@ -83,7 +84,15 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 // TODO: Optimize inside each version specific provider
                 if (args.Context.Count >= max) break;
 
-                provider.GetResources(args);
+                try
+                {
+                    provider.GetResources(args);
+                }
+                catch (ContainerException ex)
+                {
+                    this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
+                    return;
+                }
             }
 
             // Limit max number of GetResourcesResponse returned to customer
@@ -154,23 +163,6 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             resource.ContentType = new EtpContentType(resource.ContentType).For(objectType);
 
             return resource;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="folderName">The name of the folder.</param>
-        /// <param name="hasChildren">The child count.</param>
-        /// <returns>A new <see cref="Resource"/> instance.</returns>
-        public static Resource NewDecoratorFolder(EtpUri uri, string folderName, int hasChildren = -1)
-        {
-            return New(
-                uuid: Guid.NewGuid().ToString(),
-                uri: uri,
-                resourceType: ResourceTypes.DecoratorFolder,
-                name: folderName,
-                count: hasChildren);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (EtpUri.IsRoot(args.Message.Uri))
+            if (EtpUris.IsRootUri(args.Message.Uri))
             {
                 args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)"));
                 return;
@@ -111,8 +111,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
             {
-                var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
-                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
+                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
 
                 dataProvider
                     .GetAll(parentUri)
@@ -133,7 +132,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
                     .Select(x => ObjectTypes.GetObjectType(x.DataObjectType))
                     .OrderBy(x => x)
-                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, ObjectTypes.SingleToPlural(x, false))));
+                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x)));
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {

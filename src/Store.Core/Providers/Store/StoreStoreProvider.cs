@@ -120,7 +120,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.GetDataSchemaVersion()));
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
                 provider.GetObject(args);
             }
             catch (ContainerException ex)
@@ -149,7 +149,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))
                 {
-                    var objectType = uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210)
+                    var objectType = uri.IsRelatedTo(EtpUris.Witsml200)
                         ? ObjectTypes.GetObjectType(uri.ObjectType, OptionsIn.DataVersion.Version200.Value)
                         : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
 
@@ -159,7 +159,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.DataObject);
 
                 Acknowledge(header.MessageId);
@@ -200,7 +200,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
                 dataAdapter.Delete(etpUri);
 
                 Acknowledge(header.MessageId);
