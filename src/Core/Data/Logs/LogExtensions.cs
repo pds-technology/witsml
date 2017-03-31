@@ -357,5 +357,53 @@ namespace PDS.WITSMLstudio.Data.Logs
             var regEx = new Regex(_dataDelimiterExclusions);
             return !regEx.IsMatch(log.DataDelimiter);
         }
+
+        /// <summary>
+        /// Gets the start index.
+        /// </summary>
+        /// <param name="logCurveInfo">The log curve information.</param>
+        /// <returns>The start index as an object</returns>
+        public static object GetStartIndex(this Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo logCurveInfo)
+        {
+            return logCurveInfo.MinDateTimeIndexSpecified
+                ? (object)logCurveInfo.MinDateTimeIndex.Value
+                : (object)logCurveInfo.MinIndex?.Value;
+        }
+
+        /// <summary>
+        /// Gets the end index.
+        /// </summary>
+        /// <param name="logCurveInfo">The log curve information.</param>
+        /// <returns>The end index as an object</returns>
+        public static object GetEndIndex(this Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo logCurveInfo)
+        {
+            return logCurveInfo.MaxDateTimeIndexSpecified
+                ? (object)logCurveInfo.MaxDateTimeIndex.Value
+                : (object)logCurveInfo.MaxIndex?.Value;
+        }
+
+        /// <summary>
+        /// Gets the start index.
+        /// </summary>
+        /// <param name="logCurveInfo">The log curve information.</param>
+        /// <returns>The start index as an object</returns>
+        public static object GetStartIndex(this Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo logCurveInfo)
+        {
+            return logCurveInfo.MinDateTimeIndexSpecified
+                ? (object)logCurveInfo.MinDateTimeIndex.Value
+                : (object)logCurveInfo.MinIndex?.Value;
+        }
+
+        /// <summary>
+        /// Gets the end index.
+        /// </summary>
+        /// <param name="logCurveInfo">The log curve information.</param>
+        /// <returns>The end index as an object</returns>
+        public static object GetEndIndex(this Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo logCurveInfo)
+        {
+            return logCurveInfo.MaxDateTimeIndexSpecified
+                ? (object)logCurveInfo.MaxDateTimeIndex.Value
+                : (object)logCurveInfo.MaxIndex?.Value;
+        }
     }
 }

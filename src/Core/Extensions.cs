@@ -330,10 +330,10 @@ namespace PDS.WITSMLstudio
                     var isStartIndexSpecified = log131?.StartDateTimeIndexSpecified ?? log141.StartDateTimeIndexSpecified;
 
                     if (isStartIndexSpecified)
-                        startIndex = log131?.StartDateTimeIndex.ToString() ?? log141.StartDateTimeIndex.ToString();
+                        startIndex = log131?.StartDateTimeIndex?.ToString() ?? log141?.StartDateTimeIndex?.ToString();
                 }
                 else
-                    startIndex = log131?.StartIndex.ToString() ?? log141.StartIndex.ToString();
+                    startIndex = log131?.StartIndex?.ToString() ?? log141?.StartIndex?.ToString();
             }
 
             if (trajectory131 != null || trajectory141 != null)
@@ -366,10 +366,10 @@ namespace PDS.WITSMLstudio
                     var isEndIndexSpecified = log131?.EndDateTimeIndexSpecified ?? log141.EndDateTimeIndexSpecified;
 
                     if (isEndIndexSpecified)
-                        endIndex = log131?.EndDateTimeIndex.ToString() ?? log141.EndDateTimeIndex.ToString();
+                        endIndex = log131?.EndDateTimeIndex?.ToString() ?? log141?.EndDateTimeIndex?.ToString();
                 }
                 else
-                    endIndex = log131?.EndIndex.ToString() ?? log141.EndIndex.ToString();
+                    endIndex = log131?.EndIndex?.ToString() ?? log141?.EndIndex?.ToString();
             }
 
             if (trajectory131 != null || trajectory141 != null)
