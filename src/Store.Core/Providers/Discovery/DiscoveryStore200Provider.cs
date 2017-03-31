@@ -120,12 +120,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     var depthCount = logs.Count(x => ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth));
                     var otherCount = logs.Count - (timeCount + depthCount);
 
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time, timeCount));
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth, depthCount));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time, timeCount, true));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth, depthCount, true));
 
                     if (otherCount > 0)
                     {
-                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Other, otherCount));
+                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Other, otherCount, true));
                     }
                 }
                 else if (ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType) &&
@@ -218,11 +218,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
                     // Data object sub folders, e.g. Well and Wellbore
                     return x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
-                           x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType);
+                           x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType) ||
+                           ObjectTypes.IsDecoratorObject(x.ContentType.ObjectType);
                 })
                 .Select(x =>
                 {
-                    var folderName = x.ContentType.ObjectType.ToPascalCase();
+                    var folderName = ObjectTypes.SingleToPlural(x.ContentType.ObjectType, false).ToPascalCase();
                     var dataProvider = GetDataProvider(x.ContentType.ObjectType);
                     var hasChildren = childCount;
 

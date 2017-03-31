@@ -150,12 +150,21 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="objectType">Type of the object.</param>
         /// <param name="folderName">Name of the folder.</param>
         /// <param name="hasChildren">The child count.</param>
+        /// <param name="appendFolderName">if set to <c>true</c> append folder name.</param>
         /// <returns>A new <see cref="Resource"/> instance.</returns>
-        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName, int hasChildren = -1)
+        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName, int hasChildren = -1, bool appendFolderName = false)
         {
+            var folderUri = parentUri;
+
+            if (!parentUri.ObjectType.EqualsIgnoreCase(objectType))
+                folderUri = folderUri.Append(objectType);
+
+            if (appendFolderName)
+                folderUri = folderUri.Append(folderName);
+
             var resource = New(
                 uuid: Guid.NewGuid().ToString(),
-                uri: parentUri.Append(folderName),
+                uri: folderUri,
                 resourceType: ResourceTypes.Folder,
                 name: folderName,
                 count: hasChildren);

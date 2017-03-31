@@ -134,6 +134,8 @@ namespace PDS.WITSMLstudio
 
         private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
 
+        private static readonly string[] _decoratorObjects = { Activity, DataAssuranceRecord };
+
         /// <summary>
         /// The object type map
         /// </summary>
@@ -433,13 +435,23 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Determines whether the object type is a decorator object.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns></returns>
+        public static bool IsDecoratorObject(string objectType)
+        {
+            return _decoratorObjects.ContainsIgnoreCase(objectType);
+        }
+
+        /// <summary>
         /// Determines whether the object type is a growing data object type.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <returns></returns>
         public static bool IsGrowingDataObject(string objectType)
         {
-            return _growingObjects.Contains(objectType);
+            return _growingObjects.ContainsIgnoreCase(objectType);
         }
 
         /// <summary>
