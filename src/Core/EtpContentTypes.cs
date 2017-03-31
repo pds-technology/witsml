@@ -54,10 +54,5 @@ namespace PDS.WITSMLstudio
         /// The <see cref="EtpContentType"/> for witsml200
         /// </summary>
         public static readonly EtpContentType Witsml200 = new EtpContentType("application/x-witsml+xml;version=2.0");
-
-        /// <summary>
-        /// The <see cref="EtpContentType"/> for eml210
-        /// </summary>
-        public static readonly EtpContentType Eml210 = new EtpContentType("application/x-eml+xml;version=2.1");
     }
 }

@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -84,7 +83,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (EtpUri.IsRoot(args.Message.Uri))
+            if (EtpUris.IsRootUri(args.Message.Uri))
             {
                 args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)"));
                 return;
@@ -97,7 +96,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(uri.Query))
                 parentUri = new EtpUri(parentUri + uri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Witsml200) && !uri.IsRelatedTo(EtpUris.Eml210))
+            if (!uri.IsRelatedTo(EtpUris.Witsml200))
             {
                 return;
             }
@@ -114,7 +113,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 if (!string.IsNullOrWhiteSpace(uri.Query))
                     wellboreUri = new EtpUri(wellboreUri + uri.Query);
 
-                if (ObjectFolders.Logs.EqualsIgnoreCase(uri.ObjectType))
+                if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
                 {
                     var logs = _logDataProvider.GetAll(wellboreUri);
                     var timeCount = logs.Count(x => ObjectFolders.Time.EqualsIgnoreCase(x.TimeDepth));
@@ -129,7 +128,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                         args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Other, otherCount));
                     }
                 }
-                else if (ObjectFolders.Logs.EqualsIgnoreCase(parentUri.ObjectType) &&
+                else if (ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType) &&
                     (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Other.EqualsIgnoreCase(uri.ObjectType)))
                 {
                     var logs = _logDataProvider.GetAll(wellboreUri).AsEnumerable();
@@ -140,12 +139,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
                     logs.ForEach(x => args.Context.Add(ToResource(x)));
                 }
-                else if (ObjectFolders.ChannelSets.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
+                else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var log = _logDataProvider.Get(parentUri);
                     log?.ChannelSet?.ForEach(x => args.Context.Add(ToResource(x)));
                 }
-                else if (ObjectFolders.Channels.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
+                else if (ObjectTypes.Channel.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var set = _channelSetDataProvider.Get(parentUri);
                     set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
@@ -153,12 +152,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 else
                 {
                     var dataProvider = GetDataProvider(uri.ObjectType);
-                    var hasChildren = uri.IsRelatedTo(EtpUris.Eml210) ? 0 : -1;
 
                     dataProvider
                         .GetAll(parentUri)
                         .Cast<AbstractObject>()
-                        .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
+                        .ForEach(x => args.Context.Add(ToResource(x)));
                 }
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
@@ -179,7 +177,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else
             {
-                var propertyName = ObjectTypes.PluralToSingle(uri.ObjectType).ToPascalCase();
+                var propertyName = uri.ObjectType.ToPascalCase();
 
                 CreateFoldersByObjectType(uri, propertyName)
                     .ForEach(args.Context.Add);
@@ -194,7 +192,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
 
                 contentTypes
-                    .Where(x => x.IsRelatedTo(EtpContentTypes.Eml210) || x.IsRelatedTo(EtpContentTypes.Witsml200))
+                    .Where(x => x.IsRelatedTo(EtpContentTypes.Witsml200))
                     .OrderBy(x => x.ObjectType)
                     .ForEach(_contentTypes.Add);
             }
@@ -219,43 +217,26 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                         return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200) || x.ReferenceInfo == null;
 
                     // Data object sub folders, e.g. Well and Wellbore
-                    return (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210) && x.ReferenceInfo != null) ||
-                           x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
+                    return x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
                            x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType);
                 })
                 .Select(x =>
                 {
-                    var folderName = ObjectTypes.SingleToPlural(x.ContentType.ObjectType, false).ToPascalCase();
+                    var folderName = x.ContentType.ObjectType.ToPascalCase();
                     var dataProvider = GetDataProvider(x.ContentType.ObjectType);
                     var hasChildren = childCount;
-                    var baseUri = uri;
-
-                    if (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210))
-                    {
-                        if (x.ReferenceInfo != null && !string.IsNullOrWhiteSpace(uri.ObjectId))
-                        {
-                            baseUri = EtpUris.Eml210.Append(x.ContentType.ObjectType);
-                            var queryUri = new EtpUri($"{baseUri}?$filter={x.ReferenceInfo.Name}/Uuid%20eq%20'{uri.ObjectId}'");
-
-                            hasChildren = dataProvider.Count(queryUri);
-                            return DiscoveryStoreProvider.NewDecoratorFolder(queryUri, folderName, hasChildren);
-                        }
-
-                        baseUri = EtpUris.Eml210.Append(x.ContentType.ObjectType, uri.ObjectId);
-                    }
 
                     // Query for child object count if this is not the specified "additionalObjectType"
                     if (!x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
-                        hasChildren = dataProvider.Count(baseUri);
+                        hasChildren = dataProvider.Count(uri);
 
-                    return DiscoveryStoreProvider.NewFolder(baseUri, x.ContentType.ObjectType, folderName, hasChildren);
+                    return DiscoveryStoreProvider.NewFolder(uri, x.ContentType.ObjectType, folderName, hasChildren);
                 })
                 .ToList();
         }
 
         private IEtpDataProvider GetDataProvider(string objectType)
         {
-            objectType = ObjectTypes.PluralToSingle(objectType);
             return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
         }
 

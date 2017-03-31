@@ -17,10 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Reflection;
-using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using PDS.WITSMLstudio.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -32,6 +31,8 @@ namespace PDS.WITSMLstudio
     /// </summary>
     public static class EtpUris
     {
+        private static readonly string[] _rootUris = { "/", "eml:/", "eml://", "eml://" };
+
         /// <summary>
         /// The <see cref="EtpUri"/> for witsml131
         /// </summary>
@@ -48,20 +49,13 @@ namespace PDS.WITSMLstudio
         public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
 
         /// <summary>
-        /// The <see cref="EtpUri"/> for eml210
-        /// </summary>
-        public static readonly EtpUri Eml210 = new EtpUri("eml://eml21");
-
-        /// <summary>
-        /// Gets the data schema version for the specified uri.
+        /// Determines whether the specified URI is a root URI.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        /// <returns>The data schema version.</returns>
-        public static string GetDataSchemaVersion(this EtpUri uri)
+        /// <returns><c>true</c> if the specified URI is a root URI; otherwise, <c>false</c>.</returns>
+        public static bool IsRootUri(string uri)
         {
-            return uri.IsRelatedTo(Eml210)
-                ? Witsml200.Version
-                : uri.Version;
+            return _rootUris.ContainsIgnoreCase(uri);
         }
 
         /// <summary>
@@ -78,14 +72,7 @@ namespace PDS.WITSMLstudio
                 return Witsml131;
 
             if (type.Namespace.Contains("WITSML200"))
-            {
-                var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-
-                if (xmlType?.Namespace?.EndsWith("commonv2") ?? false)
-                    return Eml210;
-
                 return Witsml200;
-            }
 
             return Witsml141;
         }

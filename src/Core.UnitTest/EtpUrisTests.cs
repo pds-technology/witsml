@@ -287,8 +287,8 @@ namespace PDS.WITSMLstudio
             var activity = new Witsml200.Activity { Uuid = _data.Uid() };
             var uri = activity.GetUri();
 
-            Assert.AreEqual($"eml://eml21/Activity({ activity.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Eml210};type=Activity", uri.ContentType.ToString(), true);
+            Assert.AreEqual($"eml://witsml20/Activity({ activity.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=Activity", uri.ContentType.ToString(), true);
             Assert.AreEqual("activity", uri.ObjectType, true);
             Assert.AreEqual(activity.Uuid, uri.ObjectId, true);
         }
@@ -299,8 +299,8 @@ namespace PDS.WITSMLstudio
             var activityTemplate = new Witsml200.ActivityTemplate { Uuid = _data.Uid() };
             var uri = activityTemplate.GetUri();
 
-            Assert.AreEqual($"eml://eml21/ActivityTemplate({ activityTemplate.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Eml210};type=ActivityTemplate", uri.ContentType.ToString(), true);
+            Assert.AreEqual($"eml://witsml20/ActivityTemplate({ activityTemplate.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=ActivityTemplate", uri.ContentType.ToString(), true);
             Assert.AreEqual("activityTemplate", uri.ObjectType, true);
             Assert.AreEqual(activityTemplate.Uuid, uri.ObjectId, true);
         }
@@ -311,8 +311,8 @@ namespace PDS.WITSMLstudio
             var dataAssuranceRecord = new Witsml200.DataAssuranceRecord { Uuid = _data.Uid() };
             var uri = dataAssuranceRecord.GetUri();
 
-            Assert.AreEqual($"eml://eml21/DataAssuranceRecord({ dataAssuranceRecord.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Eml210};type=DataAssuranceRecord", uri.ContentType.ToString(), true);
+            Assert.AreEqual($"eml://witsml20/DataAssuranceRecord({ dataAssuranceRecord.Uuid })", uri.ToString(), true);
+            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=DataAssuranceRecord", uri.ContentType.ToString(), true);
             Assert.AreEqual("dataAssuranceRecord", uri.ObjectType, true);
             Assert.AreEqual(dataAssuranceRecord.Uuid, uri.ObjectId, true);
         }

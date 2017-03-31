@@ -327,7 +327,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var adapters = new List<IWitsmlDataAdapter>();
 
-            if (uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210))
+            if (uri.IsRelatedTo(EtpUris.Witsml200))
             {
                 // Cascade delete not defined for WITSML 2.0 / ETP
                 return;
