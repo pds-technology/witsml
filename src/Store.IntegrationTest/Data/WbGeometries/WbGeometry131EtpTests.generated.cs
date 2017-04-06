@@ -67,18 +67,14 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
         [TestMethod]
         public void WbGeometry131_Ensure_Creates_WbGeometry_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
         }
 
         [TestMethod]
         public async Task WbGeometry131_GetResources_Can_Get_All_WbGeometry_Resources()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
             await RequestSessionAndAssert();
 
             var uri = WbGeometry.GetUri();
@@ -101,25 +97,20 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -140,27 +131,21 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object for Add
             await PutAndAssert(handler, dataObject);
 
             // Get Added Object
-            args = await GetAndAssert(handler, uri);
+            var args =await GetAndAssert(handler, uri);
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -179,13 +164,10 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<WbGeometryList, WbGeometry>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
 
         [TestMethod]
@@ -199,35 +181,27 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
-
             Assert.IsNotNull(result);
 
             // Delete Object
             await DeleteAndAssert(handler, uri);
 
-            // Get Object
-            args = await GetAndAssert(handler, uri);
-
-            // Check Data Object doesn't exist
-            Assert.AreEqual(0, args?.Message?.DataObject?.Data?.Length ?? 0);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
         }
     }
 }

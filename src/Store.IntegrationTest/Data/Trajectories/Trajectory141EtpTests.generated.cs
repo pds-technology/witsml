@@ -64,18 +64,14 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         [TestMethod]
         public void Trajectory141_Ensure_Creates_Trajectory_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
         }
 
         [TestMethod]
         public async Task Trajectory141_GetResources_Can_Get_All_Trajectory_Resources()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
             await RequestSessionAndAssert();
 
             var uri = Trajectory.GetUri();
@@ -98,25 +94,20 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<TrajectoryList, Trajectory>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -137,27 +128,21 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object for Add
             await PutAndAssert(handler, dataObject);
 
             // Get Added Object
-            args = await GetAndAssert(handler, uri);
+            var args =await GetAndAssert(handler, uri);
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<TrajectoryList, Trajectory>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -176,13 +161,10 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<TrajectoryList, Trajectory>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
 
         [TestMethod]
@@ -196,35 +178,27 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<TrajectoryList, Trajectory>(xml);
-
             Assert.IsNotNull(result);
 
             // Delete Object
             await DeleteAndAssert(handler, uri);
 
-            // Get Object
-            args = await GetAndAssert(handler, uri);
-
-            // Check Data Object doesn't exist
-            Assert.AreEqual(0, args?.Message?.DataObject?.Data?.Length ?? 0);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
         }
     }
 }

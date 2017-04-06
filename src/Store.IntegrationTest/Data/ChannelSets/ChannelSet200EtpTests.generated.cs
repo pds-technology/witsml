@@ -64,18 +64,14 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
         [TestMethod]
         public void ChannelSet200_Ensure_Creates_ChannelSet_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(ChannelSet);
-
         }
 
         [TestMethod]
         public async Task ChannelSet200_GetResources_Can_Get_All_ChannelSet_Resources()
         {
             AddParents();
-
             DevKit.AddAndAssert(ChannelSet);
-
             await RequestSessionAndAssert();
 
             var uri = ChannelSet.GetUri();
@@ -98,25 +94,20 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             var dataObject = CreateDataObject(uri, ChannelSet);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<ChannelSet>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -136,27 +127,21 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             var dataObject = CreateDataObject(uri, ChannelSet);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object for Add
             await PutAndAssert(handler, dataObject);
 
             // Get Added Object
-            args = await GetAndAssert(handler, uri);
+            var args =await GetAndAssert(handler, uri);
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<ChannelSet>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +160,10 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<ChannelSet>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
 
         [TestMethod]
@@ -195,35 +177,27 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             var dataObject = CreateDataObject(uri, ChannelSet);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<ChannelSet>(xml);
-
             Assert.IsNotNull(result);
 
             // Delete Object
             await DeleteAndAssert(handler, uri);
 
-            // Get Object
-            args = await GetAndAssert(handler, uri);
-
-            // Check Data Object doesn't exist
-            Assert.AreEqual(0, args?.Message?.DataObject?.Data?.Length ?? 0);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
         }
     }
 }

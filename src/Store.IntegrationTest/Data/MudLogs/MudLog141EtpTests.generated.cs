@@ -64,18 +64,14 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141_Ensure_Creates_MudLog_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<MudLogList, MudLog>(MudLog);
-
         }
 
         [TestMethod]
         public async Task MudLog141_GetResources_Can_Get_All_MudLog_Resources()
         {
             AddParents();
-
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
-
             await RequestSessionAndAssert();
 
             var uri = MudLog.GetUri();
@@ -98,25 +94,20 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
             var dataObject = CreateDataObject<MudLogList, MudLog>(uri, MudLog);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<MudLogList, MudLog>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -137,27 +128,21 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
             var dataObject = CreateDataObject<MudLogList, MudLog>(uri, MudLog);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object for Add
             await PutAndAssert(handler, dataObject);
 
             // Get Added Object
-            args = await GetAndAssert(handler, uri);
+            var args =await GetAndAssert(handler, uri);
 
             // Check Added Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<MudLogList, MudLog>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -176,13 +161,10 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             var updateXml = args.Message.DataObject.GetString();
 
             result = Parse<MudLogList, MudLog>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
 
         [TestMethod]
@@ -196,35 +178,27 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
             var dataObject = CreateDataObject<MudLogList, MudLog>(uri, MudLog);
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
 
             // Get Object
-            args = await GetAndAssert(handler, uri);
+            var args = await GetAndAssert(handler, uri);
 
             // Check Data Object XML
             Assert.IsNotNull(args?.Message.DataObject);
             var xml = args.Message.DataObject.GetString();
 
             var result = Parse<MudLogList, MudLog>(xml);
-
             Assert.IsNotNull(result);
 
             // Delete Object
             await DeleteAndAssert(handler, uri);
 
-            // Get Object
-            args = await GetAndAssert(handler, uri);
-
-            // Check Data Object doesn't exist
-            Assert.AreEqual(0, args?.Message?.DataObject?.Data?.Length ?? 0);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
         }
     }
 }
