@@ -30,7 +30,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     /// </summary>
     public partial class Well200EtpTests
     {
-
         [TestMethod]
         public async Task Well200_PutObject_Add_Well_Without_Citation_Returns_Protocol_Exception()
         {
@@ -50,12 +49,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             var dataObject = CreateDataObject(uri, Well);
             dataObject.Resource.Name = DevKit.Name("Well 20");
 
-            // Get Object
-            var args = await GetAndAssert(handler, uri);
-
-            // Check for message flag indicating No Data
-            Assert.IsNotNull(args?.Header);
-            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+            // Get Object Expecting it Not to Exist
+            await GetAndAssert(handler, uri, EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject, EtpErrorCodes.InvalidObject);
