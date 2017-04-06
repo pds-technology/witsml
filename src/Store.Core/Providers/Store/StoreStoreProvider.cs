@@ -122,6 +122,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
                 provider.GetObject(args);
+
+                if (args.Context.Data == null || args.Context.Data.Length < 1)
+                {
+                    ProtocolException(11, $"Resource not found: {args.Message.Uri}", args.Header.MessageId);
+                    args.Cancel = true;
+                }
             }
             catch (ContainerException ex)
             {
