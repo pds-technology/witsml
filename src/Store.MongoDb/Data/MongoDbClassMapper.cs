@@ -19,6 +19,7 @@
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Reflection;
 using Energistics.DataAccess;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -66,6 +67,27 @@ namespace PDS.WITSMLstudio.Store.Data
 
             Register(new TimestampSerializer());
             Register(new XmlElementSerializer());
+        }
+
+        /// <summary>
+        /// Registers the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        public void Register(Type type)
+        {
+            var baseType = type.BaseType;
+
+            while (baseType != null && baseType != typeof(object))
+            {
+                if (baseType.GetProperty(ObjectTypes.Uuid, BindingFlags.Public | BindingFlags.DeclaredOnly) != null)
+                    RegisterId(baseType, ObjectTypes.Uuid);
+                else
+                    Register3(baseType, true);
+
+                baseType = baseType.BaseType;
+            }
+
+            Register3(type, true);
         }
 
         private void RegisterActivityParameterTypes()
@@ -124,10 +146,12 @@ namespace PDS.WITSMLstudio.Store.Data
             if (!BsonClassMap.IsClassMapRegistered(type))
             {
                 var cm = new BsonClassMap(type);
-                cm.SetIgnoreExtraElements(true);
 
                 if (autoMap)
                     cm.AutoMap();
+
+                cm.SetIgnoreExtraElements(true);
+                cm.SetIgnoreExtraElementsIsInherited(true);
 
                 BsonClassMap.RegisterClassMap(cm);
             }
@@ -142,6 +166,21 @@ namespace PDS.WITSMLstudio.Store.Data
                     cm.AutoMap();
                     cm.MapIdProperty(propertyName).SetIdGenerator(UidGenerator.Instance);
                 });
+            }
+        }
+
+        private void RegisterId(Type type, string propertyName = "Uid")
+        {
+            if (!BsonClassMap.IsClassMapRegistered(type))
+            {
+                var cm = new BsonClassMap(type);
+            
+                cm.AutoMap();
+                cm.MapIdProperty(propertyName).SetIdGenerator(UidGenerator.Instance);
+                cm.SetIgnoreExtraElements(true);
+                cm.SetIgnoreExtraElementsIsInherited(true);
+
+                BsonClassMap.RegisterClassMap(cm);
             }
         }
 
