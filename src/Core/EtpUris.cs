@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Reflection;
+using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using PDS.WITSMLstudio.Framework;
@@ -61,6 +63,11 @@ namespace PDS.WITSMLstudio
         public static readonly EtpUri Resqml210 = new EtpUri("eml://resqml21");
 
         /// <summary>
+        /// The <see cref="EtpUri"/> for eml210
+        /// </summary>
+        public static readonly EtpUri Eml210 = new EtpUri("eml://eml21");
+
+        /// <summary>
         /// Determines whether the specified URI is a root URI.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -71,12 +78,29 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Gets the data schema version for the specified uri.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The data schema version.</returns>
+        public static string GetDataSchemaVersion(this EtpUri uri)
+        {
+            return uri.IsRelatedTo(Eml210)
+                ? Witsml200.Version
+                : uri.Version;
+        }
+
+        /// <summary>
         /// Gets the <see cref="EtpUri"/> for a given type namespace.
         /// </summary>
         /// <param name="type">The type from which the namespace is derived.</param>
         /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUriFamily(Type type)
         {
+            var xmlType = type?.GetCustomAttribute<XmlTypeAttribute>();
+
+            if (xmlType?.Namespace?.EndsWith("commonv2") ?? false)
+                return Eml210;
+
             if (type?.Namespace == null)
                 return Witsml141;
 

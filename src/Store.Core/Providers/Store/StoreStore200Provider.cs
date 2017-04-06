@@ -68,7 +68,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
             var uri = new EtpUri(args.Message.Uri);
-            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
             var entity = dataAdapter.Get(uri) as Witsml200.AbstractObject;
             var lastChanged = (entity?.Citation.LastUpdate).ToUnixTimeMicroseconds().GetValueOrDefault();
 

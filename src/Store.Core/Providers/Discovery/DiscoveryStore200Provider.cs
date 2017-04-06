@@ -96,7 +96,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(uri.Query))
                 parentUri = new EtpUri(parentUri + uri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Witsml200))
+            if (!uri.IsRelatedTo(EtpUris.Witsml200) && !uri.IsRelatedTo(EtpUris.Eml210))
             {
                 return;
             }
@@ -152,11 +152,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 else
                 {
                     var dataProvider = GetDataProvider(uri.ObjectType);
+                    var hasChildren = uri.IsRelatedTo(EtpUris.Eml210) ? 0 : -1;
 
                     dataProvider
                         .GetAll(parentUri)
                         .Cast<AbstractObject>()
-                        .ForEach(x => args.Context.Add(ToResource(x)));
+                        .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
                 }
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
@@ -192,7 +193,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
 
                 contentTypes
-                    .Where(x => x.IsRelatedTo(EtpContentTypes.Witsml200))
+                    .Where(x => x.IsRelatedTo(EtpContentTypes.Eml210) || x.IsRelatedTo(EtpContentTypes.Witsml200))
                     .OrderBy(x => x.ObjectType)
                     .ForEach(_contentTypes.Add);
             }
@@ -217,7 +218,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                         return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200) || x.ReferenceInfo == null;
 
                     // Data object sub folders, e.g. Well and Wellbore
-                    return x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
+                    return (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210) && x.ReferenceInfo != null) ||
+                           x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||
                            x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType) ||
                            ObjectTypes.IsDecoratorObject(x.ContentType.ObjectType);
                 })

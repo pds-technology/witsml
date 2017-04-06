@@ -109,7 +109,7 @@ namespace PDS.WITSMLstudio
             var uri = well.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Well({ well.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual("well", uri.ObjectType);
+            Assert.AreEqual("Well", uri.ObjectType);
             Assert.AreEqual(well.Uuid, uri.ObjectId);
         }
 
@@ -132,7 +132,7 @@ namespace PDS.WITSMLstudio
             var uri = wellbore.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Wellbore({ wellbore.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual("wellbore", uri.ObjectType);
+            Assert.AreEqual("Wellbore", uri.ObjectType);
             Assert.AreEqual(wellbore.Uuid, uri.ObjectId);
         }
 
@@ -156,7 +156,7 @@ namespace PDS.WITSMLstudio
             var uri = log.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Log({ log.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual("log", uri.ObjectType);
+            Assert.AreEqual("Log", uri.ObjectType);
             Assert.AreEqual(log.Uuid, uri.ObjectId);
         }
 
@@ -209,7 +209,7 @@ namespace PDS.WITSMLstudio
             var uri = channelSet.GetUri(log);
 
             Assert.IsTrue($"eml://witsml20/Log({ log.Uuid })/ChannelSet({channelSet.Uuid})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.ChannelSet, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.ChannelSet.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channelSet.Uuid, uri.ObjectId);
         }
 
@@ -222,7 +222,7 @@ namespace PDS.WITSMLstudio
             var uri = channel.GetUri(channelSet);
 
             Assert.IsTrue($"eml://witsml20/ChannelSet({ channelSet.Uuid })/Channel({channel.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.Channel, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.Channel.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channel.Mnemonic, uri.ObjectId);
         }
 
@@ -235,7 +235,7 @@ namespace PDS.WITSMLstudio
             var uri = channel.GetUri(log, channelSet);
 
             Assert.IsTrue($"eml://witsml20/Log({log.Uuid})/ChannelSet({ channelSet.Uuid })/Channel({channel.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.Channel, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.Channel.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channel.Mnemonic, uri.ObjectId);
         }
 
@@ -248,7 +248,7 @@ namespace PDS.WITSMLstudio
             var uri = channelIndex.GetUri(channel);
 
             Assert.IsTrue($"eml://witsml20/Channel({channel.Uuid})/ChannelIndex({channelIndex.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.ChannelIndex, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.ChannelIndex.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channelIndex.Mnemonic, uri.ObjectId);
         }
 
@@ -262,7 +262,7 @@ namespace PDS.WITSMLstudio
             var uri = channelIndex.GetUri(channelSet);
 
             Assert.IsTrue($"eml://witsml20/ChannelSet({channelSet.Uuid})/ChannelIndex({channelIndex.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.ChannelIndex, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.ChannelIndex.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channelIndex.Mnemonic, uri.ObjectId);
         }
 
@@ -277,7 +277,7 @@ namespace PDS.WITSMLstudio
             var uri = channelIndex.GetUri(log, channelSet);
 
             Assert.IsTrue($"eml://witsml20/Log({log.Uuid})/ChannelSet({channelSet.Uuid})/ChannelIndex({channelIndex.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
-            Assert.AreEqual(ObjectTypes.ChannelIndex, uri.ObjectType);
+            Assert.AreEqual(ObjectTypes.ChannelIndex.ToPascalCase(), uri.ObjectType);
             Assert.AreEqual(channelIndex.Mnemonic, uri.ObjectId);
         }
 
@@ -287,10 +287,10 @@ namespace PDS.WITSMLstudio
             var activity = new Witsml200.Activity { Uuid = _data.Uid() };
             var uri = activity.GetUri();
 
-            Assert.AreEqual($"eml://witsml20/Activity({ activity.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=Activity", uri.ContentType.ToString(), true);
-            Assert.AreEqual("activity", uri.ObjectType, true);
-            Assert.AreEqual(activity.Uuid, uri.ObjectId, true);
+            Assert.AreEqual($"eml://eml21/Activity({ activity.Uuid })", uri.ToString());
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=Activity", uri.ContentType.ToString());
+            Assert.AreEqual("Activity", uri.ObjectType);
+            Assert.AreEqual(activity.Uuid, uri.ObjectId);
         }
 
         [TestMethod]
@@ -299,10 +299,10 @@ namespace PDS.WITSMLstudio
             var activityTemplate = new Witsml200.ActivityTemplate { Uuid = _data.Uid() };
             var uri = activityTemplate.GetUri();
 
-            Assert.AreEqual($"eml://witsml20/ActivityTemplate({ activityTemplate.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=ActivityTemplate", uri.ContentType.ToString(), true);
-            Assert.AreEqual("activityTemplate", uri.ObjectType, true);
-            Assert.AreEqual(activityTemplate.Uuid, uri.ObjectId, true);
+            Assert.AreEqual($"eml://eml21/ActivityTemplate({ activityTemplate.Uuid })", uri.ToString());
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=ActivityTemplate", uri.ContentType.ToString());
+            Assert.AreEqual("ActivityTemplate", uri.ObjectType);
+            Assert.AreEqual(activityTemplate.Uuid, uri.ObjectId);
         }
 
         [TestMethod]
@@ -311,10 +311,10 @@ namespace PDS.WITSMLstudio
             var dataAssuranceRecord = new Witsml200.DataAssuranceRecord { Uuid = _data.Uid() };
             var uri = dataAssuranceRecord.GetUri();
 
-            Assert.AreEqual($"eml://witsml20/DataAssuranceRecord({ dataAssuranceRecord.Uuid })", uri.ToString(), true);
-            Assert.AreEqual($"{EtpContentTypes.Witsml200};type=DataAssuranceRecord", uri.ContentType.ToString(), true);
-            Assert.AreEqual("dataAssuranceRecord", uri.ObjectType, true);
-            Assert.AreEqual(dataAssuranceRecord.Uuid, uri.ObjectId, true);
+            Assert.AreEqual($"eml://eml21/DataAssuranceRecord({ dataAssuranceRecord.Uuid })", uri.ToString());
+            Assert.AreEqual($"{EtpContentTypes.Eml210};type=DataAssuranceRecord", uri.ContentType.ToString());
+            Assert.AreEqual("DataAssuranceRecord", uri.ObjectType);
+            Assert.AreEqual(dataAssuranceRecord.Uuid, uri.ObjectId);
         }
     }
 }

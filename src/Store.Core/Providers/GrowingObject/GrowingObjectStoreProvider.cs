@@ -208,7 +208,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
 
             try
             {
-                return Container.Resolve<IGrowingObjectDataAdapter>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+                return Container.Resolve<IGrowingObjectDataAdapter>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
             }
             catch (ContainerException ex)
             {
