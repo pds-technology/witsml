@@ -62,6 +62,11 @@ namespace PDS.WITSMLstudio
             /// The DataVersion for version 2.0
             /// </summary>
             public static readonly DataVersion Version200 = new DataVersion("2.0");
+
+            /// <summary>
+            /// The DataVersion for version 2.1
+            /// </summary>
+            public static readonly DataVersion Version210 = new DataVersion("2.1");
         }
 
         /// <summary>

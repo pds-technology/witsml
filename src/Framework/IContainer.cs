@@ -38,7 +38,8 @@ namespace PDS.WITSMLstudio.Framework
         /// </summary>
         /// <typeparam name="T">The contract type.</typeparam>
         /// <param name="instance">The object instance.</param>
-        void Register<T>(T instance);
+        /// <param name="contractName">The contract name.</param>
+        void Register<T>(T instance, string contractName = null);
 
         /// <summary>
         /// Resolves a single instance of the specified type and optional contract name.

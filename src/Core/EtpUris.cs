@@ -23,6 +23,8 @@ using PDS.WITSMLstudio.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using Prodml200 = Energistics.DataAccess.PRODML200;
+using Resqml210 = Energistics.DataAccess.RESQML210;
 
 namespace PDS.WITSMLstudio
 {
@@ -31,22 +33,32 @@ namespace PDS.WITSMLstudio
     /// </summary>
     public static class EtpUris
     {
-        private static readonly string[] _rootUris = { "/", "eml:/", "eml://", "eml://" };
+        private static readonly string[] _rootUris = { "/", "eml:/", "eml://", "eml:///" };
 
         /// <summary>
-        /// The <see cref="EtpUri"/> for witsml131
+        /// The <see cref="EtpUri"/> for witsml13
         /// </summary>
         public static readonly EtpUri Witsml131 = new EtpUri("eml://witsml13");
 
         /// <summary>
-        /// The <see cref="EtpUri"/> for witsml141
+        /// The <see cref="EtpUri"/> for witsml14
         /// </summary>
         public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml14");
 
         /// <summary>
-        /// The <see cref="EtpUri"/> for witsml200
+        /// The <see cref="EtpUri"/> for witsml20
         /// </summary>
         public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
+
+        /// <summary>
+        /// The <see cref="EtpUri"/> for prodml20
+        /// </summary>
+        public static readonly EtpUri Prodml200 = new EtpUri("eml://prodml20");
+
+        /// <summary>
+        /// The <see cref="EtpUri"/> for resqml21
+        /// </summary>
+        public static readonly EtpUri Resqml210 = new EtpUri("eml://resqml21");
 
         /// <summary>
         /// Determines whether the specified URI is a root URI.
@@ -74,6 +86,12 @@ namespace PDS.WITSMLstudio
             if (type.Namespace.Contains("WITSML200"))
                 return Witsml200;
 
+            if (type.Namespace.Contains("PRODML200"))
+                return Prodml200;
+
+            if (type.Namespace.Contains("RESQML210"))
+                return Resqml210;
+
             return Witsml141;
         }
 
@@ -83,6 +101,26 @@ namespace PDS.WITSMLstudio
         /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
         /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUriFamily(this Witsml200.AbstractObject entity)
+        {
+            return GetUriFamily(entity?.GetType());
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/> entity.
+        /// </summary>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/> entity.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUriFamily(this Prodml200.AbstractObject entity)
+        {
+            return GetUriFamily(entity?.GetType());
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.RESQML210.AbstractObject"/> entity.
+        /// </summary>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.RESQML210.AbstractObject"/> entity.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUriFamily(this Resqml210.AbstractObject entity)
         {
             return GetUriFamily(entity?.GetType());
         }
@@ -142,6 +180,28 @@ namespace PDS.WITSMLstudio
         /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
         /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.AbstractObject entity)
+        {
+            return entity.GetUriFamily()
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/>.
+        /// </summary>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/> entity.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUri(this Prodml200.AbstractObject entity)
+        {
+            return entity.GetUriFamily()
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.RESQML210.AbstractObject"/>.
+        /// </summary>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.RESQML210.AbstractObject"/> entity.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUri(this Resqml210.AbstractObject entity)
         {
             return entity.GetUriFamily()
                 .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);

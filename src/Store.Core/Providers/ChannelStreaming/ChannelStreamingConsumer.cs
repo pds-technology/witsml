@@ -74,7 +74,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
             if (!requestedProtocols.IsSimpleStreamer())
             {
-                ChannelDescribe(new[] { EtpUri.RootUri });
+                ChannelDescribe(new string[] { EtpUri.RootUri });
             }
         }
 

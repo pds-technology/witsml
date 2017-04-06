@@ -41,6 +41,11 @@ namespace PDS.WITSMLstudio
         public static readonly EtpContentType Resqml201 = new EtpContentType("application/x-resqml+xml;version=2.0.1");
 
         /// <summary>
+        /// The <see cref="EtpContentType"/> for resqml210
+        /// </summary>
+        public static readonly EtpContentType Resqml210 = new EtpContentType("application/x-resqml+xml;version=2.1");
+
+        /// <summary>
         /// The <see cref="EtpContentType"/> for witsml131
         /// </summary>
         public static readonly EtpContentType Witsml131 = new EtpContentType("application/x-witsml+xml;version=1.3.1.1");

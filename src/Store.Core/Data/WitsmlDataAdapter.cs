@@ -293,6 +293,12 @@ namespace PDS.WITSMLstudio.Store.Data
             var abstractObject = instance as Energistics.DataAccess.WITSML200.AbstractObject;
             if (abstractObject != null) return abstractObject.GetUri();
 
+            var prodmlObject = instance as Energistics.DataAccess.PRODML200.AbstractObject;
+            if (prodmlObject != null) return prodmlObject.GetUri();
+
+            var resqmlObject = instance as Energistics.DataAccess.RESQML210.AbstractObject;
+            if (resqmlObject != null) return resqmlObject.GetUri();
+
             throw new InvalidOperationException();
         }
 

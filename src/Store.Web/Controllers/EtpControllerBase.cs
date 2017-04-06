@@ -66,7 +66,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// Gets or sets the list of data adapters.
         /// </summary>
         /// <value>The list of data adapters.</value>
-        [ImportMany]
+        [ImportMany(AllowRecomposition = true)]
         public List<IEtpDataProvider> DataAdapters { get; set; }
 
         /// <summary>

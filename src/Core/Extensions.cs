@@ -24,9 +24,9 @@ using System.Reflection;
 using Energistics.DataAccess;
 using Witsml131ReferenceData = Energistics.DataAccess.WITSML131.ReferenceData;
 using Witsml141ReferenceData = Energistics.DataAccess.WITSML141.ReferenceData;
-using Witsml200 = Energistics.DataAccess.WITSML200;
-using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml131 = Energistics.DataAccess.WITSML131;
+using Witsml141 = Energistics.DataAccess.WITSML141;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Properties;
 

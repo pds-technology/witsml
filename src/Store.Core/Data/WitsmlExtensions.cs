@@ -31,6 +31,8 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 using Witsml131Schemas = Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Witsml141Schemas = Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Witsml200Schemas = Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Prodml200Schemas = Energistics.DataAccess.PRODML200.ComponentSchemas;
+using Resqml210Schemas = Energistics.DataAccess.RESQML210.ComponentSchemas;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -194,6 +196,42 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             if (citation == null)
                 citation = new Witsml200Schemas.Citation();
+
+            citation.Creation = DateTime.UtcNow;
+            citation.LastUpdate = DateTime.UtcNow;
+            citation.Originator = WitsmlOperationContext.Current.User;
+            citation.Format = typeof(WitsmlExtensions).Assembly.FullName;
+
+            return citation;
+        }
+
+        /// <summary>
+        /// Updates the Creation and LastUpdate properties in the citation.
+        /// </summary>
+        /// <param name="citation">The citation.</param>
+        /// <returns>The instance of the citation.</returns>
+        public static Prodml200Schemas.Citation Create(this Prodml200Schemas.Citation citation)
+        {
+            if (citation == null)
+                citation = new Prodml200Schemas.Citation();
+
+            citation.Creation = DateTime.UtcNow;
+            citation.LastUpdate = DateTime.UtcNow;
+            citation.Originator = WitsmlOperationContext.Current.User;
+            citation.Format = typeof(WitsmlExtensions).Assembly.FullName;
+
+            return citation;
+        }
+
+        /// <summary>
+        /// Updates the Creation and LastUpdate properties in the citation.
+        /// </summary>
+        /// <param name="citation">The citation.</param>
+        /// <returns>The instance of the citation.</returns>
+        public static Resqml210Schemas.Citation Create(this Resqml210Schemas.Citation citation)
+        {
+            if (citation == null)
+                citation = new Resqml210Schemas.Citation();
 
             citation.Creation = DateTime.UtcNow;
             citation.LastUpdate = DateTime.UtcNow;

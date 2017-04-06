@@ -31,7 +31,7 @@ using PDS.WITSMLstudio.Store.Data;
 namespace PDS.WITSMLstudio.Store.Providers.Discovery
 {
     /// <summary>
-    /// Provides information about resources available in a WITSML store for version 1.4.1.1.
+    /// Provides information about resources available in a WITSML store for version 2.0.
     /// </summary>
     /// <seealso cref="PDS.WITSMLstudio.Store.Providers.Discovery.IDiscoveryStoreProvider" />
     [Export(typeof(IDiscoveryStoreProvider))]
@@ -74,7 +74,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets or sets the collection of <see cref="IEtpDataProvider"/> providers.
         /// </summary>
         /// <value>The collection of providers.</value>
-        [ImportMany]
+        [ImportMany(AllowRecomposition = true)]
         public IEnumerable<IEtpDataProvider> Providers { get; set; }
 
         /// <summary>

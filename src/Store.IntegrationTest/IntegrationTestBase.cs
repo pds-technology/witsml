@@ -438,7 +438,6 @@ namespace PDS.WITSMLstudio.Store
                 Assert.AreEqual(exist, args.Any());
 
                 var folder = ResourceTypes.Folder.ToString();
-                var decoratorFolder = ResourceTypes.DecoratorFolder.ToString();
 
                 // Check Resource URIs
                 foreach (var arg in args)
@@ -452,8 +451,7 @@ namespace PDS.WITSMLstudio.Store
                     {
                         Assert.IsTrue(uri.IsBaseUri);
                     }
-                    else if (!folder.EqualsIgnoreCase(arg.Message.Resource.ResourceType) &&
-                             !decoratorFolder.EqualsIgnoreCase(arg.Message.Resource.ResourceType))
+                    else if (!folder.EqualsIgnoreCase(arg.Message.Resource.ResourceType))
                     {
                         Assert.AreEqual(uri.Family, resourceUri.Family);
                         Assert.AreEqual(uri.Version, resourceUri.Version);

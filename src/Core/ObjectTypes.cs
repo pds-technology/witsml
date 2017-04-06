@@ -24,6 +24,8 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using Prodml200 = Energistics.DataAccess.PRODML200;
+using Resqml210 = Energistics.DataAccess.RESQML210;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio
@@ -118,18 +120,6 @@ namespace PDS.WITSMLstudio
         /// </summary>
         public const string WellboreGeometry = "wellboreGeometry";
 
-        /// <summary>
-        /// The collection of object types which contain children in the hierarchy.
-        /// </summary>
-        public static readonly string[] ParentObjects = 
-        {
-            ChannelSet,
-            Log,
-            Rig,
-            Well,
-            Wellbore
-        };
-
         private static readonly string[] _growingObjects = { Log, MudLog, Trajectory };
 
         private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
@@ -186,6 +176,26 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(Prodml200.AbstractObject dataObject)
+        {
+            return GetObjectType(dataObject.GetType());
+        }
+
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(Resqml210.AbstractObject dataObject)
+        {
+            return GetObjectType(dataObject.GetType());
+        }
+
+        /// <summary>
         /// Gets the type of the data object.
         /// </summary>
         /// <typeparam name="T">The type of object.</typeparam>
@@ -205,7 +215,9 @@ namespace PDS.WITSMLstudio
         {
             if (!typeof(IEnergisticsCollection).IsAssignableFrom(type) && 
                 !typeof(IDataObject).IsAssignableFrom(type) &&
-                !typeof(Witsml200.AbstractObject).IsAssignableFrom(type))
+                !typeof(Witsml200.AbstractObject).IsAssignableFrom(type) &&
+                !typeof(Prodml200.AbstractObject).IsAssignableFrom(type) &&
+                !typeof(Resqml210.AbstractObject).IsAssignableFrom(type))
             {
                 throw new ArgumentException(@"Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", nameof(type));
             }
@@ -276,6 +288,8 @@ namespace PDS.WITSMLstudio
                 ? "Energistics.DataAccess.WITSML131."
                 : OptionsIn.DataVersion.Version200.Equals(version)
                 ? "Energistics.DataAccess.WITSML200."
+                : OptionsIn.DataVersion.Version210.Equals(version)
+                ? "Energistics.DataAccess.RESQML210."
                 : "Energistics.DataAccess.WITSML141.";
 
             if (WbGeometry.EqualsIgnoreCase(objectType) && !OptionsIn.DataVersion.Version200.Equals(version))

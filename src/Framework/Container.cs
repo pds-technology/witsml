@@ -55,9 +55,13 @@ namespace PDS.WITSMLstudio.Framework
         /// </summary>
         /// <typeparam name="T">The contract type.</typeparam>
         /// <param name="instance">The object instance.</param>
-        public void Register<T>(T instance)
+        /// <param name="contractName">The contract name.</param>
+        public void Register<T>(T instance, string contractName = null)
         {
-            _container.ComposeExportedValue<T>(instance);
+            if (string.IsNullOrWhiteSpace(contractName))
+                _container.ComposeExportedValue<T>(instance);
+            else
+                _container.ComposeExportedValue<T>(contractName, instance);
         }
 
         /// <summary>
