@@ -37,29 +37,6 @@ namespace PDS.WITSMLstudio.Query
         private static readonly DataObjectTemplate _template = new DataObjectTemplate();        
 
         /// <summary>
-        /// Gets the template for Witsml object.
-        /// </summary>
-        /// <param name="version">The version.</param>
-        /// <param name="objectType">Type of the object.</param>
-        /// <param name="returnElementsOptionIn">The return elements option in.</param>
-        /// <returns>The XDocument.</returns>
-        public static XDocument GetTemplate(string objectType, string version, OptionsIn.ReturnElements returnElementsOptionIn)
-        {
-
-            if (OptionsIn.DataVersion.Version131.Equals(version))
-            {
-                return GetTemplateForWitsml131(objectType, returnElementsOptionIn);
-            }
-
-            if (OptionsIn.DataVersion.Version141.Equals(version))
-            {
-                return GetTemplateForWitsml141(objectType, returnElementsOptionIn);
-            }
-
-            return new XDocument();
-        }
-
-        /// <summary>
         /// Gets the template for Witsml131 objects.
         /// </summary>
         /// <param name="objectType">The object type.</param>

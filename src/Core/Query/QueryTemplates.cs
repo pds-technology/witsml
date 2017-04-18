@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Xml.Linq;
+using PDS.WITSMLstudio.Data;
+
 namespace PDS.WITSMLstudio.Query
 {
     /// <summary>
@@ -23,5 +26,43 @@ namespace PDS.WITSMLstudio.Query
     /// </summary>
     public partial class QueryTemplates
     {
+        /// <summary>
+        /// Gets the template for Witsml object.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="returnElementsOptionIn">The return elements option in.</param>
+        /// <returns>The XDocument.</returns>
+        public static XDocument GetTemplate(string objectType, string version, OptionsIn.ReturnElements returnElementsOptionIn)
+        {
+            var documentTemplate = new XDocument();
+
+            if (OptionsIn.DataVersion.Version131.Equals(version))
+            {
+                documentTemplate = GetTemplateForWitsml131(objectType, returnElementsOptionIn);
+            }
+
+            if (OptionsIn.DataVersion.Version141.Equals(version))
+            {
+                documentTemplate = GetTemplateForWitsml141(objectType, returnElementsOptionIn);
+            }
+
+            if (documentTemplate.Root != null) return documentTemplate;
+
+            // Unsupported objects
+            var type = ObjectTypes.GetObjectGroupType(objectType, version);
+
+            if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+            {
+                documentTemplate = _template.Create(type);
+            }
+            else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+            {
+                documentTemplate = _template.Create(type);
+                _template.RemoveAll(documentTemplate, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+            }
+
+            return documentTemplate;
+        }
     }
 }
