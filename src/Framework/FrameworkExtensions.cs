@@ -267,7 +267,11 @@ namespace PDS.WITSMLstudio.Framework
                     return true;
 
                 var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
+                if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
+                    return true;
+
+                var descriptionAttr = x.GetCustomAttribute<DescriptionAttribute>();
+                return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
             });
 
             // must be a valid enumeration member
