@@ -79,7 +79,7 @@ namespace PDS.WITSMLstudio.Query
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlQueryContext"/> class.
         /// </summary>
-        /// <param name="connection">The w itsml web service connection.</param>
+        /// <param name="connection">The witsml web service connection.</param>
         /// <param name="version">The version.</param>
         public WitsmlQueryContext(WITSMLWebServiceConnection connection, WMLSVersion version)
             : base(connection, version)
@@ -89,10 +89,15 @@ namespace PDS.WITSMLstudio.Query
         /// <summary>
         /// Gets all wells.
         /// </summary>
-        /// <returns> The wells.</returns>
+        /// <returns>The wells.</returns>
         public override IEnumerable<IDataObject> GetAllWells()
         {
             var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Well, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
+
+            _template.Add(queryIn, "//well", "timeZone", "wellDatum", "wellLocation");
+            _template.Add(queryIn, "//well/wellDatum", "name");
+
+            AddCommonDataElements(queryIn, "//well");
 
             return GetObjects<IDataObject>(ObjectTypes.Well, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -101,13 +106,17 @@ namespace PDS.WITSMLstudio.Query
         /// Gets the wellbores.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
-        /// <returns>The wellbores. </returns>
+        /// <returns>The wellbores.</returns>
         public override IEnumerable<IWellObject> GetWellbores(EtpUri parentUri)
         {
             var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Wellbore, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
 
             _template.Set(queryIn, "//@uidWell", parentUri.ObjectId);
-            _template.Add(queryIn, "//wellbore", "isActive");
+
+            if (!IsVersion131(parentUri))
+                _template.Add(queryIn, "//wellbore", "isActive");
+
+            AddCommonDataElements(queryIn, "//wellbore");
 
             return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -121,6 +130,8 @@ namespace PDS.WITSMLstudio.Query
         public override IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
         {
             var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
+
+            AddCommonDataElements(queryIn, $"//{objectType}");
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -138,6 +149,7 @@ namespace PDS.WITSMLstudio.Query
             var queryOptionsIn = IsVersion131(uri)
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
+
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
         }
 
@@ -149,9 +161,18 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The header for the specified growing objects.</returns>
         public override IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
-            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
+            var templateType = OptionsIn.ReturnElements.IdOnly;
+            var queryOptionsIn = OptionsIn.ReturnElements.HeaderOnly;
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
+            if (IsVersion131(uri))
+            {
+                templateType = OptionsIn.ReturnElements.HeaderOnly;
+                queryOptionsIn = OptionsIn.ReturnElements.Requested;
+            }
+
+            var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
+
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
         }
 
         /// <summary>
@@ -160,27 +181,41 @@ namespace PDS.WITSMLstudio.Query
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
         /// <param name="indexType">Type of the index.</param>
-        /// <returns>
-        /// The wellbore objects of specified type with header.
-        /// </returns>
+        /// <returns>The wellbore objects of specified type with header.</returns>
         public override IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri, string indexType = null)
         {
             var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
-            _template.Add(queryIn, $"//{objectType}", "objectGrowing");
+            var xpath = $"//{objectType}";
 
-            if (ObjectTypes.Log.EqualsIgnoreCase(objectType) && !string.IsNullOrEmpty(indexType))
+            _template.Add(queryIn, xpath, "objectGrowing");
+
+            if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
             {
+                _template.Add(queryIn, xpath, "indexType", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex");
+
                 try
                 {
-                    var indexTypeName = (LogIndexType)typeof(LogIndexType).ParseEnum(indexType);
-                    _template.Add(queryIn, "//log", "indexType");
-                    _template.Set(queryIn, "//log/indexType", indexTypeName.GetName());
+                    if (!string.IsNullOrEmpty(indexType))
+                    {
+                        var indexTypeName = (LogIndexType)typeof(LogIndexType).ParseEnum(indexType);
+                        _template.Set(queryIn, $"{xpath}/indexType", indexTypeName.GetName());
+                    }
                 }
                 catch
                 {
-                    //ignore 
+                    //ignore
                 }
             }
+            else if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType))
+            {
+                _template.Add(queryIn, xpath, "mdMn", "mdMx");
+            }
+            else if (ObjectTypes.MudLog.EqualsIgnoreCase(objectType))
+            {
+                _template.Add(queryIn, xpath, "startMd", "endMd");
+            }
+
+            AddCommonDataElements(queryIn, xpath);
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
@@ -205,10 +240,11 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The object detail.</returns>
         public override IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
         {
-            var templateOptionsIn = IsVersion131(uri)
+            var templateType = IsVersion131(uri)
                 ? OptionsIn.ReturnElements.All
                 : OptionsIn.ReturnElements.IdOnly;
-            var queryIn = GetTemplateAndSetIds(objectType, uri, templateOptionsIn);
+
+            var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
         }
@@ -295,9 +331,15 @@ namespace PDS.WITSMLstudio.Query
                 _template.Set(document, "//@uidWellbore", objectIds[ObjectTypes.Wellbore]);
         }
 
+        private void AddCommonDataElements(XDocument document, string xpath)
+        {
+            _template.Add(document, xpath, "commonData");
+            _template.Add(document, $"{xpath}/commonData", "dTimCreation", "dTimLastChange", "itemState");
+        }
+
         private bool IsVersion131(EtpUri uri)
         {
-            return uri.Version.Equals(OptionsIn.DataVersion.Version131.Value);
+            return OptionsIn.DataVersion.Version131.Equals(uri.Version);
         }
     }
 }
