@@ -31,6 +31,15 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// Sets the additional default values.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(Trajectory dataObject)
+        {
+            dataObject.GrowingStatus = dataObject.GrowingStatus ?? ChannelStatus.inactive;
+        }
+
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The URI.</param>
         partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri)
         {
