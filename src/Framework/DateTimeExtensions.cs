@@ -137,7 +137,12 @@ namespace PDS.WITSMLstudio.Framework
         public static string ToDisplayDateTime(this Timestamp? timestamp)
         {
             // TODO: Allow for conversion to UTC or Local time.
-            return timestamp?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? string.Empty;
+            if (!timestamp.HasValue) return string.Empty;
+
+            var dateTimeOffset = (DateTimeOffset)timestamp;
+            return dateTimeOffset.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            //return timestamp?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? string.Empty;
         }
     }
 }
