@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using Energistics.DataAccess;
 
 namespace PDS.WITSMLstudio.Framework
 {
@@ -116,6 +117,27 @@ namespace PDS.WITSMLstudio.Framework
         private static long FromUnixTicks(long ticks)
         {
             return (ticks - _epochTime.UtcTicks) / TicksToMicroSeconds;
+        }
+
+        /// <summary>
+        /// Converts a TimeSpan to a WITSML TimeZone string.
+        /// </summary>
+        /// <param name="offset">The Date Time offset.</param>
+        /// <returns></returns>
+        public static string ToTimeZone(this TimeSpan offset)
+        {
+            return $"{offset.Hours:00}:{offset.Minutes:00}";
+        }
+
+        /// <summary>
+        /// To the display date time as a string that includes fractional seconds.
+        /// </summary>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <returns>A string representation of the Timestamp if it is not null, otherwise an empty string.</returns>
+        public static string ToDisplayDateTime(this Timestamp? timestamp)
+        {
+            // TODO: Allow for conversion to UTC or Local time.
+            return timestamp?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? string.Empty;
         }
     }
 }
