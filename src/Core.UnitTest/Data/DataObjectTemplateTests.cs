@@ -104,10 +104,10 @@ namespace PDS.WITSMLstudio.Data
             var xml = document.ToString();
             Console.WriteLine(xml);
 
-            Assert.IsFalse(xml.Contains("logCurveInfo"));
-            Assert.IsFalse(xml.Contains("logData"));
-            Assert.IsFalse(xml.Contains("commonData"));
-            Assert.IsFalse(xml.Contains("customData"));
+            Assert.IsFalse(xml.Contains("logCurveInfo"), "logCurveInfo");
+            Assert.IsFalse(xml.Contains("logData"), "logData");
+            Assert.IsFalse(xml.Contains("commonData"), "commonData");
+            Assert.IsFalse(xml.Contains("customData"), "customData");
         }
 
         [TestMethod]
@@ -126,9 +126,9 @@ namespace PDS.WITSMLstudio.Data
             var xml = document.ToString();
             Console.WriteLine(xml);
 
-            Assert.IsTrue(xml.Contains("<startIndex uom=\"m\">0</startIndex>"));
-            Assert.IsTrue(xml.Contains("<endIndex uom=\"m\">100.5</endIndex>"));
-            Assert.IsTrue(xml.Contains("<logCurveInfo />"));
+            Assert.IsTrue(xml.Contains("<startIndex uom=\"m\">0</startIndex>"), "startIndex");
+            Assert.IsTrue(xml.Contains("<endIndex uom=\"m\">100.5</endIndex>"), "endIndex");
+            Assert.IsTrue(xml.Contains("<logCurveInfo />"), "logCurveInfo");
         }
     }
 }
