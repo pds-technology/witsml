@@ -130,19 +130,24 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
-        /// To the display date time as a string that includes fractional seconds.
+        /// To convert a specified timestamp to a specified timespan offset and format 
+        /// the date time for display as a string that includes fractional seconds without a timezone.
         /// </summary>
         /// <param name="timestamp">The timestamp.</param>
+        /// <param name="toOffset">The time span offset to convert the timestamp to.</param>
         /// <returns>A string representation of the Timestamp if it is not null, otherwise an empty string.</returns>
-        public static string ToDisplayDateTime(this Timestamp? timestamp)
+        public static string ToDisplayDateTime(this Timestamp? timestamp, TimeSpan toOffset)
         {
-            // TODO: Allow for conversion to UTC or Local time.
             if (!timestamp.HasValue) return string.Empty;
 
+            // Convert the Timestamp to a DateTimeOffset
             var dateTimeOffset = (DateTimeOffset)timestamp;
-            return dateTimeOffset.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss.fff");
 
-            //return timestamp?.ToString("yyyy-MM-dd HH:mm:ss.fff") ?? string.Empty;
+            // Convert the DateTimeOffset to the timezone specified in the toOffset Timespan
+            dateTimeOffset = dateTimeOffset.ToOffset(toOffset);
+
+            // Return a display representation of the Timestamp that does not include the timezone
+            return dateTimeOffset.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
     }
 }
