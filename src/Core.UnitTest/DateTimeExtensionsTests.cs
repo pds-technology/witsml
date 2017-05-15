@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using Energistics.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Framework;
 
@@ -117,6 +118,21 @@ namespace PDS.WITSMLstudio
             dto = new DateTimeOffset(2016, 1, 1, 0, 0, 0, 1, timeSpan.Value);
 
             Assert.AreEqual(dto, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_ToDisplayDateTime_Converts_UTC_Display()
+        {
+            // from +06:00 time offset
+            var fromTime = new Timestamp(new DateTimeOffset(2016, 10, 19, 16, 36, 55, new TimeSpan(6, 0, 0))) as Timestamp?;
+
+            // To UTC (Offset should be 00:00)
+            var toOffset = new TimeSpan(0, 0, 0);
+            var expected = "2016-10-19 10:36:55.000";
+
+            var actual = fromTime.ToDisplayDateTime(toOffset);
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }
