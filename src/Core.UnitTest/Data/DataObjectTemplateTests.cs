@@ -106,8 +106,8 @@ namespace PDS.WITSMLstudio.Data
 
             Assert.IsFalse(xml.Contains("logCurveInfo"), "logCurveInfo");
             Assert.IsFalse(xml.Contains("logData"), "logData");
-            Assert.IsFalse(xml.Contains("commonData"), "commonData");
-            Assert.IsFalse(xml.Contains("customData"), "customData");
+            //Assert.IsFalse(xml.Contains("commonData"), "commonData");
+            //Assert.IsFalse(xml.Contains("customData"), "customData");
         }
 
         [TestMethod]
