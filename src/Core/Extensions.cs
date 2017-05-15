@@ -312,8 +312,9 @@ namespace PDS.WITSMLstudio
         /// Gets the start index.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
+        /// <param name="displayTimeOffset">The display time offset.</param>
         /// <returns></returns>
-        public static string GetStartIndex(this IWellboreObject dataObject)
+        public static string GetStartIndex(this IWellboreObject dataObject, TimeSpan? displayTimeOffset = null)
         {
             var startIndex = string.Empty;
 
@@ -330,7 +331,14 @@ namespace PDS.WITSMLstudio
                     var isStartIndexSpecified = log131?.StartDateTimeIndexSpecified ?? log141.StartDateTimeIndexSpecified;
 
                     if (isStartIndexSpecified)
-                        startIndex = log131?.StartDateTimeIndex?.ToString() ?? log141?.StartDateTimeIndex?.ToString();
+                    {
+                        if (displayTimeOffset != null)
+                            startIndex =
+                                log131?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value)
+                                ?? log141?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
+                        else
+                            startIndex = log131?.StartDateTimeIndex?.ToString() ?? log141?.StartDateTimeIndex?.ToString();
+                    }
                 }
                 else
                     startIndex = log131?.StartIndex?.ToString() ?? log141?.StartIndex?.ToString();
@@ -348,8 +356,9 @@ namespace PDS.WITSMLstudio
         /// Gets the end index.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
+        /// <param name="displayTimeOffset">The display time offset.</param>
         /// <returns></returns>
-        public static string GetEndIndex(this IWellboreObject dataObject)
+        public static string GetEndIndex(this IWellboreObject dataObject, TimeSpan? displayTimeOffset = null)
         {
             var endIndex = string.Empty;
 
@@ -366,7 +375,15 @@ namespace PDS.WITSMLstudio
                     var isEndIndexSpecified = log131?.EndDateTimeIndexSpecified ?? log141.EndDateTimeIndexSpecified;
 
                     if (isEndIndexSpecified)
-                        endIndex = log131?.EndDateTimeIndex?.ToString() ?? log141?.EndDateTimeIndex?.ToString();
+                    {
+                        if (displayTimeOffset != null)
+                            endIndex =
+                                log131?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value)
+                                ?? log141?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
+                        else
+                            endIndex = log131?.EndDateTimeIndex?.ToString() ?? log141?.EndDateTimeIndex?.ToString();
+
+                    }
                 }
                 else
                     endIndex = log131?.EndIndex?.ToString() ?? log141?.EndIndex?.ToString();
