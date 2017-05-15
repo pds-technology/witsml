@@ -44,7 +44,6 @@ namespace PDS.WITSMLstudio.Data
         private static readonly IList<Type> _excluded;
         private static readonly Regex _regex;
         private readonly List<string> _ignored;
-        private XmlNamespaceManager _manager;
         private const string Prefix = "witsml";
 
         static DataObjectTemplate()
@@ -232,13 +231,12 @@ namespace PDS.WITSMLstudio.Data
 
         private XmlNamespaceManager GetNamespaceManager(XNode node)
         {
-            if (_manager != null) return _manager;
             var navigator = node.CreateNavigator();
 
-            _manager = new XmlNamespaceManager(navigator.NameTable ?? new NameTable());
-            _manager.AddNamespace(Prefix, navigator.NamespaceURI);
+            var manager = new XmlNamespaceManager(navigator.NameTable ?? new NameTable());
+            manager.AddNamespace(Prefix, navigator.NamespaceURI);
 
-            return _manager;
+            return manager;
         }
 
         private XDocument CreateTemplate(Type type)
