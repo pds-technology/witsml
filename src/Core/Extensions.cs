@@ -22,8 +22,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Energistics.DataAccess;
-using Witsml131ReferenceData = Energistics.DataAccess.WITSML131.ReferenceData;
-using Witsml141ReferenceData = Energistics.DataAccess.WITSML141.ReferenceData;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -81,7 +79,7 @@ namespace PDS.WITSMLstudio
         /// <returns>The value of the Version property.</returns>
         public static string GetVersion<T>(this T dataObject) where T : IEnergisticsCollection
         {
-            return (string)dataObject.GetType().GetProperty("Version").GetValue(dataObject, null);
+            return (string)dataObject.GetType().GetProperty("Version")?.GetValue(dataObject, null);
         }
 
         /// <summary>
@@ -93,7 +91,7 @@ namespace PDS.WITSMLstudio
         /// <returns>The data object instance.</returns>
         public static T SetVersion<T>(this T dataObject, string version) where T : IEnergisticsCollection
         {
-            dataObject.GetType().GetProperty("Version").SetValue(dataObject, version);
+            dataObject.GetType().GetProperty("Version")?.SetValue(dataObject, version);
             return dataObject;
         }
 
@@ -320,13 +318,15 @@ namespace PDS.WITSMLstudio
 
             var log131 = dataObject as Witsml131.Log;
             var log141 = dataObject as Witsml141.Log;
+            var mudLog131 = dataObject as Witsml131.MudLog;
+            var mudLog141 = dataObject as Witsml141.MudLog;
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
 
             if (log131 != null || log141 != null)
             {
-                if (log131?.IndexType == Witsml131ReferenceData.LogIndexType.datetime ||
-                    log141?.IndexType == Witsml141ReferenceData.LogIndexType.datetime)
+                if (log131?.IndexType == Witsml131.ReferenceData.LogIndexType.datetime ||
+                    log141?.IndexType == Witsml141.ReferenceData.LogIndexType.datetime)
                 {
                     var isStartIndexSpecified = log131?.StartDateTimeIndexSpecified ?? log141.StartDateTimeIndexSpecified;
 
@@ -334,19 +334,34 @@ namespace PDS.WITSMLstudio
                     {
                         if (displayTimeOffset != null)
                             startIndex =
-                                log131?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value)
-                                ?? log141?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
+                                log131?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value) ??
+                                log141?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
                         else
-                            startIndex = log131?.StartDateTimeIndex?.ToString() ?? log141?.StartDateTimeIndex?.ToString();
+                            startIndex =
+                                log131?.StartDateTimeIndex?.ToString() ?? 
+                                log141?.StartDateTimeIndex?.ToString();
                     }
                 }
                 else
-                    startIndex = log131?.StartIndex?.ToString() ?? log141?.StartIndex?.ToString();
+                {
+                    startIndex =
+                        log131?.StartIndex?.ToString() ??
+                        log141?.StartIndex?.ToString();
+                }
+            }
+
+            if (mudLog131 != null || mudLog141 != null)
+            {
+                startIndex =
+                    mudLog131?.StartMD?.Value.ToString(CultureInfo.InvariantCulture) ??
+                    mudLog141?.StartMD?.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             if (trajectory131 != null || trajectory141 != null)
             {
-                startIndex = trajectory131?.MDMin.Value.ToString(CultureInfo.InvariantCulture) ?? trajectory141.MDMin.Value.ToString(CultureInfo.InvariantCulture);
+                startIndex =
+                    trajectory131?.MDMin?.Value.ToString(CultureInfo.InvariantCulture) ??
+                    trajectory141?.MDMin?.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return startIndex;
@@ -364,13 +379,15 @@ namespace PDS.WITSMLstudio
 
             var log131 = dataObject as Witsml131.Log;
             var log141 = dataObject as Witsml141.Log;
+            var mudLog131 = dataObject as Witsml131.MudLog;
+            var mudLog141 = dataObject as Witsml141.MudLog;
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
 
             if (log131 != null || log141 != null)
             {
-                if (log131?.IndexType == Witsml131ReferenceData.LogIndexType.datetime ||
-                    log141?.IndexType == Witsml141ReferenceData.LogIndexType.datetime)
+                if (log131?.IndexType == Witsml131.ReferenceData.LogIndexType.datetime ||
+                    log141?.IndexType == Witsml141.ReferenceData.LogIndexType.datetime)
                 {
                     var isEndIndexSpecified = log131?.EndDateTimeIndexSpecified ?? log141.EndDateTimeIndexSpecified;
 
@@ -378,20 +395,34 @@ namespace PDS.WITSMLstudio
                     {
                         if (displayTimeOffset != null)
                             endIndex =
-                                log131?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value)
-                                ?? log141?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
+                                log131?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value) ??
+                                log141?.EndDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
                         else
-                            endIndex = log131?.EndDateTimeIndex?.ToString() ?? log141?.EndDateTimeIndex?.ToString();
-
+                            endIndex =
+                                log131?.EndDateTimeIndex?.ToString() ??
+                                log141?.EndDateTimeIndex?.ToString();
                     }
                 }
                 else
-                    endIndex = log131?.EndIndex?.ToString() ?? log141?.EndIndex?.ToString();
+                {
+                    endIndex =
+                        log131?.EndIndex?.ToString() ??
+                        log141?.EndIndex?.ToString();
+                }
+            }
+
+            if (mudLog131 != null || mudLog141 != null)
+            {
+                endIndex =
+                    mudLog131?.EndMD?.Value.ToString(CultureInfo.InvariantCulture) ??
+                    mudLog141?.EndMD?.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             if (trajectory131 != null || trajectory141 != null)
             {
-                endIndex = trajectory131?.MDMax.Value.ToString(CultureInfo.InvariantCulture) ?? trajectory141.MDMax.Value.ToString(CultureInfo.InvariantCulture);
+                endIndex =
+                    trajectory131?.MDMax?.Value.ToString(CultureInfo.InvariantCulture) ??
+                    trajectory141?.MDMax?.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return endIndex;
