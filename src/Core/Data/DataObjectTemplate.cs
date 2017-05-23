@@ -173,13 +173,13 @@ namespace PDS.WITSMLstudio.Data
         }
 
         /// <summary>
-        /// Adds an element to the document using the specified XPath expression.
+        /// Adds elements or attributes to the document using the specified XPath expression.
         /// </summary>
         /// <param name="document">The document.</param>
         /// <param name="xpath">The xpath.</param>
-        /// <param name="elements">The name.</param>
+        /// <param name="elementOrAttributeNames">The element or attribute names.</param>
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
-        public DataObjectTemplate Add(XDocument document, string xpath, params string[] elements)
+        public DataObjectTemplate Add(XDocument document, string xpath, params string[] elementOrAttributeNames)
         {
             var manager = GetNamespaceManager(document.Root);
             xpath = IncludeNamespacePrefix(xpath);
@@ -187,9 +187,15 @@ namespace PDS.WITSMLstudio.Data
             var ns = document.Root?.GetDefaultNamespace();
 
             var element = document.XPathSelectElement(xpath, manager);
+            if (element == null) return this;
 
-            if (element != null)
-                elements.ForEach(x => element.Add(new XElement(ns + x)));
+            elementOrAttributeNames.ForEach(x =>
+            {
+                element.Add(
+                    x.StartsWith("@")
+                        ? new XAttribute(x.Substring(1), string.Empty)
+                        : (object) new XElement(ns + x));
+            });
 
             return this;
         }

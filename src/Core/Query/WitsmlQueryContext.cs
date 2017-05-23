@@ -192,6 +192,8 @@ namespace PDS.WITSMLstudio.Query
             if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
             {
                 _template.Add(queryIn, xpath, "indexType", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "direction");
+                _template.Add(queryIn, $"{xpath}/startIndex", "@uom");
+                _template.Add(queryIn, $"{xpath}/endIndex", "@uom");
 
                 try
                 {
@@ -209,10 +211,14 @@ namespace PDS.WITSMLstudio.Query
             else if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType))
             {
                 _template.Add(queryIn, xpath, "mdMn", "mdMx");
+                _template.Add(queryIn, $"{xpath}/mdMn", "@uom");
+                _template.Add(queryIn, $"{xpath}/mdMx", "@uom");
             }
             else if (ObjectTypes.MudLog.EqualsIgnoreCase(objectType))
             {
                 _template.Add(queryIn, xpath, "startMd", "endMd");
+                _template.Add(queryIn, $"{xpath}/startMd", "@uom");
+                _template.Add(queryIn, $"{xpath}/endMd", "@uom");
             }
 
             AddCommonDataElements(queryIn, xpath);
