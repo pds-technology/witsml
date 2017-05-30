@@ -288,9 +288,12 @@ namespace PDS.WITSMLstudio
             var log141 = dataObject as Witsml141.Log;
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
+            var mudLog131 = dataObject as Witsml131.MudLog;
+            var mudLog141 = dataObject as Witsml141.MudLog;
 
             return log131?.ObjectGrowing ?? log141?.ObjectGrowing
                 ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing
+                ?? mudLog131?.ObjectGrowing ?? mudLog141?.ObjectGrowing
                 ?? false;
         }
 
