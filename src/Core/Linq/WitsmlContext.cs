@@ -142,6 +142,16 @@ namespace PDS.WITSMLstudio.Linq
         public abstract IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
 
         /// <summary>
+        /// Gets the name and IDs of active wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbores.</returns>
+        public virtual IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri)
+        {
+            return GetObjects<IWellboreObject>(ObjectTypes.Wellbore, parentUri, OptionsIn.ReturnElements.IdOnly).Where(o => o.GetWellboreStatus().GetValueOrDefault());
+        }
+
+        /// <summary>
         /// Gets the wellbore objects.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -161,6 +171,19 @@ namespace PDS.WITSMLstudio.Linq
         public virtual IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
             return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the name and IDs of growing objects with active status.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
+        public virtual IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri)
+        {
+            var objects = GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.HeaderOnly);
+
+            return objects.Where(o => o.GetObjectGrowingStatus() ?? false);
         }
 
         /// <summary>

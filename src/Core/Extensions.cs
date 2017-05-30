@@ -293,8 +293,7 @@ namespace PDS.WITSMLstudio
 
             return log131?.ObjectGrowing ?? log141?.ObjectGrowing
                 ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing
-                ?? mudLog131?.ObjectGrowing ?? mudLog141?.ObjectGrowing
-                ?? false;
+                ?? mudLog131?.ObjectGrowing ?? mudLog141?.ObjectGrowing;
         }
 
         /// <summary>

@@ -52,6 +52,13 @@ namespace PDS.WITSMLstudio.Linq
         IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
 
         /// <summary>
+        /// Gets the name and IDs of active wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbores.</returns>
+        IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri);
+
+        /// <summary>
         /// Gets the wellbore objects.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -67,6 +74,13 @@ namespace PDS.WITSMLstudio.Linq
         /// <returns>The header for the specified growing objects.</returns>
         IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri);
 
+        /// <summary>
+        /// Gets the name and IDs of growing objects with active status.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
+        IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri);
         /// <summary>
         /// Gets the growing objects id-only with object growing status.
         /// </summary>

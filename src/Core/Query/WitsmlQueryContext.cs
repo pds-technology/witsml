@@ -122,6 +122,25 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Gets the name and IDs of active wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbores.</returns>
+        public override IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri)
+        {
+            if (IsVersion131(parentUri))
+                return new List<IWellObject>();
+
+            var queryIn = GetTemplateAndSetIds(ObjectTypes.Wellbore, parentUri, OptionsIn.ReturnElements.IdOnly);
+            var xpath = $"//{ObjectTypes.Wellbore}";
+
+            _template.Add(queryIn, xpath, "isActive");
+            _template.Set(queryIn, $"{xpath}/isActive", true);
+
+            return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly);
+        }
+
+        /// <summary>
         /// Gets the wellbore objects.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -173,6 +192,27 @@ namespace PDS.WITSMLstudio.Query
             var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
 
             return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the name and IDs of growing objects with active status.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
+        public override IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri)
+        {
+            var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
+            var xpath = $"//{objectType}";
+
+            _template.Add(queryIn, xpath, "objectGrowing");
+            _template.Set(queryIn, $"{xpath}/objectGrowing", true);
+
+            var queryOptionsIn = IsVersion131(parentUri)
+                ? OptionsIn.ReturnElements.Requested
+                : OptionsIn.ReturnElements.IdOnly;
+
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn);
         }
 
         /// <summary>
@@ -345,7 +385,7 @@ namespace PDS.WITSMLstudio.Query
 
         private bool IsVersion131(EtpUri uri)
         {
-            return OptionsIn.DataVersion.Version131.Equals(uri.Version);
+            return uri.Version == null ? OptionsIn.DataVersion.Version131.Equals(DataSchemaVersion) : OptionsIn.DataVersion.Version131.Equals(uri.Version);
         }
     }
 }
