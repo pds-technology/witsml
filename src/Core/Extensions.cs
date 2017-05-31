@@ -325,6 +325,9 @@ namespace PDS.WITSMLstudio
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
 
+            if (log131 == null && log141 == null && mudLog131 == null && mudLog141 == null && trajectory131 == null && trajectory141 == null)
+                return null;
+
             if (log131 != null || log141 != null)
             {
                 if (log131?.IndexType == Witsml131.ReferenceData.LogIndexType.datetime ||
@@ -386,6 +389,9 @@ namespace PDS.WITSMLstudio
             var trajectory131 = dataObject as Witsml131.Trajectory;
             var trajectory141 = dataObject as Witsml141.Trajectory;
 
+            if (log131 == null && log141 == null && mudLog131 == null && mudLog141 == null && trajectory131 == null && trajectory141 == null)
+                return null;
+
             if (log131 != null || log141 != null)
             {
                 if (log131?.IndexType == Witsml131.ReferenceData.LogIndexType.datetime ||
@@ -428,6 +434,21 @@ namespace PDS.WITSMLstudio
             }
 
             return endIndex;
+        }
+
+        /// <summary>
+        /// Determines if the growing object object is empty or not.
+        /// </summary>
+        /// <param name="dataObject">The growing data object.</param>
+        /// <returns>true if the object is empty; false otherwise</returns>
+        public static bool? IsGrowingObjectEmpty(this IWellboreObject dataObject)
+        {
+            var startIndex = dataObject.GetStartIndex();
+            var endIndex = dataObject.GetEndIndex();
+
+            if (startIndex == null || endIndex == null) return null;
+
+            return string.IsNullOrWhiteSpace(startIndex) && string.IsNullOrWhiteSpace(endIndex);
         }
     }
 }
