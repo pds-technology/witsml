@@ -156,6 +156,23 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Gets the names and IDs of wellbore objects.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The names and IDs of wellbore objects of specified type.</returns>
+        public override IEnumerable<IWellboreObject> GetWellboreObjectIds(string objectType, EtpUri parentUri)
+        {
+            var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
+
+            var queryOptionsIn = IsVersion131(parentUri)
+                ? OptionsIn.ReturnElements.Requested
+                : OptionsIn.ReturnElements.IdOnly;
+
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn);
+        }
+
+        /// <summary>
         /// Gets the object identifier only.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>

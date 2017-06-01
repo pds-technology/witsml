@@ -163,6 +163,17 @@ namespace PDS.WITSMLstudio.Linq
         }
 
         /// <summary>
+        /// Gets the names and IDs of wellbore objects.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The names and IDs of wellbore objects of specified type.</returns>
+        public virtual IEnumerable<IWellboreObject> GetWellboreObjectIds(string objectType, EtpUri parentUri)
+        {
+            return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
+        }
+
+        /// <summary>
         /// Gets the growing object header only.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
