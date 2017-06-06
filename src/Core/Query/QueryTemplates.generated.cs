@@ -275,10 +275,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.LogList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -291,10 +291,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML131.LogList>();
-                        _template.Remove(_headerOnly, "//logData");
+                        var headerOnly = _template.Create<WITSML131.LogList>();
+                        _template.Remove(headerOnly, "//logData");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -307,10 +307,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML131.LogList>();
-                        _template.RemoveAll(_dataOnly, "/*/*/*[name()!='logData']");
+                        var dataOnly = _template.Create<WITSML131.LogList>();
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='logData']");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
@@ -345,16 +345,14 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.MessageList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for mudLog.    
             /// </summary>          
@@ -362,7 +360,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -386,14 +383,13 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.MudLogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -402,10 +398,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML131.MudLogList>();
-                        _template.Remove(_headerOnly, "");
+                        var headerOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.Remove(headerOnly, "");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -418,16 +414,14 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML131.MudLogList>();
-                        _template.RemoveAll(_dataOnly, "");
+                        var dataOnly = _template.Create<WITSML131.MudLogList>();
+                        _template.RemoveAll(dataOnly, "");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for rig.    
             /// </summary>          
@@ -456,10 +450,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.RigList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -497,10 +491,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.TrajectoryList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -513,10 +507,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML131.TrajectoryList>();
-                        _template.Remove(_headerOnly, "//trajectoryStation");
+                        var headerOnly = _template.Create<WITSML131.TrajectoryList>();
+                        _template.Remove(headerOnly, "//trajectoryStation");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -529,10 +523,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML131.TrajectoryList>();
-                        _template.RemoveAll(_dataOnly, "/*/*/*[name()!='trajectoryStation']");
+                        var dataOnly = _template.Create<WITSML131.TrajectoryList>();
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='trajectoryStation']");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
@@ -567,10 +561,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML131.WellboreGeometryList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -605,10 +599,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.WellList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' ]");
+                        var idOnly = _template.Create<WITSML131.WellList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' ]");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -643,10 +637,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML131.WellboreList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell']");
+                        var idOnly = _template.Create<WITSML131.WellboreList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -689,10 +683,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.AttachmentList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.AttachmentList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -730,10 +724,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.LogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.LogList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -746,10 +740,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML141.LogList>();
-                        _template.Remove(_headerOnly, "//logData");
+                        var headerOnly = _template.Create<WITSML141.LogList>();
+                        _template.Remove(headerOnly, "//logData");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -762,10 +756,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML141.LogList>();
-                        _template.RemoveAll(_dataOnly, "/*/*/*[name()!='logData']");
+                        var dataOnly = _template.Create<WITSML141.LogList>();
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='logData']");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
@@ -800,16 +794,14 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.MessageList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.MessageList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for mudLog.    
             /// </summary>          
@@ -817,7 +809,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -841,14 +832,13 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.MudLogList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -857,10 +847,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML141.MudLogList>();
-                        _template.Remove(_headerOnly, "");
+                        var headerOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.Remove(headerOnly, "");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -873,14 +863,13 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML141.MudLogList>();
-                        _template.RemoveAll(_dataOnly, "");
+                        var dataOnly = _template.Create<WITSML141.MudLogList>();
+                        _template.RemoveAll(dataOnly, "");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
-
             }
 
             /// <summary>
@@ -911,10 +900,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.RigList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.RigList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -952,10 +941,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.TrajectoryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.TrajectoryList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -968,10 +957,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_headerOnly != null) return Clone(_headerOnly);
-                        _headerOnly = _template.Create<WITSML141.TrajectoryList>();
-                        _template.Remove(_headerOnly, "//trajectoryStation");
+                        var headerOnly = _template.Create<WITSML141.TrajectoryList>();
+                        _template.Remove(headerOnly, "//trajectoryStation");
+						_headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
                 }
@@ -984,10 +973,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_dataOnly != null) return Clone(_dataOnly);
-                        _dataOnly = _template.Create<WITSML141.TrajectoryList>();
-                        _template.RemoveAll(_dataOnly, "/*/*/*[name()!='trajectoryStation']");
+                        var dataOnly = _template.Create<WITSML141.TrajectoryList>();
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='trajectoryStation']");
+						_dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
                 }
@@ -1022,10 +1011,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.WellboreGeometryList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        var idOnly = _template.Create<WITSML141.WellboreGeometryList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -1060,10 +1049,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.WellList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' ]");
+                        var idOnly = _template.Create<WITSML141.WellList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' ]");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }
@@ -1098,10 +1087,10 @@ namespace PDS.WITSMLstudio.Query
                 {
                     get
                     {
-
                         if (_idOnly != null) return Clone(_idOnly);
-                        _idOnly = _template.Create<WITSML141.WellboreList>();
-                        _template.RemoveAll(_idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell']");
+                        var idOnly = _template.Create<WITSML141.WellboreList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell']");
+						_idOnly = idOnly;
                         return Clone(_idOnly);
                     }
                 }

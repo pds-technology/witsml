@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.1
 //
 // Copyright 2017 Petrotechnical Data Systems
@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.Xml.Linq;
-using PDS.WITSMLstudio.Data;
 
 namespace PDS.WITSMLstudio.Query
 {
