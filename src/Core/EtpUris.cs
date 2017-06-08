@@ -96,7 +96,7 @@ namespace PDS.WITSMLstudio
         /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUriFamily(Type type)
         {
-            var xmlType = type?.GetCustomAttribute<XmlTypeAttribute>();
+            var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
 
             if (xmlType?.Namespace?.EndsWith("commonv2") ?? false)
                 return Eml210;

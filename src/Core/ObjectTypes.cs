@@ -321,7 +321,7 @@ namespace PDS.WITSMLstudio
 
             return objectGroupType?
                 .GetProperties()
-                .Select(x => new { Property = x, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
+                .Select(x => new { Property = x, Attribute = XmlAttributeCache<XmlElementAttribute>.GetCustomAttribute(x) })
                 .Where(x => objectType.EqualsIgnoreCase(x.Attribute?.ElementName))
                 .Select(x => x.Property)
                 .FirstOrDefault();

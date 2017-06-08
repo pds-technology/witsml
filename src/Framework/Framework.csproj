@@ -73,6 +73,7 @@
     </Compile>
     <Compile Include="Range.cs" />
     <Compile Include="TaskRunner.cs" />
+    <Compile Include="XmlAttributeCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

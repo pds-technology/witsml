@@ -708,21 +708,21 @@ namespace PDS.WITSMLstudio.Data
         {
             foreach (var prop in properties)
             {
-                var elementAttribute = prop.GetCustomAttribute<XmlElementAttribute>();
+                var elementAttribute = XmlAttributeCache<XmlElementAttribute>.GetCustomAttribute(prop);
                 if (elementAttribute != null)
                 {
                     if (elementAttribute.ElementName.EqualsIgnoreCase(name))
                         return prop;
                 }
 
-                var arrayAttribute = prop.GetCustomAttribute<XmlArrayAttribute>();
+                var arrayAttribute = XmlAttributeCache<XmlArrayAttribute>.GetCustomAttribute(prop);
                 if (arrayAttribute != null)
                 {
                     if (arrayAttribute.ElementName.EqualsIgnoreCase(name))
                         return prop;
                 }
 
-                var attributeAttribute = prop.GetCustomAttribute<XmlAttributeAttribute>();
+                var attributeAttribute = XmlAttributeCache<XmlAttributeAttribute>.GetCustomAttribute(prop);
                 if (attributeAttribute != null)
                 {
                     if (attributeAttribute.AttributeName.EqualsIgnoreCase(name))
@@ -742,7 +742,7 @@ namespace PDS.WITSMLstudio.Data
         /// <exception cref="WitsmlException"></exception>
         protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
-            var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
+            var xmlAttribute = XmlAttributeCache<XmlAttributeAttribute>.GetCustomAttribute(uomProperty);
             var isRequired = IsRequired(uomProperty);
 
             // validation not needed if uom attribute is not defined
@@ -786,7 +786,7 @@ namespace PDS.WITSMLstudio.Data
             return propType.Assembly.GetTypes()
                 .FirstOrDefault(t =>
                 {
-                    var xmlType = t.GetCustomAttribute<XmlTypeAttribute>();
+                    var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(t);
                     return ((xmlType != null && xmlType.TypeName == typeName) &&
                         (string.IsNullOrWhiteSpace(@namespace) || xmlType.Namespace == @namespace));
                 });
@@ -823,7 +823,7 @@ namespace PDS.WITSMLstudio.Data
                 type = GetConcreteType(element, type);
 
             return type.GetProperties()
-                .Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false))
+                .Where(p => !XmlAttributeCache<XmlIgnoreAttribute>.IsDefined(p))
                 .ToList();
         }
 
@@ -878,7 +878,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns><c>true</c> if the propertyInfo has the custom attribute RequiredAttribute; /// otherwise, <c>false</c>.</returns>
         protected virtual bool IsRequired(PropertyInfo propertyInfo)
         {
-            return propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
+            return XmlAttributeCache<RequiredAttribute>.GetCustomAttribute(propertyInfo) != null;
         }
 
         /// <summary>
@@ -908,7 +908,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>The <see cref="PropertyInfo"/> instance.</returns>
         protected virtual PropertyInfo GetXmlTextProperty(Type type)
         {
-            return type.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), true));
+            return type.GetProperties().FirstOrDefault(XmlAttributeCache<XmlTextAttribute>.IsDefined);
         }
 
         /// <summary>
@@ -918,7 +918,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns><c>true</c> if the type defines a type with simple content; otherwise, <c>false</c>.</returns>
         protected virtual bool HasSimpleContent(Type type)
         {
-            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), true));
+            return type.GetProperties().Any(XmlAttributeCache<XmlTextAttribute>.IsDefined);
         }
 
         /// <summary>
@@ -928,7 +928,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns><c>true</c> if the type supports any XML elements; otherwise, <c>false</c>.</returns>
         protected virtual bool HasXmlAnyElement(Type type)
         {
-            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlAnyElementAttribute), true));
+            return type.GetProperties().Any(XmlAttributeCache<XmlAnyElementAttribute>.IsDefined);
         }
 
         private bool IsNumeric(Type propertyType)
@@ -954,7 +954,7 @@ namespace PDS.WITSMLstudio.Data
         private void RemoveInvalidChildElementsAndAttributes(PropertyInfo propertyInfo, Type elementType, XElement element)
         {
             // Ignore list properties that declare child elements using XmlArrayItem
-            if (propertyInfo.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
+            if (XmlAttributeCache<XmlArrayItemAttribute>.GetCustomAttribute(propertyInfo) != null) return;
 
             var properties = GetPropertyInfo(elementType, element);
 

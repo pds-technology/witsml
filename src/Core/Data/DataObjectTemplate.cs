@@ -247,8 +247,8 @@ namespace PDS.WITSMLstudio.Data
 
         private XDocument CreateTemplate(Type type)
         {
-            var xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
-            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+            var xmlRoot = XmlAttributeCache<XmlRootAttribute>.GetCustomAttribute(type);
+            var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
 
             var objectType = ObjectTypes.GetObjectType(type);
             var version = ObjectTypes.GetVersion(type);
@@ -288,9 +288,9 @@ namespace PDS.WITSMLstudio.Data
 
             foreach (var property in objectType.GetProperties())
             {
-                var xmlAttribute = property.GetCustomAttribute<XmlAttributeAttribute>();
-                var xmlElement = property.GetCustomAttribute<XmlElementAttribute>();
-                var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
+                var xmlAttribute = XmlAttributeCache<XmlAttributeAttribute>.GetCustomAttribute(property);
+                var xmlElement = XmlAttributeCache<XmlElementAttribute>.GetCustomAttribute(property);
+                var xmlArray = XmlAttributeCache<XmlArrayAttribute>.GetCustomAttribute(property);
 
                 if ((xmlAttribute == null && xmlElement == null && xmlArray == null) ||
                     _excluded.Contains(property.PropertyType) ||
@@ -310,7 +310,7 @@ namespace PDS.WITSMLstudio.Data
                 // Arrays
                 if (xmlArray != null)
                 {
-                    var xmlArrayItem = property.GetCustomAttribute<XmlArrayItemAttribute>();
+                    var xmlArrayItem = XmlAttributeCache<XmlArrayItemAttribute>.GetCustomAttribute(property);
                     var array = new XElement(ns + xmlArray.ElementName,
                                 new XElement(ns + xmlArrayItem.ElementName));
 
@@ -322,8 +322,8 @@ namespace PDS.WITSMLstudio.Data
                 var element = new XElement(ns + xmlElement.ElementName);
                 parent.Add(element);
 
-                var xmlComponent = property.GetCustomAttribute<ComponentElementAttribute>();
-                var xmlRecurring = property.GetCustomAttribute<RecurringElementAttribute>();
+                var xmlComponent = XmlAttributeCache<ComponentElementAttribute>.GetCustomAttribute(property);
+                var xmlRecurring = XmlAttributeCache<RecurringElementAttribute>.GetCustomAttribute(property);
 
                 // Stop processing if not a complex type or recurring element
                 if (xmlComponent == null && xmlRecurring == null)
@@ -356,7 +356,7 @@ namespace PDS.WITSMLstudio.Data
 
         private bool IsIgnored(MemberInfo property)
         {
-            return property.GetCustomAttributes<XmlIgnoreAttribute>().Any()
+            return XmlAttributeCache<XmlIgnoreAttribute>.IsDefined(property)
                 || _ignored.Contains(property.Name);
         }
 

@@ -243,7 +243,7 @@ namespace PDS.WITSMLstudio.Framework
             var enumType = value.GetType();
             var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
 
-            return fieldInfo?.GetCustomAttribute<TAttribute>(true);
+            return XmlAttributeCache<TAttribute>.GetCustomAttribute(fieldInfo);
         }
 
         /// <summary>
@@ -266,11 +266,11 @@ namespace PDS.WITSMLstudio.Framework
                 if (x.Name.EqualsIgnoreCase(enumValue))
                     return true;
 
-                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
+                var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
                 if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
                     return true;
 
-                var descriptionAttr = x.GetCustomAttribute<DescriptionAttribute>();
+                var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
                 return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
             });
 
@@ -383,8 +383,8 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns>A new <see cref="XElement"/> instance.</returns>
         public static XElement UpdateRootElementName(this XElement element, Type type)
         {
-            var xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
-            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+            var xmlRoot = XmlAttributeCache<XmlRootAttribute>.GetCustomAttribute(type);
+            var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
             var elementName = type.Name;
 
             if (!string.IsNullOrWhiteSpace(xmlRoot?.ElementName))
