@@ -140,6 +140,19 @@ namespace PDS.WITSMLstudio.Framework
         {
             if (!timestamp.HasValue) return string.Empty;
 
+            return timestamp.Value.ToDisplayDateTime(toOffset);
+        }
+
+
+        /// <summary>
+        /// To convert a specified timestamp to a specified timespan offset and format 
+        /// the date time for display as a string that includes fractional seconds without a timezone.
+        /// </summary>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <param name="toOffset">The time span offset to convert the timestamp to.</param>
+        /// <returns>A string representation of the Timestamp if it is not null, otherwise an empty string.</returns>
+        public static string ToDisplayDateTime(this Timestamp timestamp, TimeSpan toOffset)
+        {
             // Convert the Timestamp to a DateTimeOffset
             var dateTimeOffset = (DateTimeOffset)timestamp;
 
