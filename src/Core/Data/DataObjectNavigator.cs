@@ -743,7 +743,7 @@ namespace PDS.WITSMLstudio.Data
         protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = XmlAttributeCache<XmlAttributeAttribute>.GetCustomAttribute(uomProperty);
-            var isRequired = IsRequired(uomProperty);
+            var isRequired = IsRequired(uomProperty) && Context.Function != Functions.GetFromStore;
 
             // validation not needed if uom attribute is not defined
             if (xmlAttribute == null)
