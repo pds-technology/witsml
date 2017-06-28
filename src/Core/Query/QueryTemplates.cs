@@ -51,14 +51,14 @@ namespace PDS.WITSMLstudio.Query
             // Unsupported objects
             var type = ObjectTypes.GetObjectGroupType(objectType, version);
 
-            if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
-            {
-                documentTemplate = _template.Create(type);
-            }
-            else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+            if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
             {
                 documentTemplate = _template.Create(type);
                 _template.RemoveAll(documentTemplate, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+            }
+            else
+            {
+                documentTemplate = _template.Create(type);
             }
 
             return documentTemplate;
