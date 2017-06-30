@@ -210,6 +210,18 @@ namespace PDS.WITSMLstudio.Linq
         }
 
         /// <summary>
+        /// Gets the data objects without logging the response.
+        /// </summary>
+        /// <param name="objectType">The rig.</param>
+        /// <param name="rootUri">The root URI.</param>
+        /// <returns> The data objects. </returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual IEnumerable<IWellboreObject> GetDataObjectsWithoutResponseLogging(string objectType, EtpUri rootUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the object identifier only.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>

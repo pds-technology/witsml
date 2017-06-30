@@ -137,7 +137,9 @@ namespace PDS.WITSMLstudio.Query
             _template.Add(queryIn, xpath, "isActive");
             _template.Set(queryIn, $"{xpath}/isActive", true);
 
-            return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.ReturnElements.IdOnly);
+            var result = ExecuteQuery(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.Join(OptionsIn.ReturnElements.IdOnly), logResponse: false);
+            var dataObjects = (IEnumerable<IWellObject>)result?.Items;
+            return dataObjects?.OrderBy(x => x.Name);
         }
 
         /// <summary>
@@ -190,6 +192,26 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Gets the data objects without logging the response.
+        /// </summary>
+        /// <param name="objectType">The object type.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The data objects.</returns>
+        public override IEnumerable<IWellboreObject> GetDataObjectsWithoutResponseLogging(string objectType, EtpUri uri)
+        {
+            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
+
+            var queryOptionsIn = IsVersion131(uri)
+                ? OptionsIn.ReturnElements.Requested
+                : OptionsIn.ReturnElements.IdOnly;
+
+            // Need to determine if there was an error
+            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: false);
+            var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
+            return dataObjects?.OrderBy(x => x.Name);
+        }
+
+        /// <summary>
         /// Gets the growing object header only.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
@@ -229,7 +251,9 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn);
+            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: false);
+            var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
+            return dataObjects?.OrderBy(x => x.Name);
         }
 
         /// <summary>
@@ -327,9 +351,10 @@ namespace PDS.WITSMLstudio.Query
             return dataObjects.OrderBy(x => x.Name);
         }
 
-        private IEnergisticsCollection ExecuteQuery(string objectType, string xmlIn, string optionsIn)
+        private IEnergisticsCollection ExecuteQuery(string objectType, string xmlIn, string optionsIn, bool logQuery = true, bool logResponse = true)
         {
-            LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
+            if (logQuery)
+                LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
             using (var client = Connection.CreateClientProxy())
             {
@@ -349,6 +374,16 @@ namespace PDS.WITSMLstudio.Query
                     suppMsgOut = "Error querying store:" + ex.GetBaseException().Message;
                 }
 
+                if (returnCode < 0)
+                {
+                    _log.WarnFormat("Unsuccessful return code: {0}{2}{2}{1}", returnCode, suppMsgOut, Environment.NewLine);
+
+                    if (logResponse)
+                        LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, null, returnCode, suppMsgOut);
+
+                    return null;
+                }
+
                 try
                 {
                     if (returnCode > 0)
@@ -366,7 +401,9 @@ namespace PDS.WITSMLstudio.Query
                     suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
                 }
 
-                LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+                if (logResponse)
+                    LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+
                 return result;
             }
         }
