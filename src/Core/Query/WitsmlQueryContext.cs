@@ -99,7 +99,7 @@ namespace PDS.WITSMLstudio.Query
 
             AddCommonDataElements(queryIn, "//well");
 
-            return GetObjects<IDataObject>(ObjectTypes.Well, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
+            return GetObjects<IDataObject>(ObjectTypes.Well, queryIn.ToString(), optionsIn: OptionsIn.ReturnElements.Requested);
         }
 
         /// <summary>
@@ -118,15 +118,16 @@ namespace PDS.WITSMLstudio.Query
 
             AddCommonDataElements(queryIn, "//wellbore");
 
-            return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
+            return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), optionsIn: OptionsIn.ReturnElements.Requested);
         }
 
         /// <summary>
         /// Gets the name and IDs of active wellbores.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The name and IDs of the wellbores.</returns>
-        public override IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri)
+        public override IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri, bool logXmlResponse = true)
         {
             if (IsVersion131(parentUri))
                 return new List<IWellObject>();
@@ -137,7 +138,7 @@ namespace PDS.WITSMLstudio.Query
             _template.Add(queryIn, xpath, "isActive");
             _template.Set(queryIn, $"{xpath}/isActive", true);
 
-            var result = ExecuteQuery(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.Join(OptionsIn.ReturnElements.IdOnly), logResponse: false);
+            var result = ExecuteQuery(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.Join(OptionsIn.ReturnElements.IdOnly), logResponse: logXmlResponse);
             var dataObjects = (IEnumerable<IWellObject>)result?.Items;
             return dataObjects?.OrderBy(x => x.Name);
         }
@@ -147,14 +148,15 @@ namespace PDS.WITSMLstudio.Query
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The wellbore objects of specified type.</returns>
-        public override IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
+        public override IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true)
         {
             var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
 
             AddCommonDataElements(queryIn, $"//{objectType}");
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), optionsIn: OptionsIn.ReturnElements.Requested, logXmlResponse: logXmlResponse);
         }
 
         /// <summary>
@@ -171,7 +173,7 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn);
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), optionsIn: queryOptionsIn);
         }
 
         /// <summary>
@@ -188,29 +190,9 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn: queryOptionsIn).FirstOrDefault();
         }
-
-        /// <summary>
-        /// Gets the data objects without logging the response.
-        /// </summary>
-        /// <param name="objectType">The object type.</param>
-        /// <param name="uri">The URI.</param>
-        /// <returns>The data objects.</returns>
-        public override IEnumerable<IWellboreObject> GetDataObjectsWithoutResponseLogging(string objectType, EtpUri uri)
-        {
-            var queryIn = GetTemplateAndSetIds(objectType, uri, OptionsIn.ReturnElements.IdOnly);
-
-            var queryOptionsIn = IsVersion131(uri)
-                ? OptionsIn.ReturnElements.Requested
-                : OptionsIn.ReturnElements.IdOnly;
-
-            // Need to determine if there was an error
-            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: false);
-            var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
-            return dataObjects?.OrderBy(x => x.Name);
-        }
-
+        
         /// <summary>
         /// Gets the growing object header only.
         /// </summary>
@@ -230,7 +212,7 @@ namespace PDS.WITSMLstudio.Query
 
             var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), queryOptionsIn).FirstOrDefault();
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), optionsIn: queryOptionsIn).FirstOrDefault();
         }
 
         /// <summary>
@@ -238,8 +220,9 @@ namespace PDS.WITSMLstudio.Query
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
-        /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
-        public override IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri)
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
+        /// <returns>/// The name and IDs of the wellbore objects of specified type.</returns>
+        public override IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true)
         {
             var queryIn = GetTemplateAndSetIds(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
             var xpath = $"//{objectType}";
@@ -251,8 +234,10 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
-            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: false);
+            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: logXmlResponse);
             var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
+
+            // If there were no growing objects found return null, else order by name
             return dataObjects?.OrderBy(x => x.Name);
         }
 
@@ -304,7 +289,7 @@ namespace PDS.WITSMLstudio.Query
 
             AddCommonDataElements(queryIn, xpath);
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), optionsIn: OptionsIn.ReturnElements.Requested);
         }
 
         /// <summary>
@@ -333,20 +318,21 @@ namespace PDS.WITSMLstudio.Query
 
             var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
 
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn: optionsIn.ToArray()).FirstOrDefault();
         }
 
         /// <summary>
         /// Gets the objects of the specified query.
         /// </summary>
-        /// <param name="objectType"></param>
-        /// <param name="queryIn"></param>
-        /// <param name="optionsIn"></param>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, params OptionsIn[] optionsIn) where T : IDataObject
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="queryIn">The query in.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The data objects.</returns>
+        public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, bool logXmlResponse = true, params OptionsIn[] optionsIn) where T : IDataObject
         {
-            var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn));
+            var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn), logResponse: logXmlResponse);
             var dataObjects = (IEnumerable<T>)result?.Items ?? Enumerable.Empty<T>();
             return dataObjects.OrderBy(x => x.Name);
         }

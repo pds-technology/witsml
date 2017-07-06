@@ -145,8 +145,9 @@ namespace PDS.WITSMLstudio.Linq
         /// Gets the name and IDs of active wellbores.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The name and IDs of the wellbores.</returns>
-        public virtual IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri)
+        public virtual IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri, bool logXmlResponse = true)
         {
             return GetObjects<IWellboreObject>(ObjectTypes.Wellbore, parentUri, OptionsIn.ReturnElements.IdOnly).Where(o => o.GetWellboreStatus().GetValueOrDefault());
         }
@@ -156,8 +157,9 @@ namespace PDS.WITSMLstudio.Linq
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The wellbore objects of specified type.</returns>
-        public virtual IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
+        public virtual IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true)
         {
             return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
         }
@@ -189,8 +191,9 @@ namespace PDS.WITSMLstudio.Linq
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
-        public virtual IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri)
+        public virtual IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true)
         {
             var objects = GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.HeaderOnly);
 
@@ -208,19 +211,7 @@ namespace PDS.WITSMLstudio.Linq
         {
             return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.HeaderOnly);
         }
-
-        /// <summary>
-        /// Gets the data objects without logging the response.
-        /// </summary>
-        /// <param name="objectType">The rig.</param>
-        /// <param name="rootUri">The root URI.</param>
-        /// <returns> The data objects. </returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public virtual IEnumerable<IWellboreObject> GetDataObjectsWithoutResponseLogging(string objectType, EtpUri rootUri)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         /// <summary>
         /// Gets the object identifier only.
         /// </summary>

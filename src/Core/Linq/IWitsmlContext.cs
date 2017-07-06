@@ -55,16 +55,18 @@ namespace PDS.WITSMLstudio.Linq
         /// Gets the name and IDs of active wellbores.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The name and IDs of the wellbores.</returns>
-        IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri);
+        IEnumerable<IWellObject> GetActiveWellbores(EtpUri parentUri, bool logXmlResponse = true);
 
         /// <summary>
         /// Gets the wellbore objects.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The wellbore objects of specified type.</returns>
-        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri);
+        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true);
 
         /// <summary>
         /// Gets the names and IDs of wellbore objects.
@@ -87,8 +89,10 @@ namespace PDS.WITSMLstudio.Linq
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
+        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <returns>The name and IDs of the wellbore objects of specified type.</returns>
-        IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri);
+        IEnumerable<IWellboreObject> GetGrowingObjects(string objectType, EtpUri parentUri, bool logXmlResponse = true);
+        
         /// <summary>
         /// Gets the growing objects id-only with object growing status.
         /// </summary>
@@ -97,15 +101,7 @@ namespace PDS.WITSMLstudio.Linq
         /// <param name="indexType">Type of the index.</param>
         /// <returns>The wellbore objects of specified type with header.</returns>
         IEnumerable<IWellboreObject> GetGrowingObjectsWithStatus(string objectType, EtpUri parentUri, string indexType = null);
-
-        /// <summary>
-        /// Gets the data objects without logging the response.
-        /// </summary>
-        /// <param name="objectType">The rig.</param>
-        /// <param name="rootUri">The root URI.</param>
-        /// <returns>The data objects.</returns>
-        IEnumerable<IWellboreObject> GetDataObjectsWithoutResponseLogging(string objectType, EtpUri rootUri);
-
+        
         /// <summary>
         /// Gets the object identifier only.
         /// </summary>
