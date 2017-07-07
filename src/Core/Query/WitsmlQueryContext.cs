@@ -92,45 +92,26 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The array of supported get from store objects.</returns>
         public override string[] GetSupportedGetFromStoreObjects()
         {
-            using (var client = Connection.CreateClientProxy())
+            string suppMsgOut, capabilitiesOut;
+
+            var returnCode = ExecuteQuery(Functions.GetCap, null, null, null, out capabilitiesOut, out suppMsgOut);
+
+            if (returnCode < 1 || string.IsNullOrEmpty(capabilitiesOut))
+                return new string[] { };
+
+            var supportedObjects = new List<string>();
+            var xml = XDocument.Parse(capabilitiesOut);
+
+            if (xml.Root != null)
             {
-                var wmls = (IWitsmlClient)client;
-                string suppMsgOut, capabilitiesOut;
-                short returnCode;
-
-                try
-                {
-                    returnCode = wmls.WMLS_GetCap(new OptionsIn.DataVersion(DataSchemaVersion), out capabilitiesOut, out suppMsgOut);
-                }
-                catch (Exception ex)
-                {
-                    _log.ErrorFormat("Error querying store: {0}", ex);
-                    return new string[] { };
-                }
-
-                if (returnCode < 1)
-                {
-                    _log.WarnFormat("Unsuccessful return code: {0}{2}{2}{1}", returnCode, suppMsgOut, Environment.NewLine);
-                    return new string[] { };
-                }
-
-                if (string.IsNullOrWhiteSpace(capabilitiesOut))
-                    return new string[] { };
-
-                var xml = XDocument.Parse(capabilitiesOut);
-                var supportedObjects = new List<string>();
-
-                if (xml.Root != null)
-                {
-                    var ns = xml.Root.GetDefaultNamespace();
-                    xml.Descendants(ns + "function")
-                        .Where(x => x.HasAttributes && x.Attribute("name")?.Value == "WMLS_GetFromStore")
-                        .Descendants()
-                        .ForEach(x => supportedObjects.Add(x.Value));
-                }
-
-                return supportedObjects.ToArray();
+                var ns = xml.Root.GetDefaultNamespace();
+                xml.Descendants(ns + "function")
+                    .Where(x => x.HasAttributes && x.Attribute("name")?.Value == "WMLS_GetFromStore")
+                    .Descendants()
+                    .ForEach(x => supportedObjects.Add(x.Value));
             }
+
+            return supportedObjects.ToArray();
         }
 
         /// <summary>
@@ -388,28 +369,74 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The data objects.</returns>
         public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, bool logXmlRequest = true, bool logXmlResponse = true, bool returnNullIfError = false, params OptionsIn[] optionsIn) where T : IDataObject
         {
-            var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn), logXmlRequest, logXmlResponse);
+            var result = ExecuteGetFromStoreQuery(objectType, queryIn, OptionsIn.Join(optionsIn), logXmlRequest, logXmlResponse);
 
             var dataObjects = (IEnumerable<T>)result?.Items ?? (returnNullIfError ? null : Enumerable.Empty<T>());
 
             return dataObjects?.OrderBy(x => x.Name);
         }
 
-        private IEnergisticsCollection ExecuteQuery(string objectType, string xmlIn, string optionsIn, bool logQuery = true, bool logResponse = true)
+        private IEnergisticsCollection ExecuteGetFromStoreQuery(string objectType, string xmlIn, string optionsIn, bool logQuery = true, bool logResponse = true)
         {
             if (logQuery)
                 LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
+            IEnergisticsCollection result = null;
+            string suppMsgOut, xmlOut;
+
+            var returnCode = ExecuteQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn, out xmlOut, out suppMsgOut);
+
+            if (returnCode < 1)
+            {
+                if (logResponse)
+                    LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, null, returnCode, suppMsgOut);
+
+                return null;
+            }
+
+            try
+            {
+                if (returnCode > 0)
+                {
+                    var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
+                    var document = WitsmlParser.Parse(xmlOut);
+
+                    result = WitsmlParser.Parse(listType, document.Root) as IEnergisticsCollection;
+                }
+            }
+            catch (WitsmlException ex)
+            {
+                _log.ErrorFormat("Error parsing query response: {0}{2}{2}{1}", xmlOut, ex, Environment.NewLine);
+                returnCode = (short)ex.ErrorCode;
+                suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
+            }
+
+            if (logResponse)
+                LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+
+            return result;
+        }
+
+        private short ExecuteQuery(Functions functionType, string objectType, string xmlIn, string optionsIn, out string xmlOut, out string suppMsgOut)
+        {
             using (var client = Connection.CreateClientProxy())
             {
                 var wmls = (IWitsmlClient)client;
-                string suppMsgOut, xmlOut = string.Empty;
-                IEnergisticsCollection result = null;
-                short returnCode;
+                xmlOut = null;
+                suppMsgOut = string.Empty;
+                short returnCode = 0;
 
                 try
                 {
-                    returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                    switch (functionType)
+                    {
+                        case Functions.GetCap:
+                            returnCode = wmls.WMLS_GetCap(new OptionsIn.DataVersion(DataSchemaVersion), out xmlOut, out suppMsgOut);
+                            break;
+                        case Functions.GetFromStore:
+                            returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -418,37 +445,10 @@ namespace PDS.WITSMLstudio.Query
                     suppMsgOut = "Error querying store:" + ex.GetBaseException().Message;
                 }
 
-                if (returnCode < 0)
-                {
+                if (returnCode < 1)
                     _log.WarnFormat("Unsuccessful return code: {0}{2}{2}{1}", returnCode, suppMsgOut, Environment.NewLine);
 
-                    if (logResponse)
-                        LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, null, returnCode, suppMsgOut);
-
-                    return null;
-                }
-
-                try
-                {
-                    if (returnCode > 0)
-                    {
-                        var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
-                        var document = WitsmlParser.Parse(xmlOut);
-
-                        result = WitsmlParser.Parse(listType, document.Root) as IEnergisticsCollection;
-                    }
-                }
-                catch (WitsmlException ex)
-                {
-                    _log.ErrorFormat("Error parsing query response: {0}{2}{2}{1}", xmlOut, ex, Environment.NewLine);
-                    returnCode = (short)ex.ErrorCode;
-                    suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
-                }
-
-                if (logResponse)
-                    LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
-
-                return result;
+                return returnCode;
             }
         }
 
