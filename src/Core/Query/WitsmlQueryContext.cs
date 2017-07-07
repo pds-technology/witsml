@@ -185,12 +185,7 @@ namespace PDS.WITSMLstudio.Query
             _template.Add(queryIn, xpath, "isActive");
             _template.Set(queryIn, $"{xpath}/isActive", true);
 
-            // Use execute query so that if an errorCode is returned the result will be null
-            var result = ExecuteQuery(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.Join(OptionsIn.ReturnElements.IdOnly), logResponse: logXmlResponse);
-            var dataObjects = (IEnumerable<IWellObject>)result?.Items;
-
-            // If there was an error querying for active wellbores return null, else order by name
-            return dataObjects?.OrderBy(x => x.Name);
+            return GetObjects<IWellObject>(ObjectTypes.Wellbore, queryIn.ToString(), logXmlResponse: logXmlResponse, returnNullIfError: true, optionsIn: OptionsIn.ReturnElements.IdOnly);
         }
 
         /// <summary>
@@ -242,7 +237,7 @@ namespace PDS.WITSMLstudio.Query
 
             return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn: queryOptionsIn).FirstOrDefault();
         }
-        
+
         /// <summary>
         /// Gets the growing object header only.
         /// </summary>
@@ -284,12 +279,7 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
-            // Use execute query so that if an errorCode is returned the result will be null
-            var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: logXmlResponse);
-            var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
-
-            // If there was an error querying for growing objects return null, else order by name
-            return dataObjects?.OrderBy(x => x.Name);
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), logXmlResponse: logXmlResponse, returnNullIfError: true, optionsIn: queryOptionsIn);
         }
 
         /// <summary>
@@ -340,7 +330,7 @@ namespace PDS.WITSMLstudio.Query
 
             AddCommonDataElements(queryIn, xpath);
 
-            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), optionsIn: OptionsIn.ReturnElements.Requested);
+            return GetObjects<IWellboreObject>(objectType, queryIn.ToString(), OptionsIn.ReturnElements.Requested);
         }
 
         /// <summary>
@@ -369,7 +359,7 @@ namespace PDS.WITSMLstudio.Query
 
             var queryIn = GetTemplateAndSetIds(objectType, uri, templateType);
 
-            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn: optionsIn.ToArray()).FirstOrDefault();
+            return GetObjects<IDataObject>(objectType, queryIn.ToString(), optionsIn.ToArray()).FirstOrDefault();
         }
 
         /// <summary>
@@ -378,14 +368,31 @@ namespace PDS.WITSMLstudio.Query
         /// <typeparam name="T"></typeparam>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="queryIn">The query in.</param>
-        /// <param name="logXmlResponse">If set to <c>true</c> then log the XML response.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns>The data objects.</returns>
-        public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, bool logXmlResponse = true, params OptionsIn[] optionsIn) where T : IDataObject
+        public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, params OptionsIn[] optionsIn) where T : IDataObject
         {
-            var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn), logResponse: logXmlResponse);
-            var dataObjects = (IEnumerable<T>)result?.Items ?? Enumerable.Empty<T>();
-            return dataObjects.OrderBy(x => x.Name);
+            return GetObjects<T>(objectType, queryIn, true, true, false, optionsIn);
+        }
+
+        /// <summary>
+        /// Gets the objects of the specified query.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="queryIn">The query in.</param>
+        /// <param name="logXmlRequest">if set to <c>true</c> log XML request.</param>
+        /// <param name="logXmlResponse">if set to <c>true</c> log XML response.</param>
+        /// <param name="returnNullIfError">if set to <c>true</c> and if there was an error querying return null, else empty.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The data objects.</returns>
+        public IEnumerable<T> GetObjects<T>(string objectType, string queryIn, bool logXmlRequest = true, bool logXmlResponse = true, bool returnNullIfError = false, params OptionsIn[] optionsIn) where T : IDataObject
+        {
+            var result = ExecuteQuery(objectType, queryIn, OptionsIn.Join(optionsIn), logXmlRequest, logXmlResponse);
+
+            var dataObjects = (IEnumerable<T>)result?.Items ?? (returnNullIfError ? null : Enumerable.Empty<T>());
+
+            return dataObjects?.OrderBy(x => x.Name);
         }
 
         private IEnergisticsCollection ExecuteQuery(string objectType, string xmlIn, string optionsIn, bool logQuery = true, bool logResponse = true)
