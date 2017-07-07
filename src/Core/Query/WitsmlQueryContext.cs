@@ -185,8 +185,11 @@ namespace PDS.WITSMLstudio.Query
             _template.Add(queryIn, xpath, "isActive");
             _template.Set(queryIn, $"{xpath}/isActive", true);
 
+            // Use execute query so that if an errorCode is returned the result will be null
             var result = ExecuteQuery(ObjectTypes.Wellbore, queryIn.ToString(), OptionsIn.Join(OptionsIn.ReturnElements.IdOnly), logResponse: logXmlResponse);
             var dataObjects = (IEnumerable<IWellObject>)result?.Items;
+
+            // If there was an error querying for active wellbores return null, else order by name
             return dataObjects?.OrderBy(x => x.Name);
         }
 
@@ -281,10 +284,11 @@ namespace PDS.WITSMLstudio.Query
                 ? OptionsIn.ReturnElements.Requested
                 : OptionsIn.ReturnElements.IdOnly;
 
+            // Use execute query so that if an errorCode is returned the result will be null
             var result = ExecuteQuery(objectType, queryIn.ToString(), OptionsIn.Join(queryOptionsIn), logResponse: logXmlResponse);
             var dataObjects = (IEnumerable<IWellboreObject>)result?.Items;
 
-            // If there were no growing objects found return null, else order by name
+            // If there was an error querying for growing objects return null, else order by name
             return dataObjects?.OrderBy(x => x.Name);
         }
 
