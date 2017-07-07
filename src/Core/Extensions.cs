@@ -202,7 +202,7 @@ namespace PDS.WITSMLstudio
                 (isTimeIndex
                     ? index
                     : index * Math.Pow(10, scale))
-                );
+            );
         }
 
         /// <summary>
@@ -247,8 +247,8 @@ namespace PDS.WITSMLstudio
         public static ErrorCodes GetNonConformingErrorCode(this Functions function)
         {
             return function == Functions.UpdateInStore
-                    ? ErrorCodes.UpdateTemplateNonConforming
-                    : ErrorCodes.InputTemplateNonConforming;
+                ? ErrorCodes.UpdateTemplateNonConforming
+                : ErrorCodes.InputTemplateNonConforming;
         }
 
         /// <summary>
@@ -261,8 +261,8 @@ namespace PDS.WITSMLstudio
             return function == Functions.AddToStore
                 ? ErrorCodes.MissingElementUidForAdd
                 : function == Functions.DeleteFromStore
-                ? ErrorCodes.MissingElementUidForDelete
-                : ErrorCodes.MissingElementUidForUpdate;
+                    ? ErrorCodes.MissingElementUidForDelete
+                    : ErrorCodes.MissingElementUidForUpdate;
         }
 
         /// <summary>
@@ -292,8 +292,8 @@ namespace PDS.WITSMLstudio
             var mudLog141 = dataObject as Witsml141.MudLog;
 
             return log131?.ObjectGrowing ?? log141?.ObjectGrowing
-                ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing
-                ?? mudLog131?.ObjectGrowing ?? mudLog141?.ObjectGrowing;
+                   ?? trajectory131?.ObjectGrowing ?? trajectory141?.ObjectGrowing
+                   ?? mudLog131?.ObjectGrowing ?? mudLog141?.ObjectGrowing;
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace PDS.WITSMLstudio
                                 log141?.StartDateTimeIndex.ToDisplayDateTime(displayTimeOffset.Value);
                         else
                             startIndex =
-                                log131?.StartDateTimeIndex?.ToString() ?? 
+                                log131?.StartDateTimeIndex?.ToString() ??
                                 log141?.StartDateTimeIndex?.ToString();
                     }
                 }
@@ -449,6 +449,23 @@ namespace PDS.WITSMLstudio
             if (startIndex == null || endIndex == null) return null;
 
             return string.IsNullOrWhiteSpace(startIndex) && string.IsNullOrWhiteSpace(endIndex);
+        }
+
+        /// <summary>
+        /// Determines whether the log has the specified index type.
+        /// </summary>
+        /// <param name="log">The data object.</param>
+        /// <param name="indexType">The index type.</param>
+        /// <returns></returns>
+        public static bool HasSpecifiedIndexType(this IWellboreObject log, string indexType)
+        {
+            var log131 = log as Witsml131.Log;
+            var log141 = log as Witsml141.Log;
+
+            if (log131 != null && log131.IndexType.ToString().EqualsIgnoreCase(indexType))
+                return true;
+
+            return log141 != null && log141.IndexType.ToString().EqualsIgnoreCase(indexType);
         }
     }
 }
