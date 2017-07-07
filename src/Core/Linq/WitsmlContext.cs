@@ -129,6 +129,12 @@ namespace PDS.WITSMLstudio.Linq
         }
 
         /// <summary>
+        /// Gets the supported get from store objects.
+        /// </summary>
+        /// <returns>The array of supported get from store objects.</returns>
+        public abstract string[] GetSupportedGetFromStoreObjects();
+
+        /// <summary>
         /// Gets all wells.
         /// </summary>
         /// <returns>The wells.</returns>

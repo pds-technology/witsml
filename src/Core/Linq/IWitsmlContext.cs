@@ -39,6 +39,12 @@ namespace PDS.WITSMLstudio.Linq
         Action<Functions, string, string, string, string, short, string> LogResponse { get; set; }
 
         /// <summary>
+        /// Gets the supported get from store objects.
+        /// </summary>
+        /// <returns>The array of supported get from store objects.</returns>
+        string[] GetSupportedGetFromStoreObjects();
+
+        /// <summary>
         /// Gets all wells.
         /// </summary>
         /// <returns>The wells.</returns>

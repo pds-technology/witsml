@@ -87,6 +87,53 @@ namespace PDS.WITSMLstudio.Query
         }
 
         /// <summary>
+        /// Gets the supported get from store objects.
+        /// </summary>
+        /// <returns>The array of supported get from store objects.</returns>
+        public override string[] GetSupportedGetFromStoreObjects()
+        {
+            using (var client = Connection.CreateClientProxy())
+            {
+                var wmls = (IWitsmlClient)client;
+                string suppMsgOut, capabilitiesOut;
+                short returnCode;
+
+                try
+                {
+                    returnCode = wmls.WMLS_GetCap(new OptionsIn.DataVersion(DataSchemaVersion), out capabilitiesOut, out suppMsgOut);
+                }
+                catch (Exception ex)
+                {
+                    _log.ErrorFormat("Error querying store: {0}", ex);
+                    return new string[] { };
+                }
+
+                if (returnCode < 1)
+                {
+                    _log.WarnFormat("Unsuccessful return code: {0}{2}{2}{1}", returnCode, suppMsgOut, Environment.NewLine);
+                    return new string[] { };
+                }
+
+                if (string.IsNullOrWhiteSpace(capabilitiesOut))
+                    return new string[] { };
+
+                var xml = XDocument.Parse(capabilitiesOut);
+                var supportedObjects = new List<string>();
+
+                if (xml.Root != null)
+                {
+                    var ns = xml.Root.GetDefaultNamespace();
+                    xml.Descendants(ns + "function")
+                        .Where(x => x.HasAttributes && x.Attribute("name")?.Value == "WMLS_GetFromStore")
+                        .Descendants()
+                        .ForEach(x => supportedObjects.Add(x.Value));
+                }
+
+                return supportedObjects.ToArray();
+            }
+        }
+
+        /// <summary>
         /// Gets all wells.
         /// </summary>
         /// <returns>The wells.</returns>

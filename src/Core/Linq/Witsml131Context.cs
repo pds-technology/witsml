@@ -66,6 +66,15 @@ namespace PDS.WITSMLstudio.Linq
         }
 
         /// <summary>
+        /// Gets the supported get from store objects.
+        /// </summary>
+        /// <returns>The array of supported get from store objects.</returns>
+        public override string[] GetSupportedGetFromStoreObjects()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the wells.
         /// </summary>
         public IWitsmlQuery<Well> Wells => CreateQuery<Well, WellList>();
