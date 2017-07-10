@@ -72,9 +72,10 @@ Integration tests for Store.MongoDb.
 ---
 
 ### Copyright and License
-Copyright &copy; 2017 Petrotechnical Data Systems
+Copyright &copy; 2017 PDS Americas LLC
 
-Released under the Apache License, Version 2.0
+Released under the PDS Open Source WITSML™ Product License Agreement
+http://www.pds.group/WITSMLstudio/OpenSource/ProductLicenseAgreement
 
 ---
 
