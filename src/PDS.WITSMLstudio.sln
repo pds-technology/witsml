@@ -25,11 +25,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{28C18AAD-FD80-4AFD-9B42-B78D6409C955}"
 	ProjectSection(SolutionItems) = preProject
 		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
+		..\LICENSE.txt = ..\LICENSE.txt
 		..\NOTICE.txt = ..\NOTICE.txt
 		..\README.md = ..\README.md
-		External\UpdateCopyrightVersion.ps1 = External\UpdateCopyrightVersion.ps1
 		External\UpdatePackageHintPaths.ps1 = External\UpdatePackageHintPaths.ps1
-		External\UpdateProductNamespaces.ps1 = External\UpdateProductNamespaces.ps1
 	EndProjectSection
 EndProject
 Global
