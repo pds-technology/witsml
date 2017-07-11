@@ -138,9 +138,16 @@ namespace PDS.WITSMLstudio.Store.Data
 
             if (childType != null && childType != typeof(string))
             {
-                var version = ObjectTypes.GetVersion(childType);
-                var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
-                validator?.Validate(Context.Function, childType, items, elementList);
+                try
+                {
+                    var version = ObjectTypes.GetVersion(childType);
+                    var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                    validator?.Validate(Context.Function, childType, items, elementList);
+                }
+                catch (ContainerException)
+                {
+                    Logger.DebugFormat("{0} not configured for type: {1}", typeof(IRecurringElementValidator).Name, childType);
+                }
             }
 
             UpdateArrayElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
