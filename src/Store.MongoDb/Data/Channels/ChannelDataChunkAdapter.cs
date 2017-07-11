@@ -169,8 +169,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                       );
 
                 // Get DataChannelChunk list from database for the computed range and URI
-                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, chunkRange, increasing);
-                var results = GetData(filter, increasing);
+                var results = GetData(reader.Uri, indexChannel.Mnemonic, chunkRange, increasing);
 
                 // Backup existing chunks for the transaction
                 AttachChunks(results);
