@@ -20,8 +20,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,7 +38,7 @@ namespace PDS.WITSMLstudio.Framework
     /// </summary>
     public static class FrameworkExtensions
     {
-        private static readonly string DefaultEncryptionKey = Settings.Default.DefaultEncryptionKey;
+        private static readonly string _defaultEncryptionKey = Settings.Default.DefaultEncryptionKey;
 
         /// <summary>
         /// Gets the version for the <see cref="System.Reflection.Assembly"/> containing the specified <see cref="Type"/>.
@@ -76,6 +76,34 @@ namespace PDS.WITSMLstudio.Framework
                 : value.Split(new[] { separator }, StringSplitOptions.None)
                        .Select(x => x.Trim())
                        .ToArray();
+        }
+
+        /// <summary>
+        /// Trims leading and training white space and any trailing zeros after a decimal.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static string TrimTrailingZeros(this string value)
+        {
+            if (value == null) return null;
+
+            var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+
+            return value.Contains(separator)
+                ? value.Trim().TrimEnd('0')
+                : value.Trim();
+        }
+
+        /// <summary>
+        /// Determines whether the string contains the specified value, ignoring case.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> if the string contains the specified value; otherwise, false.</returns>
+        public static bool ContainsIgnoreCase(this string source, string value)
+        {
+            if (source == null) return false;
+            return source.IndexOf(value, StringComparison.InvariantCultureIgnoreCase) > -1;
         }
 
         /// <summary>
@@ -138,10 +166,12 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns>The source collection, for chaining.</returns>
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
         {
-            foreach (var item in collection)
+            var items = collection.ToArray();
+
+            foreach (var item in items)
                 action(item);
             
-            return collection;
+            return items;
         }
 
         /// <summary>
@@ -153,12 +183,13 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns>The source collection, for chaining.</returns>
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T, int> action)
         {
-            int index = 0;
+            var items = collection.ToArray();
+            var index = 0;
 
-            foreach (var item in collection)
+            foreach (var item in items)
                 action(item, index++);
 
-            return collection;
+            return items;
         }
 
         /// <summary>
@@ -312,7 +343,7 @@ namespace PDS.WITSMLstudio.Framework
             if (value == null) return null;
 
             var bytes = Encoding.Unicode.GetBytes(value);
-            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+            var entropy = Encoding.Unicode.GetBytes(key ?? _defaultEncryptionKey);
 
             bytes = ProtectedData.Protect(bytes, entropy, DataProtectionScope.CurrentUser);
             return Convert.ToBase64String(bytes);
@@ -329,7 +360,7 @@ namespace PDS.WITSMLstudio.Framework
             if (value == null) return null;
 
             var bytes = Convert.FromBase64String(value);
-            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+            var entropy = Encoding.Unicode.GetBytes(key ?? _defaultEncryptionKey);
 
             bytes = ProtectedData.Unprotect(bytes, entropy, DataProtectionScope.CurrentUser);
             return Encoding.Unicode.GetString(bytes);

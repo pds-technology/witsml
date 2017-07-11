@@ -1763,7 +1763,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             if (_allNullValues == null)
             {
                 _log.Debug("Initializing _allNullValues array.");
-                _allNullValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
+                _allNullValues = Indices.Select(i => i.NullValue.TrimTrailingZeros()).Concat(_originalNullValues).ToArray();
             }
 
             return _allNullValues;
@@ -2002,8 +2002,8 @@ namespace PDS.WITSMLstudio.Data.Channels
             var nullValue = nullValues[channelIndex];
             if (string.IsNullOrWhiteSpace(nullValue)) return false;
 
-            // Using string compare to avoid parsing
-            return stringValue == nullValue;
+            // Using string compare to avoid parsing, null values are already trimmed
+            return stringValue.TrimTrailingZeros() == nullValue;
 
             //if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
             //{
