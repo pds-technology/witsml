@@ -525,7 +525,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount + totalUpdateRows);
         }
 
-        [Ignore]
         [TestMethod]
         public void Log131DataAdapter_UpdateInStore_Multi_Update_Merge_With_File_Storage()
         {

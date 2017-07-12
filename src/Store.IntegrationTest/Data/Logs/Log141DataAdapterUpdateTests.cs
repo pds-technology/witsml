@@ -2945,7 +2945,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.IsTrue(!string.IsNullOrEmpty(row4[2]));
         }
 
-        [Ignore]
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Multi_Update_Merge_With_File_Storage()
         {
