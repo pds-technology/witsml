@@ -222,7 +222,7 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
         {
             var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
             var filter = GetDocumentFilter(new EtpUri(transaction.Uri), transaction.IdPropertyName);
-            collection.ReplaceOne(filter, transaction.Value);
+            collection.ReplaceOne(filter, Adapter.GetTransactionValue(transaction.FileId));
         }
 
         private void Delete(DbTransaction transaction)
