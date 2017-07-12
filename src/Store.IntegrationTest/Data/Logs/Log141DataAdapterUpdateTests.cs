@@ -2945,6 +2945,63 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.IsTrue(!string.IsNullOrEmpty(row4[2]));
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Multi_Update_Merge_With_File_Storage()
+        {
+            // Add Well
+            var response = DevKit.Add_Well_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-well141-add.xml"));
+            // There is no response if the Well already exists in the database
+            if (response != null)
+            {
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
+
+            // Add Wellbore
+            response = DevKit.Add_Wellbore_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-wellbore141-add.xml"));
+            if (response != null)
+            {
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
+
+            // Add Log Header
+            response = DevKit.Add_Log_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-log141-add.xml"));
+            if (response != null)
+            {
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+                // Update Log with data ranging from 4.9 - 1304.8
+                var updateResponse = DevKit.Update_Log_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-log141-update1.xml"));
+                if (updateResponse != null)
+                {
+                    Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+                }
+
+                // Update Log with data ranging from 1304.9 - 2604.8
+                updateResponse = DevKit.Update_Log_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-log141-update2.xml"));
+                if (updateResponse != null)
+                {
+                    Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+                }
+            }
+
+            // Query the log using the last index from the first update to the first index of the last update
+            var queryLog = new Log()
+            {
+                UidWell = "TestChunkFileMergeWell",
+                UidWellbore = "TestChunkFileMergeWellbore",
+                Uid = "TestChunkFileMergeLog",
+                StartIndex = new GenericMeasure() { Uom = "ft", Value = 1304.8 },
+                EndIndex = new GenericMeasure() { Uom = "ft", Value = 1304.9 }
+            };
+
+            var result = DevKit.GetAndAssert(queryLog, optionsIn: OptionsIn.ReturnElements.DataOnly, queryByExample: true);
+            var logData = result.LogData;
+
+            // Both updates should fit into a single data chunk, if so we should get two records back
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(2, logData[0].Data.Count);
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()

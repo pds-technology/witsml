@@ -1,0 +1,23 @@
+<wellbores xmlns="http://www.witsml.org/schemas/131" version="1.3.1.1">
+	<wellbore uidWell="TestChunkFileMergeWell" uid="TestChunkFileMergeWellbore">
+		<nameWell>Test Chunk File Merge Well</nameWell>
+		<name>Test Chunk File Merge Wellbore</name>
+		<number>1234-0987</number>
+		<suffixAPI>02</suffixAPI>
+		<numGovt>Govt001</numGovt>
+		<statusWellbore>active</statusWellbore>
+		<purposeWellbore>exploration</purposeWellbore>
+		<typeWellbore>initial</typeWellbore>
+		<shape>horizontal</shape>
+		<dTimKickoff>2001-03-15T13:20:00.000</dTimKickoff>
+		<mdCurrent uom="ft">0</mdCurrent>
+		<tvdCurrent uom="ft">0</tvdCurrent>
+		<mdKickoff uom="ft">0</mdKickoff>
+		<tvdKickoff uom="ft">0</tvdKickoff>
+		<mdPlanned uom="ft">15800</mdPlanned>
+		<tvdPlanned uom="ft">12567</tvdPlanned>
+		<mdSubSeaPlanned uom="ft">12800</mdSubSeaPlanned>
+		<tvdSubSeaPlanned uom="ft">9567</tvdSubSeaPlanned>
+		<dayTarget uom="d">128</dayTarget>
+    </wellbore>
+</wellbores>
