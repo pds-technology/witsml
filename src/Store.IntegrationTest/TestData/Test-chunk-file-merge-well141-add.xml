@@ -1,0 +1,6 @@
+<wells xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <well uid="TestChunkFileMergeWell">
+    <name>Test Chunk File Merge Well</name>
+    <timeZone>-06:00</timeZone>
+  </well>
+</wells>

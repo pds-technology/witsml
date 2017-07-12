@@ -1036,6 +1036,26 @@ namespace PDS.WITSMLstudio.Store
             return response;
         }
 
+        public WMLS_UpdateInStoreResponse Update_Log_from_file(string xmlfile)
+        {
+            var xmlin = File.ReadAllText(xmlfile);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(xmlin);
+            Assert.IsNotNull(logList);
+            Assert.IsTrue(logList.Log.Count > 0);
+
+            var log = new Log() { Uid = logList.Log[0].Uid, UidWell = logList.Log[0].UidWell, UidWellbore = logList.Log[0].UidWellbore };
+            var result = Query<LogList, Log>(log);
+            Assert.IsNotNull(result);
+            if (result.Count > 0)
+            {
+                var response = UpdateInStore(ObjectTypes.Log, xmlin, null, null);
+                Assert.IsNotNull(response);
+            }
+
+            return null;
+        }
+
         public WMLS_AddToStoreResponse Add_Well_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);

@@ -1,0 +1,6 @@
+<wellbores xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+	<wellbore uidWell="TestChunkFileMergeWell" uid="TestChunkFileMergeWellbore">
+		<nameWell>Test Chunk File Merge Well</nameWell>
+		<name>Test Chunk File Merge Wellbore</name>
+    </wellbore>
+</wellbores>
