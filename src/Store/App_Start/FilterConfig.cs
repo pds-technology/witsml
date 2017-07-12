@@ -16,12 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Web;
 using System.Web.Mvc;
 
 namespace PDS.WITSMLstudio.Store
 {
-    public class FilterConfig
+    public static class FilterConfig
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {

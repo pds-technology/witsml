@@ -24,7 +24,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
+            ViewBag.Title = "PDS WITSMLstudio";
 
             return View();
         }

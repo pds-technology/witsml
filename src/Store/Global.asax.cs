@@ -20,7 +20,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.Optimization;
 using System.Web.Routing;
 using log4net.Config;
 using Hangfire.Mongo;
@@ -41,7 +40,6 @@ namespace PDS.WITSMLstudio.Store
             System.Web.Http.GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             XmlConfigurator.ConfigureAndWatch(new FileInfo(Server.MapPath("~/log4net.config")));
             ContainerConfiguration.Register(Server.MapPath("~/bin"));
