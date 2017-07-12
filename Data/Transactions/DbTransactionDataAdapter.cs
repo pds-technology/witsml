@@ -19,11 +19,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Text;
 using Energistics.Datatypes;
 using LinqToQuerystring;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.ChangeLogs;
+using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data.Transactions
 {
@@ -37,7 +42,7 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
     {
         private const string MongoDbTransaction = "dbTransaction";
         private const string TransactionIdField = "TransactionId";
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DbTransactionDataAdapter" /> class.
         /// </summary>
@@ -77,6 +82,7 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
         public void InsertEntities(List<DbTransaction> entities)
         {
             var collection = GetCollection();
+            UploadBinaryFilesAndClearValue(entities);
             collection.InsertMany(entities);
         }
 
@@ -102,10 +108,29 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
         public void DeleteTransactions(string transactionId)
         {
             Logger.Debug($"Deleting transactions for Transaction ID: {transactionId}");
-            var filter = MongoDbUtility.BuildFilter<DbTransaction>(TransactionIdField, transactionId);
 
+            // Delete the binary files
+            DeleteTransactionMongoFiles(transactionId);
+
+            // Delete the document
             var collection = GetCollection();
+            var filter = MongoDbUtility.BuildFilter<DbTransaction>(TransactionIdField, transactionId);
             collection.DeleteMany(filter);
+        }
+
+        /// <summary>
+        /// Gets the transaction value.
+        /// </summary>
+        /// <param name="fileId">The file identifier.</param>
+        /// <returns>The transaction value.</returns>
+        public BsonDocument GetTransactionValue(ObjectId fileId)
+        {
+            var bucket = GetMongoFileBucket();
+            var mongoFile = GetMongoFile(bucket, fileId);
+            var bytes = bucket.DownloadAsBytes(mongoFile.Id);
+            var json = Encoding.UTF8.GetString(bytes);
+
+            return BsonSerializer.Deserialize<BsonDocument>(json);
         }
 
         /// <summary>
@@ -130,6 +155,69 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
         protected override void AuditEntity(DbTransaction entity, DbAuditHistory auditHistory, bool exists)
         {
             // Excluding DbTransaction from audit history
+        }
+
+        private void UploadBinaryFilesAndClearValue(List<DbTransaction> entities)
+        {
+            var bucket = GetMongoFileBucket();
+            foreach (var entity in entities)
+            {
+                if (entity.Value == null)
+                    continue;
+
+                Logger.Debug($"Converting value to binary file: {entity.Uri}");
+
+                var bytes = Encoding.UTF8.GetBytes(entity.Value.ToJson());
+
+                var loadOptions = new GridFSUploadOptions
+                {
+                    Metadata = new BsonDocument
+                    {
+                        { "DataBytes", bytes.Length }
+                    }
+                };
+
+                entity.FileId = bucket.UploadFromBytes(entity.TransactionId, bytes, loadOptions);
+                entity.Value = null;
+            }
+        }
+
+        private IGridFSBucket GetMongoFileBucket()
+        {
+            var db = DatabaseProvider.GetDatabase();
+            return new GridFSBucket(db, new GridFSBucketOptions
+            {
+                BucketName = DbCollectionName,
+                ChunkSizeBytes = WitsmlSettings.ChunkSizeBytes
+            });
+        }
+
+        private static GridFSFileInfo GetMongoFile(IGridFSBucket bucket, ObjectId fileId)
+        {
+            var filter = Builders<GridFSFileInfo>.Filter.Eq("_id", fileId);
+            return bucket.Find(filter).FirstOrDefault();
+        }
+
+        private void DeleteTransactionMongoFiles(string transactionId)
+        {
+            Logger.Debug($"Deleting mongo files for transaction: {transactionId}");
+
+            var query = GetQuery().AsQueryable();
+            query.Where(x => x.TransactionId == transactionId && !ObjectId.Empty.Equals(x.FileId))
+                .ForEach(x => DeleteMongoFile(x.FileId));
+        }
+
+        private void DeleteMongoFile(ObjectId fileId)
+        {
+            Logger.Debug($"Deleting dbTransaction Data file: {fileId}");
+
+            var bucket = GetMongoFileBucket();
+            var mongoFile = GetMongoFile(bucket, fileId);
+
+            if (mongoFile == null)
+                return;
+
+            bucket.Delete(mongoFile.Id);
         }
     }
 }

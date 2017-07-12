@@ -73,5 +73,11 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
         /// </summary>
         /// <value>The transaction created date time.</value>
         public DateTime CreatedDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the binary file identifier.
+        /// </summary>
+        /// <value>The binary file identifier.</value>
+        public ObjectId FileId { get; set; }
     }
 }
