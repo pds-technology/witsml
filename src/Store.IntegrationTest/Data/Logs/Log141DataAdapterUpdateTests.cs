@@ -2948,6 +2948,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Multi_Update_Merge_With_File_Storage()
         {
+            WitsmlSettings.DepthRangeSize = 5000;
+            WitsmlSettings.MaxDataLength = 5000000;
+
             // Add Well
             var response = DevKit.Add_Well_from_file(Path.Combine(_dataDir, "Test-chunk-file-merge-well141-add.xml"));
             // There is no response if the Well already exists in the database

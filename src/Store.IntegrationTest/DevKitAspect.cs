@@ -69,6 +69,7 @@ namespace PDS.WITSMLstudio.Store
         public static readonly int DefaultTrajectoryGrowingTimeoutPeriod = WitsmlSettings.TrajectoryGrowingTimeoutPeriod;
         public static readonly int DefaultMudLogGrowingTimeoutPeriod = WitsmlSettings.MudLogGrowingTimeoutPeriod;
         public static readonly string DefaultTimeZone = WitsmlSettings.DefaultTimeZone;
+        public static readonly int DefaultMaxDataLength = WitsmlSettings.MaxDataLength;
 
         public readonly string TimeZone = "-06:00";
 

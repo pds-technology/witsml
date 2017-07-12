@@ -54,6 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
             WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
             WitsmlSettings.LogGrowingTimeoutPeriod = DevKitAspect.DefaultLogGrowingTimeoutPeriod;
+            WitsmlSettings.MaxDataLength = DevKitAspect.DefaultMaxDataLength;
             WitsmlOperationContext.Current = null;
         }
 
