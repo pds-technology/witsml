@@ -19,6 +19,7 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using PDS.WITSMLstudio.Framework.Properties;
 
 namespace PDS.WITSMLstudio.Framework
 {
@@ -27,6 +28,8 @@ namespace PDS.WITSMLstudio.Framework
     /// </summary>
     public static class ContainerFactory
     {
+        private static readonly string _defaultAssemblySearchPattern = Settings.Default.DefaultAssemblySearchPattern;
+
         /// <summary>
         /// Creates a composition container using the specified assembly path.
         /// </summary>
@@ -36,7 +39,7 @@ namespace PDS.WITSMLstudio.Framework
         {
             var catalog = new AggregateCatalog
             (
-                new DirectoryCatalog(assemblyPath, "PDS.*.dll")
+                new DirectoryCatalog(assemblyPath, _defaultAssemblySearchPattern)
             );
 
             return Create(catalog);

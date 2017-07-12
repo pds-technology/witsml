@@ -31,5 +31,14 @@ namespace PDS.WITSMLstudio.Framework.Properties {
                 return ((string)(this["DefaultEncryptionKey"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS.*.dll")]
+        public string DefaultAssemblySearchPattern {
+            get {
+                return ((string)(this["DefaultAssemblySearchPattern"]));
+            }
+        }
     }
 }
