@@ -584,6 +584,30 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(2, logData.Count);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Can_Update_Log_With_LogParam_Recurring_Element()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.LogParam = new List<IndexedObject> { DevKit.IndexedObject(1, 1), DevKit.IndexedObject(2, 2) };
+
+            DevKit.AddAndAssert(Log);
+
+            var logUpdated = CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            var logParam1 = DevKit.IndexedObject(3, 1);
+            var logParam2 = DevKit.IndexedObject(4, 2);
+
+            DevKit.InitHeader(logUpdated, LogIndexType.measureddepth);
+            logUpdated.LogParam = new List<IndexedObject> { logParam1, logParam2 };
+            UpdateLogData(logUpdated);
+
+            var result = DevKit.GetAndAssert(logUpdated);
+            var logParam = result.LogParam.FirstOrDefault(x => x.Name == logParam2.Name);
+
+            Assert.IsNotNull(logParam);
+        }
+
         #region Helper Functions
 
         private Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
