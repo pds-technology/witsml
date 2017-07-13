@@ -3,10 +3,10 @@
   <metadata>
     <id>PDS.WITSMLstudio.Framework</id>
     <version>$version$</version>
-    <authors>Petrotechnical Data Systems</authors>
+    <authors>PDS Americas LLC</authors>
     <description>PDS .NET Framework Extensions</description>
-    <projectUrl>https://witsml.pds.nl/</projectUrl>
-    <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
+    <projectUrl>https://witsml.pds.technology/docs/</projectUrl>
+    <licenseUrl>http://www.pds.group/WITSMLstudio/OpenSource/ProductLicenseAgreement</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net45">
