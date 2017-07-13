@@ -89,7 +89,7 @@ namespace PDS.WITSMLstudio.Framework
 
             var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 
-            return value.Contains(separator) && value.EndsWith("0")
+            return value.Contains(separator)
                 ? value.Trim().TrimEnd('0')
                 : value.Trim();
         }
