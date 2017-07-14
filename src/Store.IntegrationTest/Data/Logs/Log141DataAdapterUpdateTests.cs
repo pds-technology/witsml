@@ -3005,6 +3005,52 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(2, logData[0].Data.Count);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Null_Value_Compare_With_Trailing_Zeros_Returns_No_Data()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            var mnemonicList = DevKit.Mnemonics(Log);
+            var unitList = DevKit.Units(Log);
+
+            // Initialize data 
+            DevKit.InitData(Log, mnemonicList, unitList, 10, 10, 0);
+            DevKit.InitData(Log, mnemonicList, unitList, 11, 11, 1);
+            DevKit.InitData(Log, mnemonicList, unitList, 12, 12, 2);
+            DevKit.InitData(Log, mnemonicList, unitList, 13, 13, 3);
+            DevKit.InitData(Log, mnemonicList, unitList, 14, 14, 4);
+
+            // Add a Log with some data
+            DevKit.AddAndAssert(Log);
+
+            var updateLog = DevKit.CreateLog(Log);
+
+            // Add a new curve to the log
+            updateLog.NullValue = "-999.2500";
+            updateLog.LogCurveInfo = new List<LogCurveInfo>();
+            updateLog.LogCurveInfo.Add(new LogCurveInfo()
+            {
+                Uid = "XXX",
+                Mnemonic = new ShortNameStruct() { Value = "XXX" },
+                Unit = "m/h",
+                TypeLogData = LogDataType.@int
+            });
+            DevKit.UpdateAndAssert(updateLog);
+
+            updateLog.LogCurveInfo.Clear();
+            DevKit.InitData(updateLog, "MD,XXX", "m,m/h", 10, -999.25);
+            DevKit.UpdateAndAssert(updateLog);
+
+            updateLog.LogData[0].Data.Clear();
+            updateLog.LogData[0].UnitList = null;
+            var result = DevKit.Query<LogList, Log>(updateLog, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+
+            Assert.AreEqual(0, result[0].LogData.Count);
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()

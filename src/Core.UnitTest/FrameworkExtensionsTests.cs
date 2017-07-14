@@ -93,6 +93,22 @@ namespace PDS.WITSMLstudio
         }
 
         [TestMethod]
+        public void FrameworkExtensions_ContainsIgnoreCase_Returns_Bool_If_String_Contains_String()
+        {
+            var source = "before_deF_after";
+            Assert.IsFalse(source.ContainsIgnoreCase("test"));
+            Assert.IsTrue(source.ContainsIgnoreCase("def"));
+        }
+
+        [TestMethod]
+        public void FrameworkExtensions_TrimTrailingZeros_Removes_Trailing_Zeros_And_Whitespace()
+        {
+            var expected = "999.25";
+            var source = "    999.250000    ";
+            Assert.AreEqual(expected, source.TrimTrailingZeros());
+        }
+
+        [TestMethod]
         public void FrameworkExtensions_ToCamelCase_Converts_String_To_CamelCase()
         {
             var word = string.Empty;
