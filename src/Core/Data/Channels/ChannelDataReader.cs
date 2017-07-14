@@ -1290,7 +1290,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             return rowValues
                 .Select((x, i) => new { Index = i, Mnemonic = slicedMnemonics[i], Value = x })
                 .Skip(Depth)
-                .Any(x => !IsNull(x.Value, GetOrdinal(x.Mnemonic)));
+                .Any(x => !IsNull(x.Value, x.Index));
         }
 
         /// <summary>
@@ -1642,7 +1642,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 //var ordinal = _allSliceOrdinals[i];
                 var mnemonic = mnemonics[i];
 
-                if (!IsNull(values[i], GetOrdinal(mnemonic)))
+                if (!IsNull(values[i], i))
                 {
                     ranges[mnemonic] = ranges[mnemonic].Start.HasValue
                         ? new Range<double?>(ranges[mnemonic].Start, primaryIndex)

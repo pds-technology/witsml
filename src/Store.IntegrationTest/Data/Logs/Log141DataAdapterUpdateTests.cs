@@ -3005,6 +3005,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(2, logData[0].Data.Count);
         }
 
+        [Ignore]
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Null_Value_Compare_With_Trailing_Zeros_Returns_No_Data()
         {
