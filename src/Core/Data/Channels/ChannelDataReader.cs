@@ -1279,17 +1279,18 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Determines whether the specified row has any non-null values.
         /// </summary>
+        /// <param name="slicedMnemonics">The sliced mnemonics.</param>
         /// <param name="rowValues">The row values.</param>
         /// <returns>true if the current row has values, false otherwise.</returns>
-        public bool HasValues(IEnumerable<object> rowValues)
+        public bool HasValues(string[] slicedMnemonics, IEnumerable<object> rowValues)
         {
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Checking if the row has any values.");
 
             return rowValues
-                .Select((x, i) => new { Index = i, Value = x })
+                .Select((x, i) => new { Index = i, Mnemonic = slicedMnemonics[i], Value = x })
                 .Skip(Depth)
-                .Any(x => !IsNull(x.Value, x.Index));
+                .Any(x => !IsNull(x.Value, GetOrdinal(x.Mnemonic)));
         }
 
         /// <summary>
@@ -1473,10 +1474,11 @@ namespace PDS.WITSMLstudio.Data.Channels
             while (Read())
             {
                 var rowValues = GetRowValues(_current).ToArray();
-                var fullRowValues = GetFullRowValues(rowValues, mnemonicSlices.Values.ToArray());
+                var slicedMnemonics = mnemonicSlices.Values.ToArray();
+                var fullRowValues = GetFullRowValues(rowValues, slicedMnemonics);
 
                 // If there is no channel data in the current row then don't process it
-                if (!HasValues(fullRowValues)) continue;
+                if (!HasValues(slicedMnemonics, fullRowValues)) continue;
 
                 // Note: This was removed because it was too verbose but can be used later if needed.
                 //_log.DebugFormat("Appending channel data values for row: {0}", _current);
@@ -1640,7 +1642,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 //var ordinal = _allSliceOrdinals[i];
                 var mnemonic = mnemonics[i];
 
-                if (!IsNull(values[i], i))
+                if (!IsNull(values[i], GetOrdinal(mnemonic)))
                 {
                     ranges[mnemonic] = ranges[mnemonic].Start.HasValue
                         ? new Range<double?>(ranges[mnemonic].Start, primaryIndex)
@@ -1763,7 +1765,10 @@ namespace PDS.WITSMLstudio.Data.Channels
             if (_allNullValues == null)
             {
                 _log.Debug("Initializing _allNullValues array.");
-                _allNullValues = Indices.Select(i => i.NullValue.TrimTrailingZeros()).Concat(_originalNullValues).ToArray();
+                _allNullValues = Indices
+                    .Select(i => i.NullValue.TrimTrailingZeros())
+                    .Concat(_originalNullValues.Select(n => n.TrimTrailingZeros()))
+                    .ToArray();
             }
 
             return _allNullValues;
