@@ -37,6 +37,7 @@ namespace PDS.WITSMLstudio.Data.Channels
     /// </summary>
     /// <seealso cref="System.Data.IDataReader" />
     /// <seealso cref="PDS.WITSMLstudio.Data.Channels.IChannelDataRecord" />
+    [Serializable]
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
         /// <summary>
@@ -70,6 +71,8 @@ namespace PDS.WITSMLstudio.Data.Channels
         private int _current = -1;
         private bool _settingMerged;
         private Dictionary<string, int> _indexMap;
+
+        [NonSerialized]
         private Range<double?> _chunkRange;
         private readonly List<string[]> _recordMnemonics;
 
