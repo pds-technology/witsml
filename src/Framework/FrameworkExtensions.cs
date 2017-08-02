@@ -207,7 +207,25 @@ namespace PDS.WITSMLstudio.Framework
                 var type = instance.GetType();
                 var info = type.GetProperty(propertyName);
 
-                if (info == null) return null;
+                if (info == null)
+                {
+                    var list = instance as IList;
+
+                    if (list != null && list.Count > 0)
+                    {
+                        // TODO: Add support for property path with index or basic filter
+                        instance = list[0];
+                        type = instance?.GetType();
+                        info = type?.GetProperty(propertyName);
+
+                        if (info == null)
+                            return null;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
 
                 instance = info.GetValue(instance);
             }

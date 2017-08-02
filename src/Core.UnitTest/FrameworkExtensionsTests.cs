@@ -19,7 +19,8 @@
 using System;
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML131;
-using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Framework;
 using Shouldly;
@@ -143,7 +144,7 @@ namespace PDS.WITSMLstudio
         {
             var units = new List<Enum>()
             {
-                UnitOfMeasure.m,
+                Energistics.DataAccess.WITSML200.ReferenceData.UnitOfMeasure.m,
                 Functions.GetFromStore
             };
 
@@ -246,6 +247,47 @@ namespace PDS.WITSMLstudio
             witsmlEx = ex.GetBaseException<WitsmlException>();
 
             Assert.IsNotNull(witsmlEx);
+        }
+
+        [TestMethod]
+        public void FrameworkExtensions_GetPropertyValue_Can_Access_First_List_Element()
+        {
+            var dataContext = new WellList
+            {
+                Well = new List<Well>
+                {
+                    new Well
+                    {
+                        Uid = Guid.Empty.ToString(),
+                        Name = "Well 01",
+
+                        WellLocation = new List<Location>
+                        {
+                            new Location
+                            {
+                                Uid = "LatLon",
+                                Latitude = new PlaneAngleMeasure(123.456, PlaneAngleUom.dega),
+                                Longitude = new PlaneAngleMeasure(987.654, PlaneAngleUom.dega)
+                            }
+                        }
+                    }
+                }
+            };
+
+            Assert.AreEqual(1, dataContext.GetPropertyValue<int>("Well.Count"));
+            Assert.AreEqual(Guid.Empty.ToString(), dataContext.GetPropertyValue<string>("Well.Uid"));
+            Assert.AreEqual("Well 01", dataContext.GetPropertyValue<string>("Well.Name"));
+
+            Assert.AreEqual(1, dataContext.GetPropertyValue<int>("Well.WellLocation.Count"));
+            Assert.AreEqual(123.456, dataContext.GetPropertyValue<double>("Well.WellLocation.Latitude.Value"));
+            Assert.AreEqual(987.654, dataContext.GetPropertyValue<double>("Well.WellLocation.Longitude.Value"));
+
+            Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation.Latitude.Uom"));
+            Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation.Longitude.Uom"));
+
+            // TODO: for future implementation
+            //Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation[1].Longitude.Uom"));
+            //Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation[Uid = 'LatLon'].Longitude.Uom"));
         }
     }
 }
