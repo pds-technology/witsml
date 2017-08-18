@@ -355,15 +355,16 @@ namespace PDS.WITSMLstudio.Framework
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="key">The encryption key.</param>
+        /// <param name="forLocalMachine">if set to <c>true</c> encrypt for local machine.</param>
         /// <returns>The encrypted value.</returns>
-        public static string Encrypt(this string value, string key = null)
+        public static string Encrypt(this string value, string key = null, bool forLocalMachine = false)
         {
             if (value == null) return null;
 
             var bytes = Encoding.Unicode.GetBytes(value);
             var entropy = Encoding.Unicode.GetBytes(key ?? _defaultEncryptionKey);
 
-            bytes = ProtectedData.Protect(bytes, entropy, DataProtectionScope.CurrentUser);
+            bytes = ProtectedData.Protect(bytes, entropy, forLocalMachine ? DataProtectionScope.LocalMachine : DataProtectionScope.CurrentUser);
             return Convert.ToBase64String(bytes);
         }
 
@@ -372,15 +373,16 @@ namespace PDS.WITSMLstudio.Framework
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="key">The encryption key.</param>
+        /// <param name="forLocalMachine">if set to <c>true</c> decrypt for local machine.</param>
         /// <returns>The decrypted value.</returns>
-        public static string Decrypt(this string value, string key = null)
+        public static string Decrypt(this string value, string key = null, bool forLocalMachine = false)
         {
             if (value == null) return null;
 
             var bytes = Convert.FromBase64String(value);
             var entropy = Encoding.Unicode.GetBytes(key ?? _defaultEncryptionKey);
 
-            bytes = ProtectedData.Unprotect(bytes, entropy, DataProtectionScope.CurrentUser);
+            bytes = ProtectedData.Unprotect(bytes, entropy, forLocalMachine ? DataProtectionScope.LocalMachine : DataProtectionScope.CurrentUser);
             return Encoding.Unicode.GetString(bytes);
         }
 
