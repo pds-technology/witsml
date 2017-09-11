@@ -147,17 +147,17 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
-        /// <param name="objectType">Type of the object.</param>
-        /// <param name="folderName">Name of the folder.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <param name="folderName">The folder name.</param>
         /// <param name="hasChildren">The child count.</param>
         /// <param name="appendFolderName">if set to <c>true</c> append folder name.</param>
         /// <returns>A new <see cref="Resource"/> instance.</returns>
-        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName, int hasChildren = -1, bool appendFolderName = false)
+        public static Resource NewFolder(EtpUri parentUri, EtpContentType contentType, string folderName, int hasChildren = -1, bool appendFolderName = false)
         {
             var folderUri = parentUri;
 
-            if (!parentUri.ObjectType.EqualsIgnoreCase(objectType))
-                folderUri = folderUri.Append(objectType);
+            if (!parentUri.ObjectType.EqualsIgnoreCase(contentType.ObjectType))
+                folderUri = folderUri.Append(contentType.ObjectType);
 
             if (appendFolderName)
                 folderUri = folderUri.Append(folderName);
@@ -169,7 +169,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 name: folderName,
                 count: hasChildren);
 
-            resource.ContentType = new EtpContentType(resource.ContentType).For(objectType);
+            resource.ContentType = contentType;
 
             return resource;
         }

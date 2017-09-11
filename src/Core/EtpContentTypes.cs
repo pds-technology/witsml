@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using Energistics.Datatypes;
 
 namespace PDS.WITSMLstudio
@@ -64,5 +65,17 @@ namespace PDS.WITSMLstudio
         /// The <see cref="EtpContentType"/> for eml210
         /// </summary>
         public static readonly EtpContentType Eml210 = new EtpContentType("application/x-eml+xml;version=2.1");
+
+        /// <summary>
+        /// Gets the ETP content type for the specified data object type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>An <see cref="EtpContentType"/> instance.</returns>
+        public static EtpContentType GetContentType(Type type)
+        {
+            var uri = EtpUris.GetUriFamily(type);
+            var objectType = ObjectTypes.GetObjectType(type);
+            return uri.ContentType.For(objectType);
+        }
     }
 }

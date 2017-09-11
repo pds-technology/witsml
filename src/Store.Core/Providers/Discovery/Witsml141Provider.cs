@@ -38,7 +38,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
     /// <seealso cref="PDS.WITSMLstudio.Store.Providers.Discovery.IDiscoveryStoreProvider" />
     [Export(typeof(IDiscoveryStoreProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DiscoveryStore141Provider : IDiscoveryStoreProvider
+    public class Witsml141Provider : IDiscoveryStoreProvider
     {
         private readonly IContainer _container;
         private readonly IEtpDataProvider<Well> _wellDataProvider;
@@ -46,14 +46,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private readonly IEtpDataProvider<Log> _logDataProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DiscoveryStore141Provider" /> class.
+        /// Initializes a new instance of the <see cref="Witsml141Provider" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="wellDataProvider">The well data provider.</param>
         /// <param name="wellboreDataProvider">The wellbore data provider.</param>
         /// <param name="logDataProvider">The log data provider.</param>
         [ImportingConstructor]
-        public DiscoveryStore141Provider(
+        public Witsml141Provider(
             IContainer container,
             IEtpDataProvider<Well> wellDataProvider,
             IEtpDataProvider<Wellbore> wellboreDataProvider,
@@ -69,10 +69,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets the data schema version supported by the provider.
         /// </summary>
         /// <value>The data schema version.</value>
-        public string DataSchemaVersion
-        {
-            get { return OptionsIn.DataVersion.Version141.Value; }
-        }
+        public string DataSchemaVersion => OptionsIn.DataVersion.Version141.Value;
 
         /// <summary>
         /// Gets or sets the collection of <see cref="IWitsml141Configuration"/> providers.
@@ -130,9 +127,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 Providers
                     .OfType<IWitsmlDataAdapter>()
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
-                    .Select(x => ObjectTypes.GetObjectType(x.DataObjectType))
-                    .OrderBy(x => x)
-                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x)));
+                    .Select(x => EtpContentTypes.GetContentType(x.DataObjectType))
+                    .OrderBy(x => x.ObjectType)
+                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType)));
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {

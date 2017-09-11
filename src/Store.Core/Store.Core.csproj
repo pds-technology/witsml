@@ -405,10 +405,11 @@
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingTypes.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
-    <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />
-    <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
-    <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
+    <Compile Include="Providers\Discovery\Witsml131Provider.cs" />
+    <Compile Include="Providers\Discovery\Witsml141Provider.cs" />
+    <Compile Include="Providers\Discovery\Witsml200Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
+    <Compile Include="Providers\Discovery\Eml210Provider.cs" />
     <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
     <Compile Include="Data\WitsmlExtensions.cs" />
     <Compile Include="Providers\EtpExtensions.cs" />

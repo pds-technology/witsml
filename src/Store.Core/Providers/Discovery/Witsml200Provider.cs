@@ -36,7 +36,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
     /// <seealso cref="PDS.WITSMLstudio.Store.Providers.Discovery.IDiscoveryStoreProvider" />
     [Export(typeof(IDiscoveryStoreProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DiscoveryStore200Provider : IDiscoveryStoreProvider
+    public class Witsml200Provider : IDiscoveryStoreProvider
     {
         private readonly IContainer _container;
         private readonly IEtpDataProvider<Log> _logDataProvider;
@@ -44,13 +44,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private readonly IList<EtpContentType> _contentTypes;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
+        /// Initializes a new instance of the <see cref="Witsml200Provider" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
         [ImportingConstructor]
-        public DiscoveryStore200Provider(
+        public Witsml200Provider(
             IContainer container,
             IEtpDataProvider<Log> logDataProvider,
             IEtpDataProvider<ChannelSet> channelSetDataProvider)
@@ -65,10 +65,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets the data schema version supported by the provider.
         /// </summary>
         /// <value>The data schema version.</value>
-        public string DataSchemaVersion
-        {
-            get { return OptionsIn.DataVersion.Version200.Value; }
-        }
+        public string DataSchemaVersion => OptionsIn.DataVersion.Version200.Value;
 
         /// <summary>
         /// Gets or sets the collection of <see cref="IEtpDataProvider"/> providers.
@@ -86,6 +83,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (EtpUris.IsRootUri(args.Message.Uri))
             {
                 args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)"));
+                args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Eml210, "EML Common (2.1)"));
                 return;
             }
 
@@ -96,7 +94,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(uri.Query))
                 parentUri = new EtpUri(parentUri + uri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Witsml200) && !uri.IsRelatedTo(EtpUris.Eml210))
+            if (!uri.IsRelatedTo(EtpUris.Witsml200))
             {
                 return;
             }
@@ -120,12 +118,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     var depthCount = logs.Count(x => ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth));
                     var otherCount = logs.Count - (timeCount + depthCount);
 
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time, timeCount, true));
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth, depthCount, true));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Time, timeCount, true));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Depth, depthCount, true));
 
                     if (otherCount > 0)
                     {
-                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Other, otherCount, true));
+                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Other, otherCount, true));
                     }
                 }
                 else if (ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType) &&
@@ -151,8 +149,10 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 }
                 else
                 {
+                    var objectType = ObjectTypes.GetObjectType(uri.ObjectType, uri.Version);
+                    var contentType = EtpContentTypes.GetContentType(objectType);
+                    var hasChildren = contentType.IsRelatedTo(EtpContentTypes.Eml210) ? 0 : -1;
                     var dataProvider = GetDataProvider(uri.ObjectType);
-                    var hasChildren = uri.IsRelatedTo(EtpUris.Eml210) ? 0 : -1;
 
                     dataProvider
                         .GetAll(parentUri)
@@ -215,7 +215,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 {
                     // Top level folders
                     if (string.IsNullOrWhiteSpace(uri.ObjectId) || string.IsNullOrWhiteSpace(propertyName))
-                        return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200) || x.ReferenceInfo == null;
+                        return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200); // || x.ReferenceInfo == null;
 
                     // Data object sub folders, e.g. Well and Wellbore
                     return (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210) && x.ReferenceInfo != null) ||
@@ -233,7 +233,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     if (!x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
                         hasChildren = dataProvider.Count(uri);
 
-                    return DiscoveryStoreProvider.NewFolder(uri, x.ContentType.ObjectType, folderName, hasChildren);
+                    return DiscoveryStoreProvider.NewFolder(uri, x.ContentType, folderName, hasChildren);
                 })
                 .ToList();
         }
