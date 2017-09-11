@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2017.2
 //
 // Copyright 2017 PDS Americas LLC
@@ -81,8 +81,15 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
 
             if (parentUri != null)
             {
-                //var uidWellbore = parentUri.Value.ObjectId;
-                //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                if (!parentUri.Value.IsBaseUri && !ObjectTypes.Activity.Equals(parentUri.Value.ObjectType))
+                {
+                    var objectId = parentUri.Value.ObjectId;
+                    var contentType = parentUri.Value.ContentType.ToString();
+
+                    query = query.Where(x =>
+                        x.ActivityDescriptor.Uuid == objectId &&
+                        x.ActivityDescriptor.ContentType == contentType);
+                }
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);
