@@ -107,6 +107,10 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Adapters\Log.cs" />
+    <Compile Include="Adapters\LogData.cs" />
+    <Compile Include="Adapters\Trajectory.cs" />
+    <Compile Include="Adapters\TrajectoryStation.cs" />
     <Compile Include="Compatibility\CompatibilitySettings.cs" />
     <Compile Include="Compatibility\InvalidDataRowSetting.cs" />
     <Compile Include="Compatibility\UnknownElementSetting.cs" />
