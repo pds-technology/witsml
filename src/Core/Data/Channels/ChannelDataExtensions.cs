@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.WITSMLstudio.Compatibility;
@@ -132,11 +131,6 @@ namespace PDS.WITSMLstudio.Data.Channels
             return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(GetMnemonic(indexCurve, propertyPath), indexCurve.Unit, increasing, isTimeIndex);
-        }
-
-        private static string GetMnemonic(object instance, string propertyPath)
-        {
-            return instance?.GetPropertyValue<string>(propertyPath);
         }
 
         /// <summary>
@@ -395,6 +389,17 @@ namespace PDS.WITSMLstudio.Data.Channels
             var range = reader.GetIndexRange(index);
             channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
             channelIndex.End = range.End.GetValueOrDefault(double.NaN);
+        }
+
+        /// <summary>
+        /// Gets the mnemonic from the specified object instance.
+        /// </summary>
+        /// <param name="instance">The instance.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns>The mnemonic property value.</returns>
+        private static string GetMnemonic(object instance, string propertyPath)
+        {
+            return instance?.GetPropertyValue<string>(propertyPath);
         }
     }
 }

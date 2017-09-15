@@ -113,6 +113,11 @@ namespace PDS.WITSMLstudio.Adapters
         public string CurveDescription => _logCurveInfo131?.CurveDescription ?? _logCurveInfo141?.CurveDescription;
 
         /// <summary>
+        /// Gets the unit.
+        /// </summary>
+        public string Unit => _logCurveInfo131?.Unit ?? _logCurveInfo141.Unit;
+
+        /// <summary>
         /// Gets the null value.
         /// </summary>
         public string NullValue => _logCurveInfo131?.NullValue ?? _logCurveInfo141?.NullValue;

@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
+using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Adapters
@@ -209,6 +210,16 @@ namespace PDS.WITSMLstudio.Adapters
         public double? EndIndex => _log131?.EndIndex?.Value ?? _log141?.EndIndex?.Value;
 
         /// <summary>
+        /// Gets the log's depth uom.
+        /// </summary>
+        public string DepthUom => IsTimeLog ? null : _log131?.StartIndex?.Uom ?? _log141?.StartIndex?.Uom;
+
+        /// <summary>
+        /// Gets the log data.
+        /// </summary>
+        public List<LogData> LogData { get; private set; }
+
+        /// <summary>
         /// Gets the log curve items.
         /// </summary>
         /// <returns>The log curve items.</returns>
@@ -217,9 +228,14 @@ namespace PDS.WITSMLstudio.Adapters
             _log141?.LogCurveInfo?.Select(c => new LogCurveInfo(c)).ToList();
 
         /// <summary>
-        /// Gets the log data.
+        /// Gets a <see cref="ChannelDataReader"/> for the log.
         /// </summary>
-        public List<LogData> LogData { get; private set; }
+        /// <param name="mnemonicPropertyPath">The mnemonic property path.</param>
+        /// <returns>A <see cref="ChannelDataReader"/> instance.</returns>
+        public ChannelDataReader GetReader(string mnemonicPropertyPath = null)
+        {
+            return _log131?.GetReader(mnemonicPropertyPath) ?? _log141.GetReaders(mnemonicPropertyPath).FirstOrDefault();
+        }
 
         /// <summary>
         /// Checks if the data type is a datetime data type in the specified data schema version.
