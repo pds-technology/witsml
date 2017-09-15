@@ -230,20 +230,26 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                 {
                     Mnemonic = "MD",
                     Unit = "m",
-                    ColumnIndex = 0
+                    ColumnIndex = 0,
+                    MnemAlias = "Depth",
+                    CurveDescription = "Measured Depth"
                 },
                 new Witsml131.ComponentSchemas.LogCurveInfo
                 {
                     Mnemonic = "A",
                     Unit = "ft",
                     ColumnIndex = 1,
-                    TypeLogData = new Witsml131.ReferenceData.LogDataType?(Witsml131.ReferenceData.LogDataType.@double)
+                    TypeLogData = Witsml131.ReferenceData.LogDataType.@double,
+                    MnemAlias = "Channel A",
+                    CurveDescription = "Channel A Description"
                 },
                 new Witsml131.ComponentSchemas.LogCurveInfo
                 {
                     Mnemonic = "B",
                     Unit = "ft/hr",
-                    ColumnIndex = 2
+                    ColumnIndex = 2,
+                    MnemAlias = "Channel B",
+                    CurveDescription = "Channel B Description"
                 },
             };
             log.LogData = new List<string>()
@@ -255,6 +261,20 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             Assert.IsNotNull(reader);
 
             AssertReaderAndData(DevKit.List(reader));
+
+            reader = log.GetReader("MnemAlias");
+            Assert.IsNotNull(reader);
+
+            Assert.AreEqual("Depth", reader.GetName(0));
+            Assert.AreEqual("Channel A", reader.GetName(1));
+            Assert.AreEqual("Channel B", reader.GetName(2));
+
+            reader = log.GetReader("CurveDescription");
+            Assert.IsNotNull(reader);
+
+            Assert.AreEqual("Measured Depth", reader.GetName(0));
+            Assert.AreEqual("Channel A Description", reader.GetName(1));
+            Assert.AreEqual("Channel B Description", reader.GetName(2));
         }
 
         [TestMethod]
@@ -278,17 +298,23 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                 {
                     Mnemonic = new Witsml141.ComponentSchemas.ShortNameStruct("MD"),
                     Unit = "m",
+                    MnemAlias = new Witsml141.ComponentSchemas.ShortNameStruct("Depth"),
+                    CurveDescription = "Measured Depth"
                 },
                 new Witsml141.ComponentSchemas.LogCurveInfo
                 {
                     Mnemonic = new Witsml141.ComponentSchemas.ShortNameStruct("A"),
                     Unit = "ft",
-                    TypeLogData = new Witsml141.ReferenceData.LogDataType?(Witsml141.ReferenceData.LogDataType.@double)
+                    TypeLogData = Witsml141.ReferenceData.LogDataType.@double,
+                    MnemAlias = new Witsml141.ComponentSchemas.ShortNameStruct("Channel A"),
+                    CurveDescription = "Channel A Description"
                 },
                 new Witsml141.ComponentSchemas.LogCurveInfo
                 {
                     Mnemonic = new Witsml141.ComponentSchemas.ShortNameStruct("B"),
                     Unit = "m/hr",
+                    MnemAlias = new Witsml141.ComponentSchemas.ShortNameStruct("Channel B"),
+                    CurveDescription = "Channel B Description"
                 },
             };
             log.LogData = new List<Witsml141.ComponentSchemas.LogData>()
@@ -321,6 +347,27 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             Assert.AreEqual(1, listOfReaders.Count);
 
             AssertReaderAndData(listOfReaders);
+
+            var reader = log.GetReaders("MnemAlias").FirstOrDefault();
+            Assert.IsNotNull(reader);
+
+            Assert.AreEqual("Depth", reader.GetName(0));
+            Assert.AreEqual("Channel A", reader.GetName(1));
+            Assert.AreEqual("Channel B", reader.GetName(2));
+
+            reader = log.GetReaders("MnemAlias.Value").FirstOrDefault();
+            Assert.IsNotNull(reader);
+
+            Assert.AreEqual("Depth", reader.GetName(0));
+            Assert.AreEqual("Channel A", reader.GetName(1));
+            Assert.AreEqual("Channel B", reader.GetName(2));
+
+            reader = log.GetReaders("CurveDescription").FirstOrDefault();
+            Assert.IsNotNull(reader);
+
+            Assert.AreEqual("Measured Depth", reader.GetName(0));
+            Assert.AreEqual("Channel A Description", reader.GetName(1));
+            Assert.AreEqual("Channel B Description", reader.GetName(2));
         }
 
         [TestMethod]

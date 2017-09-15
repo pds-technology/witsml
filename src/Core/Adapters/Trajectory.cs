@@ -29,8 +29,8 @@ namespace PDS.WITSMLstudio.Adapters
     /// </summary>
     public sealed class Trajectory : IWellboreObject
     {
-        private Energistics.DataAccess.WITSML131.Trajectory _trajectory131;
-        private Energistics.DataAccess.WITSML141.Trajectory _trajectory141;
+        private readonly Energistics.DataAccess.WITSML131.Trajectory _trajectory131;
+        private readonly Energistics.DataAccess.WITSML141.Trajectory _trajectory141;
 
         /// <summary>
         /// Initializes a new <see cref="Trajectory" /> based on a <see cref="Energistics.DataAccess.WITSML131.Trajectory" />.

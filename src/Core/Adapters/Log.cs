@@ -30,8 +30,8 @@ namespace PDS.WITSMLstudio.Adapters
     /// </summary>
     public sealed class Log : IWellboreObject
     {
-        private Energistics.DataAccess.WITSML131.Log _log131;
-        private Energistics.DataAccess.WITSML141.Log _log141;
+        private readonly Energistics.DataAccess.WITSML131.Log _log131;
+        private readonly Energistics.DataAccess.WITSML141.Log _log141;
 
         /// <summary>
         /// Initializes a new <see cref="Log" /> based on a <see cref="Energistics.DataAccess.WITSML131.Log" />.
@@ -79,7 +79,7 @@ namespace PDS.WITSMLstudio.Adapters
                 DataSchemaVersion = OptionsIn.DataVersion.Version141.Value;
             }
             else
-                throw new ArgumentException("Not a WITSML 1.3.1.1 or WITSML 1.4.1.1 log", "log");
+                throw new ArgumentException(@"Not a WITSML 1.3.1.1 or WITSML 1.4.1.1 log", nameof(log));
 
             InitializeLogData();
         }
@@ -92,7 +92,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the underlying log.
         /// </summary>
-        public IWellboreObject WrappedLog => (IWellboreObject) _log131 ?? (IWellboreObject) _log141;
+        public IWellboreObject WrappedLog => (IWellboreObject) _log131 ?? _log141;
 
         /// <summary>
         /// Gets or sets the parent Well object identifier.
@@ -208,12 +208,13 @@ namespace PDS.WITSMLstudio.Adapters
         /// </summary>
         public double? EndIndex => _log131?.EndIndex?.Value ?? _log141?.EndIndex?.Value;
 
-        ///// <summary>
-        ///// Gets the log curve items.
-        ///// </summary>
-        ///// <param name="toOffset">The time offset to apply.</param>
-        ///// <returns>The log curve items.</returns>
-        //public List<LogCurveItem> GetLogCurveItems(TimeSpan toOffset) => _log131?.LogCurveInfo?.ToLogCurveItemList(toOffset) ?? _log141?.LogCurveInfo?.ToLogCurveItemList(toOffset);
+        /// <summary>
+        /// Gets the log curve items.
+        /// </summary>
+        /// <returns>The log curve items.</returns>
+        public List<LogCurveInfo> GetLogCurves() =>
+            _log131?.LogCurveInfo?.Select(c => new LogCurveInfo(c)).ToList() ??
+            _log141?.LogCurveInfo?.Select(c => new LogCurveInfo(c)).ToList();
 
         /// <summary>
         /// Gets the log data.
