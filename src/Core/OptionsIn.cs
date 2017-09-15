@@ -122,6 +122,13 @@ namespace PDS.WITSMLstudio
             public static readonly ReturnElements Requested = new ReturnElements("requested");
 
             /// <summary>
+            /// Creates a ReturnElements object for a specified value.
+            /// </summary>
+            /// <param name="value">The ReturnElements value.</param>
+            /// <returns>A new <see cref="OptionsIn.ReturnElements"/> instance.</returns>
+            public static ReturnElements Eq(string value) => new ReturnElements(value);
+
+            /// <summary>
             /// Gets a collection of returnElements option values.
             /// </summary>
             /// <returns>A collection of all returnElements option values.</returns>
@@ -158,7 +165,7 @@ namespace PDS.WITSMLstudio
             /// Creates a MaxReturnNodes object for a specified value.
             /// </summary>
             /// <param name="value">The MaxReturnNodes value.</param>
-            /// <returns></returns>
+            /// <returns>A new <see cref="OptionsIn.MaxReturnNodes"/> instance.</returns>
             public static MaxReturnNodes Eq(int value)
             {
                 return new MaxReturnNodes(value);
