@@ -24,6 +24,7 @@ namespace PDS.WITSMLstudio.Framework
     /// Represents the start and end values of a range.
     /// </summary>
     /// <typeparam name="T">The data type.</typeparam>
+    [Serializable]
     public struct Range<T>
     {
         /// <summary>
