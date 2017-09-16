@@ -317,5 +317,38 @@ namespace PDS.WITSMLstudio
 
             return true;
         }
+
+        /// <summary>
+        /// Returns a <see cref="string" /> that represents this instance.
+        /// </summary>
+        /// <param name="indexRange">The index range.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the range is a time index range.</param>
+        /// <returns>A <see cref="string" /> that represents this instance.</returns>
+        public static string ToString(this Range<double?> indexRange, bool isTimeIndex)
+        {
+            Range<string> displayRange;
+
+            if (isTimeIndex)
+            {
+                var start = indexRange.Start.HasValue
+                    ? DateTimeExtensions.FromUnixTimeMicroseconds((long)indexRange.Start.Value, indexRange.Offset).ToString()
+                    : string.Empty;
+
+                var end = indexRange.End.HasValue
+                    ? DateTimeExtensions.FromUnixTimeMicroseconds((long)indexRange.End.Value, indexRange.Offset).ToString()
+                    : string.Empty;
+
+                displayRange = new Range<string>(start, end);
+            }
+            else
+            {
+                var start = indexRange.Start?.ToString() ?? string.Empty;
+                var end = indexRange.End?.ToString() ?? string.Empty;
+
+                displayRange = new Range<string>(start, end);
+            }
+
+            return $"{{ Start: {displayRange.Start}, End: {displayRange.End} }}";
+        }
     }
 }

@@ -192,9 +192,6 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Gets all mnemonics.
         /// </summary>
-        /// <value>
-        /// All mnemonics.
-        /// </value>
         public string[] AllMnemonics
         {
             get { return Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray(); }
@@ -209,9 +206,6 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Gets all units.
         /// </summary>
-        /// <value>
-        /// All units.
-        /// </value>
         public string[] AllUnits
         {
             get { return Indices.Select(i => i.Unit).Concat(Units).ToArray(); }
@@ -236,6 +230,14 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </summary>
         /// <value> The data types. </value>
         public string[] DataTypes { get; private set; }
+
+        /// <summary>
+        /// Gets all null values.
+        /// </summary>
+        public string[] AllNullValues
+        {
+            get { return Indices.Select(i => i.NullValue).Concat(NullValues).ToArray(); }
+        }
 
         /// <summary>
         /// Gets the null values included in slicing or all null values if not sliced.
@@ -621,6 +623,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             _indexMap = null;
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
+            DataTypes = _originalDataTypes;
             NullValues = _originalNullValues;
         }
 
