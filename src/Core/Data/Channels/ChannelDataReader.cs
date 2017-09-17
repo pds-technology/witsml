@@ -777,7 +777,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                         var range = _ranges[rangeIndex];
                         if (range.Start.HasValue)
                         {
-                            channelRanges.Add(m, range);
+                            channelRanges[m] = range;
                         }
                     }
                 });

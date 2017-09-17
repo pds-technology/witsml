@@ -165,7 +165,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 var mnemonics = headerMnemonics?.ToArray() ?? ChannelDataReader.Split(logData.MnemonicList);
                 var units = ChannelDataReader.Split(logData.UnitList);
                 var dataTypes = log.LogCurveInfo.Select(x => x.TypeLogData?.ToString()).ToArray();
-                var nullValues = log.GetNullValues(mnemonics).Skip(1).ToArray();
+                var nullValues = log.GetNullValues(mnemonics).ToArray();
 
                 // Split index curve from other value curves
                 var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve) ?? new Witsml141.ComponentSchemas.LogCurveInfo
@@ -177,6 +177,8 @@ namespace PDS.WITSMLstudio.Data.Channels
                 // Skip index curve when passing mnemonics to reader
                 mnemonics = mnemonics.Skip(1).ToArray();
                 units = units.Skip(1).ToArray();
+                dataTypes = dataTypes.Skip(1).ToArray();
+                nullValues = nullValues.Skip(1).ToArray();
 
                 yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri(), dataDelimiter: log.GetDataDelimiterOrDefault())
                     // Add index curve to separate collection
@@ -338,6 +340,10 @@ namespace PDS.WITSMLstudio.Data.Channels
             if (!channelCount.HasValue || values.Length == channelCount)
                 return values;
 
+            // TODO: Add compatibility setting to allow handling of trailing delimiter
+            if (values.Length == channelCount + 1 && string.IsNullOrWhiteSpace(values.Last()))
+                return values;
+
             var message = ErrorCodes.ErrorRowDataCount.GetDescription() +
                           $" Expected: {channelCount}; Actual: {values.Length}; Data: {data}";
 
@@ -377,6 +383,17 @@ namespace PDS.WITSMLstudio.Data.Channels
         }
 
         /// <summary>
+        /// Gets the mnemonic from the specified object instance.
+        /// </summary>
+        /// <param name="instance">The instance.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns>The mnemonic property value.</returns>
+        public static string GetMnemonic(object instance, string propertyPath)
+        {
+            return instance?.GetPropertyValue<string>(propertyPath);
+        }
+
+        /// <summary>
         /// Calculates the index range for a <see cref="ChannelDataReader"/>
         /// </summary>
         /// <param name="reader">The reader.</param>
@@ -389,17 +406,6 @@ namespace PDS.WITSMLstudio.Data.Channels
             var range = reader.GetIndexRange(index);
             channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
             channelIndex.End = range.End.GetValueOrDefault(double.NaN);
-        }
-
-        /// <summary>
-        /// Gets the mnemonic from the specified object instance.
-        /// </summary>
-        /// <param name="instance">The instance.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <returns>The mnemonic property value.</returns>
-        private static string GetMnemonic(object instance, string propertyPath)
-        {
-            return instance?.GetPropertyValue<string>(propertyPath);
         }
     }
 }
