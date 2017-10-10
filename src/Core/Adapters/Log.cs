@@ -259,6 +259,30 @@ namespace PDS.WITSMLstudio.Adapters
         }
 
         /// <summary>
+        /// Removes the log curves not found in the array.
+        /// </summary>
+        /// <param name="mnemonics">An array of mnemonics.</param>
+        /// <param name="mnemonicPropertyName">Name of the mnemonic property.</param>
+        public void RemoveLogCurves(string[] mnemonics, string mnemonicPropertyName)
+        {
+            _log131?.LogCurveInfo.RemoveAll(x =>
+            {
+                var mnemonic = string.IsNullOrWhiteSpace(mnemonicPropertyName)
+                    ? x.Mnemonic
+                    : ChannelDataExtensions.GetMnemonic(x, mnemonicPropertyName);
+                return !mnemonics.ContainsIgnoreCase(mnemonic);
+            });
+
+            _log141?.LogCurveInfo.RemoveAll(x =>
+            {
+                var mnemonic = string.IsNullOrWhiteSpace(mnemonicPropertyName)
+                    ? x.Mnemonic.Value
+                    : ChannelDataExtensions.GetMnemonic(x, mnemonicPropertyName);
+                return !mnemonics.ContainsIgnoreCase(mnemonic);
+            });
+        }
+
+        /// <summary>
         /// Initializes the log data.
         /// </summary>
         private void InitializeLogData()
