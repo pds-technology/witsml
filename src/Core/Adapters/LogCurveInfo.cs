@@ -26,6 +26,7 @@ namespace PDS.WITSMLstudio.Adapters
     /// An adapter around a WITSML 1.3.1 or 1.4.1 log curve info to abstract away
     /// the version-specific differences for client applications.
     /// </summary>
+    [Serializable]
     public sealed class LogCurveInfo : IUniqueId
     {
         private readonly Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo _logCurveInfo131;

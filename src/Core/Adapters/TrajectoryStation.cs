@@ -16,11 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace PDS.WITSMLstudio.Adapters
 {
     /// <summary>
     /// Encapsulates trajectory stations from either a WITSML 1.4.1.1 or WITSML 1.3.1.1 trajectory
     /// </summary>
+    [Serializable]
     public sealed class TrajectoryStation
     {
         /// <summary>
