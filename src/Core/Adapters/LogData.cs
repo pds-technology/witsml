@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using PDS.WITSMLstudio.Framework;
 
@@ -24,6 +25,7 @@ namespace PDS.WITSMLstudio.Adapters
     /// <summary>
     /// Encapsulates log data from either a WITSML 1.4.1.1 or WITSML 1.3.1.1 log
     /// </summary>
+    [Serializable]
     public sealed class LogData
     {
         /// <summary>
