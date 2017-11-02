@@ -284,7 +284,7 @@ namespace PDS.WITSMLstudio.Adapters
         }
 
         /// <summary>
-        /// Sets the log curves infos of the on the log.
+        /// Sets the log curves infos on the log.
         /// </summary>
         /// <param name="logCurveInfos">The log curve infos.</param>
         public void SetLogCurves(List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo> logCurveInfos)
