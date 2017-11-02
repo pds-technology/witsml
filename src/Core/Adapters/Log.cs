@@ -284,13 +284,25 @@ namespace PDS.WITSMLstudio.Adapters
         }
 
         /// <summary>
-        /// Sets the log curves infos on the log.
+        /// Sets the log curve infos on the log.
         /// </summary>
         /// <param name="logCurveInfos">The log curve infos.</param>
-        public void SetLogCurves(List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo> logCurveInfos)
+        public void SetLogCurves(List<LogCurveInfo> logCurveInfos)
         {
+            if (_log131 != null)
+            {
+                _log131.LogCurveInfo = logCurveInfos.
+                    Select(x => x.WrappedLogCurveInfo).
+                    Cast<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>().
+                    ToList();
+            }
             if (_log141 != null)
-                _log141.LogCurveInfo = logCurveInfos;
+            {
+                _log141.LogCurveInfo = logCurveInfos.
+                    Select(x => x.WrappedLogCurveInfo).
+                    Cast<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>().
+                    ToList();
+            }
         }
 
         /// <summary>
