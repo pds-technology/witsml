@@ -18,10 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using PDS.WITSMLstudio.Framework;
+using SuperSocket.Common;
 
 namespace PDS.WITSMLstudio.Data.Logs
 {
@@ -107,7 +111,7 @@ namespace PDS.WITSMLstudio.Data.Logs
                 Unit = unit
             };
         }
-        
+
         /// <summary>
         /// Generates the log data.
         /// </summary>
@@ -115,113 +119,205 @@ namespace PDS.WITSMLstudio.Data.Logs
         /// <param name="numOfRows">The number of rows.</param>
         /// <param name="startIndex">The start index.</param>
         /// <param name="interval">The interval factor.</param>
-        /// <returns></returns>
-        public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0)
-        {           
-            DateTimeOffset dateTimeIndexStart = DateTimeOffset.Now;
-            DateTimeOffset dateTimeChannelStart = dateTimeIndexStart;
-
-            if (log.Direction == LogIndexDirection.decreasing)
-                interval = -interval;
+        /// <param name="generateNulls">If set to <c>true</c>, null values will be periodically generated.</param>
+        /// <returns>The end index of the generated data if the index is numeric.</returns>
+        public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0, bool generateNulls = true)
+        {
+            var indexes = GenerateLogDataIndexes(log, numOfRows, startIndex, interval);
+            var logData = GenerateLogData(log.LogCurveInfo, indexes, generateNulls);
 
             if (log.LogData == null)
                 log.LogData = new List<LogData>();
 
-            if (!log.LogData.Any())
-                log.LogData.Add(new LogData());
+            log.LogData.Clear();
+            log.LogData.Add(logData);
 
-            if (log.LogData[0].Data == null)
-                log.LogData[0].Data = new List<string>();
+            return startIndex + numOfRows * (log.Direction == LogIndexDirection.decreasing ? -interval : interval);
+        }
 
-            var data = log.LogData[0].Data;
+        /// <summary>
+        /// Generates log data indexes for the specified log.
+        /// </summary>
+        /// <param name="log">The log to generate data indexes for.</param>
+        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval between numeric indexes.</param>
+        /// <returns>The list of generated indexes.</returns>
+        public List<string> GenerateLogDataIndexes(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0)
+        {
+            DateTimeOffset dateTimeIndexStart = DateTimeOffset.Now;
+
+            if (log.Direction == LogIndexDirection.decreasing)
+                interval = -interval;
+
             var index = startIndex;
+            var indexes = new List<string>();
 
             for (int i = 0; i < numOfRows; i++)
             {
-                var row = string.Empty;
-
                 // index value
                 switch (log.IndexType)
                 {
                     case LogIndexType.datetime:
                     {
                         dateTimeIndexStart = dateTimeIndexStart.AddSeconds(_random.Next(1, 5));
-                        row += dateTimeIndexStart.ToString("o");
+                        indexes.Add(GenerateDateTimeIndex(dateTimeIndexStart));
                         break;
                     }
-                    case LogIndexType.elapsedtime:                       
-                    case LogIndexType.length:                        
-                    case LogIndexType.measureddepth:                        
+                    case LogIndexType.elapsedtime:
+                    case LogIndexType.length:
+                    case LogIndexType.measureddepth:
                     case LogIndexType.verticaldepth:
                     {
-                        row += string.Format("{0:F3}", index);
+                        indexes.Add(GenerateNumericIndex(index));
                         break;
                     }
                     default:
                         break;
                 }
 
-                // channel values
-                for (int k = 1; k < log.LogCurveInfo.Count; k++)
-                {
-                    row += ",";
+                index += interval;
+            }
 
-                    if (_random.Next(10) % 9 == 0)
+            return indexes;
+        }
+
+
+        /// <summary>
+        /// Generates the specified date time indexes starting at the given start index and using the specified interval.
+        /// </summary>
+        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval between indexes.</param>
+        /// <returns>The generated indexes.</returns>
+        public List<string> GenerateDateTimeIndexes(int numOfRows, DateTimeOffset startIndex, TimeSpan interval)
+        {
+            var indexes = new List<string>();
+            for (int i = 0; i < numOfRows; i++)
+                indexes.Add(GenerateDateTimeIndex(startIndex + TimeSpan.FromTicks(interval.Ticks * i)));
+
+            return indexes;
+        }
+
+        /// <summary>
+        /// Generates the specified numeric indexes starting at the given start index and using the specified interval.
+        /// </summary>
+        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval between indexes.</param>
+        /// <returns>The generated indexes.</returns>
+        public List<string> GenerateNumericIndexes(int numOfRows, double startIndex, double interval)
+        {
+            var indexes = new List<string>();
+            for (int i = 0; i < numOfRows; i++)
+                indexes.Add(GenerateNumericIndex(startIndex + i * interval));
+
+            return indexes;
+        }
+
+        /// <summary>
+        /// Generates the string representation of a date time index.
+        /// </summary>
+        /// <param name="index">The date time index to generate.</param>
+        /// <returns>The string representation of the index.</returns>
+        public string GenerateDateTimeIndex(DateTimeOffset index)
+        {
+            return index.ToString("o");
+        }
+
+
+        /// <summary>
+        /// Generates the string representation of a numeric (depth or elapsed time) index.
+        /// </summary>
+        /// <param name="index">The numeric index to generate.</param>
+        /// <returns>The string representation of the index.</returns>
+        public string GenerateNumericIndex(double index)
+        {
+            return index.ToString("F3");
+        }
+
+        /// <summary>
+        /// Generates log data for the specified log curves and indexes.
+        /// </summary>
+        /// <param name="logCurveInfos">The log curves to generate data for.</param>
+        /// <param name="indexes">The indexes to generate data for.</param>
+        /// <param name="generateNulls">If set to <c>true</c>, null values will be periodically generated.</param>
+        /// <returns>The generated log data.</returns>
+        public LogData GenerateLogData(List<LogCurveInfo> logCurveInfos, List<string> indexes, bool generateNulls = true)
+        {
+            indexes.NotNull(nameof(indexes));
+            logCurveInfos.NotNull(nameof(logCurveInfos));
+
+            var logData = new LogData
+            {
+                MnemonicList = string.Join(",", logCurveInfos.Select(x => x.Mnemonic)),
+                UnitList = string.Join(",", logCurveInfos.Select(x => x.Unit)),
+                Data = new List<string>()
+            };
+
+            var data = logData.Data;
+
+            if (indexes.Count == 0 || logCurveInfos.Count < 2)
+                return logData;
+
+            DateTimeOffset dateTimeChannelStart = DateTime.UtcNow - TimeSpan.FromSeconds(indexes.Count);
+
+            for (int i = 0; i < indexes.Count; i++)
+            {
+                var row = new StringBuilder(indexes[i]);
+
+                // channel values
+                for (int k = 1; k < logCurveInfos.Count; k++)
+                {
+                    row.Append(",");
+
+                    if (generateNulls && _random.Next(10) % 9 == 0)
                     {
                         continue;
                     }
 
-                    switch (log.LogCurveInfo[k].TypeLogData)
+                    switch (logCurveInfos[k].TypeLogData)
                     {
                         case LogDataType.@byte:
                         {
-                            row += "Y";
+                            row.Append("Y");
                             break;
                         }
                         case LogDataType.datetime:
                         {
-                            if (log.IndexType == LogIndexType.datetime)
-                            {
-                                dateTimeChannelStart = dateTimeIndexStart;
-                            }
-                            else
-                            {
-                                dateTimeChannelStart = dateTimeChannelStart.AddSeconds(_random.Next(1, 5));
-                            }
-                            row += dateTimeChannelStart.ToString("o");
+                            row.Append((dateTimeChannelStart + TimeSpan.FromSeconds(i)).ToString("o"));
                             break;
                         }
                         case LogDataType.@double:
-                        case LogDataType.@float:                       
+                        case LogDataType.@float:
                         {
-                            row += _random.NextDouble().ToString().Trim();
+                            row.Append(_random.NextDouble().ToString(CultureInfo.InvariantCulture).Trim());
                             break;
                         }
                         case LogDataType.@int:
                         case LogDataType.@long:
                         case LogDataType.@short:
                         {
-                            row += _random.Next(11);
+                            row.Append(_random.Next(11));
                             break;
                         }
                         case LogDataType.@string:
                         {
-                            row += "abc";
+                            row.Append("abc");
                             break;
                         }
                         default:
                         {
-                            row += "null";
+                            row.Append("null");
                         }
-                        break;
+                            break;
                     }
                 }
 
-                data.Add(row);
-                index += interval;
+                data.Add(row.ToString());
             }
 
-            return index;
+            return logData;
         }
     }
 }

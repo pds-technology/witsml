@@ -83,6 +83,17 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Removes any sub-second resolution from the <see cref="DateTimeOffset"/>.
+        /// </summary>
+        /// <param name="dateTimeOffset">The date time offset to truncate.</param>
+        /// <returns>The date time offset truncated to second resolution.</returns>
+        public static DateTimeOffset TruncateToSeconds(this DateTimeOffset dateTimeOffset)
+        {
+            return new DateTimeOffset(dateTimeOffset.Year, dateTimeOffset.Month, dateTimeOffset.Day,
+                dateTimeOffset.Hour, dateTimeOffset.Minute, dateTimeOffset.Second, dateTimeOffset.Offset);
+        }
+
+        /// <summary>
         /// Applies a time zone offset to the current <see cref="DateTimeOffset"/> instance.
         /// </summary>
         /// <param name="value">The date time value.</param>
