@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -67,12 +68,17 @@ namespace PDS.WITSMLstudio.Data.Logs
         public void Log141Generator_Can_Generate_Depth_Log_Data_Increasing_Repeatedly()
         {
             var startIndex = 0.0;
+            var logDatas = new List<LogData>();
             const int numOfRows = 3;
             const double interval = 1.0;
 
             for (var i = 0; i < 10; i++)
             {
                 var nextStartIndex = _logGenerator.GenerateLogData(_depthLogIncreasing, numOfRows, startIndex);
+                
+                // Log data is cleared each time generate log data is called
+                logDatas.Add(_depthLogIncreasing.LogData[0]);
+
                 Assert.AreEqual(startIndex + numOfRows * interval, nextStartIndex);
                 startIndex = nextStartIndex;
             }
@@ -80,40 +86,53 @@ namespace PDS.WITSMLstudio.Data.Logs
             Assert.IsNotNull(_depthLogIncreasing);
             Assert.IsNotNull(_depthLogIncreasing.LogData);
             Assert.IsNotNull(_depthLogIncreasing.LogData[0].Data);
-            Assert.AreEqual(30, _depthLogIncreasing.LogData[0].Data.Count);
+            Assert.AreEqual(30, logDatas.Sum(x => x.Data.Count));
 
             double index = 0;
-            foreach (var row in _depthLogIncreasing.LogData[0].Data)
+            foreach (var logData in logDatas)
             {
-                var columns = row.Split(',');
-                Assert.AreEqual(index, double.Parse(columns[0]));
-                index += interval;
+                foreach (var row in logData.Data)
+                {
+                    var columns = row.Split(',');
+                    Assert.AreEqual(index, double.Parse(columns[0]));
+                    index += interval;
+                }
             }
         }
+
         [TestMethod]
         public void Log141Generator_Can_Generate_Depth_Log_Data_Decreasing_Repeatedly()
         {
             var startIndex = 0.0;
-            var numOfRows = 3;
-            var interval = -1.0;
+            var logDatas = new List<LogData>();
+            const int numOfRows = 3;
+            const double interval = -1.0;
+
             for (var i = 0; i < 10; i++)
             {
                 var nextStartIndex = _logGenerator.GenerateLogData(_depthLogDecreasing, numOfRows, startIndex);
-                Assert.AreEqual(startIndex + numOfRows*interval, nextStartIndex);
+
+                // Log data is cleared each time generate log data is called
+                logDatas.Add(_depthLogDecreasing.LogData[0]);
+
+                Assert.AreEqual(startIndex + numOfRows * interval, nextStartIndex);
                 startIndex = nextStartIndex;
             }
 
             Assert.IsNotNull(_depthLogDecreasing);
             Assert.IsNotNull(_depthLogDecreasing.LogData);
             Assert.IsNotNull(_depthLogDecreasing.LogData[0].Data);
-            Assert.AreEqual(30, _depthLogDecreasing.LogData[0].Data.Count);
+            Assert.AreEqual(30, logDatas.Sum(x => x.Data.Count));
 
             double index = 0;
-            foreach (var row in _depthLogDecreasing.LogData[0].Data)
+            foreach (var logData in logDatas)
             {
-                var columns = row.Split(',');
-                Assert.AreEqual(index, double.Parse(columns[0]));
-                index += interval;
+                foreach (var row in logData.Data)
+                {
+                    var columns = row.Split(',');
+                    Assert.AreEqual(index, double.Parse(columns[0]));
+                    index += interval;
+                }
             }
         }
 
