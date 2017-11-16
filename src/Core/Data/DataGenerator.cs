@@ -79,5 +79,58 @@ namespace PDS.WITSMLstudio.Data
                 Title = curveClass,
             };
         }
+
+        /// <summary>
+        /// Generates the specified date time indexes starting at the given start index and using the specified interval.
+        /// </summary>
+        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval between indexes.</param>
+        /// <returns>The generated indexes.</returns>
+        public List<string> GenerateDateTimeIndexes(int numOfRows, DateTimeOffset startIndex, TimeSpan interval)
+        {
+            var indexes = new List<string>();
+            for (int i = 0; i < numOfRows; i++)
+                indexes.Add(GenerateDateTimeIndex(startIndex + TimeSpan.FromTicks(interval.Ticks * i)));
+
+            return indexes;
+        }
+
+        /// <summary>
+        /// Generates the specified numeric indexes starting at the given start index and using the specified interval.
+        /// </summary>
+        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval between indexes.</param>
+        /// <returns>The generated indexes.</returns>
+        public List<string> GenerateNumericIndexes(int numOfRows, double startIndex, double interval)
+        {
+            var indexes = new List<string>();
+            for (int i = 0; i < numOfRows; i++)
+                indexes.Add(GenerateNumericIndex(startIndex + i * interval));
+
+            return indexes;
+        }
+
+        /// <summary>
+        /// Generates the string representation of a date time index.
+        /// </summary>
+        /// <param name="index">The date time index to generate.</param>
+        /// <returns>The string representation of the index.</returns>
+        public string GenerateDateTimeIndex(DateTimeOffset index)
+        {
+            return index.ToString("o");
+        }
+
+
+        /// <summary>
+        /// Generates the string representation of a numeric (depth or elapsed time) index.
+        /// </summary>
+        /// <param name="index">The numeric index to generate.</param>
+        /// <returns>The string representation of the index.</returns>
+        public string GenerateNumericIndex(double index)
+        {
+            return index.ToString("F3");
+        }
     }
 }

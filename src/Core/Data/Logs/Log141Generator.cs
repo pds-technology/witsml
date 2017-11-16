@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.WITSMLstudio.Framework;
-using SuperSocket.Common;
 
 namespace PDS.WITSMLstudio.Data.Logs
 {
@@ -159,19 +158,19 @@ namespace PDS.WITSMLstudio.Data.Logs
                 switch (log.IndexType)
                 {
                     case LogIndexType.datetime:
-                    {
-                        dateTimeIndexStart = dateTimeIndexStart.AddSeconds(_random.Next(1, 5));
-                        indexes.Add(GenerateDateTimeIndex(dateTimeIndexStart));
-                        break;
-                    }
+                        {
+                            dateTimeIndexStart = dateTimeIndexStart.AddSeconds(_random.Next(1, 5));
+                            indexes.Add(GenerateDateTimeIndex(dateTimeIndexStart));
+                            break;
+                        }
                     case LogIndexType.elapsedtime:
                     case LogIndexType.length:
                     case LogIndexType.measureddepth:
                     case LogIndexType.verticaldepth:
-                    {
-                        indexes.Add(GenerateNumericIndex(index));
-                        break;
-                    }
+                        {
+                            indexes.Add(GenerateNumericIndex(index));
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -180,60 +179,6 @@ namespace PDS.WITSMLstudio.Data.Logs
             }
 
             return indexes;
-        }
-
-
-        /// <summary>
-        /// Generates the specified date time indexes starting at the given start index and using the specified interval.
-        /// </summary>
-        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
-        /// <param name="startIndex">The start index.</param>
-        /// <param name="interval">The interval between indexes.</param>
-        /// <returns>The generated indexes.</returns>
-        public List<string> GenerateDateTimeIndexes(int numOfRows, DateTimeOffset startIndex, TimeSpan interval)
-        {
-            var indexes = new List<string>();
-            for (int i = 0; i < numOfRows; i++)
-                indexes.Add(GenerateDateTimeIndex(startIndex + TimeSpan.FromTicks(interval.Ticks * i)));
-
-            return indexes;
-        }
-
-        /// <summary>
-        /// Generates the specified numeric indexes starting at the given start index and using the specified interval.
-        /// </summary>
-        /// <param name="numOfRows">The number of rows to generate indexes for.</param>
-        /// <param name="startIndex">The start index.</param>
-        /// <param name="interval">The interval between indexes.</param>
-        /// <returns>The generated indexes.</returns>
-        public List<string> GenerateNumericIndexes(int numOfRows, double startIndex, double interval)
-        {
-            var indexes = new List<string>();
-            for (int i = 0; i < numOfRows; i++)
-                indexes.Add(GenerateNumericIndex(startIndex + i * interval));
-
-            return indexes;
-        }
-
-        /// <summary>
-        /// Generates the string representation of a date time index.
-        /// </summary>
-        /// <param name="index">The date time index to generate.</param>
-        /// <returns>The string representation of the index.</returns>
-        public string GenerateDateTimeIndex(DateTimeOffset index)
-        {
-            return index.ToString("o");
-        }
-
-
-        /// <summary>
-        /// Generates the string representation of a numeric (depth or elapsed time) index.
-        /// </summary>
-        /// <param name="index">The numeric index to generate.</param>
-        /// <returns>The string representation of the index.</returns>
-        public string GenerateNumericIndex(double index)
-        {
-            return index.ToString("F3");
         }
 
         /// <summary>
@@ -279,37 +224,37 @@ namespace PDS.WITSMLstudio.Data.Logs
                     switch (logCurveInfos[k].TypeLogData)
                     {
                         case LogDataType.@byte:
-                        {
-                            row.Append("Y");
-                            break;
-                        }
+                            {
+                                row.Append("Y");
+                                break;
+                            }
                         case LogDataType.datetime:
-                        {
-                            row.Append((dateTimeChannelStart + TimeSpan.FromSeconds(i)).ToString("o"));
-                            break;
-                        }
+                            {
+                                row.Append((dateTimeChannelStart + TimeSpan.FromSeconds(i)).ToString("o"));
+                                break;
+                            }
                         case LogDataType.@double:
                         case LogDataType.@float:
-                        {
-                            row.Append(_random.NextDouble().ToString(CultureInfo.InvariantCulture).Trim());
-                            break;
-                        }
+                            {
+                                row.Append(_random.NextDouble().ToString(CultureInfo.InvariantCulture).Trim());
+                                break;
+                            }
                         case LogDataType.@int:
                         case LogDataType.@long:
                         case LogDataType.@short:
-                        {
-                            row.Append(_random.Next(11));
-                            break;
-                        }
+                            {
+                                row.Append(_random.Next(11));
+                                break;
+                            }
                         case LogDataType.@string:
-                        {
-                            row.Append("abc");
-                            break;
-                        }
+                            {
+                                row.Append("abc");
+                                break;
+                            }
                         default:
-                        {
-                            row.Append("null");
-                        }
+                            {
+                                row.Append("null");
+                            }
                             break;
                     }
                 }
