@@ -569,6 +569,26 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Adds tubular object and test the return code
+        /// </summary>
+        /// <param name="tubular">the tubular</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Tubular tubular, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<TubularList, Tubular>(tubular, errorCode);
+        }
+
+        /// <summary>
+        /// Adds fluidsReport object and test the return code
+        /// </summary>
+        /// <param name="fluidsReport">the fluidsReport</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(FluidsReport fluidsReport, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<FluidsReportList, FluidsReport>(fluidsReport, errorCode);
+        }
+
+        /// <summary>
         /// Adds mudLog object and test the return code
         /// </summary>
         /// <param name="mudLog">the mudLog</param>
@@ -576,6 +596,16 @@ namespace PDS.WITSMLstudio.Store
         public WMLS_AddToStoreResponse AddAndAssert(MudLog mudLog, ErrorCodes errorCode = ErrorCodes.Success)
         {
             return AddAndAssert<MudLogList, MudLog>(mudLog, errorCode);
+        }
+
+        /// <summary>
+        /// Adds cementJob object and test the return code
+        /// </summary>
+        /// <param name="cementJob">the cementJob</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(CementJob cementJob, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<CementJobList, CementJob>(cementJob, errorCode);
         }
 
         /// <summary>
@@ -644,6 +674,7 @@ namespace PDS.WITSMLstudio.Store
         {
             return GetAndAssert<AttachmentList, Attachment>(attachment, isNotNull, optionsIn, queryByExample);
         }
+
         /// <summary>
         /// Does get query for single mudLog object and test for result count equal to 1 and is not null
         /// </summary>
@@ -655,6 +686,32 @@ namespace PDS.WITSMLstudio.Store
         public MudLog GetAndAssert(MudLog mudLog, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<MudLogList, MudLog>(mudLog, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single fluidsReport object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="fluidsReport">the fluidsReport with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first fluidsReport from the response</returns>
+        public FluidsReport GetAndAssert(FluidsReport fluidsReport, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<FluidsReportList, FluidsReport>(fluidsReport, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single tubular object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="tubular">the tubular with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first tubular from the response</returns>
+        public Tubular GetAndAssert(Tubular tubular, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<TubularList, Tubular>(tubular, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -769,6 +826,36 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Does UpdateInStore on fluidsReport object and test the return code
+        /// </summary>
+        /// <param name="fluidsReport">the fluidsReport</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(FluidsReport fluidsReport, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<FluidsReportList, FluidsReport>(fluidsReport, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on tubular object and test the return code
+        /// </summary>
+        /// <param name="tubular">the tubular</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Tubular tubular, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<TubularList, Tubular>(tubular, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on cementJob object and test the return code
+        /// </summary>
+        /// <param name="cementJob">the cementJob</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(CementJob cementJob, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<CementJobList, CementJob>(cementJob, errorCode);
+        }
+
+        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>
@@ -867,6 +954,43 @@ namespace PDS.WITSMLstudio.Store
             DeleteAndAssert<MudLogList, MudLog>(mudLog, errorCode, partialDelete);
         }
 
+        /// <summary>
+        /// Deletes the fluidsReport and test the return code
+        /// </summary>
+        /// <param name="fluidsReport">The fluidsReport.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(FluidsReport fluidsReport, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<FluidsReportList, FluidsReport>(fluidsReport, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the tubular and test the return code
+        /// </summary>
+        /// <param name="tubular">The tubular.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Tubular tubular, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<TubularList, Tubular>(tubular, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Deletes the cementJob and test the return code
+        /// </summary>
+        /// <param name="cementJob">The cementJob.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(CementJob cementJob, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<CementJobList, CementJob>(cementJob, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Asserts the change history times unique.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
         public void AssertChangeHistoryTimesUnique(object entity)
         {
             var dataObject = entity as IDataObject;
@@ -880,6 +1004,13 @@ namespace PDS.WITSMLstudio.Store
             Assert.AreEqual(0, dupCount);
         }
 
+        /// <summary>
+        /// Asserts the change log.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="expectedHistoryCount">The expected history count.</param>
+        /// <param name="expectedChangeType">Expected type of the change.</param>
+        /// <returns></returns>
         public ChangeLog AssertChangeLog(object entity, int expectedHistoryCount, ChangeInfoType expectedChangeType)
         {
             var dataObject = entity as IDataObject;

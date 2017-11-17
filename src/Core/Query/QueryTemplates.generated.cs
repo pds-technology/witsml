@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.2
 //
 // Copyright 2017 PDS Americas LLC
@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Query
     /// </summary>
     public static partial class QueryTemplates
     {
-        private static readonly DataObjectTemplate _template = new DataObjectTemplate();        
+        private static readonly DataObjectTemplate _template = new DataObjectTemplate();               
 
         /// <summary>
         /// Gets the template for Witsml131 objects.
@@ -48,86 +48,84 @@ namespace PDS.WITSMLstudio.Query
 
             switch (objectType)
             {
-
+                case "cementJob":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.CementJob.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.CementJob.IdOnly;
+                    break;
+                case "fluidsReport":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.FluidsReport.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.FluidsReport.IdOnly;
+                    break;
                 case "log":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Log.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Log.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Log.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Log.DataOnly;
-
                     break;
-
                 case "message":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Message.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Message.IdOnly;
-
                     break;
-
                 case "mudLog":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.MudLog.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.MudLog.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.MudLog.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.MudLog.DataOnly;
-
                     break;
-
                 case "rig":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Rig.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Rig.IdOnly;
-
                     break;
-
                 case "trajectory":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Trajectory.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Trajectory.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Trajectory.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Trajectory.DataOnly;
-
                     break;
-
+                case "tubular":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.Tubular.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml131.Tubular.IdOnly;
+                    break;
                 case "wbGeometry":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.WbGeometry.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.WbGeometry.IdOnly;
-
                     break;
-
                 case "well":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Well.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Well.IdOnly;
-
                     break;
-
                 case "wellbore":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Wellbore.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml131.Wellbore.IdOnly;
-
                     break;
-
             }
 
             return xDocument;
@@ -145,94 +143,90 @@ namespace PDS.WITSMLstudio.Query
 
             switch (objectType)
             {
-
                 case "attachment":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Attachment.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Attachment.IdOnly;
-
                     break;
-
+                case "cementJob":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.CementJob.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.CementJob.IdOnly;
+                    break;
+                case "fluidsReport":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.FluidsReport.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.FluidsReport.IdOnly;
+                    break;
                 case "log":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Log.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Log.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Log.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Log.DataOnly;
-
                     break;
-
                 case "message":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Message.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Message.IdOnly;
-
                     break;
-
                 case "mudLog":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.MudLog.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.MudLog.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.MudLog.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.MudLog.DataOnly;
-
                     break;
-
                 case "rig":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Rig.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Rig.IdOnly;
-
                     break;
-
                 case "trajectory":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Trajectory.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Trajectory.IdOnly;
-
                     if (OptionsIn.ReturnElements.HeaderOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Trajectory.HeaderOnly;
                     else if (OptionsIn.ReturnElements.DataOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Trajectory.DataOnly;
-
                     break;
-
+                case "tubular":
+                    if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.Tubular.All;
+                    else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
+                        xDocument = Witsml141.Tubular.IdOnly;
+                    break;
                 case "wbGeometry":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.WbGeometry.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.WbGeometry.IdOnly;
-
                     break;
-
                 case "well":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Well.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Well.IdOnly;
-
                     break;
-
                 case "wellbore":
                     if (OptionsIn.ReturnElements.All.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Wellbore.All;
                     else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
                         xDocument = Witsml141.Wellbore.IdOnly;
-
                     break;
-
             }
 
             return xDocument;
@@ -242,8 +236,80 @@ namespace PDS.WITSMLstudio.Query
         /// Provides helper methods to create Witsml131 query templates.
         /// </summary>
         public static class Witsml131
-        {          
+        {
+            /// <summary>
+            /// Provides helper methods to create Witsml131 query templates for cementJob.    
+            /// </summary>          
+            public static class CementJob
+            {
+                private static XDocument _all;
+                private static XDocument _idOnly;
 
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML131.CementJobList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML131.CementJobList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        _idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Provides helper methods to create Witsml131 query templates for fluidsReport.    
+            /// </summary>          
+            public static class FluidsReport
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
+
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML131.FluidsReportList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML131.FluidsReportList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for log.    
             /// </summary>          
@@ -251,7 +317,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -282,7 +347,6 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -314,9 +378,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_dataOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for message.    
             /// </summary>          
@@ -457,9 +519,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for trajectory.    
             /// </summary>          
@@ -467,7 +527,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -498,7 +557,6 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -530,9 +588,43 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_dataOnly);
                     }
                 }
-
             }
+            /// <summary>
+            /// Provides helper methods to create Witsml131 query templates for tubular.    
+            /// </summary>          
+            public static class Tubular
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
 
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML131.TubularList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML131.TubularList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for wbGeometry.    
             /// </summary>          
@@ -568,9 +660,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for well.    
             /// </summary>          
@@ -606,9 +696,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml131 query templates for wellbore.    
             /// </summary>          
@@ -644,17 +732,13 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
         }
-
         /// <summary>
         /// Provides helper methods to create Witsml141 query templates.
         /// </summary>
         public static class Witsml141
         {          
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for attachment.    
             /// </summary>          
@@ -690,9 +774,81 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
 
+            /// <summary>
+            /// Provides helper methods to create Witsml141 query templates for cementJob.    
+            /// </summary>          
+            public static class CementJob
+            {
+                private static XDocument _all;
+                private static XDocument _idOnly;
+
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML141.CementJobList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML141.CementJobList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+                        _idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Provides helper methods to create Witsml141 query templates for fluidsReport.    
+            /// </summary>          
+            public static class FluidsReport
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
+
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML141.FluidsReportList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML141.FluidsReportList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for log.    
             /// </summary>          
@@ -700,7 +856,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -731,7 +886,6 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -763,9 +917,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_dataOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for message.    
             /// </summary>          
@@ -871,7 +1023,6 @@ namespace PDS.WITSMLstudio.Query
                     }
                 }
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for rig.    
             /// </summary>          
@@ -907,9 +1058,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for trajectory.    
             /// </summary>          
@@ -917,7 +1066,6 @@ namespace PDS.WITSMLstudio.Query
             { 
                 private static XDocument _all;
                 private static XDocument _idOnly;
-
                 private static XDocument _headerOnly;
                 private static XDocument _dataOnly;
 
@@ -948,7 +1096,6 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
                 /// <summary>
                 /// Create a header only query template.
                 /// </summary>
@@ -980,9 +1127,43 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_dataOnly);
                     }
                 }
-
             }
+            /// <summary>
+            /// Provides helper methods to create Witsml141 query templates for tubular.    
+            /// </summary>          
+            public static class Tubular
+            { 
+                private static XDocument _all;
+                private static XDocument _idOnly;
 
+                /// <summary>
+                /// Gets an all query template
+                /// </summary>
+                public static XDocument All
+                {
+                    get
+                    {
+                        if (_all != null) return Clone(_all);
+                        _all = _template.Create<WITSML141.TubularList>();
+                        return Clone(_all);
+                    }
+                }
+
+                /// <summary>
+                /// Gets an id-only query template.
+                /// </summary>
+                public static XDocument IdOnly
+                {
+                    get
+                    {
+                        if (_idOnly != null) return Clone(_idOnly);
+                        var idOnly = _template.Create<WITSML141.TubularList>();
+                        _template.RemoveAll(idOnly, "/*/*/*[name() != 'name' and name() != 'nameWell' and name() != 'nameWellbore']");
+						_idOnly = idOnly;
+                        return Clone(_idOnly);
+                    }
+                }
+            }
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for wbGeometry.    
             /// </summary>          
@@ -1018,9 +1199,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for well.    
             /// </summary>          
@@ -1056,9 +1235,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
             /// <summary>
             /// Provides helper methods to create Witsml141 query templates for wellbore.    
             /// </summary>          
@@ -1094,9 +1271,7 @@ namespace PDS.WITSMLstudio.Query
                         return Clone(_idOnly);
                     }
                 }
-
             }
-
         }
 
         private static XDocument Clone(XDocument document) => new XDocument(document);

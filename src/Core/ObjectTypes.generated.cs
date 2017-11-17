@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.2
 //
 // Copyright 2017 PDS Americas LLC
@@ -45,6 +45,16 @@ namespace PDS.WITSMLstudio
         public const string Attachment = "attachment";
 
         /// <summary>
+        /// The data object type for a CementJob.
+        /// </summary>
+        public const string CementJob = "cementJob";
+
+        /// <summary>
+        /// The data object type for a CementJobEvaluation.
+        /// </summary>
+        public const string CementJobEvaluation = "cementJobEvaluation";
+
+        /// <summary>
         /// The data object type for a Channel.
         /// </summary>
         public const string Channel = "channel";
@@ -58,6 +68,16 @@ namespace PDS.WITSMLstudio
         /// The data object type for a DataAssuranceRecord.
         /// </summary>
         public const string DataAssuranceRecord = "dataAssuranceRecord";
+
+        /// <summary>
+        /// The data object type for a DownholeComponent.
+        /// </summary>
+        public const string DownholeComponent = "downholeComponent";
+
+        /// <summary>
+        /// The data object type for a FluidsReport.
+        /// </summary>
+        public const string FluidsReport = "fluidsReport";
 
         /// <summary>
         /// The data object type for a Log.
@@ -90,6 +110,11 @@ namespace PDS.WITSMLstudio
         public const string Trajectory = "trajectory";
 
         /// <summary>
+        /// The data object type for a Tubular.
+        /// </summary>
+        public const string Tubular = "tubular";
+
+        /// <summary>
         /// The data object type for a WbGeometry.
         /// </summary>
         public const string WbGeometry = "wbGeometry";
@@ -103,6 +128,16 @@ namespace PDS.WITSMLstudio
         /// The data object type for a Wellbore.
         /// </summary>
         public const string Wellbore = "wellbore";
+
+        /// <summary>
+        /// The data object type for a WellboreMarker.
+        /// </summary>
+        public const string WellboreMarker = "wellboreMarker";
+
+        /// <summary>
+        /// The data object type for a WellboreMarkerSet.
+        /// </summary>
+        public const string WellboreMarkerSet = "wellboreMarkerSet";
 
         /// <summary>
         /// The data object type for a WellCompletion.

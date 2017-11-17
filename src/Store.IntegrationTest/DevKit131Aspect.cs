@@ -369,6 +369,36 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Adds fluidsReport object and test the return code
+        /// </summary>
+        /// <param name="fluidsReport">the fluidsReport</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(FluidsReport fluidsReport, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<FluidsReportList, FluidsReport>(fluidsReport, errorCode);
+        }
+
+        /// <summary>
+        /// Adds tubular object and test the return code
+        /// </summary>
+        /// <param name="tubular">the tubular</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Tubular tubular, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<TubularList, Tubular>(tubular, errorCode);
+        }
+
+        /// <summary>
+        /// Adds cementJob object and test the return code
+        /// </summary>
+        /// <param name="cementJob">the cementJob</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(CementJob cementJob, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<CementJobList, CementJob>(cementJob, errorCode);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -470,6 +500,45 @@ namespace PDS.WITSMLstudio.Store
         public MudLog GetAndAssert(MudLog mudLog, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<MudLogList, MudLog>(mudLog, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single fluidsReport object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="fluidsReport">the fluidsReport with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wbGeometry from the response</returns>
+        public FluidsReport GetAndAssert(FluidsReport fluidsReport, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<FluidsReportList, FluidsReport>(fluidsReport, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single tubular object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="tubular">the tubular with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wbGeometry from the response</returns>
+        public Tubular GetAndAssert(Tubular tubular, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<TubularList, Tubular>(tubular, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single cementJob object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="cementJob">the cementJob with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wbGeometry from the response</returns>
+        public CementJob GetAndAssert(CementJob cementJob, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<CementJobList, CementJob>(cementJob, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
