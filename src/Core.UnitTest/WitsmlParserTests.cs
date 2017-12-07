@@ -22,6 +22,7 @@ using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.WITSMLstudio.Framework;
 using Shouldly;
 
 namespace PDS.WITSMLstudio
@@ -165,7 +166,7 @@ namespace PDS.WITSMLstudio
             var elemPurposeWell = new XElement(xdoc.Root.GetDefaultNamespace() + "purposeWell");
             var elemStatusWell = new XElement(xdoc.Root.GetDefaultNamespace() + "statusWell", "plugged and abandoned");
             var elemGroundElevation = new XElement(xdoc.Root.GetDefaultNamespace() + "groundElevation");
-            var nil = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance").GetName("nil");
+            var nil = XmlUtil.Xsi.GetName("nil");
             elemGroundElevation.Add(new XAttribute(nil, true));
 
             xdoc.Root.Elements().FirstOrDefault()?.Add(elemPurposeWell);

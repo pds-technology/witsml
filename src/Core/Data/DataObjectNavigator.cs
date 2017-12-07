@@ -38,8 +38,6 @@ namespace PDS.WITSMLstudio.Data
     /// <typeparam name="TContext">The type of the context.</typeparam>
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
-        private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
         /// </summary>
@@ -90,7 +88,7 @@ namespace PDS.WITSMLstudio.Data
         /// </returns>
         protected static XName Xsi(string attributeName)
         {
-            return _xsi.GetName(attributeName);
+            return XmlUtil.Xsi.GetName(attributeName);
         }
 
         /// <summary>

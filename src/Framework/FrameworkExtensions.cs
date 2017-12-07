@@ -25,10 +25,7 @@ using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
-using System.Xml.XPath;
 using PDS.WITSMLstudio.Framework.Properties;
 
 namespace PDS.WITSMLstudio.Framework
@@ -248,6 +245,20 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Gets the custom attribute defined for the specified enumeration member.
+        /// </summary>
+        /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
+        /// <param name="value">The enumeration value.</param>
+        /// <returns>The defined attribute, or null.</returns>
+        public static TAttribute GetAttribute<TAttribute>(this Enum value) where TAttribute : Attribute
+        {
+            var enumType = value.GetType();
+            var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
+
+            return XmlAttributeCache<TAttribute>.GetCustomAttribute(fieldInfo);
+        }
+
+        /// <summary>
         /// Gets the description for the specified enumeration member.
         /// </summary>
         /// <param name="value">The enumeration value.</param>
@@ -279,20 +290,6 @@ namespace PDS.WITSMLstudio.Framework
             return attribute != null
                 ? attribute.Name
                 : value.ToString();
-        }
-
-        /// <summary>
-        /// Gets the custom attribute defined for the specified enumeration member.
-        /// </summary>
-        /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
-        /// <param name="value">The enumeration value.</param>
-        /// <returns>The defined attribute, or null.</returns>
-        public static TAttribute GetAttribute<TAttribute>(this Enum value) where TAttribute : Attribute
-        {
-            var enumType = value.GetType();
-            var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
-
-            return XmlAttributeCache<TAttribute>.GetCustomAttribute(fieldInfo);
         }
 
         /// <summary>
@@ -424,71 +421,6 @@ namespace PDS.WITSMLstudio.Framework
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Updates the name of the root element.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="type">The type.</param>
-        /// <returns>A new <see cref="XElement"/> instance.</returns>
-        public static XElement UpdateRootElementName(this XElement element, Type type)
-        {
-            var xmlRoot = XmlAttributeCache<XmlRootAttribute>.GetCustomAttribute(type);
-            var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
-            var elementName = type.Name;
-
-            if (!string.IsNullOrWhiteSpace(xmlRoot?.ElementName))
-                elementName = xmlRoot.ElementName;
-
-            else if (!string.IsNullOrWhiteSpace(xmlType?.TypeName))
-                elementName = xmlType.TypeName;
-
-            if (element.Name.LocalName.Equals(elementName))
-                return element;
-
-            var xElementName = !string.IsNullOrWhiteSpace(xmlRoot?.Namespace)
-                ? XNamespace.Get(xmlRoot.Namespace).GetName(elementName)
-                : elementName;
-
-            // Update element name to match XSD type name
-            var clone = new XElement(element)
-            {
-                Name = xElementName
-            };
-
-            // Remove xsi:type attribute used for abstract types
-            var xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-            clone.Attribute(xsi.GetName("type"))?.Remove();
-
-            return clone;
-        }
-
-        /// <summary>
-        /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <returns>An <see cref="XmlElement"/> instance.</returns>
-        public static XmlElement ToXmlElement(this XElement element)
-        {
-            using (var reader = element.CreateReader())
-            {
-                var doc = new XmlDocument();
-                doc.Load(reader);
-                return doc.DocumentElement;
-            }
-        }
-
-        /// <summary>
-        /// Evaluates the specified XPath expression.
-        /// </summary>
-        /// <param name="document">The document.</param>
-        /// <param name="expression">The expression.</param>
-        /// <param name="resolver">The resolver.</param>
-        /// <returns>A collection of elements or attributes.</returns>
-        public static IEnumerable<object> Evaluate(this XDocument document, string expression, IXmlNamespaceResolver resolver)
-        {
-            return ((IEnumerable) document.XPathEvaluate(expression, resolver)).Cast<object>();
         }
     }
 }

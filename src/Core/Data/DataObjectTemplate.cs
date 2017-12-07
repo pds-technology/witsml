@@ -21,9 +21,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Xml.XPath;
@@ -42,13 +39,10 @@ namespace PDS.WITSMLstudio.Data
     {
         private static readonly ConcurrentDictionary<Type, XDocument> _cache;
         private static readonly IList<Type> _excluded;
-        private static readonly Regex _regex;
         private readonly List<string> _ignored;
-        private const string Prefix = "witsml";
 
         static DataObjectTemplate()
         {
-            _regex = new Regex(@"(?<selector>[//]+)?(?<namespace>[A-z0-9_]+:)?(?<element>[\@\*A-z0-9_\[\]]+)");
             _cache = new ConcurrentDictionary<Type, XDocument>();
             _excluded = new List<Type>();
 
@@ -104,11 +98,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>A new <see cref="XDocument"/> instance.</returns>
         public XDocument Clone(XDocument document, string xpath)
         {
-            var manager = GetNamespaceManager(document.Root);
-            xpath = IncludeNamespacePrefix(xpath);
-
-            var node = document.XPathSelectElement(xpath, manager);
-            return node == null ? null : new XDocument(node);
+            return document.Clone(xpath);
         }
 
         /// <summary>
@@ -121,8 +111,8 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
         public DataObjectTemplate Set<TValue>(XDocument document, string xpath, TValue value)
         {
-            var manager = GetNamespaceManager(document.Root);
-            xpath = IncludeNamespacePrefix(xpath);
+            var manager = document.Root.GetNamespaceManager();
+            xpath = XmlUtil.IncludeNamespacePrefix(xpath);
 
             var node = document.Evaluate(xpath, manager).FirstOrDefault();
             var attribute = node as XAttribute;
@@ -161,8 +151,8 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
         public DataObjectTemplate Push(XDocument document, string xpath, XElement element)
         {
-            var manager = GetNamespaceManager(document.Root);
-            xpath = IncludeNamespacePrefix(xpath);
+            var manager = document.Root.GetNamespaceManager();
+            xpath = XmlUtil.IncludeNamespacePrefix(xpath);
 
             var last = document.Evaluate(xpath, manager)
                 .LastOrDefault() as XElement;
@@ -181,8 +171,8 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
         public DataObjectTemplate Add(XDocument document, string xpath, params string[] elementOrAttributeNames)
         {
-            var manager = GetNamespaceManager(document.Root);
-            xpath = IncludeNamespacePrefix(xpath);
+            var manager = document.Root.GetNamespaceManager();
+            xpath = XmlUtil.IncludeNamespacePrefix(xpath);
 
             var ns = document.Root?.GetDefaultNamespace();
 
@@ -208,10 +198,10 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
         public DataObjectTemplate Remove(XDocument document, params string[] xpaths)
         {
-            var manager = GetNamespaceManager(document.Root);
+            var manager = document.Root.GetNamespaceManager();
 
             xpaths
-                .Select(IncludeNamespacePrefix)
+                .Select(x => XmlUtil.IncludeNamespacePrefix(x))
                 .SelectMany(x => document.Evaluate(x, manager).ToArray())
                 .ForEach(RemoveElementOrAttribute);
 
@@ -226,23 +216,13 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>This <see cref="DataObjectTemplate"/> instance.</returns>
         public DataObjectTemplate RemoveAll(XDocument document, params string[] xpaths)
         {
-            var manager = GetNamespaceManager(document.Root);
+            var manager = document.Root.GetNamespaceManager();
 
             xpaths
                 .SelectMany(x => document.Evaluate(x, manager).ToArray())
                 .ForEach(RemoveElementOrAttribute);
 
             return this;
-        }
-
-        private XmlNamespaceManager GetNamespaceManager(XNode node)
-        {
-            var navigator = node.CreateNavigator();
-
-            var manager = new XmlNamespaceManager(navigator.NameTable ?? new NameTable());
-            manager.AddNamespace(Prefix, navigator.NamespaceURI);
-
-            return manager;
         }
 
         private XDocument CreateTemplate(Type type)
@@ -358,29 +338,6 @@ namespace PDS.WITSMLstudio.Data
         {
             return XmlAttributeCache<XmlIgnoreAttribute>.IsDefined(property)
                 || _ignored.Contains(property.Name);
-        }
-
-        private string IncludeNamespacePrefix(string expression)
-        {
-            var xpath = new StringBuilder();
-            var matches = _regex.Matches(expression);
-
-            foreach (Match match in matches)
-            {
-                var ns = match.Groups["namespace"].Value;
-                var element = match.Groups["element"].Value;
-
-                if (string.IsNullOrWhiteSpace(ns) && !element.StartsWith("@"))
-                {
-                    xpath.AppendFormat("{0}{1}:{2}", match.Groups["selector"].Value, Prefix, element);
-                }
-                else
-                {
-                    xpath.Append(match.Value);
-                }
-            }
-
-            return xpath.ToString();
         }
 
         private static void RemoveElementOrAttribute(object elementOrAttribute)
