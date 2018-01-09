@@ -265,11 +265,12 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     var indexCurveUid = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve)?.Uid;
                     var isTimeLog = current.IsTimeLog(true);
                     var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
-                    var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
-                    var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
-                    var updateCurves = logCurves.Where(l => !l.Uid.EqualsIgnoreCase(indexCurveUid) && uids.Contains(l.Uid.ToUpper())).ToList();
+                    var existingMnemonics = exist.Select(e => e.Uid.ToUpper()).ToArray();
+                    var newCurves = logCurves.Where(l => !existingMnemonics.Contains(l.Uid.ToUpper())).ToList();
+                    var updateCurves = logCurves.Where(l => !l.Uid.EqualsIgnoreCase(indexCurveUid) && existingMnemonics.Contains(l.Uid.ToUpper())).ToList();
+                    var hasLogData = logData != null && logData.Count > 0;
 
-                    if (newCurves.Count > 0 && updateCurves.Count > 0)
+                    if (hasLogData && newCurves.Count > 0 && updateCurves.Count > 0)
                     {
                         yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
                     }
@@ -278,9 +279,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     {
                         yield return new ValidationResult(ErrorCodes.IndexRangeSpecified.ToString(), new[] { "LogCurveInfo", "Index" });
                     }
-                    else if (logData != null && logData.Count > 0)
+                    else if (hasLogData)
                     {
-                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
+                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false, existingMnemonics);
                     }
                 }
 
@@ -481,7 +482,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             return true;
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true, string[] existingMnemonics = null)
         {
             var totalPoints = 0;
             if (Context.Function.IsDataNodesValid(ObjectTypes.GetObjectType(DataObject), logDatas.Sum(x => x.Data.Count)))
@@ -519,6 +520,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                         else if (mnemonics.Any(m => _illegalColumnIdentifiers.Any(c => m.Contains(c))))
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
+                        else if (existingMnemonics != null && !IsValidLogDataMnemonics(existingMnemonics, mnemonics))
+                        {
+                            return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
                         }
                         else if (!IsValidLogDataMnemonics(mergedLogCurveInfoMnemonics, mnemonics))
                         {
@@ -559,11 +564,11 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             return null;
         }
 
-        private bool IsValidLogDataMnemonics(List<string> logCurveInfoMnemonics, IEnumerable<string> logDataMnemonics)
+        private bool IsValidLogDataMnemonics(IEnumerable<string> logCurveInfoMnemonics, IEnumerable<string> logDataMnemonics)
         {
-            Logger.Debug("Validating mnemonic list channels for existance in LogCurveInfo.");
+            Logger.Debug("Validating mnemonic list channels for existence in LogCurveInfo.");
 
-            var isValid = !logDataMnemonics.Any(um => !logCurveInfoMnemonics.Contains(um));
+            var isValid = logDataMnemonics.All(logCurveInfoMnemonics.ContainsIgnoreCase);
 
             Logger.Debug(isValid
                 ? "Validation of mnemonic list channels successful."
@@ -571,7 +576,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             return isValid;
         }
-
 
         private bool UnitSpecified(List<LogCurveInfo> logCurves, LogData logData)
         {

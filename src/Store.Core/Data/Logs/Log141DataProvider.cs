@@ -100,7 +100,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     continue;
 
                 // Use existing curve UID, if available; otherwise, use the mnemonic
-                var curve = current.LogCurveInfo.GetByMnemonic(mnemonicElement.Value);
+                var curve = current?.LogCurveInfo.GetByMnemonic(mnemonicElement.Value);
                 var uid = curve?.Uid ?? mnemonicElement.Value;
 
                 // Update entity with UID
