@@ -19,6 +19,7 @@
 using System;
 using System.Net.Http.Headers;
 using System.Security.Principal;
+using System.Text;
 using System.Threading;
 using System.Web;
 
@@ -34,6 +35,9 @@ namespace PDS.WITSMLstudio.Framework.Web.Security
         private const string AuthenticateHeaderKey = "WWW-Authenticate";
         private const string AuthenticationModeBasic = "Basic";
         private const string AuthenticationModeBearer = "Bearer";
+        private const string GrantTypeKey = "grant_type";
+        private const string GrantTypeUsername = "username";
+        private const string GrantTypePassword = "password";
 
         /// <summary>
         /// Initializes a module and prepares it to handle requests.
@@ -56,7 +60,16 @@ namespace PDS.WITSMLstudio.Framework.Web.Security
             var request = HttpContext.Current.Request;
             var authHeader = request.QueryString[AuthorizationHeaderKey] ?? request.Headers[AuthorizationHeaderKey];
 
-            if (authHeader == null)
+            // Support username and password sent via payload for a JWT request
+            if (string.IsNullOrWhiteSpace(authHeader) && GrantTypePassword.EqualsIgnoreCase(request.Form[GrantTypeKey]))
+            {
+                var username = request.Form[GrantTypeUsername];
+                var password = request.Form[GrantTypePassword];
+
+                authHeader = ConvertToBasicAuthentication(username, password);
+            }
+
+            if (string.IsNullOrWhiteSpace(authHeader))
             {
                 DenyAccess();
             }
@@ -64,7 +77,7 @@ namespace PDS.WITSMLstudio.Framework.Web.Security
             var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
             VerifyAuthenticationHeader(authHeaderVal);
         }
-        
+
         /// <summary>
         /// Called when application end request. If the request was unauthorized, the WWW-Authenticate header is added to the response.
         /// </summary>
@@ -112,7 +125,7 @@ namespace PDS.WITSMLstudio.Framework.Web.Security
         /// <param name="authHeaderVal">The authentication header value.</param>
         protected virtual void VerifyAuthenticationHeader(AuthenticationHeaderValue authHeaderVal)
         {
-            if (authHeaderVal.Parameter == null)
+            if (string.IsNullOrWhiteSpace(authHeaderVal.Parameter))
             {
                 DenyAccess();
             }
@@ -148,6 +161,21 @@ namespace PDS.WITSMLstudio.Framework.Web.Security
         protected virtual void VerifyBearerAuthentication(string parameter)
         {
             DenyAccess();
+        }
+
+        /// <summary>
+        /// Converts the supplied credentials to a Basic authentication header.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>A Basic authentication header.</returns>
+        protected virtual string ConvertToBasicAuthentication(string username, string password)
+        {
+            var credentials = string.IsNullOrWhiteSpace(username)
+                ? string.Empty
+                : string.Concat(username, ":", password);
+
+            return string.Concat(AuthenticationModeBasic, " ", Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials)));
         }
 
         /// <summary>
