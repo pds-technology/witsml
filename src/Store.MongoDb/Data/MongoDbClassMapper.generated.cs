@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Core, 2017.2
 //
 // Copyright 2017 PDS Americas LLC
@@ -46,14 +46,47 @@ namespace PDS.WITSMLstudio.Store.Data
             Register<Witsml141.Attachment>();
             Register2<Witsml200.Attachment>();
 
+            // bhaRun
+            Register<Witsml131.BhaRun>();
+            Register<Witsml141.BhaRun>();
+            Register2<Witsml200.BhaRun>();
+
+            // cementJob
+            Register<Witsml131.CementJob>();
+            Register<Witsml141.CementJob>();
+            Register2<Witsml200.CementJob>();
+
+            // cementJobEvaluation
+            Register2<Witsml200.CementJobEvaluation>();
+
             // channel
             Register2<Witsml200.Channel>();
 
             // channelSet
             Register2<Witsml200.ChannelSet>();
 
+            // convCore
+            Register<Witsml131.ConvCore>();
+            Register<Witsml141.ConvCore>();
+
             // dataAssuranceRecord
             Register2<Witsml200.DataAssuranceRecord>();
+
+            // downholeComponent
+            Register2<Witsml200.DownholeComponent>();
+
+            // drillReport
+            Register<Witsml141.DrillReport>();
+            Register2<Witsml200.DrillReport>();
+
+            // fluidsReport
+            Register<Witsml131.FluidsReport>();
+            Register<Witsml141.FluidsReport>();
+            Register2<Witsml200.FluidsReport>();
+
+            // formationMarker
+            Register<Witsml131.FormationMarker>();
+            Register<Witsml141.FormationMarker>();
 
             // log
             Register<Witsml131.Log>();
@@ -68,6 +101,14 @@ namespace PDS.WITSMLstudio.Store.Data
             Register<Witsml131.MudLog>();
             Register<Witsml141.MudLog>();
 
+            // mudLogReport
+            Register2<Witsml200.MudLogReport>();
+
+            // opsReport
+            Register<Witsml131.OpsReport>();
+            Register<Witsml141.OpsReport>();
+            Register2<Witsml200.OpsReport>();
+
             // rig
             Register<Witsml131.Rig>();
             Register<Witsml141.Rig>();
@@ -76,10 +117,48 @@ namespace PDS.WITSMLstudio.Store.Data
             // rigUtilization
             Register2<Witsml200.RigUtilization>();
 
+            // risk
+            Register<Witsml131.Risk>();
+            Register<Witsml141.Risk>();
+            Register2<Witsml200.Risk>();
+
+            // sidewallCore
+            Register<Witsml131.SidewallCore>();
+            Register<Witsml141.SidewallCore>();
+
+            // stimJob
+            Register<Witsml141.StimJob>();
+            Register2<Witsml200.StimJob>();
+
+            // stimJobStage
+            Register2<Witsml200.StimJobStage>();
+
+            // surveyProgram
+            Register<Witsml131.SurveyProgram>();
+            Register<Witsml141.SurveyProgram>();
+            Register2<Witsml200.SurveyProgram>();
+
+            // target
+            Register<Witsml131.Target>();
+            Register<Witsml141.Target>();
+
+            // toolErrorModel
+            Register<Witsml141.ToolErrorModel>();
+            Register2<Witsml200.ToolErrorModel>();
+
+            // toolErrorTermSet
+            Register<Witsml141.ToolErrorTermSet>();
+            Register2<Witsml200.ToolErrorTermSet>();
+
             // trajectory
             Register<Witsml131.Trajectory>();
             Register<Witsml141.Trajectory>();
             Register2<Witsml200.Trajectory>();
+
+            // tubular
+            Register<Witsml131.Tubular>();
+            Register<Witsml141.Tubular>();
+            Register2<Witsml200.Tubular>();
 
             // wbGeometry
             Register<Witsml131.StandAloneWellboreGeometry>();
@@ -95,8 +174,32 @@ namespace PDS.WITSMLstudio.Store.Data
             Register<Witsml141.Wellbore>();
             Register2<Witsml200.Wellbore>();
 
+            // wellboreCompletion
+            Register2<Witsml200.WellboreCompletion>();
+
+            // wellboreGeology
+            Register2<Witsml200.WellboreGeology>();
+
+            // wellboreGeometry
+            Register2<Witsml200.WellboreGeometry>();
+
+            // wellboreMarker
+            Register2<Witsml200.WellboreMarker>();
+
+            // wellboreMarker
+            Register2<Witsml200.WellboreMarker>();
+
+            // wellboreMarkerSet
+            Register2<Witsml200.WellboreMarkerSet>();
+
+            // wellCMLedger
+            Register2<Witsml200.WellCMLedger>();
+
             // wellCompletion
             Register2<Witsml200.WellCompletion>();
+
+            // wellLog
+            Register<Witsml131.WellLog>();
 
         }
     }
