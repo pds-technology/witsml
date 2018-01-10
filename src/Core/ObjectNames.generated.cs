@@ -48,7 +48,22 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 Attachment.
         /// </summary>
         public static readonly ObjectName Attachment200 = new ObjectName(ObjectTypes.Attachment, Version200);
-        
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 BhaRun.
+        /// </summary>
+        public static readonly ObjectName BhaRun131 = new ObjectName(ObjectTypes.BhaRun, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 BhaRun.
+        /// </summary>
+        public static readonly ObjectName BhaRun141 = new ObjectName(ObjectTypes.BhaRun, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 BhaRun.
+        /// </summary>
+        public static readonly ObjectName BhaRun200 = new ObjectName(ObjectTypes.BhaRun, Version200);
+
         /// <summary>
         /// The data object name for a 1.3.1.1 CementJob.
         /// </summary>
@@ -68,7 +83,7 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 CementJobEvaluation.
         /// </summary>
         public static readonly ObjectName CementJobEvaluation200 = new ObjectName(ObjectTypes.CementJobEvaluation, Version200);
-        
+
         /// <summary>
         /// The data object name for a 2.0 Channel.
         /// </summary>
@@ -80,6 +95,16 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
 
         /// <summary>
+        /// The data object name for a 1.3.1.1 ConvCore.
+        /// </summary>
+        public static readonly ObjectName ConvCore131 = new ObjectName(ObjectTypes.ConvCore, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 ConvCore.
+        /// </summary>
+        public static readonly ObjectName ConvCore141 = new ObjectName(ObjectTypes.ConvCore, Version141);
+
+        /// <summary>
         /// The data object name for a 2.0 DataAssuranceRecord.
         /// </summary>
         public static readonly ObjectName DataAssuranceRecord200 = new ObjectName(ObjectTypes.DataAssuranceRecord, Version200);
@@ -88,6 +113,16 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 DownholeComponent.
         /// </summary>
         public static readonly ObjectName DownholeComponent200 = new ObjectName(ObjectTypes.DownholeComponent, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 DrillReport.
+        /// </summary>
+        public static readonly ObjectName DrillReport141 = new ObjectName(ObjectTypes.DrillReport, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 DrillReport.
+        /// </summary>
+        public static readonly ObjectName DrillReport200 = new ObjectName(ObjectTypes.DrillReport, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 FluidsReport.
@@ -103,6 +138,16 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 FluidsReport.
         /// </summary>
         public static readonly ObjectName FluidsReport200 = new ObjectName(ObjectTypes.FluidsReport, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 FormationMarker.
+        /// </summary>
+        public static readonly ObjectName FormationMarker131 = new ObjectName(ObjectTypes.FormationMarker, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 FormationMarker.
+        /// </summary>
+        public static readonly ObjectName FormationMarker141 = new ObjectName(ObjectTypes.FormationMarker, Version141);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Log.
@@ -140,6 +185,26 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName MudLog141 = new ObjectName(ObjectTypes.MudLog, Version141);
 
         /// <summary>
+        /// The data object name for a 2.0 MudLogReport.
+        /// </summary>
+        public static readonly ObjectName MudLogReport200 = new ObjectName(ObjectTypes.MudLogReport, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 OpsReport.
+        /// </summary>
+        public static readonly ObjectName OpsReport131 = new ObjectName(ObjectTypes.OpsReport, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 OpsReport.
+        /// </summary>
+        public static readonly ObjectName OpsReport141 = new ObjectName(ObjectTypes.OpsReport, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 OpsReport.
+        /// </summary>
+        public static readonly ObjectName OpsReport200 = new ObjectName(ObjectTypes.OpsReport, Version200);
+
+        /// <summary>
         /// The data object name for a 1.3.1.1 Rig.
         /// </summary>
         public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, Version131);
@@ -160,6 +225,91 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName RigUtilization200 = new ObjectName(ObjectTypes.RigUtilization, Version200);
 
         /// <summary>
+        /// The data object name for a 1.3.1.1 Risk.
+        /// </summary>
+        public static readonly ObjectName Risk131 = new ObjectName(ObjectTypes.Risk, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 Risk.
+        /// </summary>
+        public static readonly ObjectName Risk141 = new ObjectName(ObjectTypes.Risk, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 Risk.
+        /// </summary>
+        public static readonly ObjectName Risk200 = new ObjectName(ObjectTypes.Risk, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 SidewallCore.
+        /// </summary>
+        public static readonly ObjectName SidewallCore131 = new ObjectName(ObjectTypes.SidewallCore, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 SidewallCore.
+        /// </summary>
+        public static readonly ObjectName SidewallCore141 = new ObjectName(ObjectTypes.SidewallCore, Version141);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 StimJob.
+        /// </summary>
+        public static readonly ObjectName StimJob141 = new ObjectName(ObjectTypes.StimJob, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 StimJob.
+        /// </summary>
+        public static readonly ObjectName StimJob200 = new ObjectName(ObjectTypes.StimJob, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 StimJobStage.
+        /// </summary>
+        public static readonly ObjectName StimJobStage200 = new ObjectName(ObjectTypes.StimJobStage, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 SurveyProgram.
+        /// </summary>
+        public static readonly ObjectName SurveyProgram131 = new ObjectName(ObjectTypes.SurveyProgram, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 SurveyProgram.
+        /// </summary>
+        public static readonly ObjectName SurveyProgram141 = new ObjectName(ObjectTypes.SurveyProgram, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 SurveyProgram.
+        /// </summary>
+        public static readonly ObjectName SurveyProgram200 = new ObjectName(ObjectTypes.SurveyProgram, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 Target.
+        /// </summary>
+        public static readonly ObjectName Target131 = new ObjectName(ObjectTypes.Target, Version131);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 Target.
+        /// </summary>
+        public static readonly ObjectName Target141 = new ObjectName(ObjectTypes.Target, Version141);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 ToolErrorModel.
+        /// </summary>
+        public static readonly ObjectName ToolErrorModel141 = new ObjectName(ObjectTypes.ToolErrorModel, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 ToolErrorModel.
+        /// </summary>
+        public static readonly ObjectName ToolErrorModel200 = new ObjectName(ObjectTypes.ToolErrorModel, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 ToolErrorTermSet.
+        /// </summary>
+        public static readonly ObjectName ToolErrorTermSet141 = new ObjectName(ObjectTypes.ToolErrorTermSet, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 ToolErrorTermSet.
+        /// </summary>
+        public static readonly ObjectName ToolErrorTermSet200 = new ObjectName(ObjectTypes.ToolErrorTermSet, Version200);
+
+        /// <summary>
         /// The data object name for a 1.3.1.1 Trajectory.
         /// </summary>
         public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, Version131);
@@ -173,6 +323,11 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 Trajectory.
         /// </summary>
         public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 TrajectoryStation.
+        /// </summary>
+        public static readonly ObjectName TrajectoryStation200 = new ObjectName(ObjectTypes.TrajectoryStation, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Tubular.
@@ -230,6 +385,16 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
 
         /// <summary>
+        /// The data object name for a 2.0 WellboreCompletion.
+        /// </summary>
+        public static readonly ObjectName WellboreCompletion200 = new ObjectName(ObjectTypes.WellboreCompletion, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 WellboreGeology.
+        /// </summary>
+        public static readonly ObjectName WellboreGeology200 = new ObjectName(ObjectTypes.WellboreGeology, Version200);
+
+        /// <summary>
         /// The data object name for a 2.0 WellboreGeometry.
         /// </summary>
         public static readonly ObjectName WellboreGeometry200 = new ObjectName(ObjectTypes.WellboreGeometry, Version200);
@@ -245,9 +410,19 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName WellboreMarkerSet200 = new ObjectName(ObjectTypes.WellboreMarkerSet, Version200);
 
         /// <summary>
+        /// The data object name for a 2.0 WellCMLedger.
+        /// </summary>
+        public static readonly ObjectName WellCMLedger200 = new ObjectName(ObjectTypes.WellCMLedger, Version200);
+
+        /// <summary>
         /// The data object name for a 2.0 WellCompletion.
         /// </summary>
         public static readonly ObjectName WellCompletion200 = new ObjectName(ObjectTypes.WellCompletion, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.3.1.1 WellLog.
+        /// </summary>
+        public static readonly ObjectName WellLog131 = new ObjectName(ObjectTypes.WellLog, Version131);
 
     }
 }

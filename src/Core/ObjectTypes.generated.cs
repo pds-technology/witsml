@@ -45,6 +45,11 @@ namespace PDS.WITSMLstudio
         public const string Attachment = "attachment";
 
         /// <summary>
+        /// The data object type for a BhaRun.
+        /// </summary>
+        public const string BhaRun = "bhaRun";
+
+        /// <summary>
         /// The data object type for a CementJob.
         /// </summary>
         public const string CementJob = "cementJob";
@@ -65,6 +70,11 @@ namespace PDS.WITSMLstudio
         public const string ChannelSet = "channelSet";
 
         /// <summary>
+        /// The data object type for a ConvCore.
+        /// </summary>
+        public const string ConvCore = "convCore";
+
+        /// <summary>
         /// The data object type for a DataAssuranceRecord.
         /// </summary>
         public const string DataAssuranceRecord = "dataAssuranceRecord";
@@ -75,9 +85,19 @@ namespace PDS.WITSMLstudio
         public const string DownholeComponent = "downholeComponent";
 
         /// <summary>
+        /// The data object type for a DrillReport.
+        /// </summary>
+        public const string DrillReport = "drillReport";
+
+        /// <summary>
         /// The data object type for a FluidsReport.
         /// </summary>
         public const string FluidsReport = "fluidsReport";
+
+        /// <summary>
+        /// The data object type for a FormationMarker.
+        /// </summary>
+        public const string FormationMarker = "formationMarker";
 
         /// <summary>
         /// The data object type for a Log.
@@ -95,6 +115,16 @@ namespace PDS.WITSMLstudio
         public const string MudLog = "mudLog";
 
         /// <summary>
+        /// The data object type for a MudLogReport.
+        /// </summary>
+        public const string MudLogReport = "mudLogReport";
+
+        /// <summary>
+        /// The data object type for a OpsReport.
+        /// </summary>
+        public const string OpsReport = "opsReport";
+
+        /// <summary>
         /// The data object type for a Rig.
         /// </summary>
         public const string Rig = "rig";
@@ -103,6 +133,46 @@ namespace PDS.WITSMLstudio
         /// The data object type for a RigUtilization.
         /// </summary>
         public const string RigUtilization = "rigUtilization";
+
+        /// <summary>
+        /// The data object type for a Risk.
+        /// </summary>
+        public const string Risk = "risk";
+
+        /// <summary>
+        /// The data object type for a SidewallCore.
+        /// </summary>
+        public const string SidewallCore = "sidewallCore";
+
+        /// <summary>
+        /// The data object type for a StimJob.
+        /// </summary>
+        public const string StimJob = "stimJob";
+
+        /// <summary>
+        /// The data object type for a StimJobStage.
+        /// </summary>
+        public const string StimJobStage = "stimJobStage";
+
+        /// <summary>
+        /// The data object type for a SurveyProgram.
+        /// </summary>
+        public const string SurveyProgram = "surveyProgram";
+
+        /// <summary>
+        /// The data object type for a Target.
+        /// </summary>
+        public const string Target = "target";
+
+        /// <summary>
+        /// The data object type for a ToolErrorModel.
+        /// </summary>
+        public const string ToolErrorModel = "toolErrorModel";
+
+        /// <summary>
+        /// The data object type for a ToolErrorTermSet.
+        /// </summary>
+        public const string ToolErrorTermSet = "toolErrorTermSet";
 
         /// <summary>
         /// The data object type for a Trajectory.
@@ -130,6 +200,16 @@ namespace PDS.WITSMLstudio
         public const string Wellbore = "wellbore";
 
         /// <summary>
+        /// The data object type for a WellboreCompletion.
+        /// </summary>
+        public const string WellboreCompletion = "wellboreCompletion";
+
+        /// <summary>
+        /// The data object type for a WellboreGeology.
+        /// </summary>
+        public const string WellboreGeology = "wellboreGeology";
+
+        /// <summary>
         /// The data object type for a WellboreMarker.
         /// </summary>
         public const string WellboreMarker = "wellboreMarker";
@@ -140,9 +220,19 @@ namespace PDS.WITSMLstudio
         public const string WellboreMarkerSet = "wellboreMarkerSet";
 
         /// <summary>
+        /// The data object type for a WellCMLedger.
+        /// </summary>
+        public const string WellCMLedger = "wellCMLedger";
+
+        /// <summary>
         /// The data object type for a WellCompletion.
         /// </summary>
         public const string WellCompletion = "wellCompletion";
+
+        /// <summary>
+        /// The data object type for a WellLog.
+        /// </summary>
+        public const string WellLog = "wellLog";
 
     }
 }
