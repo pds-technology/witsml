@@ -375,6 +375,14 @@
     <Compile Include="Data\ToolErrorModels\ToolErrorModel200DataAdapter.generated.cs">
       <DependentUpon>ToolErrorModel200DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataAdapter.cs" />
+    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataAdapter.generated.cs">
+      <DependentUpon>ToolErrorTermSet141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataAdapter.cs" />
+    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataAdapter.generated.cs">
+      <DependentUpon>ToolErrorTermSet200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.cs" />
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.generated.cs">
       <DependentUpon>Trajectory131DataAdapter.cs</DependentUpon>
@@ -512,22 +520,7 @@
       <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\ToolErrorTermSets\ConvCores\" />
-    <Folder Include="Data\ToolErrorTermSets\DownholeComponents\" />
-    <Folder Include="Data\ToolErrorTermSets\DrillReports\" />
-    <Folder Include="Data\ToolErrorTermSets\FluidsReports\" />
-    <Folder Include="Data\ToolErrorTermSets\FormationMarkers\" />
-    <Folder Include="Data\ToolErrorTermSets\MudLogReports\" />
-    <Folder Include="Data\ToolErrorTermSets\OpsReports\" />
-    <Folder Include="Data\ToolErrorTermSets\Risks\" />
-    <Folder Include="Data\ToolErrorTermSets\SidewallCores\" />
-    <Folder Include="Data\ToolErrorTermSets\StimJobStages\" />
-    <Folder Include="Data\ToolErrorTermSets\StimJobs\" />
-    <Folder Include="Data\ToolErrorTermSets\SurveyPrograms\" />
-    <Folder Include="Data\ToolErrorTermSets\Targets\" />
-    <Folder Include="Data\ToolErrorTermSets\ToolErrorModels\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
