@@ -16,12 +16,23 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+
+namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
 {
     /// <summary>
     /// CementJobEvaluation200TestBase
     /// </summary>
     public partial class CementJobEvaluation200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            CementJobEvaluation.CementJob = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.CementJob),
+                Title = "CementJob",
+                Uuid = DevKit.Uid()
+            };
+        }
     }
 }

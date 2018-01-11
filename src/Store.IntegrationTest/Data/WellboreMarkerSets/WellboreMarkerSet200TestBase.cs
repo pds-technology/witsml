@@ -16,12 +16,24 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
 {
     /// <summary>
     /// WellboreMarkerSet200TestBase
     /// </summary>
     public partial class WellboreMarkerSet200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellboreMarkerSet.MarkerSetInterval = new MdInterval()
+            {
+                Datum = "SL",
+                MDTop = new LengthMeasure(0, LengthUom.ft),
+                MDBase = new LengthMeasure(1, LengthUom.ft)
+            };
+        }
     }
 }

@@ -16,12 +16,21 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.StimJobs
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+
+namespace PDS.WITSMLstudio.Store.Data.StimJobs
 {
     /// <summary>
     /// StimJob200TestBase
     /// </summary>
     public partial class StimJob200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            StimJob.Kind = "Test";
+            StimJob.CustomerName = "PDS";
+            StimJob.ServiceCompany = "CompanyA";
+            StimJob.MaterialCatalog = new StimJobMaterialCatalog();
+        }
     }
 }

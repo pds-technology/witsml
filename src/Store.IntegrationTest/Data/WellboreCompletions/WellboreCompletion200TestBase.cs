@@ -16,12 +16,30 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+
+namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
 {
     /// <summary>
     /// WellboreCompletion200TestBase
     /// </summary>
     public partial class WellboreCompletion200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellboreCompletion.NameWellCompletion = "WellboreCompletion";
+            WellboreCompletion.ReferenceWellbore = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
+                Title = "Wellbore",
+                Uuid = DevKit.Uid()
+            };
+            WellboreCompletion.WellCompletion = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.WellCompletion),
+                Title = "Wellbore",
+                Uuid = DevKit.Uid()
+            };
+        }
     }
 }

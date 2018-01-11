@@ -16,12 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.Tubulars
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.Tubulars
 {
     /// <summary>
     /// Tubular141TestBase
     /// </summary>
     public partial class Tubular141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Tubular.TypeTubularAssy = TubularAssembly.casing;
+        }
     }
 }

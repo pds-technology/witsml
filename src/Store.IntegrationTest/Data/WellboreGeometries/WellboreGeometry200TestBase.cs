@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
 {
     /// <summary>
@@ -23,5 +26,15 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
     /// </summary>
     public partial class WellboreGeometry200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellboreGeometry.GrowingStatus = ChannelStatus.active;
+            WellboreGeometry.Wellbore = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
+                Title = "Wellbore",
+                Uuid = DevKit.Uid()
+            };
+        }
     }
 }

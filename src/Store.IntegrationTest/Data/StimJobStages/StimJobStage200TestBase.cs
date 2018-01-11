@@ -16,12 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.StimJobStages
+namespace PDS.WITSMLstudio.Store.Data.StimJobStages
 {
     /// <summary>
     /// StimJobStage200TestBase
     /// </summary>
     public partial class StimJobStage200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            StimJobStage.Uid = DevKit.Uid();
+            StimJobStage.Number = 1;
+        }
     }
 }

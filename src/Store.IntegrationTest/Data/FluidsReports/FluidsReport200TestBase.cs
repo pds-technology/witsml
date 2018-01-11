@@ -16,6 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.WITSMLstudio.Store.Data.FluidsReports
 {
     /// <summary>
@@ -23,5 +28,16 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// </summary>
     public partial class FluidsReport200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            FluidsReport.DateTime = new Timestamp(DateTimeOffset.UtcNow);
+            FluidsReport.MD = new MeasuredDepthCoord(0, LengthUom.ft) { Datum = "SL" };
+            FluidsReport.Wellbore = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
+                Title = "Wellbore",
+                Uuid = DevKit.Uid()
+            };
+        }
     }
 }

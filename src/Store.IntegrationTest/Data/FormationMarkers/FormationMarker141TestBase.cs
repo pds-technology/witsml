@@ -16,12 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
 {
     /// <summary>
     /// FormationMarker141TestBase
     /// </summary>
     public partial class FormationMarker141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            FormationMarker.MDTopSample = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
+        }
     }
 }

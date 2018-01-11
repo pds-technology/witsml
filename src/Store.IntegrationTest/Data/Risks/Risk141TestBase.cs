@@ -16,12 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.Risks
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.Risks
 {
     /// <summary>
     /// Risk141TestBase
     /// </summary>
     public partial class Risk141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Risk.Type = RiskType.nearmiss;
+            Risk.Category = RiskCategory.HSE;
+        }
     }
 }

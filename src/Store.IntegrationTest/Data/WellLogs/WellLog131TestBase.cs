@@ -16,12 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellLogs
+using Energistics.DataAccess.WITSML131.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.WellLogs
 {
     /// <summary>
     /// WellLog131TestBase
     /// </summary>
     public partial class WellLog131TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellLog.IndexType = LogIndexType.datetime;
+        }
     }
 }

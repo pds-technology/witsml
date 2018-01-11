@@ -16,12 +16,20 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.DrillReports
+using System;
+using Energistics.DataAccess;
+
+namespace PDS.WITSMLstudio.Store.Data.DrillReports
 {
     /// <summary>
     /// DrillReport200TestBase
     /// </summary>
     public partial class DrillReport200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            DrillReport.DateTimeStart = new Timestamp(DateTimeOffset.UtcNow);
+            DrillReport.DateTimeEnd = new Timestamp(DateTimeOffset.UtcNow);
+        }
     }
 }

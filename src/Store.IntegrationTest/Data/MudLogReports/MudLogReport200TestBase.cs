@@ -16,12 +16,25 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.MudLogReports
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.MudLogReports
 {
     /// <summary>
     /// MudLogReport200TestBase
     /// </summary>
     public partial class MudLogReport200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            MudLogReport.GrowingStatus = ChannelStatus.active;
+            MudLogReport.ReportMDInterval = new MdInterval
+            {
+                Datum = "SL",
+                MDTop = new LengthMeasure(0, LengthUom.ft),
+                MDBase = new LengthMeasure(0, LengthUom.ft)
+            };
+        }
     }
 }

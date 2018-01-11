@@ -23,5 +23,12 @@
     /// </summary>
     public partial class StimJob141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            StimJob.Kind = "Test";
+            StimJob.ApiNumber = "API";
+            StimJob.CustomerName = "PDS";
+            StimJob.ServiceCompany = "CompanyA";
+        }
     }
 }

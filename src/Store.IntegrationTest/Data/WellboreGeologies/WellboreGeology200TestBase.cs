@@ -16,12 +16,30 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
 {
     /// <summary>
     /// WellboreGeology200TestBase
     /// </summary>
     public partial class WellboreGeology200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellboreGeology.MDInterval = new MdInterval
+            {
+                Datum = "SL",
+                MDTop = new LengthMeasure(0, LengthUom.ft),
+                MDBase = new LengthMeasure(0, LengthUom.ft)
+            };
+            WellboreGeology.Wellbore = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
+                Title = "Wellbore",
+                Uuid = DevKit.Uid()
+            };
+        }
     }
 }

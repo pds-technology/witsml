@@ -16,12 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
+namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
 {
     /// <summary>
     /// SurveyProgram141TestBase
     /// </summary>
     public partial class SurveyProgram141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            SurveyProgram.Uid = DevKit.Uid();
+            SurveyProgram.SurveyVer = 1;
+        }
     }
 }

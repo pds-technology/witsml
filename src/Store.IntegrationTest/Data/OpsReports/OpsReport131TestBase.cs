@@ -16,12 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.OpsReports
+using System;
+using Energistics.DataAccess;
+
+namespace PDS.WITSMLstudio.Store.Data.OpsReports
 {
     /// <summary>
     /// OpsReport131TestBase
     /// </summary>
     public partial class OpsReport131TestBase
     {
+        partial void BeforeEachTest()
+        {
+            OpsReport.DateTime = new Timestamp(DateTimeOffset.UtcNow);
+        }
     }
 }

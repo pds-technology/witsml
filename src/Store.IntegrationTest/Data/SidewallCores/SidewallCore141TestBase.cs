@@ -16,12 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.SidewallCores
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
+namespace PDS.WITSMLstudio.Store.Data.SidewallCores
 {
     /// <summary>
     /// SidewallCore141TestBase
     /// </summary>
     public partial class SidewallCore141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            SidewallCore.MDCore = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
+        }
     }
 }

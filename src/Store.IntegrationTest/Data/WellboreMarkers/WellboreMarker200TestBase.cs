@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
 {
     /// <summary>
@@ -23,5 +26,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
     /// </summary>
     public partial class WellboreMarker200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WellboreMarker.MD = new MeasuredDepthCoord(0, LengthUom.ft) { Datum = "SL" };
+        }
     }
 }

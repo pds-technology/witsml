@@ -16,12 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.BhaRuns
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+
+namespace PDS.WITSMLstudio.Store.Data.BhaRuns
 {
     /// <summary>
     /// BhaRun131TestBase
     /// </summary>
     public partial class BhaRun131TestBase
     {
+        partial void BeforeEachTest()
+        {
+            BhaRun.Tubular = new RefNameString(DevKit.Uid());
+        }
     }
 }

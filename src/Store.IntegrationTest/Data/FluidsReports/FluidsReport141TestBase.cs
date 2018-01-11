@@ -16,6 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
 namespace PDS.WITSMLstudio.Store.Data.FluidsReports
 {
     /// <summary>
@@ -23,5 +28,10 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// </summary>
     public partial class FluidsReport141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            FluidsReport.DateTime = new Timestamp(DateTimeOffset.UtcNow);
+            FluidsReport.MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft);
+        }
     }
 }
