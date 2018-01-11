@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.BhaRuns
+using System;
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.BhaRuns
 {
     /// <summary>
     /// BhaRun131DataProvider
     /// </summary>
     public partial class BhaRun131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(BhaRun dataObject, EtpUri uri)
+        {
+            dataObject.Tubular = new RefNameString(Guid.Empty.ToString());
+        }
     }
 }

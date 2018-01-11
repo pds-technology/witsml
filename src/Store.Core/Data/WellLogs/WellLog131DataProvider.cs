@@ -16,12 +16,25 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellLogs
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.WellLogs
 {
     /// <summary>
     /// WellLog131DataProvider
     /// </summary>
     public partial class WellLog131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(WellLog dataObject, EtpUri uri)
+        {
+            dataObject.IndexType = LogIndexType.unknown;
+        }
     }
 }

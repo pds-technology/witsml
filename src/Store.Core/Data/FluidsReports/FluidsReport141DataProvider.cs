@@ -16,6 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.Datatypes;
+
 namespace PDS.WITSMLstudio.Store.Data.FluidsReports
 {
     /// <summary>
@@ -23,5 +30,15 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// </summary>
     public partial class FluidsReport141DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(FluidsReport dataObject, EtpUri uri)
+        {
+            dataObject.DateTime = new Timestamp(DateTimeOffset.UtcNow);
+            dataObject.MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft);
+        }
     }
 }

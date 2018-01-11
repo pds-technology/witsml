@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
 {
     /// <summary>
     /// FormationMarker141DataProvider
     /// </summary>
     public partial class FormationMarker141DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(FormationMarker dataObject, EtpUri uri)
+        {
+            dataObject.MDTopSample = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
+        }
     }
 }

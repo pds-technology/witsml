@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.SidewallCores
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.SidewallCores
 {
     /// <summary>
     /// SidewallCore131DataProvider
     /// </summary>
     public partial class SidewallCore131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(SidewallCore dataObject, EtpUri uri)
+        {
+            dataObject.MDCore = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
+        }
     }
 }

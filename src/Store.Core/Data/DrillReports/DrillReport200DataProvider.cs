@@ -16,12 +16,27 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.DrillReports
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.DrillReports
 {
     /// <summary>
     /// DrillReport200DataProvider
     /// </summary>
     public partial class DrillReport200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(DrillReport dataObject, EtpUri uri)
+        {
+            dataObject.DateTimeStart = new Timestamp(DateTimeOffset.UtcNow);
+            dataObject.DateTimeEnd = new Timestamp(DateTimeOffset.UtcNow);
+        }
     }
 }

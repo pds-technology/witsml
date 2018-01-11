@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
+
 namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
 {
     /// <summary>
@@ -23,5 +27,14 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
     /// </summary>
     public partial class WellboreGeometry200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(WellboreGeometry dataObject, EtpUri uri)
+        {
+            dataObject.GrowingStatus = ChannelStatus.active;
+        }
     }
 }

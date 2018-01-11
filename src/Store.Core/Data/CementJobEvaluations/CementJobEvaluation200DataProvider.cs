@@ -16,12 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
+using System;
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
 {
     /// <summary>
     /// CementJobEvaluation200DataProvider
     /// </summary>
     public partial class CementJobEvaluation200DataProvider
-    {
+    {        
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(CementJobEvaluation dataObject, EtpUri uri)
+        {
+            dataObject.CementJob = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.CementJob),
+                Title = "CementJob",
+                Uuid = Guid.Empty.ToString()
+            };
+        }
     }
 }

@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.OpsReports
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.OpsReports
 {
     /// <summary>
     /// OpsReport131DataProvider
     /// </summary>
     public partial class OpsReport131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(OpsReport dataObject, EtpUri uri)
+        {
+            dataObject.DateTime = new Timestamp(DateTimeOffset.UtcNow);
+        }
     }
 }

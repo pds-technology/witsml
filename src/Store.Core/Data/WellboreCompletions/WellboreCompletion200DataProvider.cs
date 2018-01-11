@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
 {
     /// <summary>
     /// WellboreCompletion200DataProvider
     /// </summary>
     public partial class WellboreCompletion200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(WellboreCompletion dataObject, EtpUri uri)
+        {
+            dataObject.NameWellCompletion = "Default";
+            dataObject.WellCompletion = dataObject.WellCompletion.Create<WellCompletion>(uri.Parent);
+            dataObject.ReferenceWellbore = dataObject.ReferenceWellbore.Create<Wellbore>(uri.Parent);
+        }
     }
 }

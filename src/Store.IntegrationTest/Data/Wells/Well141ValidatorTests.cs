@@ -217,18 +217,19 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
-        [TestMethod]
-        public void WitsmlValidator_AddToStore_Error_487_Data_Object_Not_Supported()
-        {
-            var entity = new Target { Name = "Entity-to-test-unsupported-error" };
-            var list = new TargetList { Target = DevKit.List(entity) };
+        // TODO: Find a 141 object that is not supported by store
+        //[TestMethod]
+        //public void WitsmlValidator_AddToStore_Error_487_Data_Object_Not_Supported()
+        //{
+        //    var entity = new Target { Name = "Entity-to-test-unsupported-error" };
+        //    var list = new TargetList { Target = DevKit.List(entity) };
 
-            var xmlIn = EnergisticsConverter.ObjectToXml(list);
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
+        //    var xmlIn = EnergisticsConverter.ObjectToXml(list);
+        //    var response = DevKit.AddToStore("target", xmlIn, null, null);
 
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
+        //    Assert.IsNotNull(response);
+        //    Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        //}
 
         [TestMethod]
         public void WitsmlValidator_GetFromStore_Error_438_Recurring_Elements_Inconsistent_Selection()

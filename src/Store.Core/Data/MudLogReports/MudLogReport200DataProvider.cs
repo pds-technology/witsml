@@ -16,12 +16,33 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.MudLogReports
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.MudLogReports
 {
     /// <summary>
     /// MudLogReport200DataProvider
     /// </summary>
     public partial class MudLogReport200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(MudLogReport dataObject, EtpUri uri)
+        {
+
+            dataObject.GrowingStatus = ChannelStatus.active;
+            dataObject.ReportMDInterval = new MdInterval
+            {
+                Datum = "SL",
+                MDTop = new LengthMeasure(0, LengthUom.ft),
+                MDBase = new LengthMeasure(0, LengthUom.ft)
+            };
+        }
     }
 }

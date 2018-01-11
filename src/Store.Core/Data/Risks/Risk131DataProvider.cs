@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.Risks
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.Risks
 {
     /// <summary>
     /// Risk131DataProvider
     /// </summary>
     public partial class Risk131DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(Risk dataObject, EtpUri uri)
+        {
+            dataObject.Type = RiskType.nearmiss;
+            dataObject.Category = RiskCategory.HSE;
+        }
     }
 }

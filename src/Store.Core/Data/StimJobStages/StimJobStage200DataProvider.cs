@@ -16,12 +16,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.StimJobStages
+using System;
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.StimJobStages
 {
     /// <summary>
     /// StimJobStage200DataProvider
     /// </summary>
     public partial class StimJobStage200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(StimJobStage dataObject, EtpUri uri)
+        {
+            dataObject.Uid = Guid.NewGuid().ToString();
+            dataObject.Number = 1;
+        }
     }
 }

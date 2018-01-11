@@ -16,12 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
 {
     /// <summary>
     /// WellboreMarkerSet200DataProvider
     /// </summary>
     public partial class WellboreMarkerSet200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(WellboreMarkerSet dataObject, EtpUri uri)
+        {
+            dataObject.MarkerSetInterval = new MdInterval()
+            {
+                Datum = "SL",
+                MDTop = new LengthMeasure(0, LengthUom.ft),
+                MDBase = new LengthMeasure(1, LengthUom.ft)
+            };
+        }
     }
 }

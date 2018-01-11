@@ -16,12 +16,28 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.StimJobs
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.StimJobs
 {
     /// <summary>
     /// StimJob200DataProvider
     /// </summary>
     public partial class StimJob200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(StimJob dataObject, EtpUri uri)
+        {
+            dataObject.Kind = "Default";
+            dataObject.CustomerName = "Default";
+            dataObject.ServiceCompany = "Default";
+            dataObject.MaterialCatalog = new StimJobMaterialCatalog();
+        }
     }
 }

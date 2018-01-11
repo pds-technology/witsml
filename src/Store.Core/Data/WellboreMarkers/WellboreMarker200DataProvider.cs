@@ -16,6 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
+
 namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
 {
     /// <summary>
@@ -23,5 +28,14 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
     /// </summary>
     public partial class WellboreMarker200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(WellboreMarker dataObject, EtpUri uri)
+        {
+            dataObject.MD = new MeasuredDepthCoord(0, LengthUom.ft) { Datum = "SL" };
+        }
     }
 }
