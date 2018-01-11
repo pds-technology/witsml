@@ -455,5 +455,41 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             Assert.AreEqual(element3.LocalName, well.CustomData.Any[2].LocalName);
             Assert.AreEqual(element3.InnerText, well.CustomData.Any[2].InnerText);
         }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_Well_To_Add_Local_Crs()
+        {
+            AddParents();
+
+            var wellCrs = new WellCRS
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name(),
+                LocalCRS = new LocalCRS
+                {
+                    UsesWellAsOrigin = true,
+                    XRotationCounterClockwise = false,
+                    YAxisAzimuth = new YAxisAzimuth
+                    {
+                        Value = 10,
+                        Uom = PlaneAngleUom.dega,
+                        NorthDirection = AziRef.gridnorth
+                    }
+                }
+            };
+
+            Well.WellCRS = wellCrs.AsList();
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+            DevKit.GetAndAssert<WellList, Well>(Well);
+
+            // Update UID and other properties to simulate adding a new WellCRS
+            wellCrs.Uid = DevKit.Uid();
+            wellCrs.Name = DevKit.Name();
+            wellCrs.LocalCRS.YAxisAzimuth.Value = 20;
+
+            DevKit.UpdateAndAssert<WellList, Well>(Well);
+            DevKit.GetAndAssert<WellList, Well>(Well);
+        }
     }
 }

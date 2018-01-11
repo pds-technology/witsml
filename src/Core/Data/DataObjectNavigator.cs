@@ -475,7 +475,17 @@ namespace PDS.WITSMLstudio.Data
                 throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
 
             var clone = element.UpdateRootElementName(type);
-            return WitsmlParser.Parse(type, clone);
+
+            try
+            {
+                return WitsmlParser.Parse(type, clone);
+            }
+            catch
+            {
+                // Try again without the default namespace specified
+                clone = new XElement(clone) { Name = clone.Name.LocalName };
+                return WitsmlParser.Parse(type, clone);
+            }
         }
 
 
