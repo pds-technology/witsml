@@ -16,12 +16,73 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-    namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Energistics.Datatypes;
+
+namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
 {
     /// <summary>
     /// ToolErrorModel141Validator
     /// </summary>
     public partial class ToolErrorModel141Validator
     {
+        /// <summary>
+        /// Validates the data object while executing AddToStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForInsert()
+        {
+            var uri = DataObject.GetUri();
+
+            // Validate UID does not exist
+            if (Context.Function != Functions.PutObject && _wellDataAdapter.Exists(uri))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+            }
+        }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForUpdate()
+        {
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
+        }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
+
+            // Validate that there are no child data-objects if cascading deletes are not invoked.
+            if (!Parser.HasElements() && !Parser.CascadedDelete() && _wellboreDataAdapter.Any(uri))
+            {
+                yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
+            }
+        }
+
+        private ValidationResult ValidateObjectExistence(EtpUri uri)
+        {
+
+            // Validate that a Uid was provided
+            if (string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+            }
+            // Validate that a well for the Uid exists
+            else if (!_wellDataAdapter.Exists(uri))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+            }
+
+            return null;
+        }
     }
 }
