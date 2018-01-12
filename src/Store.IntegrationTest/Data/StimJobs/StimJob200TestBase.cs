@@ -16,7 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 
 namespace PDS.WITSMLstudio.Store.Data.StimJobs
 {
@@ -30,7 +32,19 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
             StimJob.Kind = "Test";
             StimJob.CustomerName = "PDS";
             StimJob.ServiceCompany = "CompanyA";
-            StimJob.MaterialCatalog = new StimJobMaterialCatalog();
+            StimJob.MaterialCatalog = new StimJobMaterialCatalog()
+            {
+                Additives = new List<StimAdditive>()
+                {
+                    new StimAdditive()
+                    {
+                        Uid = DevKit.Uid(),
+                        Kind = StimMaterialKind.CO2,
+                        Type = "CO2",
+                        SupplierCode = "CompanyB"
+                    }
+                }
+            };
         }
     }
 }
