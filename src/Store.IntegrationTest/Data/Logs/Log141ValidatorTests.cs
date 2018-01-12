@@ -355,10 +355,20 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 Uid = Log.Uid,
                 UidWell = Log.UidWell,
                 UidWellbore = Log.UidWellbore,
-                LogCurveInfo = Log.LogCurveInfo
+                LogData = new List<LogData>()
+                {
+                    new LogData()
+                    {
+                        Data = new List<string>()
+                    }
+
+                }
             };
 
-            update.LogCurveInfo.Last().Uid = "NewCurve";
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,13.3");
+            logData.MnemonicList = "MD,ROP,XXX";
 
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.AddingUpdatingLogCurveAtTheSameTime, updateResponse.Result);
@@ -393,7 +403,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         [TestMethod, Description("Test Error 434 LogCurveInfo has fewer channels than the Mnemonic list")]
-        public void Log141Validator_UpdateInStore_Error_434_Missing_Mnemonics_InLogCurveInfo()
+        public void Log141Validator_UpdateInStore_Error_434_Missing_Mnemonics_In_LogCurveInfo()
         {
             AddParents();
 
@@ -403,9 +413,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            // Remove all LogCurveInfo except for the index channel
-            Log.LogCurveInfo.RemoveAt(2);
-            Log.LogCurveInfo.RemoveAt(1);
             Log.LogData.Clear();
 
             var response = DevKit.Add<LogList, Log>(Log);
@@ -422,7 +429,11 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             };
 
             DevKit.InitHeader(update, LogIndexType.measureddepth);
-            update.LogCurveInfo.Clear();
+            //update.LogCurveInfo.Clear();
+
+            // Remove all LogCurveInfo except for the index channel
+            update.LogCurveInfo.RemoveAt(2);
+            update.LogCurveInfo.RemoveAt(1);
 
             // Add data for index channel and one other channel
             var logData = update.LogData.First();
@@ -446,9 +457,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             /////////////////////////////////////////////////////
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
-
-            // Remove the last channel from LogCurveInfo, that should leave MD and ROP
-            Log.LogCurveInfo.RemoveAt(2);
             Log.LogData.Clear();
 
             var response = DevKit.Add<LogList, Log>(Log);
@@ -465,12 +473,14 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             };
 
             DevKit.InitHeader(update, LogIndexType.measureddepth);
-            update.LogCurveInfo.Clear();
+
+            // Remove the last channel from LogCurveInfo, that should leave MD and ROP
+            update.LogCurveInfo.RemoveAt(2);
 
             var logData = update.LogData.First();
             logData.Data.Add("13,13.1");
             logData.Data.Add("14,14.1");
-            logData.MnemonicList = "MD,ROP1"; // Last channel does not match what's in LogCurveInfo
+            logData.MnemonicList = "MD,GR"; // Last channel does not match what's in LogCurveInfo
             logData.UnitList = "m,m/h";
 
             var updateResponse = DevKit.Update<LogList, Log>(update);

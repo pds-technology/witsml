@@ -521,6 +521,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
                         }
+                        else if (logCurves?.Count > 0 && !IsValidLogDataMnemonics(logCurves.Select(x => x.Mnemonic.Value), mnemonics))
+                        {
+                            return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
                         else if (existingMnemonics != null && !IsValidLogDataMnemonics(existingMnemonics, mnemonics))
                         {
                             return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
