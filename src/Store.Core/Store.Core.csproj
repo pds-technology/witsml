@@ -546,38 +546,6 @@
     <Compile Include="Data\Targets\Target141Validator.generated.cs">
       <DependentUpon>Target141Validator.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141DataProvider.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141DataProvider.generated.cs">
-      <DependentUpon>ToolErrorModel141DataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141Validator.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141Validator.generated.cs">
-      <DependentUpon>ToolErrorModel141Validator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200DataProvider.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200DataProvider.generated.cs">
-      <DependentUpon>ToolErrorModel200DataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200Validator.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200Validator.generated.cs">
-      <DependentUpon>ToolErrorModel200Validator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataProvider.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataProvider.generated.cs">
-      <DependentUpon>ToolErrorTermSet141DataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141Validator.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141Validator.generated.cs">
-      <DependentUpon>ToolErrorTermSet141Validator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataProvider.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataProvider.generated.cs">
-      <DependentUpon>ToolErrorTermSet200DataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200Validator.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200Validator.generated.cs">
-      <DependentUpon>ToolErrorTermSet200Validator.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataProvider.generated.cs">
       <DependentUpon>Trajectory131DataProvider.cs</DependentUpon>
     </Compile>
