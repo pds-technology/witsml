@@ -367,22 +367,6 @@
       <DependentUpon>Target141DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\TimestampSerializer.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141DataAdapter.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel141DataAdapter.generated.cs">
-      <DependentUpon>ToolErrorModel141DataAdapter.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200DataAdapter.cs" />
-    <Compile Include="Data\ToolErrorModels\ToolErrorModel200DataAdapter.generated.cs">
-      <DependentUpon>ToolErrorModel200DataAdapter.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataAdapter.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet141DataAdapter.generated.cs">
-      <DependentUpon>ToolErrorTermSet141DataAdapter.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataAdapter.cs" />
-    <Compile Include="Data\ToolErrorTermSets\ToolErrorTermSet200DataAdapter.generated.cs">
-      <DependentUpon>ToolErrorTermSet200DataAdapter.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.cs" />
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.generated.cs">
       <DependentUpon>Trajectory131DataAdapter.cs</DependentUpon>
