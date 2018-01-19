@@ -749,7 +749,8 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                              .StartsAfter(updateEnum.Current.GetIndexValue(), increasing, inclusive: false)))
                     {
                         updateEnum.Current.Id = endOfExisting ? string.Empty : id;
-                        existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
+                        if (!endOfExisting)
+                            existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
                         yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
@@ -760,7 +761,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                               !(new Range<double?>(updateRange.Start.Value, updateRange.End.Value)
                                   .Contains(existingEnum.Current.GetIndexValue(), increasing))))
                     {
-                        if (updateEnum.Current != null)
+                        if (!endOfUpdate && updateEnum.Current != null)
                             existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
