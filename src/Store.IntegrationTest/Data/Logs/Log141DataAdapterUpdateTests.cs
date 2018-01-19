@@ -741,7 +741,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Partial_Update_1()
         {
-            var log = AddAnEmptyLogWithFourCurves();
+            var log = AddAnEmptyLogWithMoreCurves();
 
             var curves = log.LogCurveInfo;
 
@@ -822,7 +822,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Partial_Update_2()
         {
-            var log = AddAnEmptyLogWithFourCurves();
+            var log = AddAnEmptyLogWithMoreCurves();
 
             var curves = log.LogCurveInfo;
 
@@ -902,7 +902,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Partial_Update_3()
         {
-            var log = AddAnEmptyLogWithFourCurves();
+            var log = AddAnEmptyLogWithMoreCurves();
 
             var curves = log.LogCurveInfo;
 
@@ -982,7 +982,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Partial_Update_4()
         {
-            var log = AddAnEmptyLogWithFourCurves();
+            var log = AddAnEmptyLogWithMoreCurves();
 
             var curves = log.LogCurveInfo;
 
@@ -2783,7 +2783,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public async Task Log141DataAdapter_UpdateInStore_Sparsely_Update_Log_Curves_With_Multiple_Threads()
         {
-            AddAnEmptyLogWithFourCurves();
+            AddAnEmptyLogWithMoreCurves();
 
             var iterations = 10;
             var indexValue = 10.0;
@@ -3052,27 +3052,150 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(0, result[0].LogData.Count);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Null_Reference_Exception()
+        {
+            WitsmlSettings.TimeRangeSize = 600000000;
+            const int logCount = 4;
+            const int dataRowCount = 200;
+
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            Log.LogData = null;
+
+            DevKit.AddAndAssert(Log);
+
+            var logs = new List<Log>();
+            var index = new DateTime(2000, 1, 1);
+            var mnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value));
+            var unitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit));
+
+            for (var i = 0; i < logCount; i++)
+            {
+                var clone = new Log()
+                {
+                    Uid = Log.Uid,
+                    UidWell = Log.UidWell,
+                    UidWellbore = Log.UidWellbore,
+                    Name = Log.Name,
+                    NameWell = Log.NameWell,
+                    NameWellbore = Log.NameWellbore,
+                    IndexCurve = Log.IndexCurve,
+                    IndexType = Log.IndexType,
+                    LogData = new List<LogData>()
+                    {
+                        new LogData()
+                        {
+                            MnemonicList = mnemonicList,
+                            UnitList = unitList,
+                            Data = new List<string>()
+                        }
+                    }
+                };
+
+                for (var r = 0; r < dataRowCount; r++)
+                {
+                    var data = string.Join(",", Enumerable.Repeat($"{r}", 2));
+                    clone.LogData[0].Data.Add($"{index:O},{data}");
+                    index = index.AddSeconds(1);
+                }
+
+                logs.Add(clone);
+            }
+
+            logs.Reverse();
+            logs.ForEach(x => DevKit.UpdateAndAssert(x));
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Update_With_Multiple_Threads_No_Deadlocks()
+        {
+            const int logCount = 10;
+            const int dataRowCount = 10000;
+            const int numberOfExtraCurves = 100;
+
+            AddAnEmptyLogWithMoreCurves(LogIndexType.datetime, numberOfExtraCurves);
+
+            var logs = new List<Log>();
+            var index = new DateTime(2000, 1, 1);
+            var mnemonicList = string.Join(",", Log.LogCurveInfo.Select(x => x.Mnemonic.Value));
+            var unitList = string.Join(",", Log.LogCurveInfo.Select(x => x.Unit));
+
+            for (var i = 0; i < logCount; i++)
+            {
+                var clone = new Log()
+                {
+                    Uid = Log.Uid,
+                    UidWell = Log.UidWell,
+                    UidWellbore = Log.UidWellbore,
+                    Name = Log.Name,
+                    NameWell = Log.NameWell,
+                    NameWellbore = Log.NameWellbore,
+                    IndexCurve = Log.IndexCurve,
+                    IndexType = Log.IndexType,
+                    LogData = new List<LogData>()
+                    {
+                        new LogData()
+                        {
+                            MnemonicList = mnemonicList,
+                            UnitList = unitList,
+                            Data = new List<string>()
+                        }
+                    }
+                };
+
+                for (var r = 0; r < dataRowCount; r++)
+                {
+                    var data = string.Join(",", Enumerable.Repeat($"{r}", numberOfExtraCurves + 2));
+                    clone.LogData[0].Data.Add($"{index:O},{data}");
+                    index = index.AddSeconds(1);
+                }
+
+                logs.Add(clone);
+            }
+
+            var tasks = new List<Task>();
+            logs.ForEach(x => tasks.Add(new Task(() => DevKit.UpdateAndAssert(x))));
+
+            var random = new Random();
+            tasks = tasks.OrderBy(x => random.Next()).ToList();
+            tasks.ForEach(x => x.Start());
+            Task.WaitAll(tasks.ToArray());
+
+            var headerQuery = new Log { UidWell = Log.UidWell, UidWellbore = Log.UidWellbore, Uid = Log.Uid };
+            var result = DevKit.GetAndAssert(headerQuery, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(new DateTime(2000, 1, 1).ToUnixTimeMicroseconds(), result.StartDateTimeIndex.ToUnixTimeMicroseconds(), "Start Index does not match");
+            Assert.AreEqual(index.AddSeconds(-1).ToUnixTimeMicroseconds(), result.EndDateTimeIndex.ToUnixTimeMicroseconds(), "End Index does not match");
+        }
+
         #region Helper Functions
 
-        private Log AddAnEmptyLogWithFourCurves()
+        private Log AddAnEmptyLogWithMoreCurves(LogIndexType indexType = LogIndexType.measureddepth, int numberOfExtraCurves = 1)
         {
             AddParents();
 
-            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, indexType);
 
-            var channelName = "channel3";
-            var curves = Log.LogCurveInfo;
-            var channel3 = new LogCurveInfo
+            for (var i = 0; i < numberOfExtraCurves; i++)
             {
-                Uid = channelName,
-                Mnemonic = new ShortNameStruct
+                var channelName = $"channel{i}";
+                var curves = Log.LogCurveInfo;
+                var newChannel = new LogCurveInfo
                 {
-                    Value = channelName
-                },
-                Unit = "ft",
-                TypeLogData = LogDataType.@double
-            };
-            curves.Add(channel3);
+                    Uid = channelName,
+                    Mnemonic = new ShortNameStruct
+                    {
+                        Value = channelName
+                    },
+                    Unit = "ft",
+                    TypeLogData = LogDataType.@double
+                };
+                curves.Add(newChannel);
+            }
+
             Log.LogData = null;
 
             DevKit.AddAndAssert(Log);

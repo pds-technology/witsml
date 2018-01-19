@@ -1162,7 +1162,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
 
-            var rowValues = GetRowValues(_current);
+            var rowValues = GetRowValues(IsClosed ? _records.Count - 1 : _current);
             return GetValue(rowValues, i);
         }
 
@@ -1787,7 +1787,8 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <returns>An <see cref="IEnumerable{Object}"/> of channel values and metadata for a given row.</returns>
         private IEnumerable<object> GetRowValues(int row)
         {
-            if (IsClosed)
+            // Allow access to any legitimate row
+            if (row < 0 || row >= _records.Count)
                 return Enumerable.Empty<object>();
 
             // NOTE: logging here is too verbose!
