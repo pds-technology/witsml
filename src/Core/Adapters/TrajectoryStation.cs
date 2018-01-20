@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using Energistics.DataAccess;
+using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Adapters
 {
@@ -26,54 +28,108 @@ namespace PDS.WITSMLstudio.Adapters
     [Serializable]
     public sealed class TrajectoryStation
     {
+        private readonly Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation _trajectoryStation131;
+        private readonly Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation _trajectoryStation141;
+
+        /// <summary>
+        /// Initializes a new <see cref="TrajectoryStation" /> based on a <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation" />.
+        /// </summary>
+        /// <param name="trajectoryStation">The WITSML 1.3.1.1 log curve info</param>
+        public TrajectoryStation(Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation trajectoryStation)
+        {
+            trajectoryStation.NotNull(nameof(trajectoryStation));
+
+            _trajectoryStation131 = trajectoryStation;
+            DataSchemaVersion = OptionsIn.DataVersion.Version131.Value;
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="TrajectoryStation" /> based on a <see cref="Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation" />.
+        /// </summary>
+        /// <param name="trajectoryStation">The WITSML 1.4.1.1 log curve info</param>
+        public TrajectoryStation(Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation trajectoryStation)
+        {
+            trajectoryStation.NotNull(nameof(trajectoryStation));
+
+            _trajectoryStation141 = trajectoryStation;
+            DataSchemaVersion = OptionsIn.DataVersion.Version141.Value;
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="TrajectoryStation" /> based on either a <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation" />
+        /// or a <see cref="Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation" />.
+        /// </summary>
+        /// <param name="trajectoryStation">The WITSML 1.3.1.1 or 1.4.1.1 log curve info</param>
+        public TrajectoryStation(object trajectoryStation)
+        {
+            trajectoryStation.NotNull(nameof(trajectoryStation));
+
+            if (trajectoryStation is Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation)
+            {
+                _trajectoryStation131 = trajectoryStation as Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation;
+                DataSchemaVersion = OptionsIn.DataVersion.Version131.Value;
+            }
+            else if (trajectoryStation is Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation)
+            {
+                _trajectoryStation141 = trajectoryStation as Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation;
+                DataSchemaVersion = OptionsIn.DataVersion.Version141.Value;
+            }
+            else
+                throw new ArgumentException(@"Not a WITSML 1.3.1.1 or WITSML 1.4.1.1 trajectory station", nameof(trajectoryStation));
+        }
+
+        /// <summary>
+        /// The data schema version of the object.
+        /// </summary>
+        public string DataSchemaVersion { get; }
+
+        /// <summary>
+        /// Gets the underlying trajectory station.
+        /// </summary>
+        public IUniqueId WrappedTrajectoryStation => (IUniqueId)_trajectoryStation131 ?? _trajectoryStation141;
+
+        /// <summary>
+        /// Gets or sets the unique object identifier.
+        /// </summary>
+        public string Uid
+        {
+            get { return _trajectoryStation131?.Uid ?? _trajectoryStation141?.Uid; }
+            set { if (_trajectoryStation131 != null) { _trajectoryStation131.Uid = value; } else { _trajectoryStation141.Uid = value; } }
+        }
+
         /// <summary>
         /// Gets the measured depth.
         /// </summary>
-        public double MD { get; }
+        public double? MD => _trajectoryStation131?.MD.Value ?? _trajectoryStation141?.MD.Value;
+
         /// <summary>
         /// Gets the true vertical depth.
         /// </summary>
-        public double? Tvd { get; }
+        public double? Tvd => _trajectoryStation131?.Tvd.Value ?? _trajectoryStation141?.Tvd.Value;
+
         /// <summary>
-        /// Gets the inclincation.
+        /// Gets the inclination.
         /// </summary>
-        public double? Incl { get; }
+        public double? Incl => _trajectoryStation131?.Incl.Value ?? _trajectoryStation141?.Incl.Value;
+
         /// <summary>
         /// Gets the azimuth.
         /// </summary>
-        public double? Azi { get; }
+        public double? Azi => _trajectoryStation131?.Azi.Value ?? _trajectoryStation141?.Azi.Value;
+
         /// <summary>
         /// Gets the magnetic toolface.
         /// </summary>
-        public double? Mtf { get; }
+        public double? Mtf => _trajectoryStation131?.Mtf.Value ?? _trajectoryStation141?.Mtf.Value;
+
         /// <summary>
         /// Gets the gravity toolface.
         /// </summary>
-        public double? Gtf { get; }
+        public double? Gtf => _trajectoryStation131?.Gtf.Value ?? _trajectoryStation141?.Gtf.Value;
+
         /// <summary>
         /// Gets the dogleg severity.
         /// </summary>
-        public double? DoglegSeverity { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TrajectoryStation" /> class.
-        /// </summary>
-        /// <param name="md">The measured depth.</param>
-        /// <param name="tvd">The true vertical depth.</param>
-        /// <param name="incl">The inclination.</param>
-        /// <param name="azi">The azimuth.</param>
-        /// <param name="mtf">The magnetic toolface.</param>
-        /// <param name="gtf">The gravity toolface.</param>
-        /// <param name="doglegSeverity">The dogleg severity.</param>
-        public TrajectoryStation(double md, double? tvd, double? incl, double? azi, double? mtf, double? gtf, double? doglegSeverity)
-        {
-            MD = md;
-            Tvd = tvd;
-            Incl = incl;
-            Azi = azi;
-            Mtf = mtf;
-            Gtf = gtf;
-            DoglegSeverity = doglegSeverity;
-        }
+        public double? DoglegSeverity => _trajectoryStation131?.DoglegSeverity.Value ?? _trajectoryStation141?.DoglegSeverity.Value;
     }
 }

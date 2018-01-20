@@ -86,6 +86,11 @@ namespace PDS.WITSMLstudio.Adapters
         public string DataSchemaVersion { get; }
 
         /// <summary>
+        /// Gets the underlying trajectory.
+        /// </summary>
+        public IWellboreObject WrappedTrajectory => (IWellboreObject) _trajectory131 ?? _trajectory141;
+
+        /// <summary>
         /// Gets or sets the parent Well object identifier.
         /// </summary>
         public string UidWell
@@ -167,18 +172,18 @@ namespace PDS.WITSMLstudio.Adapters
 
         private void InitializeTrajectoryStations()
         {
-            if (_trajectory131 != null && _trajectory131.TrajectoryStation != null)
+            if (_trajectory131?.TrajectoryStation != null)
             {
                 TrajectoryStation = new List<TrajectoryStation>();
 
-                _trajectory131.TrajectoryStation.ForEach(x => TrajectoryStation.Add(new TrajectoryStation(x.MD.Value, x.Tvd?.Value, x.Incl?.Value, x.Azi?.Value, x.Mtf?.Value, x.Gtf?.Value, x.DoglegSeverity?.Value)));
+                _trajectory131.TrajectoryStation.ForEach(x => TrajectoryStation.Add(new TrajectoryStation(x)));
             }
 
-            if (_trajectory141 != null && _trajectory141.TrajectoryStation != null)
+            if (_trajectory141?.TrajectoryStation != null)
             {
                 TrajectoryStation = new List<TrajectoryStation>();
 
-                _trajectory141.TrajectoryStation.ForEach(x => TrajectoryStation.Add(new TrajectoryStation(x.MD.Value, x.Tvd?.Value, x.Incl?.Value, x.Azi?.Value, x.Mtf?.Value, x.Gtf?.Value, x.DoglegSeverity?.Value)));
+                _trajectory141.TrajectoryStation.ForEach(x => TrajectoryStation.Add(new TrajectoryStation(x)));
             }
         }
     }
