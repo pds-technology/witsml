@@ -1788,7 +1788,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         private IEnumerable<object> GetRowValues(int row)
         {
             // Allow access to any legitimate row
-            if (row < 0 || row >= _records.Count)
+            if (row < -1 || row >= _records.Count)
                 return Enumerable.Empty<object>();
 
             // NOTE: logging here is too verbose!
