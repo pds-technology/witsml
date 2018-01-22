@@ -3109,6 +3109,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             logs.ForEach(x => DevKit.UpdateAndAssert(x));
         }
 
+        [Ignore]
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Update_With_Multiple_Threads_No_Deadlocks()
         {
