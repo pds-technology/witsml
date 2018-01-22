@@ -225,26 +225,23 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 // Validate LogCurveInfo
                 else if (logCurves != null)
                 {
-                    var indexCurve = current.IndexCurve;
-                    var indexCurveUid = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic == indexCurve.Value)?.Uid;
+                    var indexCurve = current.IndexCurve.Value;
                     var isTimeLog = current.IsTimeLog(true);
                     var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
-                    var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
-                    var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
-                    var updateCurves = logCurves.Where(l => !l.Uid.EqualsIgnoreCase(indexCurveUid) && uids.Contains(l.Uid.ToUpper())).ToList();
+                    var existingCurves = exist.Select(e => e.Mnemonic).ToList();
+                    var newCurves = logCurves.Where(l =>
+                            !l.Mnemonic.EqualsIgnoreCase(indexCurve) &&
+                            !existingCurves.ContainsIgnoreCase(l.Mnemonic))
+                        .ToList();
 
-                    if (newCurves.Count > 0 && updateCurves.Count > 0)
-                    {
-                        yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
-                    }
-                    else if (isTimeLog && newCurves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)
+                    if (isTimeLog && newCurves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)
                         || !isTimeLog && newCurves.Any(c => c.MinIndex != null || c.MaxIndex != null))
                     {
                         yield return new ValidationResult(ErrorCodes.IndexRangeSpecified.ToString(), new[] { "LogCurveInfo", "Index" });
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(Functions.UpdateInStore, indexCurve.Value, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
+                        yield return ValidateLogData(Functions.UpdateInStore, indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
                     }
                 }
 

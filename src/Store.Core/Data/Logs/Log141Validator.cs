@@ -262,26 +262,30 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 else if (logCurves != null)
                 {
                     var indexCurve = current.IndexCurve;
-                    var indexCurveUid = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve)?.Uid;
                     var isTimeLog = current.IsTimeLog(true);
                     var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
-                    var existingMnemonics = exist.Select(e => e.Uid.ToUpper()).ToArray();
-                    var newCurves = logCurves.Where(l => !existingMnemonics.Contains(l.Uid.ToUpper())).ToList();
-                    var updateCurves = logCurves.Where(l => !l.Uid.EqualsIgnoreCase(indexCurveUid) && existingMnemonics.Contains(l.Uid.ToUpper())).ToList();
                     var hasLogData = logData != null && logData.Count > 0;
+                    var existingCurves = exist.Select(e => e.Mnemonic.Value).ToArray();
+                    var newCurves = logCurves.Where(l =>
+                        !string.IsNullOrWhiteSpace(l.Mnemonic?.Value) &&
+                        !existingCurves.ContainsIgnoreCase(l.Mnemonic.Value)).ToList();
+                    var updateCurves = logCurves.Where(l =>
+                        !string.IsNullOrWhiteSpace(l.Mnemonic?.Value) &&
+                        !l.Mnemonic.Value.EqualsIgnoreCase(indexCurve) &&
+                        existingCurves.ContainsIgnoreCase(l.Mnemonic.Value)).ToList();
 
                     if (hasLogData && newCurves.Count > 0 && updateCurves.Count > 0)
                     {
                         yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
                     }
                     else if (isTimeLog && newCurves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)
-                        || !isTimeLog && newCurves.Any(c => c.MinIndex != null || c.MaxIndex != null))
+                             || !isTimeLog && newCurves.Any(c => c.MinIndex != null || c.MaxIndex != null))
                     {
                         yield return new ValidationResult(ErrorCodes.IndexRangeSpecified.ToString(), new[] { "LogCurveInfo", "Index" });
                     }
                     else if (hasLogData)
                     {
-                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false, existingMnemonics);
+                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false, existingCurves);
                     }
                 }
 
