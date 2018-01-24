@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Initializes a new <see cref="TrajectoryStation" /> based on a <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation" />.
         /// </summary>
-        /// <param name="trajectoryStation">The WITSML 1.3.1.1 log curve info</param>
+        /// <param name="trajectoryStation">The WITSML 1.3.1.1 trajectory station</param>
         public TrajectoryStation(Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation trajectoryStation)
         {
             trajectoryStation.NotNull(nameof(trajectoryStation));
@@ -46,7 +46,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Initializes a new <see cref="TrajectoryStation" /> based on a <see cref="Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation" />.
         /// </summary>
-        /// <param name="trajectoryStation">The WITSML 1.4.1.1 log curve info</param>
+        /// <param name="trajectoryStation">The WITSML 1.4.1.1 trajectory station</param>
         public TrajectoryStation(Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation trajectoryStation)
         {
             trajectoryStation.NotNull(nameof(trajectoryStation));
@@ -59,7 +59,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// Initializes a new <see cref="TrajectoryStation" /> based on either a <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.TrajectoryStation" />
         /// or a <see cref="Energistics.DataAccess.WITSML141.ComponentSchemas.TrajectoryStation" />.
         /// </summary>
-        /// <param name="trajectoryStation">The WITSML 1.3.1.1 or 1.4.1.1 log curve info</param>
+        /// <param name="trajectoryStation">The WITSML 1.3.1.1 or 1.4.1.1 trajectory station</param>
         public TrajectoryStation(object trajectoryStation)
         {
             trajectoryStation.NotNull(nameof(trajectoryStation));
