@@ -191,6 +191,25 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Removes the empty attributes from from the specified element and optionally the descendant nodes.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="includeDescendants">if set to <c>true</c> only elements with nil="true" are removed.</param>
+        public static void RemoveEmptyAttributes(XElement element, bool includeDescendants = false)
+        {
+            _log.Debug("Removing empty attributes.");
+
+            Action<XElement> predicate = e => e.Attributes().Where(a => string.IsNullOrEmpty(a.Value)).Remove();
+
+            predicate(element);
+
+            if (includeDescendants)
+            {
+                element.Descendants().ForEach(predicate);
+            }
+        }
+
+        /// <summary>
         /// Removes the empty descendant nodes from the specified element.
         /// </summary>
         /// <param name="element">The element.</param>

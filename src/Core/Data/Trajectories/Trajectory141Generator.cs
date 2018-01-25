@@ -33,11 +33,17 @@ namespace PDS.WITSMLstudio.Data.Trajectories
         /// The default Md uom
         /// </summary>
         public const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
+        /// <summary>
+        /// The default Tvd uom
+        /// </summary>
+        public const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
+        /// <summary>
+        /// The default Angle uom
+        /// </summary>
+        public const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
         private const string StationUidPrefix = "sta-";
         private const string LocationUidPrefix = "loc-";
-        private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
-        private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
         /// <summary>
         /// Generations trajectory station data.
