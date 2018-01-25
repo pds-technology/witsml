@@ -94,6 +94,20 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Get the node in the document using the specified XPath expression.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="xpath">The xpath.</param>
+        /// <returns>A <see cref="XElement"/> instance.</returns>
+        public static XElement GetElement(this XDocument document, string xpath)
+        {
+            var manager = GetNamespaceManager(document.Root);
+            xpath = IncludeNamespacePrefix(xpath);
+
+            return document.XPathSelectElement(xpath, manager);
+        }
+
+        /// <summary>
         /// Creates a clone of the node in the document using the specified XPath expression.
         /// </summary>
         /// <param name="document">The document.</param>
