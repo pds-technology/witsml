@@ -158,7 +158,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(log3);
 
             // Query for log 1
-            var objectTemplate = CreateLogTemplateQuery(Log);
+            var objectTemplate = DevKit.CreateLogTemplateQuery(Log);
 
             // Set the count element value to 16
             DevKit.Template.Set(objectTemplate, "//count", 16);
@@ -169,7 +169,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AssertAxisDefintion(Log, arrayCurve1, result.XMLout);
 
             // Create a new log template
-            objectTemplate = CreateLogTemplateQuery();
+            objectTemplate = DevKit.CreateLogTemplateQuery();
 
             // Set the count element value to 64
             DevKit.Template.Set(objectTemplate, "//count", 64);
@@ -181,7 +181,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AssertAxisDefintion(log3, arrayCurve3, result.XMLout);
 
             // Create a new log template
-            objectTemplate = CreateLogTemplateQuery();
+            objectTemplate = DevKit.CreateLogTemplateQuery();
 
             // Query for logs that contain curve ROP or arrayCurve2
             DevKit.Template.Set(objectTemplate, "//mnemonic", "ROP");
@@ -247,7 +247,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.IsNotNull(logParam4);
 
             // Query for log 1
-            var objectTemplate = CreateLogTemplateQuery(Log);
+            var objectTemplate = DevKit.CreateLogTemplateQuery(Log);
 
             // Set the param value to test1
             DevKit.Template.Set(objectTemplate, "//logParam/@name", logParam1.Name);
@@ -258,7 +258,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AssertLogParam(Log, logParam1, result.XMLout);
 
             // Query for logs that have logParam2
-            objectTemplate = CreateLogTemplateQuery();
+            objectTemplate = DevKit.CreateLogTemplateQuery();
 
             // Set the param value to test1
             DevKit.Template.Set(objectTemplate, "//logParam/@name", logParam2.Name);
@@ -270,7 +270,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AssertLogParam(log2, logParam2, result.XMLout);
 
             // Query for logs that have logParams with the value of 13.0 or 14.0
-            objectTemplate = CreateLogTemplateQuery();
+            objectTemplate = DevKit.CreateLogTemplateQuery();
 
             // Set the param value to test1
             var logParam = DevKit.Template.Clone(objectTemplate, "//logParam");
@@ -390,25 +390,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(expectedLogParam.Description, logParam.Description);
             Assert.AreEqual(expectedLogParam.Index, logParam.Index);
         }
-
-        private XDocument CreateLogTemplateQuery(Log log = null, bool includeData = false)
-        {
-            var document = DevKit.Template.Create<LogList>();
-
-            Assert.IsNotNull(document);
-            Assert.IsNotNull(document.Root);
-
-            // If log is not null set the UIDs
-            if (log != null)
-                DevKit.SetDocumentUids(log, document);
-
-            // Remove log data
-            if (!includeData)
-                DevKit.Template.Remove(document, "//logData");
-
-            return document;
-        }
-
+        
         private static void AssertAxisDefintion(Log expectedLog, LogCurveInfo curve, string xmlOut, int expectedCurveCount = 2)
         {
             var logList = EnergisticsConverter.XmlToObject<LogList>(xmlOut);

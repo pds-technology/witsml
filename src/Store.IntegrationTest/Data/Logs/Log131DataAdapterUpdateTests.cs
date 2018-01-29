@@ -608,6 +608,39 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.IsNotNull(logParam);
         }
 
+        [TestMethod, Description("As Unit is not required on logCurveInfo this validates updating a log with no unit")]
+        public void Log131DataAdapter_UpdateInStore_With_Empty_Unit_On_Curve()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+
+            //Remove the unit of the last logCurveInfo
+            var lci = Log.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(lci);
+
+            lci.Unit = string.Empty;
+
+            DevKit.AddAndAssert(Log);
+
+            DevKit.UpdateAndAssert(Log);
+
+            var template = DevKit.CreateLogTemplateQuery(Log);
+            var log = DevKit.GetLogWithTemplate(template);
+
+            // Verify the logCurveInfo unit
+            var resultLci = log.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(resultLci);
+            Assert.IsNull(resultLci.Unit);
+
+            // Verify the log data unitList matches
+            template = DevKit.CreateLogTemplateQuery(Log, true);
+            log = DevKit.GetLogWithTemplate(template);
+            Assert.IsNotNull(log.LogData[0]);
+            Assert.AreEqual(10, log.LogData.Count);
+        }
+
         #region Helper Functions
 
         private Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)

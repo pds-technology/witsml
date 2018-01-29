@@ -972,6 +972,43 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log, ErrorCodes.ErrorRowDataCount);
         }
 
+        [TestMethod, Description("As Unit is not required on logCurveInfo this validates adding a log with no unit")]
+        public void Log141Validator_AddToStore_With_Empty_Unit_On_Curve()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+
+            //Remove the unit of the last logCurveInfo
+            var lci = Log.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(lci);
+
+            lci.Unit = string.Empty;
+
+            // Set the 3rd UnitList entry to an empty string
+            var logData = Log.LogData.First();
+            logData.UnitList = "m,m/h,";
+
+            DevKit.AddAndAssert(Log);
+
+            var result = DevKit.GetAndAssert(Log, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            Assert.IsNotNull(result);
+
+            // Verify the logCurveInfo unit
+            var resultLci = result.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(resultLci);
+            Assert.IsNull(resultLci.Unit);
+
+            // Verify the log data unitList matches
+            result = DevKit.GetAndAssert(Log, optionsIn: OptionsIn.ReturnElements.DataOnly);
+            Assert.IsNotNull(result.LogData[0]);
+            Assert.AreEqual(1, result.LogData.Count);
+
+            var resultLogData = result.LogData[0];
+            Assert.AreEqual("m,", resultLogData.UnitList, "Unit list of the result doesn't match");
+        }
+
         #region Helper Methods
 
         private Log GetLog(Log log)
