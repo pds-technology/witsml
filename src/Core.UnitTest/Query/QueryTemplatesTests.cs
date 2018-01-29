@@ -17,16 +17,19 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Witsml131 = Energistics.DataAccess.WITSML131;
-using Witsml141 = Energistics.DataAccess.WITSML141;
-using Witsml200 = Energistics.DataAccess.WITSML200;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Query
 {
     [TestClass]
     public class QueryTemplatesTests
     {
+        private string xml141Namespace = "{http://www.witsml.org/schemas/1series}";
+        private string xml131Namespace = "{http://www.witsml.org/schemas/131}";
         [TestMethod]
         public void QueryTemplatesTests_Create_Header_Only_Template_For_Log_131()
         {
@@ -47,6 +50,80 @@ namespace PDS.WITSMLstudio.Query
             Console.WriteLine(xml);
 
             Assert.IsFalse(xml.Contains("logData"));
+        }
+
+        [TestMethod]
+        public void QueryTemplatesTests_Create_Trajectory_Has_Uom_141()
+        {
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.All);
+            var node = template.Descendants(xml141Namespace + "location").FirstOrDefault();
+            var elementList = new List<string>()
+            {
+                "latitude",
+                "longitude",
+                "easting",
+                "northing",
+                "southing",
+                "projectedX",
+                "projectedY",
+                "localX",
+                "localY"
+            };
+            AssertElementHasAttribute(node, xml141Namespace, elementList);
+        }
+
+        [TestMethod]
+        public void QueryTemplatesTests_Create_Trajectory_Has_Uom_131()
+        {
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var node = template.Descendants(xml131Namespace + "location").FirstOrDefault();
+            var elementList = new List<string>()
+            {
+                "latitude",
+                "longitude",
+                "easting",
+                "northing",
+                "southing",
+                "projectedX",
+                "projectedY",
+                "localX",
+                "localY"
+            };
+            AssertElementHasAttribute(node, xml131Namespace, elementList);
+        }
+
+        [TestMethod]
+        public void QueryTemplatesTests_Create_CementJob_Has_Uom_141()
+        {
+            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var node = template.Descendants(xml131Namespace + "cementAdditive").FirstOrDefault();
+            var elementList = new List<string>()
+            {
+                "concentration",
+                "wtSack",
+                "volSack"
+            };
+            AssertElementHasAttribute(node, xml131Namespace, elementList);
+        }
+
+        [TestMethod]
+        public void QueryTemplatesTests_Create_CementJob_Has_Uom_131()
+        {
+            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var node = template.Descendants(xml131Namespace + "cementAdditive").FirstOrDefault();
+            var elementList = new List<string>()
+            {
+                "concentration",
+                "wtSack",
+                "volSack"
+            };
+            AssertElementHasAttribute(node, xml131Namespace, elementList);
+        }
+
+        private void AssertElementHasAttribute(XElement node, string ns, IEnumerable<string> elements)
+        {
+            Assert.IsNotNull(node);
+            elements.ForEach(e => Assert.IsTrue(node.Element(ns + e).HasAttributes));
         }
     }
 }
