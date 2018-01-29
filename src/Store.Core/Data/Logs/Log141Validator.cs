@@ -596,7 +596,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 var logCurve = logCurves.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
 
                 // If there are not enough units to cover all of the mnemonics OR 
-                //... the LogCurve has a unit and the unit is empty the the unit is not specified.
+                //... the LogCurve has a unit and the unit is empty the unit is not specified.
                 if (units.Length <= i || (!string.IsNullOrEmpty(logCurve?.Unit) && string.IsNullOrEmpty(units[i].Trim())))
                     return false;
             }

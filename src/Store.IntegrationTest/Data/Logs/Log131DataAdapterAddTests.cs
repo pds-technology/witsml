@@ -426,6 +426,31 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.GetAndAssertDataRowCount(DevKit.CreateLog(Log), dataRowCount);
         }
 
+        [TestMethod, Description("As Unit is not required on logCurveInfo this validates adding a log with no unit")]
+        public void Log131DataAdapter_AddToStore_With_Empty_Unit_On_Curve()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+
+            //Remove the unit of the last logCurveInfo
+            var lci = Log.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(lci);
+
+            lci.Unit = string.Empty;
+
+            DevKit.AddAndAssert(Log);
+
+            var template = DevKit.CreateLogTemplateQuery(Log);
+            var log = DevKit.GetLogWithTemplate(template);
+
+            // Verify the logCurveInfo unit
+            var resultLci = log.LogCurveInfo.LastOrDefault();
+            Assert.IsNotNull(resultLci);
+            Assert.IsNull(resultLci.Unit);
+        }
+
         #region Helper Methods
 
         private Log GetLog(Log log)

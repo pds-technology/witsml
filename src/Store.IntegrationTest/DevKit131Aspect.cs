@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
@@ -258,6 +259,60 @@ namespace PDS.WITSMLstudio.Store
 
             return result;
         }
+
+        /// <summary>
+        /// Creates the log template query.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeData">if set to <c>true</c> include data.</param>
+        public XDocument CreateLogTemplateQuery(Log log = null, bool includeData = false)
+        {
+            var document = Template.Create<LogList>();
+
+            Assert.IsNotNull(document);
+            Assert.IsNotNull(document.Root);
+
+            // If log is not null set the UIDs
+            if (log != null)
+                SetDocumentUids(log, document);
+
+            // Remove log data
+            if (!includeData)
+                Template.Remove(document, "//logData");
+
+            return document;
+        }
+
+        /// <summary>
+        /// Gets the log with template.
+        /// </summary>
+        /// <param name="template">The template.</param>
+        public Log GetLogWithTemplate(XDocument template)
+        {
+            var logList = GetWithTemplate<LogList>(template);
+            var log = logList.Log.FirstOrDefault();
+            Assert.IsNotNull(log);
+
+            return log;
+        }
+
+        /// <summary>
+        /// Gets the list of objects the with template.
+        /// </summary>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <param name="template">The template.</param>
+        public T GetWithTemplate<T>(XDocument template)
+        {
+            var result = GetFromStore(ObjectTypes.Log, template.ToString(), null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+            Assert.IsNotNull(result);
+
+            var value = EnergisticsConverter.XmlToObject<T>(result.XMLout);
+            Assert.IsNotNull(value);
+
+            return value;
+        }
+
         /// <summary>
         /// Does get query for single bhaRun object and test for result count equal to 1 and is not null
         /// </summary>

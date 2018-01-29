@@ -441,11 +441,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(),
                         new[] {"LogCurveInfo"});
                 }
-                else if (!UnitSpecified(logCurves))
-                {
-                    return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(),
-                        new[] { "LogCurveInfo" });
-                }
                 else if (!string.IsNullOrEmpty(indexCurve) && mergedLogCurveInfoMnemonics.All(m => m != indexCurve))
                 {
                     return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] {"IndexCurve"});
@@ -477,11 +472,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         private bool ColumnIndexGreaterThanLength(List<LogCurveInfo> logCurves, int logDataColumnLength)
         {
             return logCurves.Any(c => c.ColumnIndex > logDataColumnLength);
-        }
-
-        private bool UnitSpecified(List<LogCurveInfo> logCurves)
-        {
-            return logCurves.All(lc => !string.IsNullOrWhiteSpace(lc.Unit));
         }
 
         private bool DuplicateUid(IEnumerable<string> uids)
