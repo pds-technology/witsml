@@ -107,6 +107,8 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Adapters\LengthMeasure.cs" />
+    <Compile Include="Adapters\Location.cs" />
     <Compile Include="Adapters\Log.cs" />
     <Compile Include="Adapters\LogCurveInfo.cs" />
     <Compile Include="Adapters\LogData.cs" />

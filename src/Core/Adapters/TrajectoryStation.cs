@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Energistics.DataAccess;
 using PDS.WITSMLstudio.Framework;
 
@@ -41,6 +42,8 @@ namespace PDS.WITSMLstudio.Adapters
 
             _trajectoryStation131 = trajectoryStation;
             DataSchemaVersion = OptionsIn.DataVersion.Version131.Value;
+
+            InitializeLocations();
         }
 
         /// <summary>
@@ -53,6 +56,8 @@ namespace PDS.WITSMLstudio.Adapters
 
             _trajectoryStation141 = trajectoryStation;
             DataSchemaVersion = OptionsIn.DataVersion.Version141.Value;
+
+            InitializeLocations();
         }
 
         /// <summary>
@@ -76,6 +81,8 @@ namespace PDS.WITSMLstudio.Adapters
             }
             else
                 throw new ArgumentException(@"Not a WITSML 1.3.1.1 or WITSML 1.4.1.1 trajectory station", nameof(trajectoryStation));
+
+            InitializeLocations();
         }
 
         /// <summary>
@@ -131,5 +138,27 @@ namespace PDS.WITSMLstudio.Adapters
         /// Gets the dogleg severity.
         /// </summary>
         public double? DoglegSeverity => _trajectoryStation131?.DoglegSeverity.Value ?? _trajectoryStation141?.DoglegSeverity.Value;
+
+        /// <summary>
+        /// Gets the trajectory stations.
+        /// </summary>
+        public List<Location> Location { get; private set; }
+
+        private void InitializeLocations()
+        {
+            if (_trajectoryStation131?.Location != null)
+            {
+                Location = new List<Location>();
+
+                _trajectoryStation131.Location.ForEach(x => Location.Add(new Location(x)));
+            }
+
+            if (_trajectoryStation141?.Location != null)
+            {
+                Location = new List<Location>();
+
+                _trajectoryStation141.Location.ForEach(x => Location.Add(new Location(x)));
+            }
+        }
     }
 }

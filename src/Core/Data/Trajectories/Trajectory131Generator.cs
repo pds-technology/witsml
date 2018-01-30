@@ -43,6 +43,7 @@ namespace PDS.WITSMLstudio.Data.Trajectories
         public const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
         private const string StationUidPrefix = "sta-";
+        private const string LocationUidPrefix = "loc-";
 
         /// <summary>
         /// Generations trajectory station data.
@@ -62,15 +63,17 @@ namespace PDS.WITSMLstudio.Data.Trajectories
 
             for (var i = 0; i < numOfStations; i++)
             {
+                string uidPrefix = (i + 1).ToString();
                 var station = new TrajectoryStation
                 {
-                    Uid = StationUidPrefix + (i + 1),
+                    Uid = StationUidPrefix + uidPrefix,
                     TypeTrajStation = i == 0 ? TrajStationType.tieinpoint : TrajStationType.magneticMWD,
                     MD = new MeasuredDepthCoord { Uom = mdUom, Value = startMd },
                     Tvd = new WellVerticalDepthCoord() { Uom = tvdUom, Value = startMd == 0 ? 0 : startMd - 0.1 },
                     Azi = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
                     Incl = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
-                    DateTimeStn = now.AddMinutes(i)
+                    DateTimeStn = now.AddMinutes(i),
+                    Location = new List<Location> { Location(LocationUidPrefix + 1, random.NextDouble(), "ED" + uidPrefix) }
                 };
 
                 if (includeExtra)
@@ -85,6 +88,21 @@ namespace PDS.WITSMLstudio.Data.Trajectories
             }
 
             return stations;
+        }
+
+        /// <summary>
+        /// Trajectory station location.
+        /// </summary>
+        /// <returns></returns>
+        public Location Location(string uid, double coordinateValue, string wellCrsValue)
+        {
+            return new Location
+            {
+                Uid = uid,
+                WellCRS = new RefNameString { UidRef = "proj1", Value = wellCrsValue },
+                Easting = new LengthMeasure(coordinateValue * 5, LengthUom.m),
+                Northing = new LengthMeasure(coordinateValue * 12, LengthUom.m),
+            };
         }
     }
 }
