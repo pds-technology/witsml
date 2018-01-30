@@ -3172,8 +3172,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             Assert.AreEqual(index.AddSeconds(-1).ToUnixTimeMicroseconds(), result.EndDateTimeIndex.ToUnixTimeMicroseconds(), "End Index does not match");
         }
 
-        [TestMethod, Description("As Unit is not required on logCurveInfo this validates updating a log with no unit")]
-        public void Log141Validator_UpdateInStore_With_Empty_Unit_On_Curve()
+        [TestMethod, Description("As Unit is not required (can be blank) on unit list when unit is not specfied on logCurveInfo")]
+        public void Log141DataAdapter_UpdateInStore_With_Empty_Unit_On_Curve()
         {
             AddParents();
 
