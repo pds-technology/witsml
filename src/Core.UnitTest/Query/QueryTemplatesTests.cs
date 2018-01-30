@@ -28,8 +28,9 @@ namespace PDS.WITSMLstudio.Query
     [TestClass]
     public class QueryTemplatesTests
     {
-        private string xml141Namespace = "{http://www.witsml.org/schemas/1series}";
-        private string xml131Namespace = "{http://www.witsml.org/schemas/131}";
+        private const string _xml141Namespace = "{http://www.witsml.org/schemas/1series}";
+
+        private const string _xml131Namespace = "{http://www.witsml.org/schemas/131}";
         [TestMethod]
         public void QueryTemplatesTests_Create_Header_Only_Template_For_Log_131()
         {
@@ -56,7 +57,8 @@ namespace PDS.WITSMLstudio.Query
         public void QueryTemplatesTests_Create_Trajectory_Has_Uom_141()
         {
             var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.All);
-            var node = template.Descendants(xml141Namespace + "location").FirstOrDefault();
+            var node = template.Descendants(_xml141Namespace + "location").FirstOrDefault();
+
             var elementList = new List<string>()
             {
                 "latitude",
@@ -69,14 +71,16 @@ namespace PDS.WITSMLstudio.Query
                 "localX",
                 "localY"
             };
-            AssertElementHasAttribute(node, xml141Namespace, elementList);
+
+            AssertElementHasAttribute(node, _xml141Namespace, elementList);
         }
 
         [TestMethod]
         public void QueryTemplatesTests_Create_Trajectory_Has_Uom_131()
         {
             var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
-            var node = template.Descendants(xml131Namespace + "location").FirstOrDefault();
+            var node = template.Descendants(_xml131Namespace + "location").FirstOrDefault();
+
             var elementList = new List<string>()
             {
                 "latitude",
@@ -89,41 +93,50 @@ namespace PDS.WITSMLstudio.Query
                 "localX",
                 "localY"
             };
-            AssertElementHasAttribute(node, xml131Namespace, elementList);
+
+            AssertElementHasAttribute(node, _xml131Namespace, elementList);
         }
 
         [TestMethod]
         public void QueryTemplatesTests_Create_CementJob_Has_Uom_141()
         {
             var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
-            var node = template.Descendants(xml131Namespace + "cementAdditive").FirstOrDefault();
+            var node = template.Descendants(_xml131Namespace + "cementAdditive").FirstOrDefault();
+
             var elementList = new List<string>()
             {
                 "concentration",
                 "wtSack",
                 "volSack"
             };
-            AssertElementHasAttribute(node, xml131Namespace, elementList);
+
+            AssertElementHasAttribute(node, _xml131Namespace, elementList);
         }
 
         [TestMethod]
         public void QueryTemplatesTests_Create_CementJob_Has_Uom_131()
         {
             var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
-            var node = template.Descendants(xml131Namespace + "cementAdditive").FirstOrDefault();
+            var node = template.Descendants(_xml131Namespace + "cementAdditive").FirstOrDefault();
+
             var elementList = new List<string>()
             {
                 "concentration",
                 "wtSack",
                 "volSack"
             };
-            AssertElementHasAttribute(node, xml131Namespace, elementList);
+
+            AssertElementHasAttribute(node, _xml131Namespace, elementList);
         }
 
-        private void AssertElementHasAttribute(XElement node, string ns, IEnumerable<string> elements)
+        private static void AssertElementHasAttribute(XContainer node, string ns, IEnumerable<string> elements)
         {
             Assert.IsNotNull(node);
-            elements.ForEach(e => Assert.IsTrue(node.Element(ns + e).HasAttributes));
+
+            elements.ForEach(e =>
+                Assert.IsNotNull(node.Element(ns + e).Attribute("uom"),
+                    $"Element {e} does not have UOM attribute")
+                );
         }
     }
 }
