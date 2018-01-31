@@ -700,7 +700,7 @@ namespace PDS.WITSMLstudio.Query
                     {
                         if (_headerOnly != null) return Clone(_headerOnly);
                         var headerOnly = _template.Create<WITSML131.MudLogList>();
-                        _template.Remove(headerOnly, "");
+                        _template.Remove(headerOnly, "//geologyInterval");
                         _headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
@@ -716,7 +716,7 @@ namespace PDS.WITSMLstudio.Query
                     {
                         if (_dataOnly != null) return Clone(_dataOnly);
                         var dataOnly = _template.Create<WITSML131.MudLogList>();
-                        _template.RemoveAll(dataOnly, "");
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='geologyInterval']");
                         _dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
@@ -1618,7 +1618,7 @@ namespace PDS.WITSMLstudio.Query
                     {
                         if (_headerOnly != null) return Clone(_headerOnly);
                         var headerOnly = _template.Create<WITSML141.MudLogList>();
-                        _template.Remove(headerOnly, "");
+                        _template.Remove(headerOnly, "//geologyInterval");
                         _headerOnly = headerOnly;
                         return Clone(_headerOnly);
                     }
@@ -1634,7 +1634,7 @@ namespace PDS.WITSMLstudio.Query
                     {
                         if (_dataOnly != null) return Clone(_dataOnly);
                         var dataOnly = _template.Create<WITSML141.MudLogList>();
-                        _template.RemoveAll(dataOnly, "");
+                        _template.RemoveAll(dataOnly, "/*/*/*[name()!='geologyInterval']");
                         _dataOnly = dataOnly;
                         return Clone(_dataOnly);
                     }
