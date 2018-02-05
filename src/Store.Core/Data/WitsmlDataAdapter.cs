@@ -66,6 +66,21 @@ namespace PDS.WITSMLstudio.Store.Data
         public Type DataObjectType => typeof(T);
 
         /// <summary>
+        /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="IWitsmlTransaction" /> instance.</returns>
+        public virtual IWitsmlTransaction GetTransaction() => Container.Resolve<IWitsmlTransaction>();
+
+        /// <summary>
+        /// Gets a value indicating whether validation is enabled for this data adapter.
+        /// </summary>
+        /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns><c>true</c> if validation is enabled for this data adapter; otherwise, <c>false</c>.</returns>
+        public virtual bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, T dataObject) => true;
+
+        /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
         /// <param name="parser">The query template parser.</param>
@@ -314,15 +329,6 @@ namespace PDS.WITSMLstudio.Store.Data
             var entity = Get(uri);
             DataObjectValidator.TryValidate(entity, out results);
             WitsmlValidator.ValidateResults(function, results);
-        }
-
-        /// <summary>
-        /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
-        /// </summary>
-        /// <returns></returns>
-        protected virtual IWitsmlTransaction GetTransaction()
-        {
-            return Container.Resolve<IWitsmlTransaction>();
         }
 
         /// <summary>

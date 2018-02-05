@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using Energistics.Datatypes;
 using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Transactions;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -28,6 +29,21 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <typeparam name="T">The data object type.</typeparam>
     public interface IWitsmlDataAdapter<T>
     {
+        /// <summary>
+        /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="IWitsmlTransaction"/> instance.</returns>
+        IWitsmlTransaction GetTransaction();
+
+        /// <summary>
+        /// Gets a value indicating whether validation is enabled for this data adapter.
+        /// </summary>
+        /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns><c>true</c> if validation is enabled for this data adapter; otherwise, <c>false</c>.</returns>
+        bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, T dataObject);
+
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
