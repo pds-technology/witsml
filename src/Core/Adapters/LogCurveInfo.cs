@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess;
 using PDS.WITSMLstudio.Framework;
 
@@ -147,5 +149,18 @@ namespace PDS.WITSMLstudio.Adapters
         /// Gets the maximum index of the date time.
         /// </summary>
         public Timestamp? MaxDateTimeIndex => _logCurveInfo131?.MaxDateTimeIndex ?? _logCurveInfo141?.MaxDateTimeIndex;
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has array data.
+        /// </summary>
+        public bool IsArrayData => _logCurveInfo131?.AxisDefinitionSpecified ?? _logCurveInfo141.AxisDefinitionSpecified;
+
+        /// <summary>
+        /// Gets the log curve infos axis definitions.
+        /// </summary>
+        /// <returns>The axis definitions.</returns>
+        public List<AxisDefinition> GetAxisDefinitions() =>
+            _logCurveInfo131?.AxisDefinition?.Select(c => new AxisDefinition(c)).ToList() ??
+            _logCurveInfo141?.AxisDefinition?.Select(c => new AxisDefinition(c)).ToList();
     }
 }

@@ -61,6 +61,28 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Splits the string to an array.
+        /// </summary>
+        /// <typeparam name="T">The object type.</typeparam>
+        /// <param name="value">The string value.</param>
+        /// <param name="separator">The separator.</param>
+        /// <returns>An array of values if successful, otherwise an empty array.</returns>
+        public static T[] Split<T>(this string value, string separator = " ")
+        {
+            try
+            {
+                return value
+                    .Split(new[] { separator }, StringSplitOptions.None)
+                    .Select(s => (T) Convert.ChangeType(s, typeof(T), CultureInfo.InvariantCulture))
+                    .ToArray();
+            }
+            catch
+            {
+                return new T[0];
+            }
+        }
+
+        /// <summary>
         /// Creates an array of trimmed strings by splitting this string at each occurence of a separator.
         /// </summary>
         /// <param name="value">The string value.</param>
