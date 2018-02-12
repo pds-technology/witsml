@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
@@ -138,7 +139,7 @@ namespace PDS.WITSMLstudio.Store.Data
             if (objectType == typeof(short) || objectType == typeof(int) || objectType == typeof(long) || 
                 objectType == typeof(double) || objectType == typeof(float) || objectType == typeof(decimal))
             {
-                return Convert.ChangeType(1, objectType);
+                return Convert.ChangeType(1, objectType, CultureInfo.InvariantCulture);
             }
             if (objectType == typeof(DateTime))
             {

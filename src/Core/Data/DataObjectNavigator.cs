@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -426,7 +427,7 @@ namespace PDS.WITSMLstudio.Data
                         ? bool.FalseString
                         : propertyValue;
 
-                var value = Convert.ChangeType(propertyValue, propertyType);
+                var value = Convert.ChangeType(propertyValue, propertyType, CultureInfo.InvariantCulture);
                 HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else if (propertyType == typeof(DateTime))
@@ -453,7 +454,7 @@ namespace PDS.WITSMLstudio.Data
             }
             else if (typeof(IConvertible).IsAssignableFrom(propertyType))
             {
-                var value = Convert.ChangeType(propertyValue, propertyType);
+                var value = Convert.ChangeType(propertyValue, propertyType, CultureInfo.InvariantCulture);
                 HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else
