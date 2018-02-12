@@ -45,6 +45,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
     {
         private static readonly string _defaultServerName = WitsmlSettings.DefaultServerName;
         private static readonly string _overrideServerVersion = WitsmlSettings.OverrideServerVersion;
+        private static readonly string[] _supportedEncodings = { "binary", "JSON" };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpControllerBase"/> class.
@@ -84,7 +85,8 @@ namespace PDS.WITSMLstudio.Store.Controllers
                 ApplicationVersion = handler.ApplicationVersion,
                 SupportedProtocols = handler.GetSupportedProtocols(),
                 SupportedObjects = supportedObjects,
-                ContactInformation = new Contact()
+                SupportedEncodings = string.Join(";", _supportedEncodings),
+                ContactInformation = new Contact
                 {
                     OrganizationName = WitsmlSettings.DefaultVendorName,
                     ContactName = WitsmlSettings.DefaultContactName,
@@ -126,20 +128,45 @@ namespace PDS.WITSMLstudio.Store.Controllers
         {
             var context = HttpContext.Current;
 
-            if (context.IsWebSocketRequest || context.IsWebSocketRequestUpgrading)
+            // Verify web socket handshake
+            if (!context.IsWebSocketRequest && !context.IsWebSocketRequestUpgrading)
             {
-                var options = CreateWebSocketOptions(context.WebSocketRequestedProtocols);
-                context.AcceptWebSocketRequest(AcceptWebSocketRequest, options);
-
-                var response = Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
-                UpdateHandshakeResponse(response);
-
-                return response;
+                return Request.CreateResponse(
+                    HttpStatusCode.UpgradeRequired,
+                    new { error = "Invalid web socket request" });
             }
 
-            return Request.CreateResponse(
-                HttpStatusCode.UpgradeRequired,
-                new { error = "Invalid web socket request" });
+            var options = CreateWebSocketOptions(context.WebSocketRequestedProtocols);
+
+            // Validate web socket protocol matched energistics-tp
+            if (options == null)
+            {
+                return Request.CreateResponse(
+                    HttpStatusCode.PreconditionFailed,
+                    new { error = "Invalid web socket protocol" });
+            }
+
+            var headers = GetWebSocketHeaders(context.Request.Headers, context.Request.QueryString);
+            string encoding;
+
+            // Validate etp-encoding header is either binary, json or not specified
+            if (headers.TryGetValue(EtpSettings.EtpEncodingHeader, out encoding) &&
+                !string.IsNullOrWhiteSpace(encoding) &&
+                !_supportedEncodings.ContainsIgnoreCase(encoding))
+            {
+                return Request.CreateResponse(
+                    HttpStatusCode.PreconditionFailed,
+                    new { error = "Invalid etp-encoding header" });
+            }
+
+            // Accept WebSocket request
+            context.AcceptWebSocketRequest(AcceptWebSocketRequest, options);
+
+            // Update response headers
+            var response = Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
+            UpdateHandshakeResponse(response);
+
+            return response;
         }
 
         /// <summary>
@@ -149,9 +176,13 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// <returns>A new <see cref="AspNetWebSocketOptions"/> instance.</returns>
         protected virtual AspNetWebSocketOptions CreateWebSocketOptions(IList<string> requestedProtocols)
         {
-            return requestedProtocols?.Count > 0
-                ? new AspNetWebSocketOptions { SubProtocol = EtpSettings.EtpSubProtocolName }
-                : null;
+            if (!requestedProtocols?.ContainsIgnoreCase(EtpSettings.EtpSubProtocolName) ?? false)
+                return null;
+
+            return new AspNetWebSocketOptions
+            {
+                SubProtocol = EtpSettings.EtpSubProtocolName
+            };
         }
 
         /// <summary>
