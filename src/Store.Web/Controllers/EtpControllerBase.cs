@@ -142,7 +142,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
             if (options == null)
             {
                 return Request.CreateResponse(
-                    HttpStatusCode.PreconditionFailed,
+                    HttpStatusCode.BadRequest,
                     new { error = "Invalid web socket protocol" });
             }
 
