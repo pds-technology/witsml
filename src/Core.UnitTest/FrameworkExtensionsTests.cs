@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
@@ -288,6 +289,87 @@ namespace PDS.WITSMLstudio
             // TODO: for future implementation
             //Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation[1].Longitude.Uom"));
             //Assert.AreEqual(PlaneAngleUom.dega, dataContext.GetPropertyValue<PlaneAngleUom>("Well.WellLocation[Uid = 'LatLon'].Longitude.Uom"));
+        }
+
+        [TestMethod]
+        public void FrameworkExtensions_ToDictionaryIgnoreCase_Can_Create_Dictionary_With_Specified_Key_Selector()
+        {
+            var list = new List<Well> {
+                new Well { Name = "well1", Country = "country1" },
+                new Well { Name = "well3", Country = "country4" },
+                new Well { Name = "WELL1", Country = "COUNTRY4" },
+                new Well { Name = "well4", Country = "country4" } 
+            };
+
+            var result = list.ToDictionaryIgnoreCase(w => w.Name);
+
+            Assert.AreEqual(3, result.Count);
+            var firstRecord = result.First();
+            Assert.IsNotNull(firstRecord);
+            Assert.AreEqual("well1", firstRecord.Key);
+            Assert.AreEqual("country1", firstRecord.Value.Country);
+
+            var lastRecord = result.Last();
+            Assert.IsNotNull(lastRecord);
+            Assert.AreEqual("well4", result.Last().Key);
+            Assert.AreEqual("country4", lastRecord.Value.Country);
+
+            result = list.ToDictionaryIgnoreCase(w => w.Country);
+
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("country1", result.First().Key);
+
+            firstRecord = result.First();
+            Assert.IsNotNull(firstRecord);
+            Assert.AreEqual("country1", firstRecord.Key);
+            Assert.AreEqual("well1", firstRecord.Value.Name);
+
+            lastRecord = result.Last();
+            Assert.IsNotNull(lastRecord);
+            Assert.AreEqual("country4", lastRecord.Key);
+            Assert.AreEqual("well3", lastRecord.Value.Name);
+        }
+
+        [TestMethod]
+        public void FrameworkExtensions_ToDictionaryIgnoreCase_Can_Create_Dictionary_With_Specified_Key_And_Element_Selector()
+        {
+            var list = new List<Well> {
+                new Well { Name = "well1", Country = "country1" },
+                new Well { Name = "well3", Country = "country4" },
+                new Well { Name = "WELL1", Country = "COUNTRY4" },
+                new Well { Name = "well4", Country = "country4" }
+            };
+
+            var result = list.ToDictionaryIgnoreCase(w => w.Name, w2 => new {w2.Country, w2.Name});
+
+            Assert.AreEqual(3, result.Count);
+            var firstRecord = result.First();
+            Assert.IsNotNull(firstRecord);
+            Assert.AreEqual("well1", firstRecord.Key);
+            Assert.AreEqual("country1", firstRecord.Value.Country);
+            Assert.AreEqual(2, firstRecord.Value.GetType().GetProperties().Length);
+
+            var lastRecord = result.Last();
+            Assert.IsNotNull(lastRecord);
+            Assert.AreEqual("well4", result.Last().Key);
+            Assert.AreEqual("country4", lastRecord.Value.Country);
+
+            var result2 = list.ToDictionaryIgnoreCase(w => w.Country, w2 => new { w2.Country, w2.Name, w2.County});
+
+            Assert.AreEqual(2, result2.Count);
+            Assert.AreEqual("country1", result2.First().Key);
+
+            var firstRecord2 = result2.First();
+            Assert.IsNotNull(firstRecord);
+            Assert.AreEqual("country1", firstRecord2.Key);
+            Assert.AreEqual("well1", firstRecord2.Value.Name);
+            Assert.IsNull(firstRecord2.Value.County);
+            Assert.AreEqual(3, firstRecord2.Value.GetType().GetProperties().Length);
+
+            var lastRecord2 = result2.Last();
+            Assert.IsNotNull(lastRecord2);
+            Assert.AreEqual("country4", lastRecord2.Key);
+            Assert.AreEqual("well3", lastRecord2.Value.Name);
         }
     }
 }

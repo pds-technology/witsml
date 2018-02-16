@@ -212,6 +212,38 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Creates a dictionary from collection without duplicates.
+        /// </summary>
+        /// <typeparam name="T">The type</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="keySelector">The key selector.</param>
+        /// <returns></returns>
+        public static IDictionary<string, T> ToDictionaryIgnoreCase<T>(this IEnumerable<T> collection, Func<T, string> keySelector)
+        {
+            return collection?
+                .ToLookup(keySelector, StringComparer.InvariantCultureIgnoreCase)
+                .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        ///  Creates a dictionary from collection without duplicates.
+        /// </summary>
+        /// <typeparam name="T">The collection type.</typeparam>
+        /// <typeparam name="TOut">The dictionary value type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="keySelector">The key selector.</param>
+        /// <param name="elementSelector">The element selector.</param>
+        /// <returns></returns>
+        public static IDictionary<string, TOut> ToDictionaryIgnoreCase<T, TOut>(this IEnumerable<T> collection, Func<T, string> keySelector, Func<T, TOut> elementSelector)
+        {
+            return collection?
+                .ToLookup(keySelector, elementSelector, StringComparer.InvariantCultureIgnoreCase)
+                .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
         /// Gets the property value from the specified object instance.
         /// </summary>
         /// <param name="instance">The object instance.</param>
