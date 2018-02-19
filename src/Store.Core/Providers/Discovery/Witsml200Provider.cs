@@ -105,39 +105,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
             {
-                var wellboreUri = parentUri.Parent;
-
-                // Append query string, if any
-                if (!string.IsNullOrWhiteSpace(uri.Query))
-                    wellboreUri = new EtpUri(wellboreUri + uri.Query);
-
-                if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
-                {
-                    var logs = _logDataProvider.GetAll(wellboreUri);
-                    var timeCount = logs.Count(x => ObjectFolders.Time.EqualsIgnoreCase(x.TimeDepth));
-                    var depthCount = logs.Count(x => ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth));
-                    var otherCount = logs.Count - (timeCount + depthCount);
-
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Time, timeCount, true));
-                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Depth, depthCount, true));
-
-                    if (otherCount > 0)
-                    {
-                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, uri.ContentType, ObjectFolders.Other, otherCount, true));
-                    }
-                }
-                else if (ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType) &&
-                    (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Other.EqualsIgnoreCase(uri.ObjectType)))
-                {
-                    var logs = _logDataProvider.GetAll(wellboreUri).AsEnumerable();
-
-                    logs = ObjectFolders.Other.EqualsIgnoreCase(uri.ObjectType)
-                        ? logs.Where(x => !ObjectFolders.Time.EqualsIgnoreCase(x.TimeDepth) && !ObjectFolders.Depth.EqualsIgnoreCase(x.TimeDepth))
-                        : logs.Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType));
-
-                    logs.ForEach(x => args.Context.Add(ToResource(x)));
-                }
-                else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
+                if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var log = _logDataProvider.Get(parentUri);
                     log?.ChannelSet?.ForEach(x => args.Context.Add(ToResource(x)));

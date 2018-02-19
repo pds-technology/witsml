@@ -37,12 +37,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var uri = Log.GetUri();
             var folderUri = uri.Parent.Append(ObjectTypes.Log);
             await GetResourcesAndAssert(folderUri);
-
-            var timeLogUri = folderUri.Append(ObjectFolders.Time);
-            await GetResourcesAndAssert(timeLogUri);
-
-            var depthLogUri = folderUri.Append(ObjectFolders.Depth);
-            await GetResourcesAndAssert(depthLogUri);
         }
     }
 }
