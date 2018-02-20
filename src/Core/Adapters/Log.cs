@@ -229,6 +229,19 @@ namespace PDS.WITSMLstudio.Adapters
             _log141?.LogCurveInfo?.Select(c => new LogCurveInfo(c)).ToList();
 
         /// <summary>
+        /// Gets the index log curve info.
+        /// </summary>
+        /// <returns>LogCurveInfo for the index curve</returns>
+        public LogCurveInfo GetIndexLogCurve()
+        {
+            var indexLogCurve = (object)_log131?.LogCurveInfo?.FirstOrDefault(l => l.Mnemonic.EqualsIgnoreCase(IndexCurve)) ??
+                                   (object)_log141?.LogCurveInfo?.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(IndexCurve));
+            return indexLogCurve == null
+                ? null
+                : new LogCurveInfo(indexLogCurve);
+        }
+
+        /// <summary>
         /// Gets a <see cref="ChannelDataReader"/> for the log.
         /// </summary>
         /// <param name="mnemonicPropertyPath">The mnemonic property path.</param>
