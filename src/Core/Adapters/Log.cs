@@ -244,11 +244,10 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets a <see cref="ChannelDataReader"/> for the log.
         /// </summary>
-        /// <param name="mnemonicPropertyPath">The mnemonic property path.</param>
         /// <returns>A <see cref="ChannelDataReader"/> instance.</returns>
-        public ChannelDataReader GetReader(string mnemonicPropertyPath = null)
+        public ChannelDataReader GetReader()
         {
-            return _log131?.GetReader(mnemonicPropertyPath) ?? _log141.GetReaders(mnemonicPropertyPath).FirstOrDefault();
+            return _log131?.GetReader() ?? _log141.GetReaders().FirstOrDefault();
         }
 
         /// <summary>
