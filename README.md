@@ -259,7 +259,7 @@ Implements configuration and security for WITSML and ETP endpoints.
 ---
 
 ### Copyright and License
-Copyright &copy; 2017 PDS Americas LLC
+Copyright &copy; 2018 PDS Americas LLC
 
 Released under the PDS Open Source WITSML™ Product License Agreement
 http://www.pds.group/WITSMLstudio/OpenSource/ProductLicenseAgreement

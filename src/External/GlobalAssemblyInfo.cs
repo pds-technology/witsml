@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2017.2
+// PDS WITSMLstudio Core, 2018.1
 //
-// Copyright 2017 PDS Americas LLC
+// Copyright 2018 PDS Americas LLC
 // 
 // Licensed under the PDS Open Source WITSML Product License Agreement (the
 // "License"); you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@
 
 using System.Reflection;
 
-[assembly: AssemblyCopyright("Copyright © 2017")]
+[assembly: AssemblyCopyright("Copyright © 2018")]
 [assembly: AssemblyCompany("PDS Americas LLC")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2017.2.0.0")]
-[assembly: AssemblyFileVersion("2017.2.0.0")]
-[assembly: AssemblyInformationalVersion("2017.2.0.0")]
+[assembly: AssemblyVersion("2018.1.0.0")]
+[assembly: AssemblyFileVersion("2018.1.0.0")]
+[assembly: AssemblyInformationalVersion("2018.1.0.0")]
 
 #if DEBUG
 [assembly: System.Diagnostics.Debuggable(true, true)]
