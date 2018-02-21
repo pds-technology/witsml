@@ -1,7 +1,7 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2017.2
+// PDS WITSMLstudio Store, 2018.1
 //
-// Copyright 2017 PDS Americas LLC
+// Copyright 2018 PDS Americas LLC
 // 
 // Licensed under the PDS Open Source WITSML Product License Agreement (the
 // "License"); you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 using System.Reflection;
 
 [assembly: AssemblyProduct("PDS WITSMLstudio Store")]
-[assembly: AssemblyCopyright("Copyright © 2017")]
+[assembly: AssemblyCopyright("Copyright © 2018")]
 [assembly: AssemblyCompany("PDS Americas LLC")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
