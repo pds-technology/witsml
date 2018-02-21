@@ -108,9 +108,8 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// Gets a <see cref="ChannelDataReader" /> for a <see cref="Witsml131.Log" />.
         /// </summary>
         /// <param name="log">The <see cref="Witsml131.Log" /> instance.</param>
-        /// <param name="mnemonicPropertyPath">The mnemonic property path.</param>
         /// <returns>A <see cref="ChannelDataReader" />.</returns>
-        public static ChannelDataReader GetReader(this Witsml131.Log log, string mnemonicPropertyPath = null)
+        public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
             if (log?.LogData == null || !log.LogData.Any()) return null;
 
@@ -118,28 +117,26 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             var isTimeIndex = log.IsTimeLog();
             var increasing = log.IsIncreasing();
-            var propertyPath = mnemonicPropertyPath ?? "Mnemonic";
 
             // Split index curve from other value curves
             var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve?.Value);
             var logCurveInfos = log.LogCurveInfo.Where(x => x != indexCurve).OrderBy(x => x.ColumnIndex.GetValueOrDefault()).ToList();
-            var mnemonics = logCurveInfos.Select(x => GetMnemonic(x, propertyPath)).ToArray();
+            var mnemonics = logCurveInfos.Select(x => x.Mnemonic).ToArray();
             var units = logCurveInfos.Select(x => x.Unit).ToArray();
             var dataTypes = logCurveInfos.Select(x => x.TypeLogData?.ToString()).ToArray();
             var nullValues = logCurveInfos.Select(x => x.NullValue).ToArray();
 
             return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri())
                 // Add index curve to separate collection
-                .WithIndex(GetMnemonic(indexCurve, propertyPath), indexCurve.Unit, increasing, isTimeIndex);
+                .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
 
         /// <summary>
         /// Gets multiple readers for each LogData from a <see cref="Witsml141.Log"/> instance.
         /// </summary>
         /// <param name="log">The log.</param>
-        /// <param name="mnemonicPropertyPath">The mnemonic property path.</param>
         /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
-        public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log, string mnemonicPropertyPath = null)
+        public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
             if (log?.LogData == null) yield break;
 
@@ -147,15 +144,12 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             var isTimeIndex = log.IsTimeLog();
             var increasing = log.IsIncreasing();
-            var propertyPath = mnemonicPropertyPath ?? "Mnemonic.Value";
             string[] headerMnemonics = null;
 
-            if (propertyPath.EqualsIgnoreCase("Mnemonic") || propertyPath.EqualsIgnoreCase("MnemAlias"))
-                propertyPath += ".Value";
 
             // Check if a different mnemonic property is desired
-            if (!string.IsNullOrWhiteSpace(mnemonicPropertyPath) && !mnemonicPropertyPath.ContainsIgnoreCase("Mnemonic") && log.LogCurveInfo.Any())
-                headerMnemonics = log.LogCurveInfo.Select(x => GetMnemonic(x, propertyPath)).ToArray();
+            if (log.LogCurveInfo.Any())
+                headerMnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToArray();
 
             foreach (var logData in log.LogData)
             {
