@@ -144,19 +144,13 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             var isTimeIndex = log.IsTimeLog();
             var increasing = log.IsIncreasing();
-            string[] headerMnemonics = null;
-
-
-            // Check if a different mnemonic property is desired
-            if (log.LogCurveInfo.Any())
-                headerMnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToArray();
 
             foreach (var logData in log.LogData)
             {
                 if (logData?.Data == null || !logData.Data.Any())
                     continue;
 
-                var mnemonics = headerMnemonics?.ToArray() ?? ChannelDataReader.Split(logData.MnemonicList);
+                var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                 var units = ChannelDataReader.Split(logData.UnitList);
                 var dataTypes = log.LogCurveInfo.Select(x => x.TypeLogData?.ToString()).ToArray();
                 var nullValues = log.GetNullValues(mnemonics).ToArray();
