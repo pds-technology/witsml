@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -46,15 +47,10 @@ namespace PDS.WITSMLstudio.Store.Data
         public void Register()
         {
             RegisterDataTypes();
-            RegisterActivityParameterTypes();
+            RegisterDerivedTypes();
 
             Register3<Witsml141.ChangeLog>();
 
-            Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
-            Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();
-            Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
-            Register3<Witsml200.ComponentSchemas.DepthIndexValue>();
-            Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
             RegisterId<Witsml200.ComponentSchemas.ChannelIndex>("Mnemonic");
             RegisterId<Witsml141.ComponentSchemas.LithostratigraphyStruct>("Kind");
             RegisterId<Witsml141.ComponentSchemas.ChronostratigraphyStruct>("Kind");
@@ -90,15 +86,17 @@ namespace PDS.WITSMLstudio.Store.Data
             Register3(type, true);
         }
 
-        private void RegisterActivityParameterTypes()
+        private void RegisterDerivedTypes()
         {
-            var parameter = typeof(Witsml200.ComponentSchemas.AbstractActivityParameter);
+            var type = typeof(Witsml200.ComponentSchemas.ProjectedWellLocation);
 
-            parameter.Assembly.GetTypes()
-                .Where(x => parameter.IsAssignableFrom(x) && !x.IsAbstract)
-                .ForEach(x => Register2(x, true));
+            type.Assembly
+                .GetTypes()
+                .Where(t => t.Namespace == type.Namespace && !t.IsAbstract && t.GetCustomAttributes<XmlIncludeAttribute>().Any())
+                .SelectMany(t => t.GetCustomAttributes<XmlIncludeAttribute>())
+                .ForEach(a => Register2(a.Type, true));
         }
-
+        
         private void Register<T>() where T : IDataObject
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
