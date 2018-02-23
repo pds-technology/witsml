@@ -63,7 +63,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <param name="name">The name.</param>
         /// <param name="childCount">The child count.</param>
         /// <param name="lastChanged">The last changed in microseconds.</param>
-        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0)
+        /// <param name="compress">if set to <c>true</c> compress the data object.</param>
+        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0, bool compress = true)
         {
             if (entity == null)
             {
@@ -79,7 +80,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                     ? Energistics.Common.EtpExtensions.Serialize(entity)
                     : WitsmlParser.ToXml(entity);
 
-                dataObject.SetString(data);
+                dataObject.SetString(data, compress);
             }
 
             dataObject.Resource = new Resource()
