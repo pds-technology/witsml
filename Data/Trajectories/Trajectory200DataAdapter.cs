@@ -523,7 +523,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             var uri = entity.GetUri();
             var childUri = uri.Append(ObjectTypes.TrajectoryStation, trajectoryStation.Uid);
-            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0);
+            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0, compress: false);
 
             return dataObject;
         }
