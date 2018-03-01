@@ -290,7 +290,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
-                .Append(ObjectTypes.Channel, entity.Mnemonic);
+                .Append(ObjectTypes.Channel, entity.Uuid);
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
-                .Append(ObjectTypes.Channel, entity.Mnemonic);
+                .Append(ObjectTypes.Channel, entity.Uuid);
         }
 
         /// <summary>

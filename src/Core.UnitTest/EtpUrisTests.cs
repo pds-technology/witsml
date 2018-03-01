@@ -216,27 +216,27 @@ namespace PDS.WITSMLstudio
         [TestMethod]
         public void EtpUris_GetUri_Can_Get_ChannelSet_200_Channel_Uri()
         {
-            var channel = new Witsml200.Channel {Mnemonic = "ROP" };
+            var channel = new Witsml200.Channel { Uuid = _data.Uid(), Mnemonic = "ROP" };
             var channelSet = new Witsml200.ChannelSet {Uuid = _data.Uid(), Channel = new List<Witsml200.Channel> {channel}};
 
             var uri = channel.GetUri(channelSet);
 
-            Assert.IsTrue($"eml://witsml20/ChannelSet({ channelSet.Uuid })/Channel({channel.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
+            Assert.IsTrue($"eml://witsml20/ChannelSet({channelSet.Uuid})/Channel({channel.Uuid})".EqualsIgnoreCase(uri.ToString()));
             Assert.AreEqual(ObjectTypes.Channel.ToPascalCase(), uri.ObjectType);
-            Assert.AreEqual(channel.Mnemonic, uri.ObjectId);
+            Assert.AreEqual(channel.Uuid, uri.ObjectId);
         }
 
         [TestMethod]
         public void EtpUris_GetUri_Can_Get_Log_ChannelSet_200_Channel_Uri()
         {
-            var channel = new Witsml200.Channel {Mnemonic = "ROP" };
+            var channel = new Witsml200.Channel { Uuid = _data.Uid(), Mnemonic = "ROP" };
             var channelSet = new Witsml200.ChannelSet {Uuid = _data.Uid(), Channel = new List<Witsml200.Channel> {channel}};
             var log = new Witsml200.Log {Uuid = _data.Uid(), ChannelSet = new List<Witsml200.ChannelSet> {channelSet}};
             var uri = channel.GetUri(log, channelSet);
 
-            Assert.IsTrue($"eml://witsml20/Log({log.Uuid})/ChannelSet({ channelSet.Uuid })/Channel({channel.Mnemonic})".EqualsIgnoreCase(uri.ToString()));
+            Assert.IsTrue($"eml://witsml20/Log({log.Uuid})/ChannelSet({channelSet.Uuid})/Channel({channel.Uuid})".EqualsIgnoreCase(uri.ToString()));
             Assert.AreEqual(ObjectTypes.Channel.ToPascalCase(), uri.ObjectType);
-            Assert.AreEqual(channel.Mnemonic, uri.ObjectId);
+            Assert.AreEqual(channel.Uuid, uri.ObjectId);
         }
 
         [TestMethod]
