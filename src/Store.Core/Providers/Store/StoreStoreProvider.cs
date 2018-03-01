@@ -119,6 +119,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                     return;
                 }
 
+                // Validate that objectId was provided
+                if (string.IsNullOrWhiteSpace(uri.ObjectId))
+                {
+                    this.InvalidUri(args.Message.Uri, args.Header.MessageId);
+                    args.Cancel = true;
+                    return;
+                }
+
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
                 var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.GetDataSchemaVersion()));
