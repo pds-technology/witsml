@@ -71,7 +71,8 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// </returns>
         public static bool IsChannelSubscribable(this EtpUri uri)
         {
-            if (!uri.IsValid) return false;
+            // eml://eml21 does not need to be subscribable as there are no growing/channel objects
+            if (!uri.IsValid || EtpUris.Eml210.Equals(uri)) return false;
 
             // e.g. "/" or eml://witsml20 or eml://witsml14 or eml://witsml13
             if (EtpUri.RootUri.Equals(uri) || uri.IsBaseUri) return true;
