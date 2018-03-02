@@ -62,7 +62,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             // Get Invalid Object
             await GetAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
-            await GetAndAssert(handler, new EtpUri("eml://witsml141/ChannelSet"), EtpErrorCodes.UnsupportedObject);
+            await GetAndAssert(handler, new EtpUri("eml://unknown141/well"), EtpErrorCodes.InvalidUri);
+            await GetAndAssert(handler, new EtpUri("eml://witsml141/ChannelSet(123)"), EtpErrorCodes.UnsupportedObject);
             await GetAndAssert(handler, new EtpUri("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
         }
 
