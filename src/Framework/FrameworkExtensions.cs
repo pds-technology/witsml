@@ -353,31 +353,33 @@ namespace PDS.WITSMLstudio.Framework
         {
             if (string.IsNullOrWhiteSpace(enumValue)) return null;
 
-            if (Enum.IsDefined(enumType, enumValue))
+            try
             {
                 return Enum.Parse(enumType, enumValue);
             }
-
-            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            catch
             {
-                if (x.Name.EqualsIgnoreCase(enumValue))
-                    return true;
+                var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+                {
+                    if (x.Name.EqualsIgnoreCase(enumValue))
+                        return true;
 
-                var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
-                if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
-                    return true;
+                    var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
+                    if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
+                        return true;
 
-                var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
-                return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
-            });
+                    var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
+                    return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
+                });
 
-            // must be a valid enumeration member
-            if (!enumType.IsEnum || enumMember == null)
-            {
-                throw new ArgumentException();
+                // must be a valid enumeration member
+                if (!enumType.IsEnum || enumMember == null)
+                {
+                    throw new ArgumentException();
+                }
+
+                return Enum.Parse(enumType, enumMember.Name);
             }
-
-            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
