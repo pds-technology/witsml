@@ -352,7 +352,11 @@ namespace PDS.WITSMLstudio
             if (WbGeometry.EqualsIgnoreCase(objectType))
                 objectType = WellboreGeometry;
 
-            return GetObjectType(objectType + "List", version);
+            var suffix = OptionsIn.DataVersion.Version200.Equals(version)
+                ? string.Empty
+                : "List";
+
+            return GetObjectType(objectType + suffix, version);
         }
 
         /// <summary>
