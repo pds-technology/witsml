@@ -355,31 +355,37 @@ namespace PDS.WITSMLstudio.Framework
 
             try
             {
-                return Enum.Parse(enumType, enumValue);
+                double index;
+
+                // Ensure enumValue is not numeric
+                if (!double.TryParse(enumValue, out index))
+                    return Enum.Parse(enumType, enumValue);
             }
             catch
             {
-                var enumMember = enumType.GetMembers().FirstOrDefault(x =>
-                {
-                    if (x.Name.EqualsIgnoreCase(enumValue))
-                        return true;
-
-                    var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
-                    if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
-                        return true;
-
-                    var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
-                    return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
-                });
-
-                // must be a valid enumeration member
-                if (!enumType.IsEnum || enumMember == null)
-                {
-                    throw new ArgumentException();
-                }
-
-                return Enum.Parse(enumType, enumMember.Name);
+                // Ignore
             }
+
+            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            {
+                if (x.Name.EqualsIgnoreCase(enumValue))
+                    return true;
+
+                var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
+                if (xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue))
+                    return true;
+
+                var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
+                return descriptionAttr != null && descriptionAttr.Description.EqualsIgnoreCase(enumValue);
+            });
+
+            // must be a valid enumeration member
+            if (!enumType.IsEnum || enumMember == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
