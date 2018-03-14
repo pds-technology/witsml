@@ -107,13 +107,16 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Adapters\Lithology.cs" />
     <Compile Include="Adapters\AxisDefinition.cs" />
     <Compile Include="Adapters\LengthMeasure.cs" />
     <Compile Include="Adapters\Location.cs" />
     <Compile Include="Adapters\Log.cs" />
     <Compile Include="Adapters\LogCurveInfo.cs" />
     <Compile Include="Adapters\LogData.cs" />
+    <Compile Include="Adapters\MudLog.cs" />
     <Compile Include="Adapters\Trajectory.cs" />
+    <Compile Include="Adapters\GeologyInterval.cs" />
     <Compile Include="Adapters\TrajectoryStation.cs" />
     <Compile Include="Compatibility\CompatibilitySettings.cs" />
     <Compile Include="Compatibility\InvalidDataRowSetting.cs" />
@@ -133,6 +136,7 @@
     <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
+    <Compile Include="Data\MudLogs\MudLog131Generator.cs" />
     <Compile Include="Data\MudLogs\MudLog141Generator.cs" />
     <Compile Include="Data\Trajectories\Trajectory131Generator.cs" />
     <Compile Include="Data\Trajectories\Trajectory141Generator.cs" />

@@ -19,9 +19,9 @@
 using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 
 namespace PDS.WITSMLstudio.Data.MudLogs
 {
@@ -29,7 +29,7 @@ namespace PDS.WITSMLstudio.Data.MudLogs
     /// Generates data for a 141 MudLog.
     /// </summary>
     /// <seealso cref="PDS.WITSMLstudio.Data.DataGenerator" />
-    public class MudLog141Generator : DataGenerator
+    public class MudLog131Generator : DataGenerator
     {
         /// <summary>
         /// The default Md uom
