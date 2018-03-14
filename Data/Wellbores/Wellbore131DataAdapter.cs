@@ -17,13 +17,25 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
+using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
 namespace PDS.WITSMLstudio.Store.Data.Wellbores
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />.
     /// </summary>
-    public partial class Wellbore131DataAdapter
-    {        
+    [Export131(typeof(IWellboreDataAdapter))]
+    public partial class Wellbore131DataAdapter : IWellboreDataAdapter
+    {
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        public void UpdateIsActive(EtpUri uri, bool isActive)
+        {
+            // In WITSML v131, Wellbore does not have an isActive element.
+        }
     }
 }
