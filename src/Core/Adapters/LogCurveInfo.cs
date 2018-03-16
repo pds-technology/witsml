@@ -108,7 +108,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the mnem alias.
         /// </summary>
-        public string MnemAlias => _logCurveInfo131?.MnemAlias ?? _logCurveInfo141?.MnemAlias.Value;
+        public string MnemAlias => _logCurveInfo131?.MnemAlias ?? _logCurveInfo141?.MnemAlias?.Value;
 
         /// <summary>
         /// Gets the curve description.
