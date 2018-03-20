@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.Datatypes;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 using PDS.WITSMLstudio.Framework;
@@ -238,16 +237,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         protected override bool IsObjectGrowing(MudLog entity)
         {
             return entity.ObjectGrowing.GetValueOrDefault();
-        }
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="mudLogUri">The MudLog URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri mudLogUri, bool isActive)
-        {
-            // In WITSML v131, Wellbore does not have an isActive element.
         }
     }
 }
