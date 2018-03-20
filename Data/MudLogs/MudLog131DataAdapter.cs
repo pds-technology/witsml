@@ -29,7 +29,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="MudLog" />
     /// </summary>
-    [Export141(ObjectTypes.MudLog, typeof(IGrowingObjectDataAdapter))]
+    [Export131(ObjectTypes.MudLog, typeof(IGrowingObjectDataAdapter))]
     public partial class MudLog131DataAdapter
     {
         /// <summary>
