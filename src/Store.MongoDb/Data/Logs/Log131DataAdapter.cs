@@ -453,16 +453,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="logUri">The Log URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
-        {
-            // In WITSML v131, Wellbore does not have an isActive element.
-        }
-
-        /// <summary>
         /// Updates the common data.
         /// </summary>
         /// <param name="logHeaderUpdate">The log header update.</param>

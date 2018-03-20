@@ -205,15 +205,5 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
             return entity.ObjectGrowing.GetValueOrDefault();
         }
-
-        /// <summary>
-        /// Updates the IsActive field of a wellbore.
-        /// </summary>
-        /// <param name="trajectoryUri">The Trajectory URI.</param>
-        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
-        protected override void UpdateWellboreIsActive(EtpUri trajectoryUri, bool isActive)
-        {
-            // In WITSML v131, Wellbore does not have an isActive element.
-        }
     }
 }
