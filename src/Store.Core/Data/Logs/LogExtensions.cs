@@ -90,6 +90,22 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         /// <summary>
+        /// Determines whether Log curve infos should be included in the query response.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns><c>true</c> if Log curve infos should be included; otherwise, <c>false</c>.</returns>
+        public static bool IncludeLogCurveInfo(this WitsmlQueryParser parser)
+        {
+            var returnElements = parser.ReturnElements();
+
+            _log.DebugFormat("Checking if log curves should be included. Return Elements: {0};", returnElements);
+
+            return OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                   OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
+                   (OptionsIn.ReturnElements.Requested.Equals(returnElements) && parser.Contains(ObjectTypes.LogCurveInfo));
+        }
+
+        /// <summary>
         /// Gets the log curve information mnemonics.
         /// </summary>
         /// <param name="parser">The parser.</param>
