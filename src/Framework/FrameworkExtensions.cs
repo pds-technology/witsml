@@ -21,11 +21,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
+using Microsoft.VisualBasic.FileIO;
 using PDS.WITSMLstudio.Framework.Properties;
 
 namespace PDS.WITSMLstudio.Framework
@@ -95,6 +97,62 @@ namespace PDS.WITSMLstudio.Framework
                 : value.Split(new[] { separator }, StringSplitOptions.None)
                        .Select(x => x.Trim())
                        .ToArray();
+        }
+
+        /// <summary>
+        /// Splits the quoted string value based on the specified separator.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="separator">The separator.</param>
+        /// <returns>A string array.</returns>
+        public static string[] SplitQuotedString(this string value, string separator)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return new string[0];
+
+            // Check to see if delimiter is a single character and there are no quoted strings
+            if (separator.Length < 2 && !value.Contains("\""))
+            {
+                return value.SplitAndTrim(separator);
+            }
+
+            // TextFieldParser iterates when it detects new line characters
+            value = value.Replace("\n", " ");
+
+            using (var reader = new StringReader(value))
+            using (var parser = new TextFieldParser(reader))
+            {
+                parser.SetDelimiters(separator);
+
+                try
+                {
+                    return parser.ReadFields();
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+
+            return new string[0];
+        }
+
+        /// <summary>
+        /// Joins the array of strings with quotes based on the specified separator.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        /// <param name="separator">The separator.</param>
+        /// <returns>The string value.</returns>
+        public static string JoinQuotedStrings(this string[] values, string separator)
+        {
+            var quotedValues = new List<string>();
+
+            values.ForEach(v =>
+            {
+                quotedValues.Add(v.Contains(separator) ? $"\"{v}\"" : v);
+            });
+
+            return string.Join(separator, quotedValues);
         }
 
         /// <summary>

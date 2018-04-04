@@ -371,5 +371,30 @@ namespace PDS.WITSMLstudio
             Assert.AreEqual("country4", lastRecord2.Key);
             Assert.AreEqual("well3", lastRecord2.Value.Name);
         }
+
+        [TestMethod]
+        public void FrameworkExtensions_SplitQuotedString_Returns_String_Array()
+        {
+            var delimiter = ",";
+            var value = "well1,well2,\"well3,a\",\"well4,b\",well5";
+
+            var values = value.SplitQuotedString(delimiter);
+            Assert.AreEqual(values[0], "well1");
+            Assert.AreEqual(values[1], "well2");
+            Assert.AreEqual(values[2], "well3,a");
+            Assert.AreEqual(values[3], "well4,b");
+            Assert.AreEqual(values[4], "well5");
+        }
+
+        [TestMethod]
+        public void FrameworkExtensions_JoinQuotedString_Returns_Value()
+        {
+            var delimiter = ",";
+            var testValue = "well1,well2,\"well3,a\",\"well4,b\",well5";
+            var values = testValue.SplitQuotedString(",");
+
+            var value = values.JoinQuotedStrings(delimiter);
+            Assert.AreEqual(testValue, value);
+        }
     }
 }
