@@ -145,14 +145,7 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns>The string value.</returns>
         public static string JoinQuotedStrings(this string[] values, string separator)
         {
-            var quotedValues = new List<string>();
-
-            values.ForEach(v =>
-            {
-                quotedValues.Add(v.Contains(separator) ? $"\"{v}\"" : v);
-            });
-
-            return string.Join(separator, quotedValues);
+            return string.Join(separator, values.Select(v => v.Contains(separator) ? $"\"{v}\"" : v));
         }
 
         /// <summary>
