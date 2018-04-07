@@ -419,7 +419,7 @@ namespace PDS.WITSMLstudio.Query
 
         private short ExecuteQuery(Functions functionType, string objectType, string xmlIn, string optionsIn, out string xmlOut, out string suppMsgOut)
         {
-            using (var client = Connection.CreateClientProxy())
+            using (var client = Connection.CreateClientProxy().WithUserAgent())
             {
                 var wmls = (IWitsmlClient)client;
                 xmlOut = null;

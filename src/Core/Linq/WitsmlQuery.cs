@@ -88,7 +88,7 @@ namespace PDS.WITSMLstudio.Linq
 
             Context.LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
-            using (var client = Context.Connection.CreateClientProxy())
+            using (var client = Context.Connection.CreateClientProxy().WithUserAgent())
             {
                 var wmls = (IWitsmlClient)client;
                 string suppMsgOut, xmlOut = string.Empty;

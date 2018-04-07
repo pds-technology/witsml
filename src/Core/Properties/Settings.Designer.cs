@@ -103,5 +103,14 @@ namespace PDS.WITSMLstudio.Properties {
                 return ((bool)(this["MudLogAllowPutObjectWithData"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSMLstudio Client")]
+        public string DefaultWmlsUserAgent {
+            get {
+                return ((string)(this["DefaultWmlsUserAgent"]));
+            }
+        }
     }
 }

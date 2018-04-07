@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Web.Services.Protocols;
 using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -35,6 +36,8 @@ namespace PDS.WITSMLstudio
     /// </summary>
     public static class Extensions
     {
+        private static readonly string _defaulWmlstUserAgent = Settings.Default.DefaultWmlsUserAgent;
+
         /// <summary>
         /// Initializes a new UID value if one was not specified.
         /// </summary>
@@ -93,6 +96,21 @@ namespace PDS.WITSMLstudio
         {
             dataObject.GetType().GetProperty("Version")?.SetValue(dataObject, version);
             return dataObject;
+        }
+
+        /// <summary>
+        /// Sets the User-Agent header sent by the SOAP client proxy.
+        /// </summary>
+        /// <param name="proxy">The SOAP client proxy.</param>
+        /// <param name="userAgent">The user agent.</param>
+        /// <returns>The <see cref="SoapHttpClientProtocol"/> instance.</returns>
+        public static SoapHttpClientProtocol WithUserAgent(this SoapHttpClientProtocol proxy, string userAgent = null)
+        {
+            if (proxy == null) return null;
+
+            proxy.UserAgent = userAgent ?? _defaulWmlstUserAgent;
+
+            return proxy;
         }
 
         /// <summary>
