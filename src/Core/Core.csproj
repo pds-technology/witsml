@@ -140,6 +140,8 @@
     <Compile Include="Data\MudLogs\MudLog141Generator.cs" />
     <Compile Include="Data\Trajectories\Trajectory131Generator.cs" />
     <Compile Include="Data\Trajectories\Trajectory141Generator.cs" />
+    <Compile Include="Data\Trajectories\TrajectoryDataExtensions.cs" />
+    <Compile Include="Data\Trajectories\TrajectoryDataReader.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />

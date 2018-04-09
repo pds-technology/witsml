@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
+using PDS.WITSMLstudio.Data.Trajectories;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Adapters
@@ -169,6 +170,15 @@ namespace PDS.WITSMLstudio.Adapters
         /// Gets the trajectory stations.
         /// </summary>
         public List<TrajectoryStation> TrajectoryStation { get; private set; }
+
+        /// <summary>
+        /// Gets a <see cref="TrajectoryDataReader"/> for the log.
+        /// </summary>
+        /// <returns>A <see cref="TrajectoryDataReader"/> instance.</returns>
+        public TrajectoryDataReader GetReader()
+        {
+            return _trajectory131?.GetReader() ?? _trajectory141.GetReader();
+        }
 
         private void InitializeTrajectoryStations()
         {
