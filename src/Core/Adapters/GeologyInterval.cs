@@ -86,6 +86,16 @@ namespace PDS.WITSMLstudio.Adapters
         }
 
         /// <summary>
+        /// Returns whether the specified object is an instnce of a supported data type
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        public static bool IsSupportedObject(object dataObject)
+        {
+            return null != dataObject && (dataObject is Energistics.DataAccess.WITSML131.ComponentSchemas.GeologyInterval || dataObject is Energistics.DataAccess.WITSML141.ComponentSchemas.GeologyInterval);
+        }
+
+        /// <summary>
         /// The data schema version of the object.
         /// </summary>
         public string DataSchemaVersion { get; }
