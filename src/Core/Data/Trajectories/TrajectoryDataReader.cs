@@ -463,24 +463,37 @@ namespace PDS.WITSMLstudio.Data.Trajectories
 
                 var propertyInfo = propertyMap[property];
 
-                if (LocationTypeName.Equals(parentProperty))
-                {
-                    var list = instance as IList;
+                var list = instance as IList;
 
-                    // attempt to find the first instance with a valid property value
-                    instance = list?.Cast<object>().Select(item => propertyInfo.GetValue(item)).FirstOrDefault(item => null != item);
+                if (null != list)
+                {
+                    if (LocationTypeName.Equals(parentProperty))
+                    {
+                        // attempt to find the first instance with a valid property value
+                        instance = list.Cast<object>().Select(item => propertyInfo.GetValue(item)).FirstOrDefault(item => null != item);
+                    }
+                    else
+                    {
+                        if (TrajectoryStationTypeName.Equals(parentProperty))
+                        {
+                            // retrieve current trajectory station
+                            instance = list[_current];
+                        }
+                        else
+                        {
+                            // TODO: Handle indexing of other list based properties
+                            instance = list.Count > 0 ? list[0] : null;
+                        }
+
+                        if (null == instance)
+                            return null;
+
+                        instance = propertyInfo.GetValue(instance);
+                    }
                 }
                 else
                 {
                     instance = propertyInfo.GetValue(instance);
-                }
-
-                // retrieve current trajectory station
-                if (TrajectoryStationTypeName.Equals(property))
-                {
-                    var list = instance as IList;
-
-                    instance = list?[_current];
                 }
 
                 if (null == instance)
