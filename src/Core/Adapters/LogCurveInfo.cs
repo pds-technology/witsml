@@ -128,7 +128,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the unit.
         /// </summary>
-        public string Unit => _logCurveInfo131?.Unit ?? _logCurveInfo141.Unit;
+        public string Unit => _logCurveInfo131?.Unit ?? _logCurveInfo141?.Unit;
 
         /// <summary>
         /// Gets the null value.
