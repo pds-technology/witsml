@@ -84,7 +84,7 @@ namespace PDS.WITSMLstudio.Store.Data
                 OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
                 OptionsIn.ReturnElements.LatestChangeOnly.Equals(returnElements))
             {
-                entities.AddRange(results.ToList());
+                entities.AddRange(results.ToEnumerable());
             }
             else if (Context.IsProjection)
             {
@@ -95,7 +95,7 @@ namespace PDS.WITSMLstudio.Store.Data
                     results = results.Project<T>(projection);
                 }
 
-                entities.AddRange(results.ToList());
+                entities.AddRange(results.ToEnumerable());
             }
 
             Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.ObjectType, entities.Count);

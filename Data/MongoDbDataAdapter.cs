@@ -369,7 +369,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="uris">The uris.</param>
         /// <returns>The query results.</returns>
-        protected List<T> GetEntities(IEnumerable<EtpUri> uris)
+        protected IEnumerable<T> GetEntities(IEnumerable<EtpUri> uris)
         {
             return GetEntities<T>(uris, DbCollectionName);
         }
@@ -381,7 +381,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="uris">The uris.</param>
         /// <param name="dbCollectionName">Name of the database collection.</param>
         /// <returns>The query results.</returns>
-        protected List<TObject> GetEntities<TObject>(IEnumerable<EtpUri> uris, string dbCollectionName)
+        protected IEnumerable<TObject> GetEntities<TObject>(IEnumerable<EtpUri> uris, string dbCollectionName)
         {
             var list = uris.ToList();
 
@@ -394,14 +394,14 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 return GetCollection<TObject>(dbCollectionName)
                     .Find("{}")
-                    .ToList();
+                    .ToEnumerable();
             }
 
             var filters = list.Select(x => MongoDbUtility.GetEntityFilter<TObject>(x, IdPropertyName));
 
             return GetCollection<TObject>(dbCollectionName)
                 .Find(Builders<TObject>.Filter.Or(filters))
-                .ToList();
+                .ToEnumerable();
         }
 
         /// <summary>
