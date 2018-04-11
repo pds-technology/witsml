@@ -46,30 +46,32 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var uri = DataObject.GetUri();
-            var uriWell = uri.Parent;
-            var well = _wellDataAdapter.Get(uriWell);
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
             }
-
-            // Validate parent exists
-            else if (well == null)
+            else
             {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            }
+                var well = _wellDataAdapter.Get(uri.Parent);
 
-            else if (!well.Uid.Equals(DataObject.UidWell))
-            {
-                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
-            }
+                // Validate parent exists
+                if (well == null)
+                {
+                    yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
+                }
 
-            // Validate UID does not exist
-            else if (Context.Function != Functions.PutObject && _wellboreDataAdapter.Exists(uri))
-            {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+                else if (!well.Uid.Equals(DataObject.UidWell))
+                {
+                    yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
+                }
+
+                // Validate UID does not exist
+                else if (Context.Function != Functions.PutObject && _wellboreDataAdapter.Exists(uri))
+                {
+                    yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+                }
             }
         }
 
