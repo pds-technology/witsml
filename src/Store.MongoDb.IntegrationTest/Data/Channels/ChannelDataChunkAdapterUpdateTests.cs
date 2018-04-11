@@ -113,7 +113,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
 
             // Test there there is only one chunk
             var filter = channelDataChunkAdapter.BuildDataFilter(Log.GetUri(), null, new Range<double?>(null, null), true);
-            var chunks = channelDataChunkAdapter.GetData(filter, true);
+            var chunks = channelDataChunkAdapter.GetData(filter, true).ToList();
             Assert.AreEqual(1, chunks.Count, "More than one data chunk was found");
 
             // Add data that will push us into two chunks
@@ -125,7 +125,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             DevKit.UpdateAndAssert(Log);
 
             // Test that we now have two chunks
-            chunks = channelDataChunkAdapter.GetData(filter, true);
+            chunks = channelDataChunkAdapter.GetData(filter, true).ToList();
             Assert.AreEqual(2, chunks.Count, "More than two data chunks were found");
         }
 

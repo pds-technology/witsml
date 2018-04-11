@@ -244,7 +244,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             );
         }
 
-        private void AttachChunks(List<ChannelDataChunk> chunks)
+        private void AttachChunks(IEnumerable<ChannelDataChunk> chunks)
         {
             chunks.ForEach(cdc =>
                 Transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, cdc.ToBsonDocument(),
@@ -289,7 +289,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             {
                 // Get DataChannelChunk list from database for the log
                 var filter = BuildDataFilter(uri, indexCurve, new Range<double?>(null, null), increasing);
-                var results = GetData(filter, increasing);
+                var results = GetData(filter, increasing).ToList();
 
                 // Backup existing chunks for the transaction
                 AttachChunks(results);
@@ -554,7 +554,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             }
         }
 
-        private IEnumerable<ChannelDataChunk> PartialDeleteChunks(List<ChannelDataChunk> chunks, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
+        private IEnumerable<ChannelDataChunk> PartialDeleteChunks(IEnumerable<ChannelDataChunk> chunks, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
         {
             foreach (var chunk in chunks)
             {
@@ -837,7 +837,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         /// <param name="filter">The data filter.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns>The list of channel data chunks that fit the query criteria sorted by the primary index.</returns>
-        internal List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool ascending)
+        internal IEnumerable<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool ascending)
         {
             var collection = GetCollection();
             var sortBuilder = Builders<ChannelDataChunk>.Sort;
@@ -856,7 +856,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             return collection
                 .Find(filter ?? "{}")
                 .Sort(sort)
-                .ToList();
+                .ToEnumerable();
         }
 
         /// <summary>
