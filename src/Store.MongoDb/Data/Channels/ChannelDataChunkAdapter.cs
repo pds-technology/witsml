@@ -469,6 +469,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                 if (!plannedRange.HasValue)
                 {
                     plannedRange = Range.ComputeRange(index, rangeSize, increasing);
+                    Logger.Debug($"Computed planned range: {plannedRange}");
                     id = record.Id;
                     startIndex = index;
                 }
@@ -498,7 +499,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
 
                     Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
-                    yield return new ChannelDataChunk()
+                    yield return new ChannelDataChunk
                     {
                         Uid = id,
                         Data = "[" + String.Join(",", data) + "]",
@@ -511,7 +512,8 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                     };
 
                     plannedRange = Range.ComputeRange(index, rangeSize, increasing);
-                    data = new List<string>() { record.GetJson() };
+                    Logger.Debug($"Computed planned range: {plannedRange}");
+                    data = new List<string> { record.GetJson() };
                     startIndex = index;
                     endIndex = index;
                     id = record.Id;
@@ -532,7 +534,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
 
                 Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
-                var chunk = new ChannelDataChunk()
+                var chunk = new ChannelDataChunk
                 {
                     Uid = id,
                     Data = "[" + string.Join(",", data) + "]",
@@ -727,8 +729,6 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         {
             Logger.DebugFormat("Merging existing and update ChannelDataRecords: {0}", updateRange);
 
-            var id = string.Empty;
-
             using (var existingEnum = existingChunks.GetEnumerator())
             using (var updateEnum = updatedChunks.GetEnumerator())
             {
@@ -748,12 +748,11 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                          new Range<double?>(existingEnum.Current.GetIndexValue(), null)
                              .StartsAfter(updateEnum.Current.GetIndexValue(), increasing, inclusive: false)))
                     {
-                        updateEnum.Current.Id = endOfExisting ? string.Empty : id;
                         existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
+                        Logger.Debug($"(1) Keeping update with id: '{updateEnum.Current.Id}' at index: {updateEnum.Current.GetValue(0)}");
                         yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
-
                     // Existing value is not contained in the update range
                     else if (!endOfExisting &&
                              (endOfUpdate ||
@@ -762,9 +761,10 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                     {
                         if (updateEnum.Current != null)
                             existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
+
+                        Logger.Debug($"(2) Keeping existing with id: '{existingEnum.Current.Id}' at index: {existingEnum.Current.GetValue(0)}");
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
-                        id = endOfExisting ? string.Empty : existingEnum.Current.Id;
                     }
                     else // existing and update overlap
                     {
@@ -772,10 +772,13 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                         {
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
-                                id = existingEnum.Current.Id;
                                 existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Same, increasing);
+
                                 if (existingEnum.Current.HasValues())
+                                {
+                                    Logger.Debug($"(3) Keeping existing with id: '{existingEnum.Current.Id}' at index: {existingEnum.Current.GetValue(0)}");
                                     yield return existingEnum.Current;
+                                }
 
                                 endOfExisting = !existingEnum.MoveNext();
                                 endOfUpdate = !updateEnum.MoveNext();
@@ -784,20 +787,25 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                             else if (new Range<double?>(updateEnum.Current.GetIndexValue(), null)
                                 .StartsAfter(existingEnum.Current.GetIndexValue(), increasing, inclusive: false))
                             {
-                                id = existingEnum.Current.Id;
                                 existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
+
                                 if (existingEnum.Current.HasValues())
+                                {
+                                    Logger.Debug($"(4) Keeping existing with id: '{existingEnum.Current.Id}' at index: {existingEnum.Current.GetValue(0)}");
                                     yield return existingEnum.Current;
+                                }
 
                                 endOfExisting = !existingEnum.MoveNext();
                             }
-
                             else // Update Starts Before existing
                             {
-                                updateEnum.Current.Id = id;
                                 existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
+
                                 if (updateEnum.Current.HasValues())
+                                {
+                                    Logger.Debug($"(5) Keeping update with id: '{updateEnum.Current.Id}' at index: {updateEnum.Current.GetValue(0)}");
                                     yield return updateEnum.Current;
+                                }
 
                                 endOfUpdate = !updateEnum.MoveNext();
                             }
