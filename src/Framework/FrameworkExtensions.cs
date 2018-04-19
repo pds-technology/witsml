@@ -138,14 +138,26 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
-        /// Joins the array of strings with quotes based on the specified separator.
+        /// Joins an enumerable of strings that may contain quotes based with the specified separator in between.
         /// </summary>
         /// <param name="values">The values.</param>
         /// <param name="separator">The separator.</param>
         /// <returns>The string value.</returns>
-        public static string JoinQuotedStrings(this string[] values, string separator)
+        public static string JoinQuotedStrings(this IEnumerable<string> values, string separator)
         {
-            return string.Join(separator, values.Select(v => v.Contains(separator) ? $"\"{v}\"" : v));
+            var stringValues = values.Select(value =>
+            {
+                if (string.IsNullOrEmpty(value))
+                    return string.Empty;
+
+                var needQuotes = value.IndexOf(separator, StringComparison.InvariantCulture) >= 0
+                                 || value.IndexOf("\"", StringComparison.InvariantCulture) >= 0
+                                 || value.IndexOf(Environment.NewLine, StringComparison.InvariantCulture) >= 0;
+                var csvValue = value.Replace("\"", "\"\"");
+
+                return needQuotes ? $"\"{csvValue}\"" : csvValue;
+            });
+            return string.Join(separator, stringValues);
         }
 
         /// <summary>
