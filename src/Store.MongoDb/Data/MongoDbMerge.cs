@@ -26,6 +26,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Data.Common;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -283,6 +284,93 @@ namespace PDS.WITSMLstudio.Store.Data
                         PopPropertyInfo();
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Handles the special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns>true if the special case was handled, false otherwise</returns>
+        protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
+        {
+            if (!IsSpecialCase(propertyInfo))
+            {
+                return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+            }
+
+            var items = Context.PropertyValues.Last() as IEnumerable;
+            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyType = propertyInfo.PropertyType;
+
+            var args = propertyType.GetGenericArguments();
+            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+            if (childType != null && childType != typeof(string))
+            {
+                try
+                {
+                    var version = ObjectTypes.GetVersion(childType);
+                    var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                    validator?.Validate(Context.Function, childType, items, elementList);
+                }
+                catch (ContainerException)
+                {
+                    Logger.DebugFormat("{0} not configured for type: {1}", typeof(IRecurringElementValidator).Name, childType);
+                }
+            }
+
+            UpdateArrayElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
+
+            return true;
+        }
+
+        private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        {
+            Logger.Debug($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
+
+            if (MergeDelete)
+                RemoveAll(elements);
+
+            var list = propertyValue as IList;
+            list?.Clear();
+
+            foreach (var element in elements)
+            {
+                if (MergeDelete)
+                    continue;
+
+                WitsmlParser.RemoveEmptyElements(element);
+
+                // TODO: Modify to handle other item types as needed.
+                object item;
+
+                if (IsComplexType(type))
+                {
+                    var complexType = type.IsAbstract
+                        ? GetConcreteType(element, type)
+                        : type;
+
+                    item = ParseNestedElement(complexType, element);
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(element.Value))
+                        continue;
+
+                    item = element.Value;
+                }
+
+                if (Context.ValidationOnly)
+                    continue;
+
+                if (propertyValue == null)
+                    continue;
+
+                list?.Add(item);
             }
         }
 
