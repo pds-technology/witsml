@@ -292,7 +292,7 @@ namespace PDS.WITSMLstudio.Store.Data
             var filterBuilder = Builders<T>.Filter;
 
             var updateList = elements
-                .Select(element =>
+                .Select((element, index) =>
                 {
                     var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
@@ -320,7 +320,7 @@ namespace PDS.WITSMLstudio.Store.Data
                     if (Context.ValidationOnly)
                         return null;
 
-                    var update = propertyValue == null
+                    var update = propertyValue == null || index == 0
                         ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
                         : updateBuilder.Push(parentPath, item);
 
