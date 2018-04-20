@@ -369,7 +369,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             var queryWell = DevKit.GetAndAssert(new Well() {Uid = response.SuppMsgOut});
             Assert.IsNotNull(queryWell.CommonData);
             Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
-            Assert.AreEqual(4, queryWell.CommonData.AcquisitionTimeZone.Count);
+            Assert.AreEqual(1, queryWell.CommonData.AcquisitionTimeZone.Count, "Acquisition time zone count did not match");
         }
 
         [TestMethod]
