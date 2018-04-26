@@ -42,11 +42,9 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
-        private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
-
-        private Dictionary<string, List<IChannelDataProvider>> _providers;
+        private readonly Dictionary<string, List<IChannelDataProvider>> _providers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
@@ -55,10 +53,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         [ImportingConstructor]
         public ChannelStreamingProducer(IContainer container)
         {
-            _container = container;
+            Container = container;
             Channels = new Dictionary<long, Tuple<EtpUri, ChannelMetadataRecord>>();
             _channelStreamingContextLists = new List<IList<ChannelStreamingContext>>();
-            InitializeChannelDataProviders();
+            _providers = InitializeChannelDataProviders();
         }
 
         /// <summary>
@@ -71,6 +69,48 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <value>The request message header.</value>
         public MessageHeader Request { get; private set; }
+
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        protected IContainer Container { get; }
+
+        /// <summary>
+        /// Initializes the channel data providers.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Dictionary<string, List<IChannelDataProvider>> InitializeChannelDataProviders()
+        {
+            var providers = Container.ResolveAll<IChannelDataProvider>();
+
+            if (!providers.Any())
+            {
+                Logger.Warn("No IChannelDataProvider instances found.");
+                return new Dictionary<string, List<IChannelDataProvider>>();
+            }
+
+            return new Dictionary<string, List<IChannelDataProvider>>
+            {
+                {OptionsIn.DataVersion.Version131.Value, new List<IChannelDataProvider>{Container.Resolve<IChannelDataProvider>(ObjectNames.Log131)}},
+                {OptionsIn.DataVersion.Version141.Value, new List<IChannelDataProvider> {Container.Resolve<IChannelDataProvider>(ObjectNames.Log141)}},
+                {OptionsIn.DataVersion.Version200.Value, new List<IChannelDataProvider>
+                {
+                    Container.Resolve<IChannelDataProvider>(ObjectNames.Log200),
+                    Container.Resolve<IChannelDataProvider>(ObjectNames.Trajectory200),
+                    Container.Resolve<IChannelDataProvider>(ObjectNames.Channel200)
+                }}
+            };
+        }
+
+        /// <summary>
+        /// Gets the data provider to handle the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        protected virtual IChannelDataProvider GetDataProvider(EtpUri uri)
+        {
+            return Container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+        }
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
@@ -575,34 +615,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         {
             ChannelData(Request, dataItemList, messageFlag);
             await Task.Delay(MaxMessageRate);
-        }
-
-        private IChannelDataProvider GetDataProvider(EtpUri uri)
-        {
-            return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-        }
-
-        private void InitializeChannelDataProviders()
-        {
-            var providers = _container.ResolveAll<IChannelDataProvider>();
-
-            if (!providers.Any())
-            {
-                Logger.Warn("No IChannelDataProvider instances found.");
-                return;
-            }
-
-            _providers = new Dictionary<string, List<IChannelDataProvider>>
-            {
-                {OptionsIn.DataVersion.Version131.Value, new List<IChannelDataProvider>{_container.Resolve<IChannelDataProvider>(ObjectNames.Log131)}},
-                {OptionsIn.DataVersion.Version141.Value, new List<IChannelDataProvider> {_container.Resolve<IChannelDataProvider>(ObjectNames.Log141)}},
-                {OptionsIn.DataVersion.Version200.Value, new List<IChannelDataProvider>
-                {
-                    _container.Resolve<IChannelDataProvider>(ObjectNames.Log200),
-                    _container.Resolve<IChannelDataProvider>(ObjectNames.Trajectory200),
-                    _container.Resolve<IChannelDataProvider>(ObjectNames.Channel200)
-                }}
-            };
         }
 
         private object FormatValue(object value, List<object> attributes)
