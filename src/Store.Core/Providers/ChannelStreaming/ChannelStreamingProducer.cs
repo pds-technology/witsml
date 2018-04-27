@@ -239,7 +239,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             base.HandleChannelStreamingStop(header, channelStreamingStop);
         }
 
-        private void StopStreamingChannels(long messageId, IList<long> channels)
+        /// <summary>
+        /// Stops the streaming channels.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="channels">The channels.</param>
+        protected virtual void StopStreamingChannels(long messageId, IList<long> channels)
         {
             foreach (var channel in channels)
             {
@@ -267,7 +272,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private void StartChannelStreaming(long messageId, IList<ChannelStreamingInfo> infos, CancellationToken token)
+        /// <summary>
+        /// Starts the channel streaming.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="infos">The infos.</param>
+        /// <param name="token">The token.</param>
+        protected virtual void StartChannelStreaming(long messageId, IList<ChannelStreamingInfo> infos, CancellationToken token)
         {
             List<long> channelIds = ValidateAndRemoveStreamingChannels(messageId, infos);
 
@@ -291,6 +302,16 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     ReceiveChangeNotification = info.ReceiveChangeNotification
                 };
 
+            StartChannelStreamingContextGroups(streamingContextList, token);
+        }
+
+        /// <summary>
+        /// Starts the channel streaming context groups.
+        /// </summary>
+        /// <param name="streamingContextList">The streaming context list.</param>
+        /// <param name="token">The token.</param>
+        protected virtual void StartChannelStreamingContextGroups(IEnumerable<ChannelStreamingContext> streamingContextList, CancellationToken token)
+        {
             // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex
             var streamingContextGrouping =
                 from x in streamingContextList
@@ -300,7 +321,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
         }
 
-        private void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
+        /// <summary>
+        /// Starts the channel range request.
+        /// </summary>
+        /// <param name="infos">The infos.</param>
+        /// <param name="token">The token.</param>
+        protected virtual void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
         {
             // Validate each channel range info
             ValidateChannelRangeInfos(infos);
@@ -344,7 +370,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
         }
 
-        private List<long> ValidateAndRemoveStreamingChannels(long messageId, IList<ChannelStreamingInfo> infos)
+        /// <summary>
+        /// Validates the and remove streaming channels.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="infos">The infos.</param>
+        /// <returns></returns>
+        protected List<long> ValidateAndRemoveStreamingChannels(long messageId, IList<ChannelStreamingInfo> infos)
         {
             var channelIds = infos
                 .Select(i => i.ChannelId)
@@ -372,7 +404,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             return channelIds;
         }
 
-        private ChannelStreamingTypes ToChannelStreamingType(object item)
+        /// <summary>
+        /// To the type of the channel streaming.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <returns></returns>
+        protected ChannelStreamingTypes ToChannelStreamingType(object item)
         {
             return item is long
                 ? ChannelStreamingTypes.IndexValue
@@ -381,7 +418,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     : ChannelStreamingTypes.LatestValue;
         }
 
-        private ChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
+        /// <summary>
+        /// Gets the streaming channels.
+        /// </summary>
+        /// <param name="channelIds">The channel ids.</param>
+        /// <returns></returns>
+        protected ChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
         {
             return _channelStreamingContextLists
                 .SelectMany(list => list
@@ -390,7 +432,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .ToArray();
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, CancellationToken token)
+        /// <summary>
+        /// Streams the channel data.
+        /// </summary>
+        /// <param name="contextList">The context list.</param>
+        /// <param name="token">The token.</param>
+        /// <returns></returns>
+        protected virtual async Task StreamChannelData(IList<ChannelStreamingContext> contextList, CancellationToken token)
         {
             _channelStreamingContextLists.Add(contextList);
 
@@ -489,7 +537,19 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart, CancellationToken token)
+        /// <summary>
+        /// Streams the channel data.
+        /// </summary>
+        /// <param name="contextList">The context list.</param>
+        /// <param name="channelData">The channel data.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeIndex">Index of the is time.</param>
+        /// <param name="scale">The scale.</param>
+        /// <param name="firstStart">if set to <c>true</c> [first start].</param>
+        /// <param name="token">The token.</param>
+        /// <returns></returns>
+        protected async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
             var firstContext = contextList.FirstOrDefault();
@@ -536,7 +596,18 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart)
+        /// <summary>
+        /// Creates the data items.
+        /// </summary>
+        /// <param name="contextList">The context list.</param>
+        /// <param name="record">The record.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeIndex">Index of the is time.</param>
+        /// <param name="scale">The scale.</param>
+        /// <param name="firstStart">if set to <c>true</c> [first start].</param>
+        /// <returns></returns>
+        protected IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart)
         {
             // Get the index and value components for the current record
             var indexes = record[0];
@@ -611,13 +682,25 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private async Task SendChannelData(List<DataItem> dataItemList, MessageFlags messageFlag = MessageFlags.MultiPart)
+        /// <summary>
+        /// Sends the channel data.
+        /// </summary>
+        /// <param name="dataItemList">The data item list.</param>
+        /// <param name="messageFlag">The message flag.</param>
+        /// <returns></returns>
+        protected async Task SendChannelData(List<DataItem> dataItemList, MessageFlags messageFlag = MessageFlags.MultiPart)
         {
             ChannelData(Request, dataItemList, messageFlag);
             await Task.Delay(MaxMessageRate);
         }
 
-        private object FormatValue(object value, List<object> attributes)
+        /// <summary>
+        /// Formats the value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="attributes">The attributes.</param>
+        /// <returns></returns>
+        protected object FormatValue(object value, List<object> attributes)
         {
             value = ChannelDataReader.ReadValue(value);
             var data = value as object[];
@@ -633,7 +716,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             return FormatValue(data.FirstOrDefault());
         }
 
-        private object FormatValue(object value)
+        /// <summary>
+        /// Formats the value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        protected object FormatValue(object value)
         {
             if (value is DateTime)
             {
@@ -647,7 +735,15 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             return value;
         }
 
-        private static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
+        /// <summary>
+        /// Determines whether [is streaming stopped] [the specified context list].
+        /// </summary>
+        /// <param name="contextList">The context list.</param>
+        /// <param name="token">The token.</param>
+        /// <returns>
+        ///   <c>true</c> if [is streaming stopped] [the specified context list]; otherwise, <c>false</c>.
+        /// </returns>
+        protected static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
         {
             return token.IsCancellationRequested || contextList.Count == 0;
         }
@@ -657,7 +753,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Validates the channel range request.
         /// </summary>
         /// <param name="infos">The infos.</param>
-        private void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
+        protected void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
         {
             // Remove invalid channel range infos from streaming context
             infos
@@ -679,7 +775,14 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .ForEach(infos.RemoveAt);
         }
 
-        private bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
+        /// <summary>
+        /// Validates the range request indexes.
+        /// </summary>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
+        protected bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
         {
             if (increasing)
             {
