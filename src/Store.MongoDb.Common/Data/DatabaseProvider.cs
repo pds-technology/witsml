@@ -17,11 +17,12 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Configuration;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
-using PDS.WITSMLstudio.Store.MongoDb;
+using PDS.WITSMLstudio.Store.MongoDb.Common;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -45,25 +46,27 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Initializes a new instance of the <see cref="DatabaseProvider" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
-        /// <param name="mapper">The MongoDb class mapper.</param>
+        /// <param name="mappers">The MongoDb class mappers.</param>
         [ImportingConstructor]
-        public DatabaseProvider(IContainer container, MongoDbClassMapper mapper)
+        public DatabaseProvider(IContainer container, [ImportMany] IEnumerable<IMongoDbClassMapper> mappers)
         {
             MongoDefaults.MaxConnectionIdleTime = TimeSpan.FromMinutes(1);
             _container = container;
             _client = new Lazy<IMongoClient>(CreateMongoClient);
             _connectionString = GetConnectionString();
             _databaseName = GetDatabaseName(_connectionString);
-            mapper.Register();
+
+            foreach (var mapper in mappers)
+                mapper.Register();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider"/> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
-        /// <param name="mapper">The MongoDb class mapper.</param>
+        /// <param name="mappers">The MongoDb class mappers.</param>
         /// <param name="connectionString">The connection string.</param>
-        internal DatabaseProvider(IContainer container, MongoDbClassMapper mapper, string connectionString) : this(container, mapper)
+        internal DatabaseProvider(IContainer container, IEnumerable<IMongoDbClassMapper> mappers, string connectionString) : this(container, mappers)
         {
             _connectionString = connectionString;
             _databaseName = GetDatabaseName(_connectionString);

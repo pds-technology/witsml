@@ -41,7 +41,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>..\packages\Standards.DevKit-PDS.2.0.20180415.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20180415.1\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -216,6 +216,10 @@
     <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+      <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
+      <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>

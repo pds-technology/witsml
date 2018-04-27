@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.WITSMLstudio.Store.MongoDb {
+namespace PDS.WITSMLstudio.Store.MongoDb.Common {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,28 +25,19 @@ namespace PDS.WITSMLstudio.Store.MongoDb {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
-        public int DefaultTransactionWaitInterval {
+        [global::System.Configuration.DefaultSettingValueAttribute("mongodb://localhost:27017")]
+        public string DefaultConnectionString {
             get {
-                return ((int)(this["DefaultTransactionWaitInterval"]));
+                return ((string)(this["DefaultConnectionString"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("150")]
-        public int DefaultMaximumTransactionAttempt {
+        [global::System.Configuration.DefaultSettingValueAttribute("WitsmlStore")]
+        public string DefaultDatabaseName {
             get {
-                return ((int)(this["DefaultMaximumTransactionAttempt"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int DefaultServerTimeoutMinutes {
-            get {
-                return ((int)(this["DefaultServerTimeoutMinutes"]));
+                return ((string)(this["DefaultDatabaseName"]));
             }
         }
     }

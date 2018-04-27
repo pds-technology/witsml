@@ -37,9 +37,10 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <summary>
     /// Initializes MongoDb class and member mappings.
     /// </summary>
-    [Export]
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IMongoDbClassMapper" />
+    [Export(typeof(IMongoDbClassMapper))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class MongoDbClassMapper
+    public partial class MongoDbClassMapper : IMongoDbClassMapper
     {
         /// <summary>
         /// Registers all supported class and member mappings.

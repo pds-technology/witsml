@@ -46,7 +46,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>..\packages\Standards.DevKit-PDS.2.0.20180415.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20180415.1\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -203,7 +203,6 @@
     <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataAdapter.generated.cs">
       <DependentUpon>DataAssuranceRecord200DataAdapter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.cs" />
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs" />
@@ -236,7 +235,6 @@
       <DependentUpon>FormationMarker141DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\GrowingObjects\GrowingObjectDataAdapterBase.cs" />
-    <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.generated.cs">
       <DependentUpon>Log131DataAdapter.cs</DependentUpon>
@@ -366,7 +364,6 @@
     <Compile Include="Data\Targets\Target141DataAdapter.generated.cs">
       <DependentUpon>Target141DataAdapter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\TimestampSerializer.cs" />
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.cs" />
     <Compile Include="Data\Trajectories\Trajectory131DataAdapter.generated.cs">
       <DependentUpon>Trajectory131DataAdapter.cs</DependentUpon>
@@ -395,7 +392,6 @@
     <Compile Include="Data\Tubulars\Tubular200DataAdapter.generated.cs">
       <DependentUpon>Tubular200DataAdapter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\UidGenerator.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry131DataAdapter.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry131DataAdapter.generated.cs">
       <DependentUpon>WbGeometry131DataAdapter.cs</DependentUpon>
@@ -460,7 +456,6 @@
     <Compile Include="Data\Wells\Well200DataAdapter.generated.cs">
       <DependentUpon>Well200DataAdapter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\XmlElementSerializer.cs" />
     <Compile Include="Data\GrowingObjects\DbGrowingObject.cs" />
     <Compile Include="Data\GrowingObjects\DbGrowingObjectDataAdapter.cs" />
     <Compile Include="Models\ChannelDataChunk.cs" />
@@ -473,8 +468,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Security\DbUser.cs" />
-    <Compile Include="Security\MongoDbMembershipProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -502,6 +495,10 @@
     <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+      <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
+      <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
