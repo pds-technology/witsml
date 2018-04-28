@@ -38,9 +38,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Web", "..\ext\witsml\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Notifications", "Store.Notifications\Store.Notifications.csproj", "{987B6304-B4A6-4D57-ACC3-7209175286A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb.Common", "Store.MongoDb.Common\Store.MongoDb.Common.csproj", "{C1FE065B-5750-4D15-84D8-77DF756C52D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb.Common", "..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj", "{C1FE065B-5750-4D15-84D8-77DF756C52D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UserAdmin", "Store.UserAdmin\Store.UserAdmin.csproj", "{347D0962-B422-4ACB-97AA-4BB78854A282}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UserAdmin", "..\ext\witsml\src\Store.UserAdmin\Store.UserAdmin.csproj", "{347D0962-B422-4ACB-97AA-4BB78854A282}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,5 +117,7 @@ Global
 		{C050AB68-0543-4A23-870C-2D07F872484B} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 		{006F1A29-952B-4264-8E91-0D445F74B183} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{C1FE065B-5750-4D15-84D8-77DF756C52D8} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{347D0962-B422-4ACB-97AA-4BB78854A282} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 	EndGlobalSection
 EndGlobal

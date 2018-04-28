@@ -217,7 +217,7 @@
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
       <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
       <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
