@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.WITSMLstudio.Store.MongoDb.Common" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DefaultConnectionString" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">mongodb://localhost:27017</Value>
+    </Setting>
+    <Setting Name="DefaultDatabaseName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WitsmlStore</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

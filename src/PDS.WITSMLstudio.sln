@@ -31,6 +31,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{28
 		External\UpdatePackageHintPaths.ps1 = External\UpdatePackageHintPaths.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb.Common", "Store.MongoDb.Common\Store.MongoDb.Common.csproj", "{C1FE065B-5750-4D15-84D8-77DF756C52D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UserAdmin", "Store.UserAdmin\Store.UserAdmin.csproj", "{347D0962-B422-4ACB-97AA-4BB78854A282}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1FE065B-5750-4D15-84D8-77DF756C52D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1FE065B-5750-4D15-84D8-77DF756C52D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1FE065B-5750-4D15-84D8-77DF756C52D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1FE065B-5750-4D15-84D8-77DF756C52D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{347D0962-B422-4ACB-97AA-4BB78854A282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{347D0962-B422-4ACB-97AA-4BB78854A282}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{347D0962-B422-4ACB-97AA-4BB78854A282}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{347D0962-B422-4ACB-97AA-4BB78854A282}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
