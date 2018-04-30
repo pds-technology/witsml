@@ -141,7 +141,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private Resource ToResource(Well entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: entity.Uid,
+                uuid: string.Empty,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
@@ -151,7 +151,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private Resource ToResource(Wellbore entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: entity.Uid,
+                uuid: string.Empty,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
@@ -161,7 +161,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private Resource ToResource(IWellboreObject entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: entity.Uid,
+                uuid: string.Empty,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
@@ -171,7 +171,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private Resource ToResource(Log log, LogCurveInfo curve)
         {
             return DiscoveryStoreProvider.New(
-                uuid: curve.Uid,
+                uuid: string.Empty,
                 uri: curve.GetUri(log),
                 resourceType: ResourceTypes.DataObject,
                 name: curve.Mnemonic);
