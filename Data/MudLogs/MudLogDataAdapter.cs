@@ -311,12 +311,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
                 : parser.IncludeGeologyIntervals()
-                ? new List<string>
-                {
-                    IdPropertyName, "UidWell", "UidWellbore", "GeologyInterval.Uid",
-                    "GeologyInterval.TypeLithology", "GeologyInterval.MDTop",
-                    "GeologyInterval.MDBottom"
-                }
+                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "GeologyInterval" }
                 : OptionsIn.ReturnElements.Requested.Equals(returnElements)
                 ? new List<string>()
                 : null;
