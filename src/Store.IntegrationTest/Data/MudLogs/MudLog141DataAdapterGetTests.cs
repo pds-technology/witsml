@@ -33,7 +33,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             "<mudLog uidWell=\"490251091700\" uidWellbore=\"25-LX-11\" uid=\"h45a\">" +
             "<startMd uom=\"ft\">5011</startMd>" +
             "<endMd uom=\"ft\">5019</endMd>" +
-            "<geologyInterval>" +
+            "<geologyInterval uid=\"\">" +
             "<mdTop uom=\"\"/>" +
             "<mdBottom uom=\"\"/>" +
             "</geologyInterval>" +
@@ -50,28 +50,28 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141DataAdapter_GetFromStore_IntervalRangeInclusion_Minimal_Point()
         {
-            var expextedIntervals = new[] { "gi123", "gi124", "gi125", "gi126" };
+            var expectedIntervals = new[] { "gi123", "gi124", "gi125", "gi126" };
             var intervalRangeInclusion = OptionsIn.IntervalRangeInclusion.MinimumPoint;
 
-            AssertIntervalRangeInclusion(intervalRangeInclusion, expextedIntervals);
+            AssertIntervalRangeInclusion(intervalRangeInclusion, expectedIntervals);
         }
 
         [TestMethod]
         public void MudLog141DataAdapter_GetFromStore_IntervalRangeInclusion_Any_Part()
         {
-            var expextedIntervals = new[] { "gi122", "gi123", "gi124", "gi125", "gi126" };
+            var expectedIntervals = new[] { "gi122", "gi123", "gi124", "gi125", "gi126" };
             var intervalRangeInclusion = OptionsIn.IntervalRangeInclusion.AnyPart;
 
-            AssertIntervalRangeInclusion(intervalRangeInclusion, expextedIntervals);
+            AssertIntervalRangeInclusion(intervalRangeInclusion, expectedIntervals);
         }
 
         [TestMethod]
         public void MudLog141DataAdapter_GetFromStore_IntervalRangeInclusion_Whole_Interval()
         {
-            var expextedIntervals = new[] { "gi123", "gi124", "gi125" };
+            var expectedIntervals = new[] { "gi123", "gi124", "gi125" };
             var intervalRangeInclusion = OptionsIn.IntervalRangeInclusion.WholeInterval;
 
-            AssertIntervalRangeInclusion(intervalRangeInclusion, expextedIntervals);
+            AssertIntervalRangeInclusion(intervalRangeInclusion, expectedIntervals);
         }
 
         [TestMethod]
@@ -124,7 +124,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
         #region Helper Methods
 
-        private void AssertIntervalRangeInclusion(OptionsIn.IntervalRangeInclusion intervalRangeInclusion, string[] expextedIntervals)
+        private void AssertIntervalRangeInclusion(OptionsIn.IntervalRangeInclusion intervalRangeInclusion, string[] expectedIntervals)
         {
             var result = DevKit.GetFromStore(ObjectTypes.MudLog, IntervalRangeQuery, null, intervalRangeInclusion);
             Assert.IsNotNull(result);
@@ -135,9 +135,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
 
             var mudLog = mudLogList.MudLog[0];
             Assert.IsNotNull(mudLogList);
-            Assert.AreEqual(expextedIntervals.Length, mudLog.GeologyInterval.Count);
+            Assert.AreEqual(expectedIntervals.Length, mudLog.GeologyInterval.Count);
 
-            mudLog.GeologyInterval.ForEach((x, i) => Assert.AreEqual(expextedIntervals[i], x.Uid));
+            mudLog.GeologyInterval.ForEach((x, i) => Assert.AreEqual(expectedIntervals[i], x.Uid));
         }
 
         #endregion
