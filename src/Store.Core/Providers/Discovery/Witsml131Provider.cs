@@ -141,40 +141,44 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private Resource ToResource(Well entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: string.Empty,
+                uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: -1);
+                count: -1,
+                lastChanged: entity.GetLastChangedMicroseconds());
         }
 
         private Resource ToResource(Wellbore entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: string.Empty,
+                uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: -1);
+                count: -1,
+                lastChanged: entity.GetLastChangedMicroseconds());
         }
 
         private Resource ToResource(IWellboreObject entity)
         {
             return DiscoveryStoreProvider.New(
-                uuid: string.Empty,
+                uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: entity is Log ? -1 : 0);
+                count: entity is Log ? -1 : 0,
+                lastChanged: (entity as ICommonDataObject).GetLastChangedMicroseconds());
         }
 
         private Resource ToResource(Log log, LogCurveInfo curve)
         {
             return DiscoveryStoreProvider.New(
-                uuid: string.Empty,
+                uuid: null,
                 uri: curve.GetUri(log),
                 resourceType: ResourceTypes.DataObject,
-                name: curve.Mnemonic);
+                name: curve.Mnemonic,
+                lastChanged: log.GetLastChangedMicroseconds());
         }
     }
 }

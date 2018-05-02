@@ -218,7 +218,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(channelSet),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Mnemonic,
-                lastChanged: GetLastChanged(entity));
+                lastChanged: entity.GetLastChangedMicroseconds());
         }
 
         private Resource ToResource(AbstractObject entity, int hasChildren = -1)
@@ -229,12 +229,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: hasChildren,
-                lastChanged: GetLastChanged(entity));
-        }
-
-        private long GetLastChanged(AbstractObject entity)
-        {
-            return entity?.Citation?.LastUpdate?.ToUnixTimeMicroseconds() ?? 0;
+                lastChanged: entity.GetLastChangedMicroseconds());
         }
     }
 }

@@ -122,12 +122,12 @@ namespace PDS.WITSMLstudio
         /// <returns>An <see cref="IEnergisticsCollection"/> instance.</returns>
         public static IEnergisticsCollection BuildEmptyQuery(this WITSMLWebServiceConnection connection, Type type, string version)
         {
-            var method = connection.GetType()
-                .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)
+            var method = connection?.GetType()
+                .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)?
                 .MakeGenericMethod(type);
 
-            var query = method.Invoke(null, null) as IEnergisticsCollection;
-            query.SetVersion(version);
+            var query = method?.Invoke(null, null) as IEnergisticsCollection;
+            query?.SetVersion(version);
 
             return query;
         }
@@ -255,6 +255,26 @@ namespace PDS.WITSMLstudio
         public static long? ToUnixTimeMicroseconds(this Timestamp? timestamp)
         {
             return timestamp?.ToUnixTimeMicroseconds();
+        }
+
+        /// <summary>
+        /// Gets the last changed date time in microseconds.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The last changed date time in microseconds.</returns>
+        public static long GetLastChangedMicroseconds(this ICommonDataObject entity)
+        {
+            return entity?.CommonData?.DateTimeLastChange?.ToUnixTimeMicroseconds() ?? 0;
+        }
+
+        /// <summary>
+        /// Gets the last changed date time in microseconds.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The last changed date time in microseconds.</returns>
+        public static long GetLastChangedMicroseconds(this Witsml200.AbstractObject entity)
+        {
+            return entity?.Citation?.LastUpdate?.ToUnixTimeMicroseconds() ?? 0;
         }
 
         /// <summary>
