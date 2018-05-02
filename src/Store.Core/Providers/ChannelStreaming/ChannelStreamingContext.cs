@@ -99,5 +99,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// otherwise, <c>false</c>.
         /// </value>
         public bool ReceiveChangeNotification { get; set; }
+
+        /// <summary>
+        /// Gets or sets the query context.
+        /// </summary>
+        public string QueryContext { get; set; }
     }
 }
