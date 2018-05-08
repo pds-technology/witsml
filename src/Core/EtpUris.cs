@@ -254,7 +254,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml131.ComponentSchemas.LogCurveInfo entity, Witsml131.Log log)
         {
             return log.GetUri()
-                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic);
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic, true);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
         {
             return log.GetUri()
-                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic.Value);
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic.Value, true);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Channel channel)
         {
             return channel.GetUri()
-                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic, true);
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
-                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic, true);
         }
 
         /// <summary>
@@ -340,7 +340,7 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
-                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic, true);
         }
     }
 }
