@@ -199,8 +199,11 @@ namespace PDS.WITSMLstudio.Store.Security
             _log.InfoFormat("Deleting user: {0}", username);
 
             var usr = ByUserName(username);
+            if (usr == null) return false;
+
             //Db.Delete<DbUser>(usr);
             Delete(usr);
+
             return true;
         }
 

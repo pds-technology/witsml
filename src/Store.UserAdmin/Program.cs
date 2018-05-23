@@ -76,7 +76,10 @@ namespace PDS.WITSMLstudio.Store.UserAdmin
             var saved = provider.GetUser(username, false);
 
             if (saved != null)
+            {
+                Console.WriteLine($"User '{username}' already exists");
                 return Error;
+            }
 
             var user = provider.CreateUser(
                 username: username,
@@ -89,12 +92,18 @@ namespace PDS.WITSMLstudio.Store.UserAdmin
                 status: out status);
 
             if (user == null || status != MembershipCreateStatus.Success)
+            {
+                Console.WriteLine($"Error creating user '{username}'");
                 return Error;
+            }
 
             saved = provider.GetUser(username, false);
 
             if (saved == null || !provider.ValidateUser(username, password))
+            {
+                Console.WriteLine($"Error validating user '{username}'");
                 return Error;
+            }
 
             Console.WriteLine("email:     {0}", email);
             Console.WriteLine("username:  {0}", username);
@@ -107,9 +116,13 @@ namespace PDS.WITSMLstudio.Store.UserAdmin
         {
             var provider = GetProvider();
 
-            return provider.DeleteUser(opts.Username, true)
-                ? Success
-                : Error;
+            if (!provider.DeleteUser(opts.Username, true))
+            {
+                Console.WriteLine($"Error deleting user '{opts.Username}'");
+                return Error;
+            }
+
+            return Success;
         }
     }
 }

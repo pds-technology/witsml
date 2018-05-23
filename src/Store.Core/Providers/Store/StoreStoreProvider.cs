@@ -83,10 +83,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 dataObject.SetString(data, compress);
             }
 
+            double version;
+            var uuid = double.TryParse(uri.Version, out version) && version >= 2.0 ? uri.ObjectId : null;
+
             dataObject.Resource = new Resource()
             {
                 Uri = uri,
-                Uuid = uri.ObjectId,
+                Uuid = uuid,
                 Name = name,
                 HasChildren = childCount,
                 ContentType = uri.ContentType,
