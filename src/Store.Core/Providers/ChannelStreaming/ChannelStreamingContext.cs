@@ -29,65 +29,46 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Gets or sets the channel identifier.
         /// </summary>
-        /// <value>
-        /// The channel identifier.
-        /// </value>
         public long ChannelId { get; set; }
 
         /// <summary>
         /// Gets or sets the channel metadata.
         /// </summary>
-        /// <value>
-        /// The channel metadata.
-        /// </value>
         public ChannelMetadataRecord ChannelMetadata { get; set; }
 
         /// <summary>
         /// Gets or sets the parent URI.
         /// </summary>
-        /// <value>
-        /// The parent URI.
-        /// </value>
         public EtpUri ParentUri { get; set; }
 
         /// <summary>
         /// Gets or sets the start index.
         /// </summary>
-        /// <value>
-        /// The start index.
-        /// </value>
         public long? StartIndex { get; set; }
 
         /// <summary>
         /// Gets or sets the end index.
         /// </summary>
-        /// <value>
-        /// The end index.
-        /// </value>
         public long? EndIndex { get; set; }
 
         /// <summary>
-        /// Gets or sets the index count.
+        /// Gets or sets the last index value processed.
         /// </summary>
-        /// <value>
-        /// The index count before and including the latest index value.
-        /// </value>
+        public long? LastIndex { get; set; }
+
+        /// <summary>
+        /// Gets or sets the index count before and including the latest index value.
+        /// </summary>
         public int IndexCount { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the channel streaming.
         /// </summary>
-        /// <value>
-        /// The type of the channel streaming.
-        /// </value>
         public ChannelStreamingTypes ChannelStreamingType { get; set; }
 
         /// <summary>
         /// Gets or sets the range request message header.
         /// </summary>
-        /// <value>
-        /// The range request message header.
-        /// </value>
         public MessageHeader RangeRequestHeader { get; set; }
 
         /// <summary>
