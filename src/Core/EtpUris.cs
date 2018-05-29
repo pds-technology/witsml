@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Reflection;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -169,7 +168,7 @@ namespace PDS.WITSMLstudio
             return (entity as IWellboreObject)?.GetUri()
                 ?? (entity as IWellObject)?.GetUri()
                 ?? entity.GetUriFamily()
-                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid, true);
         }
 
         /// <summary>
@@ -181,8 +180,8 @@ namespace PDS.WITSMLstudio
         {
             return (entity as IWellboreObject)?.GetUri()
                 ?? entity.GetUriFamily()
-                    .Append(ObjectTypes.Well, entity.UidWell)
-                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+                    .Append(ObjectTypes.Well, entity.UidWell, true)
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid, true);
         }
 
         /// <summary>
@@ -193,9 +192,9 @@ namespace PDS.WITSMLstudio
         public static EtpUri GetUri(this IWellboreObject entity)
         {
             return entity.GetUriFamily()
-                .Append(ObjectTypes.Well, entity.UidWell)
-                .Append(ObjectTypes.Wellbore, entity.UidWellbore)
-                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+                .Append(ObjectTypes.Well, entity.UidWell, true)
+                .Append(ObjectTypes.Wellbore, entity.UidWellbore, true)
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uid, true);
         }
 
         /// <summary>
