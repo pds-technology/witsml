@@ -167,8 +167,9 @@ namespace PDS.WITSMLstudio
         /// </summary>
         /// <param name="obj">The object.</param>
         /// <param name="nilOnly">if set to <c>true</c> only elements with nil="true" are removed.</param>
+        /// <param name="removeTypePrefix">if set to <c>true</c> any type prefix will be removed.</param>
         /// <returns>The serialized XML string.</returns>
-        public static string ToXml(object obj, bool nilOnly = false)
+        public static string ToXml(object obj, bool nilOnly = false, bool removeTypePrefix = false)
         {
             _log.Debug("Serializing object to XML.");
 
@@ -180,7 +181,7 @@ namespace PDS.WITSMLstudio
 
             if (root == null) return string.Empty;
 
-            root = root.UpdateRootElementName(obj.GetType());
+            root = root.UpdateRootElementName(obj.GetType(), removeTypePrefix);
 
             foreach (var element in root.Elements())
             {

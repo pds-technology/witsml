@@ -78,7 +78,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             {
                 var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)
                     ? Energistics.Common.EtpExtensions.Serialize(entity)
-                    : WitsmlParser.ToXml(entity);
+                    : WitsmlParser.ToXml(entity, removeTypePrefix: true);
 
                 dataObject.SetString(data, compress);
             }
@@ -86,7 +86,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             double version;
             var uuid = double.TryParse(uri.Version, out version) && version >= 2.0 ? uri.ObjectId : null;
 
-            dataObject.Resource = new Resource()
+            dataObject.Resource = new Resource
             {
                 Uri = uri,
                 Uuid = uuid,

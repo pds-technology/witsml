@@ -127,8 +127,9 @@ namespace PDS.WITSMLstudio.Framework
         /// </summary>
         /// <param name="element">The element.</param>
         /// <param name="type">The type.</param>
+        /// <param name="removeTypePrefix">if set to <c>true</c> any type prefix will be removed.</param>
         /// <returns>A new <see cref="XElement"/> instance.</returns>
-        public static XElement UpdateRootElementName(this XElement element, Type type)
+        public static XElement UpdateRootElementName(this XElement element, Type type, bool removeTypePrefix = false)
         {
             var xmlRoot = XmlAttributeCache<XmlRootAttribute>.GetCustomAttribute(type);
             var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
@@ -140,12 +141,22 @@ namespace PDS.WITSMLstudio.Framework
             else if (!string.IsNullOrWhiteSpace(xmlType?.TypeName))
                 elementName = xmlType.TypeName;
 
+            if (removeTypePrefix)
+            {
+                if (elementName.StartsWith("obj_"))
+                    elementName = elementName.Substring(4);
+                else if (elementName.StartsWith("cs_"))
+                    elementName = elementName.Substring(3);
+            }
+
             if (element.Name.LocalName.Equals(elementName))
                 return element;
 
             var xElementName = !string.IsNullOrWhiteSpace(xmlRoot?.Namespace)
                 ? XNamespace.Get(xmlRoot.Namespace).GetName(elementName)
-                : elementName;
+                : !string.IsNullOrWhiteSpace(xmlType?.Namespace)
+                    ? XNamespace.Get(xmlType.Namespace).GetName(elementName)
+                    : elementName;
 
             // Update element name to match XSD type name
             var clone = new XElement(element)
