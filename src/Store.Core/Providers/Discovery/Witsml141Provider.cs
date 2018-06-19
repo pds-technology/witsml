@@ -129,7 +129,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
                     .Select(x => EtpContentTypes.GetContentType(x.DataObjectType))
                     .OrderBy(x => x.ObjectType)
-                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType)));
+                    .ForEach(x =>
+                    {
+                        var hasChildren = ObjectTypes.Log.EqualsIgnoreCase(x.ObjectType)
+                            ? _logDataProvider.Count(uri)
+                            : -1;
+
+                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType, hasChildren));
+                    });
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
@@ -145,7 +152,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: -1,
+                count: _wellboreDataProvider.Count(entity.GetUri()),
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
@@ -156,7 +163,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: -1,
+                count: _logDataProvider.Count(entity.GetUri()),
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
@@ -167,7 +174,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: entity is Log ? -1 : 0,
+                count: (entity as Log)?.LogCurveInfo?.Count ?? 0,
                 lastChanged: (entity as ICommonDataObject).GetLastChangedMicroseconds());
         }
 
