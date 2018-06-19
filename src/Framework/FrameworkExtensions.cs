@@ -38,6 +38,7 @@ namespace PDS.WITSMLstudio.Framework
     public static class FrameworkExtensions
     {
         private static readonly string _defaultEncryptionKey = Settings.Default.DefaultEncryptionKey;
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(FrameworkExtensions));
 
         /// <summary>
         /// Gets the version for the <see cref="System.Reflection.Assembly"/> containing the specified <see cref="Type"/>.
@@ -501,7 +502,16 @@ namespace PDS.WITSMLstudio.Framework
             var bytes = Convert.FromBase64String(value);
             var entropy = Encoding.Unicode.GetBytes(key ?? _defaultEncryptionKey);
 
-            bytes = ProtectedData.Unprotect(bytes, entropy, forLocalMachine ? DataProtectionScope.LocalMachine : DataProtectionScope.CurrentUser);
+            try
+            {
+                bytes = ProtectedData.Unprotect(bytes, entropy,
+                    forLocalMachine ? DataProtectionScope.LocalMachine : DataProtectionScope.CurrentUser);
+            }
+            catch (CryptographicException ex)
+            {
+                _log.ErrorFormat("Error decrypting string: {0}", ex);
+                return null;
+            }
             return Encoding.Unicode.GetString(bytes);
         }
 
