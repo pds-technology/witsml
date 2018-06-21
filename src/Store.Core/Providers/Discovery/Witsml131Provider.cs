@@ -129,7 +129,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
                     .Select(x => EtpContentTypes.GetContentType(x.DataObjectType))
                     .OrderBy(x => x.ObjectType)
-                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType)));
+                    .ForEach(x =>
+                    {
+                        var hasChildren = ObjectTypes.Log.EqualsIgnoreCase(x.ObjectType)
+                            ? _logDataProvider.Count(uri)
+                            : -1;
+
+                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType, hasChildren));
+                    });
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
