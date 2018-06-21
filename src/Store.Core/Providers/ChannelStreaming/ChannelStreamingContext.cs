@@ -63,6 +63,11 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         public int IndexCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the real time status of the channel.
+        /// </summary>
+        public bool IsRealTime { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of the channel streaming.
         /// </summary>
         public ChannelStreamingTypes ChannelStreamingType { get; set; }
