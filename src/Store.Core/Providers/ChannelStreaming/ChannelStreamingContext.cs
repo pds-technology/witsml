@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -96,10 +97,15 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Gets or sets the query context.
         /// </summary>
         public string QueryContext { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the cancellation token source.
         /// </summary>
         public CancellationTokenSource TokenSource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the custom data.
+        /// </summary>
+        public Dictionary<string, object> CustomData { get; set; } = new Dictionary<string, object>();
     }
 }
