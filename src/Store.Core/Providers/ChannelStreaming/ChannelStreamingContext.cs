@@ -73,6 +73,11 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         public ChannelStreamingTypes ChannelStreamingType { get; set; }
 
         /// <summary>
+        /// Gets or sets the transfer mode.
+        /// </summary>
+        public TransferModes TransferMode { get; set; }
+
+        /// <summary>
         /// Gets or sets the range request message header.
         /// </summary>
         public MessageHeader RangeRequestHeader { get; set; }
