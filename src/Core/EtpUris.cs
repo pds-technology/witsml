@@ -209,6 +209,18 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>  and parentUri.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An <see cref="EtpUri"/> instance</returns>
+        public static EtpUri GetUri(this Witsml200.AbstractObject entity, EtpUri parentUri)
+        {
+            return parentUri
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        /// <summary>
         /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/>.
         /// </summary>
         /// <param name="entity">The <see cref="Energistics.DataAccess.PRODML200.AbstractObject"/> entity.</param>

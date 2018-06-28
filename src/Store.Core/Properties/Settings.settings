@@ -140,5 +140,8 @@
     <Setting Name="MaxGeologyIntervalCount" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">300</Value>
     </Setting>
+    <Setting Name="IsChannelDataAdapterEnabled" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

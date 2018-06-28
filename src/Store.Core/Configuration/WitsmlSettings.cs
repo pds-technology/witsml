@@ -239,6 +239,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static int MaxGetResourcesResponse = Properties.Settings.Default.MaxGetResourcesResponse;
 
         /// <summary>
+        /// The channel data adapter enabled setting.
+        /// </summary>
+        public static bool IsChannelDataAdapterEnabled = Properties.Settings.Default.IsChannelDataAdapterEnabled;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

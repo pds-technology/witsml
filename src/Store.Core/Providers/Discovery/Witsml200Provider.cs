@@ -26,6 +26,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
 using PDS.WITSMLstudio.Framework;
+using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data;
 
 namespace PDS.WITSMLstudio.Store.Providers.Discovery
@@ -105,15 +106,17 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
             {
-                if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
+                var isChannelDataAdapterEnabled = WitsmlSettings.IsChannelDataAdapterEnabled;
+
+                if (!isChannelDataAdapterEnabled && ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var log = _logDataProvider.Get(parentUri);
-                    log?.ChannelSet?.ForEach(x => args.Context.Add(ToResource(x)));
+                    log?.ChannelSet?.ForEach(x => args.Context.Add(ToResource(x, parentUri)));
                 }
-                else if (ObjectTypes.Channel.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
+                else if (!isChannelDataAdapterEnabled && ObjectTypes.Channel.EqualsIgnoreCase(uri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var set = _channelSetDataProvider.Get(parentUri);
-                    set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
+                    set?.Channel?.ForEach(x => args.Context.Add(ToResource(x, parentUri)));
                 }
                 else
                 {
@@ -125,7 +128,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     dataProvider
                         .GetAll(parentUri)
                         .Cast<AbstractObject>()
-                        .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
+                        .ForEach(x => args.Context.Add(ToResource(x, parentUri, hasChildren)));
                 }
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
@@ -211,23 +214,31 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
         }
 
-        private Resource ToResource(ChannelSet channelSet, Channel entity)
+        private Resource ToResource(Channel entity, EtpUri parentUri)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.GetUri(channelSet),
+                uri: entity.GetUri(parentUri),
                 resourceType: ResourceTypes.DataObject,
-                name: entity.Mnemonic,
+                name: $"{entity.Citation.Title}({entity.Mnemonic})",
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
-        private Resource ToResource(AbstractObject entity, int hasChildren = -1)
+        private Resource ToResource(AbstractObject entity, EtpUri parentUri, int hasChildren = -1)
         {
+            var name = entity.Citation.Title;
+            var channel = entity as Channel;
+
+            if (channel != null)
+            {
+                name = $"{name}({channel.Mnemonic})";
+            }
+
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.GetUri(),
+                uri: entity.GetUri(parentUri),
                 resourceType: ResourceTypes.DataObject,
-                name: entity.Citation.Title,
+                name: name,
                 count: hasChildren,
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
