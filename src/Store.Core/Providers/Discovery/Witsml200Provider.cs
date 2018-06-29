@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
             if (channel != null)
             {
-                name = $"{name}({channel.Mnemonic})";
+                name = $"{name} ({channel.Mnemonic})";
             }
 
             return DiscoveryStoreProvider.New(
