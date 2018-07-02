@@ -170,6 +170,8 @@ namespace PDS.WITSMLstudio.Framework
         {
             if (value == null) return null;
 
+            // TODO: char version of contains is faster than string version (investigate whether it matters)
+            //var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
             var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 
             return value.Contains(separator)
@@ -553,6 +555,61 @@ namespace PDS.WITSMLstudio.Framework
             }
 
             return null;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(IEnumerable<T> values, int count)
+        {
+            var list = values as IList<T>;
+            if (null != list)
+                return list.Skip(count);
+
+            var array = values as object[];
+            if (null != array)
+                return array.Skip(count).Cast<T>();
+
+            return Enumerable.Skip(values, count);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(this IList<T> values, int count)
+        {
+            while (count < values.Count)
+                yield return values[count++];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(this T[] values, int count)
+        {
+            while (count < values.Length)
+                yield return values[count++];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool Contains(this string instance, char value)
+        {
+            return instance.IndexOf(value) >= 0;
         }
     }
 }

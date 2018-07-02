@@ -252,6 +252,8 @@ namespace PDS.WITSMLstudio.Data.Channels
             var reader = new ChannelDataReader(data, "CH1,CH2,CH3,CH4,CH5".Split(','), "ft1,ft2,ft3,ft4,ft5".Split(','), "double,double,double,double,double".Split(','), ",,,,".Split(','), "eml://witsml14/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
+            Assert.IsTrue(reader.Read());
+
             // Slice the Reader
             //var slices = new string[] { "MD", "CH2", "CH5" };
 
@@ -265,14 +267,14 @@ namespace PDS.WITSMLstudio.Data.Channels
             // Test Mnemonic Slices
             var mnemonics = reader.AllMnemonics;
             var requestedMnemonicValues = requestedMnemonics.Values.ToArray();
-            for (var i = 0; i < mnemonics.Length; i++)
+            for (var i = 0; i < mnemonics.Count; i++)
             {
                 Assert.AreEqual(requestedMnemonicValues[i], mnemonics[i]);
             }
 
             // Test Unit Slices
             var units = reader.AllUnits;
-            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Length);
+            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Count);
             Assert.AreEqual(units[0], "ft");
             Assert.AreEqual(units[1], "ft2");
             Assert.AreEqual(units[2], "ft5");
@@ -290,6 +292,8 @@ namespace PDS.WITSMLstudio.Data.Channels
             var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), "double,double,double,double,double,double,double,double, double".Split(','), ",,,,,,,,".Split(','), "eml://witsml14/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
+            Assert.IsTrue(reader.Read());
+
             Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 2, "CH2" }, { 6, "CH6" } };
             Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 2, "ft2" }, { 6, "ft6" } };
             Dictionary<int, string> requestedDataTypes = new Dictionary<int, string>() { { 0, "double" }, { 2, "double" }, { 6, "double" } };
@@ -302,7 +306,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             var requestedMnemonicValues = requestedMnemonics.Values.ToArray();
             Assert.AreEqual(3, mnemonics.Count());
             Assert.AreEqual(mnemonics.Count(), requestedMnemonicValues.Count());
-            for (var i = 0; i < mnemonics.Length; i++)
+            for (var i = 0; i < mnemonics.Count; i++)
             {
                 Assert.AreEqual(requestedMnemonicValues[i], mnemonics[i]);
             }
@@ -310,7 +314,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // Test Unit Slices
             var units = reader.AllUnits;
             Assert.AreEqual(3, units.Count());
-            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Length);
+            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Count);
             Assert.AreEqual("ft", units[0]);
             Assert.AreEqual("ft2", units[1]);
             Assert.AreEqual("ft6", units[2]);
@@ -330,6 +334,8 @@ namespace PDS.WITSMLstudio.Data.Channels
             var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), "double,double,double,double,double,double,double,double, double".Split(','),",,,,,,,,".Split(','), "eml://witsml14/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
+            Assert.IsTrue(reader.Read());
+
             Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 1, "CH1" }, { 2, "CH2" }, { 5, "CH5" }, { 6, "CH6" }, { 7, "CH7" }, { 9, "CH9" } };
             Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 1, "ft1" }, { 2, "ft2" }, { 5, "ft5" }, { 6, "ft6" }, { 7, "ft7" }, { 9, "ft9" } };
             Dictionary<int, string> requestedDataTypes = new Dictionary<int, string>() { { 0, "double" }, { 1, "double" }, { 2, "double" }, { 5, "double" }, { 6, "double" }, { 7, "double" }, { 9, "double" } };
@@ -342,7 +348,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             var requestedMnemonicValues = requestedMnemonics.Values.ToArray();
             Assert.AreEqual(3, mnemonics.Count());
             Assert.AreEqual(mnemonics.Count(), requestedMnemonicValues.Count());
-            for (var i = 0; i < mnemonics.Length; i++)
+            for (var i = 0; i < mnemonics.Count; i++)
             {
                 Assert.AreEqual(requestedMnemonicValues[i], mnemonics[i]);
             }
@@ -350,7 +356,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // Test Unit Slices
             var units = reader.AllUnits;
             Assert.AreEqual(3, units.Count());
-            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Length);
+            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Count);
             Assert.AreEqual("ft", units[0]);
             Assert.AreEqual("ft2", units[1]);
             Assert.AreEqual("ft6", units[2]);
