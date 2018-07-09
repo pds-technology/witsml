@@ -446,5 +446,14 @@ namespace PDS.WITSMLstudio.Store.Properties {
                 return ((bool)(this["IsChannelDataAdapterEnabled"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DefaultDescribeUri {
+            get {
+                return ((string)(this["DefaultDescribeUri"]));
+            }
+        }
     }
 }

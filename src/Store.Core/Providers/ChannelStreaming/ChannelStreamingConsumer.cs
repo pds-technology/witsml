@@ -29,6 +29,7 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
+using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.Channels;
 using PDS.WITSMLstudio.Store.Properties;
 
@@ -72,10 +73,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             if (!supportedProtocols.Contains(Protocol, Role)) return;
             Start(maxMessageRate: _maxMessageRate);
 
-            if (!requestedProtocols.IsSimpleStreamer())
-            {
-                ChannelDescribe(new string[] { EtpUri.RootUri });
-            }
+            if (requestedProtocols.IsSimpleStreamer()) return;
+
+            if (!string.IsNullOrEmpty(WitsmlSettings.DefaultDescribeUri))
+                ChannelDescribe(new[] { WitsmlSettings.DefaultDescribeUri });
         }
 
         /// <summary>

@@ -244,6 +244,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static bool IsChannelDataAdapterEnabled = Properties.Settings.Default.IsChannelDataAdapterEnabled;
 
         /// <summary>
+        /// The default describe URI.
+        /// </summary>
+        public static string DefaultDescribeUri = Properties.Settings.Default.DefaultDescribeUri;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>
