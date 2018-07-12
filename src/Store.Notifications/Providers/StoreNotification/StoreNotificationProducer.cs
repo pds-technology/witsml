@@ -40,14 +40,16 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(StoreNotificationProducer));
         private readonly IDictionary<string, object> _config;
-        private readonly StringSerializer _serializer;
+        private readonly StringSerializer _keySerializer;
+        private readonly StringSerializer _valueSerializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreNotificationProducer"/> class.
         /// </summary>
         public StoreNotificationProducer()
         {
-            _serializer = new StringSerializer(Encoding.UTF8);
+            _keySerializer = new StringSerializer(Encoding.UTF8);
+            _valueSerializer = new StringSerializer(Encoding.UTF8);
             _config = new Dictionary<string, object>
             {
                 {KafkaSettings.DebugKey, KafkaSettings.DebugContexts},
@@ -56,7 +58,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         }
 
         /// <summary>
-        /// Sends the notification messages for the speficed entity.
+        /// Sends the notification messages for the specified entity.
         /// </summary>
         /// <typeparam name="T">The data object type.</typeparam>
         /// <param name="entity">The changed entity.</param>
@@ -77,7 +79,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             {
                 try
                 {
-                    using (var producer = new Producer<string, string>(_config, _serializer, _serializer))
+                    using (var producer = new Producer<string, string>(_config, _keySerializer, _valueSerializer))
                     {
                         _log.Debug($"{producer.Name} producing on {topic}.");
 

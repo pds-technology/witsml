@@ -38,7 +38,8 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     public class StoreNotificationStoreProvider : StoreNotificationStoreProviderBase
     {
         private readonly IDictionary<string, object> _config;
-        private readonly StringDeserializer _deserializer;
+        private readonly StringDeserializer _keyDeserializer;
+        private readonly StringDeserializer _valueDeserializer;
         private readonly TimeSpan _timeout;
         private Consumer<string, string> _consumer;
         private bool _isCancelled;
@@ -49,7 +50,9 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         public StoreNotificationStoreProvider()
         {
             _timeout = TimeSpan.FromMilliseconds(KafkaSettings.PollingIntervalInMilliseconds);
-            _deserializer = new StringDeserializer(Encoding.UTF8);
+            _keyDeserializer = new StringDeserializer(Encoding.UTF8);
+            _valueDeserializer = new StringDeserializer(Encoding.UTF8);
+
             _config = new Dictionary<string, object>
             {
                 {KafkaSettings.DebugKey, KafkaSettings.DebugContexts},
@@ -70,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             _config[KafkaSettings.GroupIdKey] = Session.ApplicationName;
 
             // Create and configure a new Consumer instance
-            _consumer = new Consumer<string, string>(_config, _deserializer, _deserializer);
+            _consumer = new Consumer<string, string>(_config, _keyDeserializer, _valueDeserializer);
 
             _consumer.OnPartitionsAssigned += (sender, partitions) =>
             {
