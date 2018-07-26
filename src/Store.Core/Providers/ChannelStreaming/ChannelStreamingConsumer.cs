@@ -21,12 +21,10 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
-using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Core;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -49,6 +47,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
         private Timer _flushIntervalTimer;
+        private bool _isSimpleStreamer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingConsumer"/> class.
@@ -71,12 +70,28 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         {
             // Is the client requesting the ChannelStreaming consumer role
             if (!supportedProtocols.Contains(Protocol, Role)) return;
+
+            // Check the protocol capabilities for the SimpleStreamer flag
+            _isSimpleStreamer = requestedProtocols.IsSimpleStreamer() || supportedProtocols.IsSimpleStreamer();
+
             Start(maxMessageRate: _maxMessageRate);
 
-            if (requestedProtocols.IsSimpleStreamer()) return;
+            // Do not send ChannelDescribe to a SimpleStreamer
+            if (_isSimpleStreamer) return;
 
             if (!string.IsNullOrEmpty(WitsmlSettings.DefaultDescribeUri))
                 ChannelDescribe(new[] { WitsmlSettings.DefaultDescribeUri });
+        }
+
+        /// <summary>
+        /// Updates the channel data for the specified URI using the supplied channel data reader.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="reader">The channel data reader.</param>
+        protected virtual void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
+        {
+            var dataProvider = _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            dataProvider.UpdateChannelData(uri, reader);
         }
 
         /// <summary>
@@ -98,6 +113,9 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
             InitializeDataBlocks(header.MessageId, channelMetadata.Channels);
 
+            // Do not send ChannelStreamingStart to a SimpleStreamer
+            if (_isSimpleStreamer) return;
+
             var infos = channelMetadata.Channels
                 .Select(ToChannelStreamingInfo)
                 .ToList();
@@ -106,20 +124,25 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             ChannelStreamingStart(infos);
         }
 
-        private void EvaluateChannelMetadata(long messageId, ChannelMetadata channelMetadata)
+        /// <summary>
+        /// Evaluates the channel metadata.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="channelMetadata">The channel metadata.</param>
+        protected virtual void EvaluateChannelMetadata(long messageId, ChannelMetadata channelMetadata)
         {
             var channelsToBeStopped = new List<ChannelMetadataRecord>();
             var channelIndex = new List<int>();
 
-            for (int i = 0; i < channelMetadata.Channels.Count; i++)
+            for (var i = 0; i < channelMetadata.Channels.Count; i++)
             {
                 var channel = channelMetadata.Channels[i];
                 var uri = new EtpUri(channel.ChannelUri);
 
                 // Ensure that all parent UIDs are populated
-                foreach (var objectId in uri.GetObjectIds())
+                foreach (var segment in uri.GetObjectIds())
                 {
-                    if (string.IsNullOrWhiteSpace(objectId.ObjectId))
+                    if (string.IsNullOrWhiteSpace(segment.ObjectId))
                     {
                         this.InvalidUri($"Channel {channel.ChannelName}({channel.ChannelId}) is missing the objectId of a parent.", messageId);
                         channelsToBeStopped.Add(channel);
@@ -128,8 +151,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 }
             }
 
-            // Notify producer to stop streaming the channels
-            ChannelStreamingStop(channelsToBeStopped.Select(x => x.ChannelId).ToList());
+            // Do not send ChannelStreamingStop to a SimpleStreamer
+            if (!_isSimpleStreamer)
+            {
+                // Notify producer to stop streaming the channels
+                ChannelStreamingStop(channelsToBeStopped.Select(x => x.ChannelId).ToList());
+            }
 
             // Remove the channels from the metadata
             channelIndex.Reverse();
@@ -157,15 +184,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         }
 
         /// <summary>
-        /// Handles the channel streaming stop.
+        /// Appends the channel data to the appropriate data block.
         /// </summary>
-        /// <param name="channelIds">The  list of channel ids to be stopped.</param>
-        protected void ChannelStreamingStop(List<long> channelIds)
-        {
-            base.ChannelStreamingStop(channelIds);
-        }
-
-        private void AppendChannelData(IList<DataItem> data)
+        /// <param name="data">The data items.</param>
+        protected virtual void AppendChannelData(IList<DataItem> data)
         {
             foreach (var dataItem in data)
             {
@@ -174,7 +196,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     continue;
 
                 var parentUri = _channelParentUris[dataItem.ChannelId];
-
                 var dataBlock = _dataBlocks[parentUri];
 
                 var channel = ChannelMetadataRecords.FirstOrDefault(x => x.ChannelId == dataItem.ChannelId);
@@ -185,7 +206,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private IList<object> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
+        /// <summary>
+        /// Downscales the index values.
+        /// </summary>
+        /// <param name="indexMetadata">The index metadata.</param>
+        /// <param name="indexValues">The index values.</param>
+        /// <returns>The downscaled index values.</returns>
+        protected virtual IList<object> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
         {
             return indexValues
                 .Select((x, i) =>
@@ -198,7 +225,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .ToList();
         }
 
-        private void InitializeDataBlocks(long messageId, IList<ChannelMetadataRecord> channels)
+        /// <summary>
+        /// Initializes the data blocks.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <param name="channels">The channel metadata.</param>
+        protected virtual void InitializeDataBlocks(long messageId, IList<ChannelMetadataRecord> channels)
         {
             foreach (var channel in channels)
             {
@@ -226,7 +258,11 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private void ProcessDataBlocks(bool flush = false)
+        /// <summary>
+        /// Processes the data blocks.
+        /// </summary>
+        /// <param name="flush">if set to <c>true</c> flush immediately.</param>
+        protected virtual void ProcessDataBlocks(bool flush = false)
         {
             foreach (var item in _dataBlocks)
             {
@@ -235,27 +271,40 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
         }
 
-        private void FlushDataBlocks(object state)
+        /// <summary>
+        /// Flushes the data blocks.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        protected virtual void FlushDataBlocks(object state)
         {
             ProcessDataBlocks(true);
         }
 
-        private void ProcessDataBlock(EtpUri uri, ChannelDataBlock dataBlock)
+        /// <summary>
+        /// Processes the data block.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="dataBlock">The data block.</param>
+        protected virtual void ProcessDataBlock(EtpUri uri, ChannelDataBlock dataBlock)
         {
             var reader = dataBlock.GetReader();
             dataBlock.Clear();
 
-            var dataProvider = _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            dataProvider.UpdateChannelData(uri, reader);
+            UpdateChannelData(uri, reader);
         }
 
-        private ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)
+        /// <summary>
+        /// Creates the channel streaming information for the specified channel metadata.
+        /// </summary>
+        /// <param name="channel">The channel metadata.</param>
+        /// <returns>A new <see cref="ChannelStreamingInfo"/> instance.</returns>
+        protected virtual ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord channel)
         {
-            return new ChannelStreamingInfo()
+            return new ChannelStreamingInfo
             {
-                ChannelId = record.ChannelId,
+                ChannelId = channel.ChannelId,
                 ReceiveChangeNotification = false,
-                StartIndex = new StreamingStartIndex()
+                StartIndex = new StreamingStartIndex
                 {
                     // "null" indicates a request for the latest value
                     Item = null
