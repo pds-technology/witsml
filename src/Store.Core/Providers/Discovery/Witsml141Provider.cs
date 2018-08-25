@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -19,13 +19,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Discovery;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data;
@@ -81,46 +82,72 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
-        public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}" /> instance containing the event data.</param>
+        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Discovery.GetResources, IList<Etp11.Datatypes.Object.Resource>> args)
         {
-            if (EtpUris.IsRootUri(args.Message.Uri))
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
+        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        {
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{FindResources, IList}"/> instance containing the event data.</param>
+        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        {
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources) where T : IResource
+        {
+            if (EtpUris.IsRootUri(uri))
             {
-                args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)"));
+                resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)"));
                 return;
             }
 
-            var uri = new EtpUri(args.Message.Uri);
-            var parentUri = uri.Parent;
+            var etpUri = new EtpUri(uri);
+            var parentUri = etpUri.Parent;
 
             // Append query string, if any
-            if (!string.IsNullOrWhiteSpace(uri.Query))
-                parentUri = new EtpUri(parentUri + uri.Query);
+            if (!string.IsNullOrWhiteSpace(etpUri.Query))
+                parentUri = new EtpUri(parentUri + etpUri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Witsml141))
+            if (!etpUri.IsRelatedTo(EtpUris.Witsml141))
             {
                 return;
             }
-            if (uri.IsBaseUri || (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType)))
+            if (etpUri.IsBaseUri || (string.IsNullOrWhiteSpace(etpUri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(etpUri.ObjectType)))
             {
-                _wellDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                _wellDataProvider.GetAll(etpUri)
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x)));
             }
-            else if (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
+            else if (string.IsNullOrWhiteSpace(etpUri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
             {
-                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
 
                 dataProvider
                     .GetAll(parentUri)
                     .Cast<IWellboreObject>()
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x)));
             }
-            else if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Well.EqualsIgnoreCase(etpUri.ObjectType))
             {
-                _wellboreDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                _wellboreDataProvider.GetAll(etpUri)
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x)));
             }
-            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(etpUri.ObjectType))
             {
                 var wellboreObjectType = typeof (IWellboreObject);
 
@@ -132,22 +159,22 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     .ForEach(x =>
                     {
                         var hasChildren = ObjectTypes.Log.EqualsIgnoreCase(x.ObjectType)
-                            ? _logDataProvider.Count(uri)
+                            ? _logDataProvider.Count(etpUri)
                             : -1;
 
-                        args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, x.ObjectType, hasChildren));
+                        resources.Add(etpAdapter.NewFolder(etpUri, x, x.ObjectType, hasChildren));
                     });
             }
-            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Log.EqualsIgnoreCase(etpUri.ObjectType))
             {
-                var log = _logDataProvider.Get(uri);
-                log?.LogCurveInfo?.ForEach(x => args.Context.Add(ToResource(log, x)));
+                var log = _logDataProvider.Get(etpUri);
+                log?.LogCurveInfo?.ForEach(x => resources.Add(ToResource(etpAdapter, log, x)));
             }
         }
 
-        private Resource ToResource(Well entity)
+        private IResource ToResource(IEtpAdapter etpAdapter, Well entity)
         {
-            return DiscoveryStoreProvider.New(
+            return etpAdapter.CreateResource(
                 uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
@@ -156,9 +183,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
-        private Resource ToResource(Wellbore entity)
+        private IResource ToResource(IEtpAdapter etpAdapter, Wellbore entity)
         {
-            return DiscoveryStoreProvider.New(
+            return etpAdapter.CreateResource(
                 uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
@@ -167,9 +194,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
-        private Resource ToResource(IWellboreObject entity)
+        private IResource ToResource(IEtpAdapter etpAdapter, IWellboreObject entity)
         {
-            return DiscoveryStoreProvider.New(
+            return etpAdapter.CreateResource(
                 uuid: null,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
@@ -178,9 +205,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 lastChanged: (entity as ICommonDataObject).GetLastChangedMicroseconds());
         }
 
-        private Resource ToResource(Log log, LogCurveInfo curve)
+        private IResource ToResource(IEtpAdapter etpAdapter, Log log, LogCurveInfo curve)
         {
-            return DiscoveryStoreProvider.New(
+            return etpAdapter.CreateResource(
                 uuid: null,
                 uri: curve.GetUri(log),
                 resourceType: ResourceTypes.DataObject,

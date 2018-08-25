@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.MudLogs
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="MudLog"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{MudLogList, MudLog}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<MudLog>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     [Export131(ObjectTypes.MudLog, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class MudLog131DataProvider : WitsmlDataProvider<MudLogList, MudLog>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MudLog131DataProvider"/> class.

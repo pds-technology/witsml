@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,10 +21,10 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
-using Energistics.Common;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Protocol.ChannelStreaming;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.v12.Datatypes.ChannelData;
+using Energistics.Etp.v12.Protocol.ChannelStreaming;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -36,10 +36,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     /// <summary>
     /// Consumer class for channel streaming
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.ChannelStreaming.ChannelStreamingConsumerHandler" />
+    /// <seealso cref="ChannelStreamingConsumerHandler" />
     [Export(typeof(IChannelStreamingConsumer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class ChannelStreamingConsumer : ChannelStreamingConsumerHandler
+    public class ChannelStreaming12Consumer : ChannelStreamingConsumerHandler
     {
         private static readonly int _maxMessageRate = Settings.Default.MaxMessageRate;
 
@@ -50,11 +50,11 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         private bool _isSimpleStreamer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelStreamingConsumer"/> class.
+        /// Initializes a new instance of the <see cref="ChannelStreaming12Consumer"/> class.
         /// </summary>
         /// <param name="container">The container.</param>
         [ImportingConstructor]
-        public ChannelStreamingConsumer(IContainer container)
+        public ChannelStreaming12Consumer(IContainer container)
         {
             _container = container;
             _dataBlocks = new Dictionary<EtpUri, ChannelDataBlock>();
@@ -66,7 +66,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="requestedProtocols">The requested protocols.</param>
         /// <param name="supportedProtocols">The supported protocols.</param>
-        public override void OnSessionOpened(IList<SupportedProtocol> requestedProtocols, IList<SupportedProtocol> supportedProtocols)
+        public override void OnSessionOpened(IList<ISupportedProtocol> requestedProtocols, IList<ISupportedProtocol> supportedProtocols)
         {
             // Is the client requesting the ChannelStreaming consumer role
             if (!supportedProtocols.Contains(Protocol, Role)) return;
@@ -74,7 +74,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             // Check the protocol capabilities for the SimpleStreamer flag
             _isSimpleStreamer = requestedProtocols.IsSimpleStreamer() || supportedProtocols.IsSimpleStreamer();
 
-            Start(maxMessageRate: _maxMessageRate);
+            Start(minMessageInterval: _maxMessageRate);
 
             // Do not send ChannelDescribe to a SimpleStreamer
             if (_isSimpleStreamer) return;
@@ -99,7 +99,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="channelMetadata">The channel metadata.</param>
-        protected override void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)
+        protected override void HandleChannelMetadata(IMessageHeader header, ChannelMetadata channelMetadata)
         {
             // Base implementation caches ChannelMetadataRecord items sent from the producer
             base.HandleChannelMetadata(header, channelMetadata);
@@ -168,7 +168,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="channelData">The channel data.</param>
-        protected override void HandleChannelData(MessageHeader header, ChannelData channelData)
+        protected override void HandleChannelData(IMessageHeader header, ChannelData channelData)
         {
             base.HandleChannelData(header, channelData);
 
@@ -218,7 +218,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .Select((x, i) =>
                 {
                     var index = indexMetadata[i];
-                    return index.IndexType == ChannelIndexTypes.Depth
+                    return index.IndexKind == ChannelIndexKinds.Depth
                         ? (object)(indexValues[i] / Math.Pow(10, index.Scale))
                         : DateTimeExtensions.FromUnixTimeMicroseconds(indexValues[i]);
                 })
@@ -251,7 +251,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                         index.Uom,
                         "long",
                         index.Direction == IndexDirections.Increasing,
-                        index.IndexType == ChannelIndexTypes.Time);
+                        index.IndexKind == ChannelIndexKinds.Time);
                 }
 
                 dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom, channel.DataType);

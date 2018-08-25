@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -17,8 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 
@@ -32,9 +33,10 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         /// <summary>
         /// Gets the channels metadata.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uris">The collection of URI to describe.</param>
         /// <returns>A collection of channel metadata.</returns>
-        IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris);
+        IList<IChannelMetadataRecord> GetChannelMetadata(IEtpAdapter etpAdapter, params EtpUri[] uris);
 
         /// <summary>
         /// Gets the channel data records for the specified data object URI and range.

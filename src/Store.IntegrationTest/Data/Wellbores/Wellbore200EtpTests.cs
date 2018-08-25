@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,7 +18,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Energistics.Protocol.Store;
+using Energistics.Etp.v11.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Wellbores

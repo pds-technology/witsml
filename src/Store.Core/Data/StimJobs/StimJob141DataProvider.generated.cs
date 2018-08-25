@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.StimJobs
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="StimJob"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{StimJobList, StimJob}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<StimJob>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
     [Export141(ObjectTypes.StimJob, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class StimJob141DataProvider : WitsmlDataProvider<StimJobList, StimJob>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StimJob141DataProvider"/> class.

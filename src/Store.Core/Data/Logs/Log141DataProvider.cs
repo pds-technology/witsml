@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -22,7 +22,7 @@ using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Logs;
 

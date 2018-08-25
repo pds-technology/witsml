@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="SurveyProgram"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{SurveyProgramList, SurveyProgram}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<SurveyProgram>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     [Export131(ObjectTypes.SurveyProgram, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class SurveyProgram131DataProvider : WitsmlDataProvider<SurveyProgramList, SurveyProgram>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SurveyProgram131DataProvider"/> class.

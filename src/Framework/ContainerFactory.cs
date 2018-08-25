@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Framework, 2018.1
+// PDS WITSMLstudio Framework, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 

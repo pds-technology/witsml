@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
@@ -38,7 +38,6 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -46,7 +45,6 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry141DataProvider"/> class.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -88,33 +88,57 @@ namespace PDS.WITSMLstudio
         DeleteObject,
 
         /// <summary>
-        /// Growing Object Get
+        /// Get Part
         /// </summary>
-        [Description("Growing Object Get")]
-        GrowingObjectGet,
+        [Description("Get Part")]
+        GetPart,
 
         /// <summary>
-        /// Growing Object Get Range
+        /// Get Parts by Range
         /// </summary>
-        [Description("Growing Object Get Range")]
-        GrowingObjectGetRange,
+        [Description("Get Parts by Range")]
+        GetPartsByRange,
 
         /// <summary>
-        /// Growing Object Put
+        /// Put Part
         /// </summary>
-        [Description("Growing Object Put")]
-        GrowingObjectPut,
+        [Description("Put Part")]
+        PutPart,
 
         /// <summary>
-        /// Growing Object Delete
+        /// Delete Part
         /// </summary>
-        [Description("Growing Object Delete")]
-        GrowingObjectDelete,
+        [Description("Delete Part")]
+        DeletePart,
 
         /// <summary>
-        /// Growing Object Delete Range
+        /// Delete Parts by Range
         /// </summary>
-        [Description("Growing Object Delete Range")]
-        GrowingObjectDeleteRange
+        [Description("Delete Parts by Range")]
+        DeletePartsByRange,
+
+        /// <summary>
+        /// Find Parts
+        /// </summary>
+        [Description("Find Parts")]
+        FindParts,
+
+        /// <summary>
+        /// Find Objects
+        /// </summary>
+        [Description("Find Objects")]
+        FindObjects,
+
+        /// <summary>
+        /// Get Resources
+        /// </summary>
+        [Description("Get Resources")]
+        GetResources,
+
+        /// <summary>
+        /// Find Reources
+        /// </summary>
+        [Description("Find Resources")]
+        FindResources
     }
 }

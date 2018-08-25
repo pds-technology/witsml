@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,10 +21,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
 using log4net;
 using PDS.WITSMLstudio.Framework;
 
@@ -76,7 +75,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var type = typeof(TObject);
 
-            if (type.Assembly != typeof(IDataObject).Assembly)
+            if (type.Assembly != typeof(Energistics.DataAccess.IDataObject).Assembly)
                 return;
 
             var contentType = EtpUris.GetUriFamily(type)
@@ -160,7 +159,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Puts the specified data object into the data store.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        public virtual void Put(DataObject dataObject)
+        public virtual void Put(IDataObject dataObject)
         {
             var context = WitsmlOperationContext.Current;
             context.Document = WitsmlParser.Parse(context.Request.Xml);
@@ -177,7 +176,7 @@ namespace PDS.WITSMLstudio.Store.Data
         public virtual void Put(WitsmlQueryParser parser)
         {
             var uri = parser.GetUri<TObject>();
-            Logger.DebugFormat("Putting {0} with URI '{1}'", typeof(TObject).Name, uri);
+            Logger.Debug($"Putting {typeof(TObject).Name} with URI '{uri}'");
 
             if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
             {

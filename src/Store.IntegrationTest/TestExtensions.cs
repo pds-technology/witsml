@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -19,7 +19,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Energistics;
+using Energistics.Etp;
 
 namespace PDS.WITSMLstudio.Store
 {

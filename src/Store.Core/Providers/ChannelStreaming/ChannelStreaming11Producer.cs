@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -22,11 +22,12 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Energistics.Common;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Protocol;
-using Energistics.Protocol.ChannelStreaming;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
+using Energistics.Etp.v11.Datatypes;
+using Energistics.Etp.v11.Datatypes.ChannelData;
+using Energistics.Etp.v11.Protocol.ChannelStreaming;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -37,24 +38,24 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     /// <summary>
     /// Producer class for channel streaming
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.ChannelStreaming.ChannelStreamingProducerHandler" />
+    /// <seealso cref="ChannelStreamingProducerHandler" />
     [Export(typeof(IChannelStreamingProducer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class ChannelStreamingProducer : ChannelStreamingProducerHandler
+    public class ChannelStreaming11Producer : ChannelStreamingProducerHandler
     {
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
         private readonly Dictionary<string, List<IChannelDataProvider>> _providers;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
+        /// Initializes a new instance of the <see cref="ChannelStreaming11Producer"/> class.
         /// </summary>
         /// <param name="container">The container.</param>
         [ImportingConstructor]
-        public ChannelStreamingProducer(IContainer container)
+        public ChannelStreaming11Producer(IContainer container)
         {
             Container = container;
-            Channels = new Dictionary<long, Tuple<EtpUri, ChannelMetadataRecord>>();
+            Channels = new Dictionary<long, Tuple<EtpUri, IChannelMetadataRecord>>();
             _channelStreamingContextLists = new List<IList<ChannelStreamingContext>>();
             _providers = InitializeChannelDataProviders();
         }
@@ -62,13 +63,13 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Gets the channels.
         /// </summary>
-        public Dictionary<long, Tuple<EtpUri, ChannelMetadataRecord>> Channels { get; }
+        public Dictionary<long, Tuple<EtpUri, IChannelMetadataRecord>> Channels { get; }
 
         /// <summary>
         /// Gets the request.
         /// </summary>
         /// <value>The request message header.</value>
-        public MessageHeader Request { get; private set; }
+        public IMessageHeader Request { get; private set; }
 
         /// <summary>
         /// Gets the composition container.
@@ -148,7 +149,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 var providers = _providers[family.Key];
                 foreach (var provider in providers)
                 {
-                    var metadata = provider.GetChannelMetadata(family.ToArray());
+                    var metadata = provider.GetChannelMetadata(Session.Adapter, family.ToArray());
 
                     metadata.ForEach(m =>
                     {
@@ -168,7 +169,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                                 parentUri = channelUri;
 
                             m.ChannelId = Channels.Keys.Count;
-                            Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(parentUri, m));
+                            Channels.Add(m.ChannelId, new Tuple<EtpUri, IChannelMetadataRecord>(parentUri, m));
                             channelMetadataRecord = m;
                         }
 
@@ -183,7 +184,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="channelStreamingStart">The channel streaming start.</param>
-        protected override void HandleChannelStreamingStart(MessageHeader header, ChannelStreamingStart channelStreamingStart)
+        protected override void HandleChannelStreamingStart(IMessageHeader header, ChannelStreamingStart channelStreamingStart)
         {
             // no action needed if streaming already started
             //if (_tokenSource != null)
@@ -206,7 +207,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="channelRangeRequest">The channel range request.</param>
-        protected override void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
+        protected override void HandleChannelRangeRequest(IMessageHeader header, ChannelRangeRequest channelRangeRequest)
         {
             base.HandleChannelRangeRequest(header, channelRangeRequest);
 
@@ -225,7 +226,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="channelStreamingStop">The channel streaming stop.</param>
-        protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
+        protected override void HandleChannelStreamingStop(IMessageHeader header, ChannelStreamingStop channelStreamingStop)
         {
             // no action needed if streaming not in progress
             if (_tokenSource == null)
@@ -423,7 +424,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="channelIds">The channel ids.</param>
         /// <returns></returns>
-        protected ChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
+        protected IChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
         {
             return _channelStreamingContextLists
                 .SelectMany(list => list
@@ -447,15 +448,16 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             var firstContext = contextList.First();
             var channelStreamingType = firstContext.ChannelStreamingType;
             var parentUri = firstContext.ParentUri;
-            var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
-            var isTimeIndex = firstContext.ChannelMetadata.Indexes.Select(i => i.IndexType == ChannelIndexTypes.Time).ToArray();
+            var indexes = firstContext.ChannelMetadata.Indexes.Cast<IIndexMetadataRecord>().ToList();
+            var primaryIndex = indexes[0];
+            var isTimeIndex = indexes.Select(i => i.IndexKind == (int) ChannelIndexTypes.Time).ToArray();
             var requestLatestValues =
                 channelStreamingType == ChannelStreamingTypes.IndexCount
                     ? firstContext.IndexCount
                     : channelStreamingType == ChannelStreamingTypes.LatestValue
                         ? 1
                         : (int?)null;
-            var increasing = primaryIndex.Direction == IndexDirections.Increasing;
+            var increasing = primaryIndex.Direction == (int) IndexDirections.Increasing;
             bool? firstStart = null;
 
             // Loop until there is a cancellation or all channals have been removed
@@ -511,7 +513,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     .Where(
                         c =>
                             (c.ChannelStreamingType != ChannelStreamingTypes.RangeRequest &&
-                            c.ChannelMetadata.Status != ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
+                            c.ChannelMetadata.Status != (int) ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
                             c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
 
                             (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
@@ -522,7 +524,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 completedContexts.ForEach(c =>
                 {
                     // Notify consumer if the ReceiveChangeNotification field is true
-                    if (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ReceiveChangeNotification)
+                    if (c.ChannelMetadata.Status != (int) ChannelStatuses.Active && c.ReceiveChangeNotification)
                     {
                         // TODO: Decide which message shoud be sent...
                         // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);
@@ -660,7 +662,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     continue;
 
                 // Create and return a DataItem.
-                yield return new DataItem()
+                yield return new DataItem
                 {
                     ChannelId = context.ChannelId,
                     Indexes = indexValues.ToArray(),
@@ -768,7 +770,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .Where(x =>
                     x.Channels.Any(channel =>
                         ValidateRangeRequestIndexes(x.Info.StartIndex, x.Info.EndIndex,
-                            channel.Indexes[0].Direction == IndexDirections.Increasing))
+                            channel.Indexes.Cast<IIndexMetadataRecord>().First().Direction == (int) IndexDirections.Increasing))
                 )
                 .Select(x => x.Index)
                 .Reverse()

@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.DownholeComponents
@@ -35,14 +35,12 @@ namespace PDS.WITSMLstudio.Store.Data.DownholeComponents
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="DownholeComponent"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{DownholeComponent}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<DownholeComponent>))]
     [Export200(ObjectTypes.DownholeComponent, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class DownholeComponent200DataProvider : EtpDataProvider<DownholeComponent>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DownholeComponent200DataProvider"/> class.

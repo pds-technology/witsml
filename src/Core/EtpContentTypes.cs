@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 
 namespace PDS.WITSMLstudio
 {

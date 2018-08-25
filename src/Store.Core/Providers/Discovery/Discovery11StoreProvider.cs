@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,10 +20,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.Common;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Discovery;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.v11.Datatypes;
+using Energistics.Etp.v11.Datatypes.Object;
+using Energistics.Etp.v11.Protocol.Discovery;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
@@ -32,10 +33,10 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
     /// <summary>
     /// Process messages received for the Store role of the Discovery protocol.
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.Discovery.DiscoveryStoreHandler" />
+    /// <seealso cref="Energistics.Etp.v11.Protocol.Discovery.DiscoveryStoreHandler" />
     [Export(typeof(IDiscoveryStore))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class DiscoveryStoreProvider : DiscoveryStoreHandler
+    public class Discovery11StoreProvider : DiscoveryStoreHandler
     {
         /// <summary>
         /// Gets or sets the collection of providers implementing the <see cref="IDiscoveryStoreProvider"/> interface.
@@ -48,7 +49,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets the capabilities supported by the protocol handler.
         /// </summary>
         /// <returns>A collection of protocol capabilities.</returns>
-        public override IDictionary<string, DataValue> GetCapabilities()
+        public override IDictionary<string, IDataValue> GetCapabilities()
         {
             var capabilities = base.GetCapabilities();
 
@@ -86,7 +87,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
                 try
                 {
-                    provider.GetResources(args);
+                    provider.GetResources(Session.Adapter, args);
                 }
                 catch (ContainerException ex)
                 {

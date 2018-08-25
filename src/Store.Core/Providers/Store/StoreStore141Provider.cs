@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,12 +18,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using Energistics.Common;
 using Energistics.DataAccess;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Store;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Data;
 
@@ -65,16 +66,57 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <summary>
         /// Gets the object details for the specified URI.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
+        public void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Store.GetObject, Etp11.Datatypes.Object.DataObject> args)
         {
-            var uri = new EtpUri(args.Message.Uri);
-            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            var entity = dataAdapter.Get(uri) as IDataObject;
-            var list = GetList(entity, uri);
+            GetObject(etpAdapter, args.Message.Uri, args.Context);
+        }
 
-            StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity), lastChanged: GetLastChanged(entity));
+        /// <summary>
+        /// Gets the object details for the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
+        public void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Store.GetObject, Etp12.Datatypes.Object.DataObject> args)
+        {
+            GetObject(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        /// <summary>
+        /// Gets the object details for the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
+        public void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, IList<Etp12.Datatypes.Object.DataObject>> args)
+        {
+            FindObjects(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        private void GetObject(IEtpAdapter etpAdapter, string uri, Energistics.Etp.Common.Datatypes.Object.IDataObject dataObject)
+        {
+            var etpUri = new EtpUri(uri);
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+            var entity = dataAdapter.Get(etpUri) as IDataObject;
+            var list = GetList(entity, etpUri);
+
+            etpAdapter.SetDataObject(dataObject, list, etpUri, GetName(entity), lastChanged: GetLastChanged(entity));
+        }
+
+        private void FindObjects(IEtpAdapter etpAdapter, string uri, IList<Etp12.Datatypes.Object.DataObject> context)
+        {
+            var etpUri = new EtpUri(uri);
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+
+            foreach (var result in dataAdapter.GetAll(etpUri))
+            {
+                var entity = result as IDataObject;
+                var list = GetList(entity, etpUri);
+                var dataObject = new Etp12.Datatypes.Object.DataObject();
+
+                etpAdapter.SetDataObject(dataObject, list, etpUri, GetName(entity), lastChanged: GetLastChanged(entity));
+                context.Add(dataObject);
+            }
         }
 
         private IEnergisticsCollection GetList(IDataObject entity, EtpUri uri)

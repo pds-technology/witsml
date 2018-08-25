@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -323,11 +323,6 @@ namespace PDS.WITSMLstudio
         /// The data object name for a 2.0 Trajectory.
         /// </summary>
         public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, Version200);
-
-        /// <summary>
-        /// The data object name for a 2.0 TrajectoryStation.
-        /// </summary>
-        public static readonly ObjectName TrajectoryStation200 = new ObjectName(ObjectTypes.TrajectoryStation, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Tubular.

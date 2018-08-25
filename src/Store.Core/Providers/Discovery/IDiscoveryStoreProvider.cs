@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Energistics.Common;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Discovery;
+using Energistics.Etp.Common;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 
 namespace PDS.WITSMLstudio.Store.Providers.Discovery
 {
@@ -37,7 +37,22 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
-        void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args);
+        void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Discovery.GetResources, IList<Etp11.Datatypes.Object.Resource>> args);
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
+        void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args);
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The ProtocolEventArgs{FindResources, IList{Resource}} instance containing the event data.</param>
+        void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args);
     }
 }

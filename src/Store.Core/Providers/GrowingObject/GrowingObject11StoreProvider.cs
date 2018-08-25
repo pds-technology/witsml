@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,11 +20,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.Common;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol;
-using Energistics.Protocol.GrowingObject;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
+using Energistics.Etp.v11.Protocol.GrowingObject;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 
@@ -33,17 +32,17 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
     /// <summary>
     /// Process messages received for the Store role of the GrowingObject protocol.
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.GrowingObject.GrowingObjectStoreHandler" />
+    /// <seealso cref="GrowingObjectStoreHandler" />
     [Export(typeof(IGrowingObjectStore))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class GrowingObjectStoreProvider : GrowingObjectStoreHandler
+    public class GrowingObject11StoreProvider : GrowingObjectStoreHandler
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GrowingObjectStoreProvider" /> class.
+        /// Initializes a new instance of the <see cref="GrowingObject11StoreProvider" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         [ImportingConstructor]
-        public GrowingObjectStoreProvider(IContainer container)
+        public GrowingObject11StoreProvider(IContainer container)
         {
             Container = container;
         }
@@ -59,7 +58,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="message">The message.</param>
-        protected override void HandleGrowingObjectGet(MessageHeader header, GrowingObjectGet message)
+        protected override void HandleGrowingObjectGet(IMessageHeader header, GrowingObjectGet message)
         {
             base.HandleGrowingObjectGet(header, message);
 
@@ -67,11 +66,11 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
             var dataAdapter = GetDataAdapterAndValidateUri(header.MessageId, message.Uri, out uri);
             if (dataAdapter == null) return;
 
-            DataObject dataObject;
+            IDataObject dataObject;
 
             try
             {
-                dataObject = dataAdapter.GetGrowingPart(uri, message.Uid);
+                dataObject = dataAdapter.GetGrowingPart(Session.Adapter, uri, message.Uid);
             }
             catch (NotImplementedException)
             {
@@ -93,7 +92,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="message">The message.</param>
-        protected override void HandleGrowingObjectGetRange(MessageHeader header, GrowingObjectGetRange message)
+        protected override void HandleGrowingObjectGetRange(IMessageHeader header, GrowingObjectGetRange message)
         {
             base.HandleGrowingObjectGetRange(header, message);
 
@@ -101,11 +100,11 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
             var dataAdapter = GetDataAdapterAndValidateUri(header.MessageId, message.Uri, out uri);
             if (dataAdapter == null) return;
 
-            IList<DataObject> dataObjects;
+            IList<IDataObject> dataObjects;
 
             try
             {
-                dataObjects = dataAdapter.GetGrowingParts(uri, message.StartIndex.Item, message.EndIndex.Item);
+                dataObjects = dataAdapter.GetGrowingParts(Session.Adapter, uri, message.StartIndex.Item, message.EndIndex.Item);
             }
             catch (NotImplementedException)
             {
@@ -127,7 +126,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="message">The message.</param>
-        protected override void HandleGrowingObjectPut(MessageHeader header, GrowingObjectPut message)
+        protected override void HandleGrowingObjectPut(IMessageHeader header, GrowingObjectPut message)
         {
             base.HandleGrowingObjectPut(header, message);
 
@@ -137,7 +136,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
 
             try
             {
-                dataAdapter.PutGrowingPart(uri, message.ContentType, message.Data);
+                dataAdapter.PutGrowingPart(Session.Adapter, uri, message.ContentType, message.Data);
             }
             catch (NotImplementedException)
             {
@@ -150,7 +149,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="message">The message.</param>
-        protected override void HandleGrowingObjectDelete(MessageHeader header, GrowingObjectDelete message)
+        protected override void HandleGrowingObjectDelete(IMessageHeader header, GrowingObjectDelete message)
         {
             base.HandleGrowingObjectDelete(header, message);
 
@@ -173,7 +172,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="message">The message.</param>
-        protected override void HandleGrowingObjectDeleteRange(MessageHeader header, GrowingObjectDeleteRange message)
+        protected override void HandleGrowingObjectDeleteRange(IMessageHeader header, GrowingObjectDeleteRange message)
         {
             base.HandleGrowingObjectDeleteRange(header, message);
 
@@ -217,7 +216,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
             }
         }
 
-        private void SendObjectFragments(long messageId, string uri, ICollection<DataObject> dataObjects)
+        private void SendObjectFragments(long messageId, string uri, ICollection<IDataObject> dataObjects)
         {
             dataObjects.ForEach((dataObject, i) =>
             {

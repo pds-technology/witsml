@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,8 +18,8 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 
 namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
@@ -36,7 +36,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Gets or sets the channel metadata.
         /// </summary>
-        public ChannelMetadataRecord ChannelMetadata { get; set; }
+        public IChannelMetadataRecord ChannelMetadata { get; set; }
 
         /// <summary>
         /// Gets or sets the parent URI.
@@ -81,7 +81,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Gets or sets the range request message header.
         /// </summary>
-        public MessageHeader RangeRequestHeader { get; set; }
+        public IMessageHeader RangeRequestHeader { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether change notification 

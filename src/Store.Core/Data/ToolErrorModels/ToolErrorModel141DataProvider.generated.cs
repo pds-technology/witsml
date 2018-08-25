@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="ToolErrorModel"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{ToolErrorModelList, ToolErrorModel}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<ToolErrorModel>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
     [Export141(ObjectTypes.ToolErrorModel, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class ToolErrorModel141DataProvider : WitsmlDataProvider<ToolErrorModelList, ToolErrorModel>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolErrorModel141DataProvider"/> class.

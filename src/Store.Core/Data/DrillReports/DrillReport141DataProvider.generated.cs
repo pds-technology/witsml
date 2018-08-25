@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.DrillReports
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="DrillReport"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{DrillReportList, DrillReport}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<DrillReport>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
     [Export141(ObjectTypes.DrillReport, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class DrillReport141DataProvider : WitsmlDataProvider<DrillReportList, DrillReport>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DrillReport141DataProvider"/> class.

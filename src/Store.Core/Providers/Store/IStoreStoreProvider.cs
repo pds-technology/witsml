@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -16,9 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.Common;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Store;
+using System.Collections.Generic;
+using Energistics.Etp.Common;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 
 namespace PDS.WITSMLstudio.Store.Providers.Store
 {
@@ -36,7 +37,22 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <summary>
         /// Gets the object details for the specified URI.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
+        void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Store.GetObject, Etp11.Datatypes.Object.DataObject> args);
+
+        /// <summary>
+        /// Gets the object details for the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
-        void GetObject(ProtocolEventArgs<GetObject, DataObject> args);
+        void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Store.GetObject, Etp12.Datatypes.Object.DataObject> args);
+
+        /// <summary>
+        /// Gets the object details for the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{FindObjects, DataObject}"/> instance containing the event data.</param>
+        void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, IList<Etp12.Datatypes.Object.DataObject>> args);
     }
 }

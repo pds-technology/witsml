@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.Wellbores
@@ -35,14 +35,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
     [Export200(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore200DataProvider : EtpDataProvider<Wellbore>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore200DataProvider"/> class.

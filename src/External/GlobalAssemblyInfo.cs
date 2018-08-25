@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -24,9 +24,9 @@ using System.Reflection;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("2018.1.0.0")]
-[assembly: AssemblyFileVersion("2018.1.0.0")]
-[assembly: AssemblyInformationalVersion("2018.1.0.0")]
+[assembly: AssemblyVersion("2018.3.0.0")]
+[assembly: AssemblyFileVersion("2018.3.0.0")]
+[assembly: AssemblyInformationalVersion("2018.3.0.0")]
 
 #if DEBUG
 [assembly: System.Diagnostics.Debuggable(true, true)]

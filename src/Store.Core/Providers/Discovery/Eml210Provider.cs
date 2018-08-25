@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -19,11 +19,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Discovery;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Data;
 
@@ -67,54 +68,80 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
-        public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}" /> instance containing the event data.</param>
+        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Discovery.GetResources, IList<Etp11.Datatypes.Object.Resource>> args)
         {
-            if (EtpUris.IsRootUri(args.Message.Uri))
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
+        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        {
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{FindResources, IList}"/> instance containing the event data.</param>
+        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        {
+            GetResources(etpAdapter, args.Message.Uri, args.Context);
+        }
+
+        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources) where T : IResource
+        {
+            if (EtpUris.IsRootUri(uri))
             {
                 // NOTE: This entry added by the Witsml200Provider so that it appears at the end of the list
-                //args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Eml210, "EML Common (2.1)"));
+                //resources.Add(etpAdapter.NewProtocol(EtpUris.Eml210, "EML Common (2.1)"));
                 return;
             }
 
-            var uri = new EtpUri(args.Message.Uri);
-            var parentUri = uri.Parent;
+            var etpUri = new EtpUri(uri);
+            var parentUri = etpUri.Parent;
 
             // Append query string, if any
-            if (!string.IsNullOrWhiteSpace(uri.Query))
-                parentUri = new EtpUri(parentUri + uri.Query);
+            if (!string.IsNullOrWhiteSpace(etpUri.Query))
+                parentUri = new EtpUri(parentUri + etpUri.Query);
 
-            if (!uri.IsRelatedTo(EtpUris.Eml210))
+            if (!etpUri.IsRelatedTo(EtpUris.Eml210))
             {
                 return;
             }
-            if (uri.IsBaseUri)
+            if (etpUri.IsBaseUri)
             {
-                CreateFoldersByObjectType(uri)
-                    .ForEach(args.Context.Add);
+                CreateFoldersByObjectType(etpAdapter, etpUri)
+                    .ForEach(resources.Add);
             }
-            else if (string.IsNullOrWhiteSpace(uri.ObjectId))
+            else if (string.IsNullOrWhiteSpace(etpUri.ObjectId))
             {
-                var objectType = ObjectTypes.GetObjectType(uri.ObjectType, uri.Version);
+                var objectType = ObjectTypes.GetObjectType(etpUri.ObjectType, etpUri.Version);
                 var contentType = EtpContentTypes.GetContentType(objectType);
                 var hasChildren = contentType.IsRelatedTo(EtpContentTypes.Eml210) ? 0 : -1;
-                var dataProvider = GetDataProvider(uri.ObjectType);
+                var dataProvider = GetDataProvider(etpUri.ObjectType);
 
                 dataProvider
                     .GetAll(parentUri)
                     .Cast<AbstractObject>()
-                    .ForEach(x => args.Context.Add(ToResource(x, hasChildren)));
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x, hasChildren)));
             }
             //else
             //{
             //    var propertyName = uri.ObjectType.ToPascalCase();
             //
             //    CreateFoldersByObjectType(uri, propertyName)
-            //        .ForEach(args.Context.Add);
+            //        .ForEach(resources.Add);
             //}
         }
 
-        private IList<Resource> CreateFoldersByObjectType(EtpUri uri, string propertyName = null, string additionalObjectType = null, int childCount = 0)
+        private IList<IResource> CreateFoldersByObjectType(IEtpAdapter etpAdapter, EtpUri uri, string propertyName = null, string additionalObjectType = null, int childCount = 0)
         {
             if (!_contentTypes.Any())
             {
@@ -162,7 +189,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     if (!x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
                         hasChildren = dataProvider.Count(uri);
 
-                    return DiscoveryStoreProvider.NewFolder(uri, x.ContentType, folderName, hasChildren);
+                    return etpAdapter.NewFolder(uri, x.ContentType, folderName, hasChildren);
                 })
                 .ToList();
         }
@@ -172,9 +199,9 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
         }
 
-        private Resource ToResource(AbstractObject entity, int hasChildren = -1)
+        private IResource ToResource(IEtpAdapter etpAdapter, AbstractObject entity, int hasChildren = -1)
         {
-            return DiscoveryStoreProvider.New(
+            return etpAdapter.CreateResource(
                 uuid: entity.Uuid,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,

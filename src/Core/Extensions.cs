@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -167,6 +167,29 @@ namespace PDS.WITSMLstudio
         public static List<TObject> AsList<TObject>(this TObject instance) where TObject : IUniqueId
         {
             return new List<TObject>() { instance };
+        }
+
+        /// <summary>
+        /// Adds the item to the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="item">The item.</param>
+        public static void Add<T>(this ICollection<T> collection, object item)
+        {
+            collection?.Add((T)item);
+        }
+
+        /// <summary>
+        /// Adds the item to the collection.
+        /// </summary>
+        /// <typeparam name="T1">The item type.</typeparam>
+        /// <typeparam name="T2">The base type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="item">The item.</param>
+        public static void Add<T1, T2>(this ICollection<T1> collection, T2 item) where T1 : T2
+        {
+            collection?.Add((T1)item);
         }
 
         /// <summary>

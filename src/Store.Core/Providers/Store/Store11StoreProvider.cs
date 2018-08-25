@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,11 +18,12 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using Energistics;
-using Energistics.Common;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Store;
+using Energistics.Etp;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
+using Energistics.Etp.v11.Datatypes.Object;
+using Energistics.Etp.v11.Protocol.Store;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data;
@@ -32,17 +33,16 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
     /// <summary>
     /// Process messages received for the Store role of the Store protocol.
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.Store.StoreStoreHandler" />
     [Export(typeof(IStoreStore))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class StoreStoreProvider : StoreStoreHandler
+    public class Store11StoreProvider : StoreStoreHandler
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoreStoreProvider"/> class.
+        /// Initializes a new instance of the <see cref="Store11StoreProvider"/> class.
         /// </summary>
         /// <param name="container">The container.</param>
         [ImportingConstructor]
-        public StoreStoreProvider(IContainer container)
+        public Store11StoreProvider(IContainer container)
         {
             Container = container;
         }
@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         public IContainer Container { get; private set; }
 
         /// <summary>
-        /// Sets the properties of the <see cref="DataObject"/> instance.
+        /// Sets the properties of the <see cref="IDataObject"/> instance.
         /// </summary>
         /// <typeparam name="T">The type of entity.</typeparam>
         /// <param name="dataObject">The data object.</param>
@@ -64,7 +64,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <param name="childCount">The child count.</param>
         /// <param name="lastChanged">The last changed in microseconds.</param>
         /// <param name="compress">if set to <c>true</c> compress the data object.</param>
-        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0, bool compress = true)
+        public static void SetDataObject<T>(IDataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0, bool compress = true)
         {
             if (entity == null)
             {
@@ -77,7 +77,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             else
             {
                 var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)
-                    ? Energistics.Common.EtpExtensions.Serialize(entity)
+                    ? Energistics.Etp.Common.EtpExtensions.Serialize(entity)
                     : WitsmlParser.ToXml(entity, removeTypePrefix: true);
 
                 dataObject.SetString(data, compress);
@@ -133,7 +133,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
                 var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.GetDataSchemaVersion()));
-                provider.GetObject(args);
+                provider.GetObject(Session.Adapter, args);
 
                 if (args.Context.Data == null || args.Context.Data.Length < 1)
                 {
@@ -153,7 +153,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// </summary>
         /// <param name="header">The message header.</param>
         /// <param name="putObject">The put object message.</param>
-        protected override void HandlePutObject(MessageHeader header, PutObject putObject)
+        protected override void HandlePutObject(IMessageHeader header, PutObject putObject)
         {
             base.HandlePutObject(header, putObject);
 
@@ -171,7 +171,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                         ? ObjectTypes.GetObjectType(uri.ObjectType, OptionsIn.DataVersion.Version200.Value)
                         : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
 
-                    var instance = Energistics.Common.EtpExtensions.Deserialize(objectType, data);
+                    var instance = Energistics.Etp.Common.EtpExtensions.Deserialize(objectType, data);
                     data = WitsmlParser.ToXml(instance);
                 }
 
@@ -197,7 +197,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// </summary>
         /// <param name="header">The message header.</param>
         /// <param name="deleteObject">The delete object message.</param>
-        protected override void HandleDeleteObject(MessageHeader header, DeleteObject deleteObject)
+        protected override void HandleDeleteObject(IMessageHeader header, DeleteObject deleteObject)
         {
             base.HandleDeleteObject(header, deleteObject);
             DeleteObject(header, deleteObject.Uri);
@@ -208,7 +208,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// </summary>
         /// <param name="header">The message header.</param>
         /// <param name="uri">The URI.</param>
-        private void DeleteObject(MessageHeader header, string uri)
+        private void DeleteObject(IMessageHeader header, string uri)
         {
             try
             {

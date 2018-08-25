@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -19,10 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -295,9 +294,9 @@ namespace PDS.WITSMLstudio.Store.Data
         public static T SetDocumentInfo<T>(this T dataObject, WitsmlQueryParser parser, string username) where T : IEnergisticsCollection
         {
             var property = dataObject.GetType().GetProperty("DocumentInfo");
-            var documentInfo = property.GetValue(dataObject);
+            var documentInfo = property?.GetValue(dataObject);
 
-            if (documentInfo == null)
+            if (property != null && documentInfo == null)
             {
                 var version = ObjectTypes.GetVersion(typeof(T));
 

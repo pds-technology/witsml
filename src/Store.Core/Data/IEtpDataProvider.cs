@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,8 +18,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.Object;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -73,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Puts the specified data object into the data store.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        void Put(DataObject dataObject);
+        void Put(IDataObject dataObject);
 
         /// <summary>
         /// Deletes a data object by the specified URI.

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.Datatypes.ChannelData;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 
 namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
@@ -30,7 +30,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// </summary>
         /// <param name="indexDataItem">The index data item.</param>
         /// <param name="valueDataItem">The value data item.</param>
-        public IndexedDataItem(DataItem indexDataItem, DataItem valueDataItem)
+        public IndexedDataItem(IDataItem indexDataItem, IDataItem valueDataItem)
         {
             IndexDataItem = indexDataItem;
             ValueDataItem = valueDataItem;
@@ -42,7 +42,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <value>
         /// The index data item.
         /// </value>
-        public DataItem IndexDataItem { get; private set; }
+        public IDataItem IndexDataItem { get; }
 
         /// <summary>
         /// Gets the channel value data item.
@@ -50,6 +50,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <value>
         /// The value data item.
         /// </value>
-        public DataItem ValueDataItem { get; private set; }
+        public IDataItem ValueDataItem { get; }
     }
 }

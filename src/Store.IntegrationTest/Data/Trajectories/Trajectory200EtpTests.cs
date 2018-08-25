@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,12 +20,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.Store;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes.Object;
+using Energistics.Etp.v11.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
@@ -98,7 +98,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
 
             // Call PutGrowingPart to add the TrajectoryStation to the Trajectory
             var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
-            dataAdapter.PutGrowingPart(uri, contentType, data);
+            dataAdapter.PutGrowingPart(_client.Adapter, uri, contentType, data);
 
             // Get the Trajectory Object from the store
             var args = await GetAndAssert(handler, uri);
@@ -114,7 +114,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             Assert.IsNotNull(result.MDMin);
             Assert.AreEqual(1, result.MDMin.Value);
 
-            var dataObjectGet = dataAdapter.GetGrowingPart(uri, uid);
+            var dataObjectGet = dataAdapter.GetGrowingPart(_client.Adapter, uri, uid);
 
             var trajectoryStationObject = GetTrajectoryStation(dataObjectGet);
 
@@ -154,7 +154,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             const int rangeStart = 10;
             const int rangeEnd = 109;
             var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
-            var growingParts = dataAdapter.GetGrowingParts(uri, rangeStart, rangeEnd);
+            var growingParts = dataAdapter.GetGrowingParts(_client.Adapter, uri, rangeStart, rangeEnd);
 
 
             // Assert that we retrieved the total number of stations expected
@@ -192,18 +192,18 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             var dataAdapter = DevKit.Container.Resolve<IGrowingObjectDataAdapter>(ObjectNames.Trajectory200);
 
             // Assert that GetGrowingPart does not fail without stations to return
-            var dataObjectStation = dataAdapter.GetGrowingPart(uri, string.Empty);
+            var dataObjectStation = dataAdapter.GetGrowingPart(_client.Adapter, uri, string.Empty);
             Assert.IsNotNull(dataObjectStation);
             var trajectoryStationObject = GetTrajectoryStation(dataObjectStation);
             Assert.IsNull(trajectoryStationObject);
 
             // Assert that GetGrowingParts does not fail without stations to return
-            var dataObjectStations = dataAdapter.GetGrowingParts(uri, 0, 100);
+            var dataObjectStations = dataAdapter.GetGrowingParts(_client.Adapter, uri, 0, 100);
             Assert.IsNotNull(dataObjectStations);
             Assert.AreEqual(0, dataObjectStations.Count);
         }
 
-        private static TrajectoryStation GetTrajectoryStation(DataObject dataObjectGet)
+        private static TrajectoryStation GetTrajectoryStation(IDataObject dataObjectGet)
         {
             if (dataObjectGet.Data == null)
                 return null;

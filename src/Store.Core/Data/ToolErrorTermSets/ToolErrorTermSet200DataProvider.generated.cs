@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
@@ -35,14 +35,12 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="ToolErrorTermSet"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{ToolErrorTermSet}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<ToolErrorTermSet>))]
     [Export200(ObjectTypes.ToolErrorTermSet, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class ToolErrorTermSet200DataProvider : EtpDataProvider<ToolErrorTermSet>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolErrorTermSet200DataProvider"/> class.

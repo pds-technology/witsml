@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="FormationMarker"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{FormationMarkerList, FormationMarker}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<FormationMarker>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     [Export131(ObjectTypes.FormationMarker, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class FormationMarker131DataProvider : WitsmlDataProvider<FormationMarkerList, FormationMarker>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FormationMarker131DataProvider"/> class.

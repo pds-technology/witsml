@@ -45,11 +45,12 @@
       <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20180429.2\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20180702.1\lib\net452\ETP.DevKit.dll</HintPath>
+    <Reference Include="ETP.DevKit, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev08\lib\net452\ETP.DevKit.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.1.5.0.0\lib\ETP.Messages.dll</HintPath>
+    <Reference Include="ETP.Messages, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.1.6.0-dev06\lib\net40\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fare, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
@@ -747,27 +748,34 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Producer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Consumer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingContext.cs" />
-    <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
-    <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreaming11Producer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreaming11Consumer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingTypes.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
     <Compile Include="Providers\ChannelStreaming\TransferModes.cs" />
+    <Compile Include="Providers\DiscoveryQuery\DiscoveryQuery12StoreProvider.cs" />
+    <Compile Include="Providers\Discovery\Discovery12StoreProvider.cs" />
     <Compile Include="Providers\Discovery\Witsml131Provider.cs" />
     <Compile Include="Providers\Discovery\Witsml141Provider.cs" />
     <Compile Include="Providers\Discovery\Witsml200Provider.cs" />
-    <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
+    <Compile Include="Providers\Discovery\Discovery11StoreProvider.cs" />
     <Compile Include="Providers\Discovery\Eml210Provider.cs" />
     <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
     <Compile Include="Data\WitsmlExtensions.cs" />
     <Compile Include="Providers\EtpExtensions.cs" />
-    <Compile Include="Providers\GrowingObject\GrowingObjectStoreProvider.cs" />
+    <Compile Include="Providers\GrowingObject\GrowingObject12StoreProvider.cs" />
+    <Compile Include="Providers\GrowingObject\GrowingObject11StoreProvider.cs" />
     <Compile Include="Providers\StoreNotification\IStoreNotificationProducer.cs" />
+    <Compile Include="Providers\StoreQuery\StoreQuery12StoreProvider.cs" />
     <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
+    <Compile Include="Providers\Store\Store12StoreProvider.cs" />
     <Compile Include="Providers\Store\StoreStore131Provider.cs" />
     <Compile Include="Providers\Store\StoreStore200Provider.cs" />
     <Compile Include="Providers\Store\StoreStore141Provider.cs" />
-    <Compile Include="Providers\Store\StoreStoreProvider.cs" />
+    <Compile Include="Providers\Store\Store11StoreProvider.cs" />
     <Compile Include="Data\Security\IUserAuthorizationProvider.cs" />
     <Compile Include="Data\Security\UserAuthorizationProvider.cs" />
     <Compile Include="Transactions\IWitsmlTransaction.cs" />
@@ -786,7 +794,6 @@
       <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="app.config">
       <SubType>Designer</SubType>

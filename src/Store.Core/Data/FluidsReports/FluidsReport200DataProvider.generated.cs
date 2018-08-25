@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.FluidsReports
@@ -35,14 +35,12 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="FluidsReport"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.EtpDataProvider{FluidsReport}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<FluidsReport>))]
     [Export200(ObjectTypes.FluidsReport, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class FluidsReport200DataProvider : EtpDataProvider<FluidsReport>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FluidsReport200DataProvider"/> class.

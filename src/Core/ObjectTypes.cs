@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -114,11 +114,6 @@ namespace PDS.WITSMLstudio
         /// The ObjectType identifier for a ChannelIndex.
         /// </summary>
         public const string ChannelIndex = "channelIndex";
-
-        /// <summary>
-        /// The ObjectType identifier for a WellboreGeometry.
-        /// </summary>
-        public const string WellboreGeometry = "wellboreGeometry";
 
         private static readonly string[] _growingObjects = { Log, MudLog, Trajectory };
 

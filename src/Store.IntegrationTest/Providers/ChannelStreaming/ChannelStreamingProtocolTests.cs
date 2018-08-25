@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,15 +21,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Energistics;
-using Energistics.Common;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Protocol;
-using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Core;
+using Energistics.Etp;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Protocol.Core;
+using Energistics.Etp.v11;
+using Energistics.Etp.v11.Datatypes.ChannelData;
+using Energistics.Etp.v11.Protocol.ChannelStreaming;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Framework;
 using Shouldly;
@@ -37,7 +36,7 @@ using Shouldly;
 namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
     [TestClass]
-    [ProtocolRole(Protocols.ChannelStreaming, "consumer", "producer")]
+    [ProtocolRole((int)Protocols.ChannelStreaming, "consumer", "producer")]
     public class ChannelStreamingProtocolTests : IntegrationTestBase
     {
         public DevKit141Aspect DevKit { get; set; }
@@ -219,7 +218,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
             // Register event handlers
             var onChannelMetadata = HandleMultiPartAsync<ChannelMetadata>(x => handler.OnChannelMetadata += x);            
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send Start message
             handler.Start();
@@ -269,7 +268,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
             // Register event handlers
             var onChannelMetadata = HandleMultiPartAsync<ChannelMetadata>(x => handler.OnChannelMetadata += x);
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send Start message
             handler.Start();
@@ -302,7 +301,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Assert.AreEqual("Invalid Argument: startIndex > endIndex", args.Message.ErrorMessage);
 
             // Wait 30s and verify that no further error messages are sent.
-            var moreExceptions = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x, 30000);
+            var moreExceptions = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x, 30000);
 
             // Assert a Timeout exception because no more errors should be returned within 30s
             await Should.ThrowAsync<TimeoutException>(moreExceptions);
@@ -704,7 +703,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 
             // Register event handlers
             var onChannelMetadata = HandleMultiPartAsync<ChannelMetadata>(x => handler.OnChannelMetadata += x);
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send Start message
             handler.Start();

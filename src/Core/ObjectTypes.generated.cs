@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -208,6 +208,11 @@ namespace PDS.WITSMLstudio
         /// The data object type for a WellboreGeology.
         /// </summary>
         public const string WellboreGeology = "wellboreGeology";
+
+        /// <summary>
+        /// The data object type for a WellboreGeometry.
+        /// </summary>
+        public const string WellboreGeometry = "wellboreGeometry";
 
         /// <summary>
         /// The data object type for a WellboreMarker.

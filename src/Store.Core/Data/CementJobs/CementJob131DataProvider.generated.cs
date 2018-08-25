@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -27,7 +27,7 @@ using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data.CementJobs
@@ -35,7 +35,6 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="CementJob"/>.
     /// </summary>
-
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.WitsmlDataProvider{CementJobList, CementJob}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<CementJob>))]
@@ -43,7 +42,6 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
     [Export131(ObjectTypes.CementJob, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class CementJob131DataProvider : WitsmlDataProvider<CementJobList, CementJob>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CementJob131DataProvider"/> class.

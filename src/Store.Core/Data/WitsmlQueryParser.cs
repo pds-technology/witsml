@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Prodml200 = Energistics.DataAccess.PRODML200;
 using Resqml210 = Energistics.DataAccess.RESQML210;

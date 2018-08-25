@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -18,7 +18,7 @@
 
 using System;
 using Energistics.DataAccess.WITSML141;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data.Wells

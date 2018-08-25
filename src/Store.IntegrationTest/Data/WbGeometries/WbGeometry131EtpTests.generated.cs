@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -26,16 +26,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
-using Energistics.Datatypes;
-using Energistics.Protocol;
-using Energistics.Protocol.Core;
-using Energistics.Protocol.Discovery;
-using Energistics.Protocol.Store;
+using Energistics.Etp;
+using Energistics.Etp.Common;
+using Energistics.Etp.v11.Protocol;
+using Energistics.Etp.v11.Protocol.Core;
+using Energistics.Etp.v11.Protocol.Discovery;
+using Energistics.Etp.v11.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using WbGeometry = Energistics.DataAccess.WITSML131.StandAloneWellboreGeometry;
@@ -98,7 +98,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
             // Get Object Expecting it Not to Exist
-            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
+            await GetAndAssert(handler, uri, Energistics.Etp.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
@@ -132,7 +132,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
             // Get Object Expecting it Not to Exist
-            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
+            await GetAndAssert(handler, uri, Energistics.Etp.EtpErrorCodes.NotFound);
 
             // Put Object for Add
             await PutAndAssert(handler, dataObject);
@@ -182,7 +182,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
 
             // Get Object Expecting it Not to Exist
-            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
+            await GetAndAssert(handler, uri, Energistics.Etp.EtpErrorCodes.NotFound);
 
             // Put Object
             await PutAndAssert(handler, dataObject);
@@ -201,7 +201,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             await DeleteAndAssert(handler, uri);
 
             // Get Object Expecting it Not to Exist
-            await GetAndAssert(handler, uri, Energistics.EtpErrorCodes.NotFound);
+            await GetAndAssert(handler, uri, Energistics.Etp.EtpErrorCodes.NotFound);
         }
     }
 }

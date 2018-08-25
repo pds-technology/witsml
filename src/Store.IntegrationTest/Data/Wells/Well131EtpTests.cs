@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -17,10 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Threading.Tasks;
-using Energistics;
-using Energistics.Common;
 using Energistics.DataAccess.WITSML131;
-using Energistics.Protocol.Store;
+using Energistics.Etp;
+using Energistics.Etp.v11.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Wells

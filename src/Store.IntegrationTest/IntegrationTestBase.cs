@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -24,17 +24,18 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Avro.Specific;
-using Energistics;
-using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol;
-using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Core;
-using Energistics.Protocol.Discovery;
-using Energistics.Protocol.Store;
+using Energistics.Etp;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Protocol.Core;
+using Energistics.Etp.v11;
+using Energistics.Etp.v11.Datatypes.Object;
+using Energistics.Etp.v11.Protocol.ChannelStreaming;
+using Energistics.Etp.v11.Protocol.Core;
+using Energistics.Etp.v11.Protocol.Discovery;
+using Energistics.Etp.v11.Protocol.Store;
 using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Framework;
@@ -139,10 +140,12 @@ namespace PDS.WITSMLstudio.Store
         protected EtpClient CreateClient(string url)
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var headers = Energistics.Security.Authorization.Basic(TestSettings.Username, TestSettings.Password);
+            var headers = Energistics.Etp.Security.Authorization.Basic(TestSettings.Username, TestSettings.Password);
+            var etpSubProtocol = EtpSettings.LegacySubProtocol;
 
-            var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
+            var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, etpSubProtocol, headers);
             client.Output = client.Logger.Info;
+
             return client;
         }
 
@@ -404,7 +407,7 @@ namespace PDS.WITSMLstudio.Store
                 x => handler.OnGetResourcesResponse += x);
 
             // Register exception hanlder
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send GetResources message for specified URI
             var messageId = handler.GetResources(uri);
@@ -478,17 +481,17 @@ namespace PDS.WITSMLstudio.Store
         /// <param name="uri">The URI.</param>
         /// <param name="errorCode">The error code.</param>
         /// <returns>The ProtocolEventArgs.</returns>
-        protected async Task<ProtocolEventArgs<Energistics.Protocol.Store.Object>> GetAndAssert(IStoreCustomer handler, EtpUri uri, EtpErrorCodes? errorCode = null)
+        protected async Task<ProtocolEventArgs<Energistics.Etp.v11.Protocol.Store.Object>> GetAndAssert(IStoreCustomer handler, EtpUri uri, EtpErrorCodes? errorCode = null)
         {
             // Register event handler for root URI
-            var onObject = HandleAsync<Energistics.Protocol.Store.Object>(x => handler.OnObject += x);
+            var onObject = HandleAsync<Energistics.Etp.v11.Protocol.Store.Object>(x => handler.OnObject += x);
 
             // Register exception hanlder
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send GetObject for non-existant URI
             handler.GetObject(uri);
-            ProtocolEventArgs<Energistics.Protocol.Store.Object> args = null;
+            ProtocolEventArgs<Energistics.Etp.v11.Protocol.Store.Object> args = null;
 
             var tokenSource = new CancellationTokenSource();
 
@@ -540,10 +543,10 @@ namespace PDS.WITSMLstudio.Store
         protected async Task PutAndAssert(IStoreCustomer handler, DataObject dataObject, EtpErrorCodes? errorCode = null)
         {
             // Register event handler for Acknowledge response
-            var onAcknowledge = HandleAsync<Acknowledge>(x => handler.OnAcknowledge += x);
+            var onAcknowledge = HandleAsync<IAcknowledge>(x => handler.OnAcknowledge += x);
 
             // Register exception hanlder
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send PutObject message for new data object
             var messageId = handler.PutObject(dataObject);
@@ -598,10 +601,10 @@ namespace PDS.WITSMLstudio.Store
         protected async Task DeleteAndAssert(IStoreCustomer handler, EtpUri uri, EtpErrorCodes? errorCode = null)
         {
             // Register event handler for Acknowledge response
-            var onAcknowledge = HandleAsync<Acknowledge>(x => handler.OnAcknowledge += x);
+            var onAcknowledge = HandleAsync<IAcknowledge>(x => handler.OnAcknowledge += x);
 
             // Register exception hanlder
-            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+            var onProtocolException = HandleAsync<IProtocolException>(x => handler.OnProtocolException += x);
 
             // Send GetObject for non-existant URI
             var messageId = handler.DeleteObject(uri);
