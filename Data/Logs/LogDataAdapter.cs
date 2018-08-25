@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,8 +21,9 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Compatibility;
 using PDS.WITSMLstudio.Framework;
@@ -137,17 +138,18 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uris">The collection of URI.</param>
         /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
+        public IList<IChannelMetadataRecord> GetChannelMetadata(IEtpAdapter etpAdapter, params EtpUri[] uris)
         {
-            var metadata = new List<ChannelMetadataRecord>();
+            var metadata = new List<IChannelMetadataRecord>();
             var entities = GetEntitiesForChannel(uris);
 
             foreach (var entity in entities)
             {
                 Logger.Debug($"Getting channel metadata for URI: {entity.GetUri()}");
-                metadata.AddRange(GetChannelMetadataForAnEntity(entity, uris));
+                metadata.AddRange(GetChannelMetadataForAnEntity(etpAdapter, entity, uris));
             }
 
             return metadata;
@@ -1010,20 +1012,22 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// <summary>
         /// Converts a logCurveInfo to an index metadata record.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="indexCurve">The index curve.</param>
         /// <param name="scale">The scale.</param>
         /// <returns></returns>
-        protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
+        protected abstract IIndexMetadataRecord ToIndexMetadataRecord(IEtpAdapter etpAdapter, T entity, TChild indexCurve, int scale = 3);
 
         /// <summary>
         /// Converts a logCurveInfo to a channel metadata record.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="curve">The curve.</param>
         /// <param name="indexMetadata">The index metadata.</param>
         /// <returns></returns>
-        protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
+        protected abstract IChannelMetadataRecord ToChannelMetadataRecord(IEtpAdapter etpAdapter, T entity, TChild curve, IIndexMetadataRecord indexMetadata);
 
         /// <summary>
         /// Partially delete the log data.
@@ -1193,10 +1197,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                 filters.Add(builder.EqIgnoreCase(propertyPath, propertyValue));
         }
 
-        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(T entity, params EtpUri[] uris)
+        private IList<IChannelMetadataRecord> GetChannelMetadataForAnEntity(IEtpAdapter etpAdapter, T entity, params EtpUri[] uris)
         {
             var logCurves = GetLogCurves(entity);
-            var metadata = new List<ChannelMetadataRecord>();
+            var metadata = new List<IChannelMetadataRecord>();
             var index = 0;
 
             if (!logCurves.Any())
@@ -1204,14 +1208,14 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             var mnemonic = GetIndexCurveMnemonic(entity);
             var indexCurve = logCurves.FirstOrDefault(x => GetMnemonic(x).EqualsIgnoreCase(mnemonic));
-            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
+            var indexMetadata = ToIndexMetadataRecord(etpAdapter, entity, indexCurve);
 
             metadata.AddRange(
                 logCurves
                 .Where(x => IsChannelMetaDataRequested(GetChannelUri(x, entity), uris) && !GetMnemonic(x).EqualsIgnoreCase(indexMetadata.Mnemonic))
                 .Select(x =>
                 {
-                    var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
+                    var channel = ToChannelMetadataRecord(etpAdapter, entity, x, indexMetadata);
                     channel.ChannelId = index++;
                     return channel;
                 }));

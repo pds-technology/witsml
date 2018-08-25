@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,8 +21,9 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
@@ -40,9 +41,11 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// <summary>
         /// Gets the channels metadata.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uris">The collection of URI to describe.</param>
         /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
+        /// <exception cref="WitsmlException">IChannelDataProvider not configured.</exception>
+        public IList<IChannelMetadataRecord> GetChannelMetadata(IEtpAdapter etpAdapter, params EtpUri[] uris)
         {
             var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
@@ -59,7 +62,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var logs = GetLogsByUris(uris.ToList());
 
             if (!logs.Any())
-                return adapter.GetChannelMetadata(channelUris.Any() ? channelUris.ToArray() : null);
+                return adapter.GetChannelMetadata(etpAdapter, channelUris.Any() ? channelUris.ToArray() : null);
 
             foreach (var log in logs)
             {
@@ -70,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     .ToList());
             }
 
-            return adapter.GetChannelMetadata(channelUris.ToArray());
+            return adapter.GetChannelMetadata(etpAdapter, channelUris.ToArray());
         }
 
         /// <summary>

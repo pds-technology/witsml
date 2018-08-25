@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+//----------------------------------------------------------------------- 
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -182,9 +182,6 @@ namespace PDS.WITSMLstudio.Store.Data
 
             // wellboreGeometry
             Register2<Witsml200.WellboreGeometry>();
-
-            // wellboreMarker
-            Register2<Witsml200.WellboreMarker>();
 
             // wellboreMarker
             Register2<Witsml200.WellboreMarker>();

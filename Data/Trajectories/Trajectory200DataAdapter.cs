@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,12 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Datatypes.Object;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
+using Energistics.Etp.Common.Datatypes.Object;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -36,7 +36,7 @@ using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.Channels;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
-using PDS.WITSMLstudio.Store.Providers.Store;
+using PDS.WITSMLstudio.Store.Providers;
 
 namespace PDS.WITSMLstudio.Store.Data.Trajectories
 {
@@ -114,17 +114,18 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <summary>
         /// Gets the channel metadata.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uris">The uris to retrieve metadata for</param>
-        /// <returns></returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<IChannelMetadataRecord> GetChannelMetadata(IEtpAdapter etpAdapter, params EtpUri[] uris)
         {
-            var metadata = new List<ChannelMetadataRecord>();
+            var metadata = new List<IChannelMetadataRecord>();
             var entities = GetChannelsByUris(uris);
 
             foreach (var entity in entities)
             {
                 Logger.Debug($"Getting channel metadata for URI: {entity.GetUri()}");
-                metadata.AddRange(GetChannelMetadataForAnEntity(entity, uris));
+                metadata.AddRange(GetChannelMetadataForAnEntity(etpAdapter, entity, uris));
             }
 
             return metadata;
@@ -194,43 +195,47 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         /// <summary>
         /// Gets the growing part having the specified UID for a growing object.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uri">The growing obejct's URI.</param>
         /// <param name="uid">The growing part's uid.</param>
         /// <returns></returns>
-        public override DataObject GetGrowingPart(EtpUri uri, string uid)
+        public override IDataObject GetGrowingPart(IEtpAdapter etpAdapter, EtpUri uri, string uid)
         {
             var entity = GetEntity(uri);
             var trajectoryStation = GetStation(entity, uid);
 
-            return ToDataObject(entity, trajectoryStation);
+            return ToDataObject(etpAdapter, entity, trajectoryStation);
         }
 
         /// <summary>
         /// Gets the growing parts for a growing object within the specified index range.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uri">The growing obejct's URI.</param>
         /// <param name="startIndex">The start index.</param>
         /// <param name="endIndex">The end index.</param>
         /// <returns></returns>
-        public override List<DataObject> GetGrowingParts(EtpUri uri, object startIndex, object endIndex)
+        public override List<IDataObject> GetGrowingParts(IEtpAdapter etpAdapter, EtpUri uri, object startIndex, object endIndex)
         {
             var entity = GetEntity(uri);
             var trajectoryStations = GetStations(entity, ToTrajectoryIndex(startIndex), ToTrajectoryIndex(endIndex));
 
             return trajectoryStations
-                .Select(ts => ToDataObject(entity, ts))
+                .Select(ts => ToDataObject(etpAdapter, entity, ts))
                 .ToList();
         }
 
         /// <summary>
         /// Puts the growing part for a growing object.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uri">The growing obejct's URI.</param>
         /// <param name="contentType">Type of the content.</param>
         /// <param name="data">The data.</param>
-        public override void PutGrowingPart(EtpUri uri, string contentType, byte[] data)
+        public override void PutGrowingPart(IEtpAdapter etpAdapter, EtpUri uri, string contentType, byte[] data)
         {
-            var dataObject = new DataObject() {Data = data};
+            var dataObject = etpAdapter.CreateDataObject();
+            dataObject.Data = data;
 
             // Convert byte array to TrajectoryStation
             var trajectoryStationXml = dataObject.GetString();
@@ -415,77 +420,58 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             return channelFilters.Any() ? GetCollection().Find(Builders<Trajectory>.Filter.Or(channelFilters)).ToList() : new List<Trajectory>();
         }
 
-        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(Trajectory entity, params EtpUri[] uris)
+        private IList<IChannelMetadataRecord> GetChannelMetadataForAnEntity(IEtpAdapter etpAdapter, Trajectory entity, params EtpUri[] uris)
         {
-            var metadata = new List<ChannelMetadataRecord>();
+            var metadata = new List<IChannelMetadataRecord>();
 
             // Get Index Metadata
-            var indexMetadata = ToIndexMetadataRecord(entity);
+            var indexMetadata = ToIndexMetadataRecord(etpAdapter, entity);
 
             // Get Channel Metadata
-            var channel = ToChannelMetadataRecord(entity, indexMetadata);
+            var channel = ToChannelMetadataRecord(etpAdapter, entity, indexMetadata);
             metadata.Add(channel);
 
             return metadata;
         }
 
-        private IndexMetadataRecord ToIndexMetadataRecord(Trajectory entity, int scale = 3)
+        private IIndexMetadataRecord ToIndexMetadataRecord(IEtpAdapter etpAdapter, Trajectory entity, int scale = 3)
         {
-            return new IndexMetadataRecord()
-            {
-                Uri = entity.GetUri().Append("md"),
-                Mnemonic = "MD",
-                Description = LogIndexType.measureddepth.GetName(),
-                Uom = Units.GetUnit(entity.MDMin?.Uom.ToString()),
-                Scale = scale,
-                IndexType = ChannelIndexTypes.Depth,
-                Direction = IndexDirections.Increasing,
-                CustomData = new Dictionary<string, DataValue>(0),
-            };
+            var metadata = etpAdapter.CreateIndexMetadata(
+                uri: entity.GetUri().Append("md"),
+                isTimeIndex: false,
+                isIncreasing: true);
+
+            metadata.Mnemonic = "MD";
+            metadata.Description = LogIndexType.measureddepth.GetName();
+            metadata.Uom = Units.GetUnit(entity.MDMin?.Uom.ToString());
+            metadata.Scale = scale;
+
+            return metadata;
         }
 
-        private ChannelMetadataRecord ToChannelMetadataRecord(Trajectory entity, IndexMetadataRecord indexMetadata)
+        private IChannelMetadataRecord ToChannelMetadataRecord(IEtpAdapter etpAdapter, Trajectory entity, IIndexMetadataRecord indexMetadata)
         {
             var uri = entity.GetUri();
-            var dataObject = new DataObject();
             var lastChanged = entity.Citation.LastUpdate.ToUnixTimeMicroseconds().GetValueOrDefault();
 
-            StoreStoreProvider.SetDataObject(dataObject, entity, uri, entity.Citation.Title, 0, lastChanged);
+            var dataObject = etpAdapter.CreateDataObject();
+            etpAdapter.SetDataObject(dataObject, entity, uri, entity.Citation.Title, 0, lastChanged);
 
-            return new ChannelMetadataRecord()
-            {
-                ChannelUri = uri,
-                ContentType = uri.ContentType,
-                DataType = EtpDataType.@string.GetName(),
-                Description = entity.Citation.Description ?? entity.Citation.Title,
-                ChannelName = entity.Citation.Title,
-                Uom = Units.GetUnit(entity.MDMin?.Uom.ToString()),
-                MeasureClass = ObjectTypes.Unknown,
-                Source = ObjectTypes.Unknown,
-                Uuid = entity.Uuid,
-                DomainObject = dataObject,
-                Status = GetStatus(entity.GrowingStatus),
-                StartIndex = entity.MDMin?.Value.IndexToScale(indexMetadata.Scale),
-                EndIndex = entity.MDMax?.Value.IndexToScale(indexMetadata.Scale),
-                Indexes = new List<IndexMetadataRecord>()
-                {
-                    indexMetadata
-                },
-                CustomData = new Dictionary<string, DataValue>()
-            };
-        }
+            var metadata = etpAdapter.CreateChannelMetadata(uri);
+            metadata.DataType = EtpDataType.@string.GetName();
+            metadata.Description = entity.Citation.Description ?? entity.Citation.Title;
+            metadata.ChannelName = entity.Citation.Title;
+            metadata.Uom = Units.GetUnit(entity.MDMin?.Uom.ToString());
+            metadata.MeasureClass = ObjectTypes.Unknown;
+            metadata.Source = ObjectTypes.Unknown;
+            metadata.Uuid = entity.Uuid;
+            metadata.DomainObject = dataObject;
+            metadata.Status = etpAdapter.GetChannelStatus(entity.GrowingStatus == ChannelStatus.active);
+            metadata.StartIndex = entity.MDMin?.Value.IndexToScale(indexMetadata.Scale);
+            metadata.EndIndex = entity.MDMax?.Value.IndexToScale(indexMetadata.Scale);
+            metadata.Indexes = new List<IIndexMetadataRecord> { indexMetadata };
 
-        private ChannelStatuses GetStatus(ChannelStatus? entityGrowingStatus)
-        {
-            switch (entityGrowingStatus)
-            {
-                case ChannelStatus.active:
-                    return ChannelStatuses.Active;
-                case ChannelStatus.inactive:
-                    return ChannelStatuses.Inactive;
-                default:
-                    return ChannelStatuses.Closed;
-            }
+            return metadata;
         }
 
         private TrajectoryStation GetStation(Trajectory entity, string uid)
@@ -514,16 +500,16 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             return convertible?.ToDouble(null);
         }
 
-        private static DataObject ToDataObject(Trajectory entity, TrajectoryStation trajectoryStation)
+        private static IDataObject ToDataObject(IEtpAdapter etpAdapter, Trajectory entity, TrajectoryStation trajectoryStation)
         {
-            var dataObject = new DataObject();
+            var dataObject = etpAdapter.CreateDataObject();
 
             if (entity == null || trajectoryStation == null)
                 return dataObject;
 
             var uri = entity.GetUri();
             var childUri = uri.Append(ObjectTypes.TrajectoryStation, trajectoryStation.Uid);
-            StoreStoreProvider.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0, compress: false);
+            etpAdapter.SetDataObject(dataObject, trajectoryStation, childUri, entity.Citation.Title, 0, compress: false);
 
             return dataObject;
         }

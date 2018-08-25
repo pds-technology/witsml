@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -19,7 +19,7 @@
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using MongoDB.Bson;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 using PDS.WITSMLstudio.Store.Data.Transactions;

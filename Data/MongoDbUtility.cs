@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -23,7 +23,7 @@ using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
 
