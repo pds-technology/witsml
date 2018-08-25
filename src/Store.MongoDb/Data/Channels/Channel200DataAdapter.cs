@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -17,19 +17,20 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Datatypes.Object;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
-using PDS.WITSMLstudio.Store.Providers.Store;
+using PDS.WITSMLstudio.Store.Providers;
 
 namespace PDS.WITSMLstudio.Store.Data.Channels
 {
@@ -43,23 +44,22 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         /// <summary>
         /// Gets the channels metadata.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="uris">The collection of URI to describe.</param>
-        /// <returns>
-        /// A collection of channel metadata.
-        /// </returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<IChannelMetadataRecord> GetChannelMetadata(IEtpAdapter etpAdapter, params EtpUri[] uris)
         {
-            var metadatas = new List<ChannelMetadataRecord>();
+            var metadatas = new List<IChannelMetadataRecord>();
 
             var channels = GetChannelsByUris(uris);
             foreach (var channel in channels)
             {
                 Logger.Debug($"Getting channel metadata for URI: {channel.GetUri()}");
                 var indexMetadata = channel.Index
-                    .Select(x => ToIndexMetadataRecord(channel, x))
+                    .Select(x => ToIndexMetadataRecord(etpAdapter, channel, x))
                     .ToList();
 
-                metadatas.Add(ToChannelMetadataRecord(channel, indexMetadata));
+                metadatas.Add(ToChannelMetadataRecord(etpAdapter, channel, indexMetadata));
             }
 
             return metadatas;
@@ -108,55 +108,48 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             throw new NotImplementedException();
         }
 
-        private ChannelMetadataRecord ToChannelMetadataRecord(Channel channel, IList<IndexMetadataRecord> indexMetadata)
+        private IChannelMetadataRecord ToChannelMetadataRecord(IEtpAdapter etpAdapter, Channel channel, IList<IIndexMetadataRecord> indexMetadata)
         {
             var uri = channel.GetUri();
-            var primaryIndex = indexMetadata.FirstOrDefault();
-            var isTimeLog = primaryIndex != null && primaryIndex.IndexType == ChannelIndexTypes.Time;
             var channelIndex = GetIndexRange(channel);
-            var dataObject = new DataObject();
             var lastChanged = channel.Citation.LastUpdate.ToUnixTimeMicroseconds().GetValueOrDefault();
 
-            StoreStoreProvider.SetDataObject(dataObject, channel, uri, channel.Mnemonic, 0, lastChanged);
+            var primaryIndex = indexMetadata.FirstOrDefault();
+            var isTimeIndex = etpAdapter.IsTimeIndex(primaryIndex);
 
-            return new ChannelMetadataRecord()
-            {
-                ChannelUri = uri,
-                ContentType = uri.ContentType,
-                DataType = channel.DataType.GetValueOrDefault(EtpDataType.@double).ToString().Replace("@", string.Empty),
-                Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
-                ChannelName = channel.Mnemonic,
-                Uom = Units.GetUnit(channel.Uom),
-                MeasureClass = channel.ChannelClass?.Title ?? ObjectTypes.Unknown,
-                Source = channel.Source ?? ObjectTypes.Unknown,
-                Uuid = channel.Mnemonic,
-                DomainObject = dataObject,
-                Status = ChannelStatuses.Active,
-                //Status = (ChannelStatuses)(int)channel.GrowingStatus.GetValueOrDefault(ChannelStatus.inactive),
-                StartIndex = primaryIndex == null ? null : channelIndex.Start.IndexToScale(primaryIndex.Scale, isTimeLog),
-                EndIndex = primaryIndex == null ? null : channelIndex.End.IndexToScale(primaryIndex.Scale, isTimeLog),
-                Indexes = indexMetadata,
-                CustomData = new Dictionary<string, DataValue>()
-            };
+            var dataObject = etpAdapter.CreateDataObject();
+            etpAdapter.SetDataObject(dataObject, channel, uri, channel.Mnemonic, 0, lastChanged);
+
+            var metadata = etpAdapter.CreateChannelMetadata(uri);
+            metadata.DataType = channel.DataType.GetValueOrDefault(EtpDataType.@double).ToString().Replace("@", string.Empty);
+            metadata.Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic;
+            metadata.ChannelName = channel.Mnemonic;
+            metadata.Uom = Units.GetUnit(channel.Uom);
+            metadata.MeasureClass = channel.ChannelClass?.Title ?? ObjectTypes.Unknown;
+            metadata.Source = channel.Source ?? ObjectTypes.Unknown;
+            metadata.Uuid = channel.Mnemonic;
+            metadata.DomainObject = dataObject;
+            //metadata.Status = (ChannelStatuses)(int)channel.GrowingStatus.GetValueOrDefault(ChannelStatus.inactive);
+            metadata.StartIndex = primaryIndex == null ? null : channelIndex.Start.IndexToScale(primaryIndex.Scale, isTimeIndex);
+            metadata.EndIndex = primaryIndex == null ? null : channelIndex.End.IndexToScale(primaryIndex.Scale, isTimeIndex);
+            metadata.Indexes = etpAdapter.ToList(indexMetadata);
+
+            return metadata;
         }
 
-        private IndexMetadataRecord ToIndexMetadataRecord(Channel entity, ChannelIndex indexChannel, int scale = 3)
+        private IIndexMetadataRecord ToIndexMetadataRecord(IEtpAdapter etpAdapter, Channel entity, ChannelIndex indexChannel, int scale = 3)
         {
-            return new IndexMetadataRecord()
-            {
-                Uri = indexChannel.GetUri(entity),
-                Mnemonic = indexChannel.Mnemonic,
-                Description = indexChannel.Mnemonic,
-                Uom = Units.GetUnit(indexChannel.Uom),
-                Scale = scale,
-                IndexType = indexChannel.IsTimeIndex(true)
-                    ? ChannelIndexTypes.Time
-                    : ChannelIndexTypes.Depth,
-                Direction = indexChannel.IsIncreasing()
-                    ? IndexDirections.Increasing
-                    : IndexDirections.Decreasing,
-                CustomData = new Dictionary<string, DataValue>(0),
-            };
+            var metadata = etpAdapter.CreateIndexMetadata(
+                uri: indexChannel.GetUri(entity),
+                isTimeIndex: indexChannel.IsTimeIndex(true),
+                isIncreasing: indexChannel.IsIncreasing());
+
+            metadata.Mnemonic = indexChannel.Mnemonic;
+            metadata.Description = indexChannel.Mnemonic;
+            metadata.Uom = Units.GetUnit(indexChannel.Uom);
+            metadata.Scale = scale;
+
+            return metadata;
         }
 
         private Range<double?> GetIndexRange(Channel entity)

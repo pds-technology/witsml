@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props" Condition="Exists('..\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props')" />
+  <Import Project="$(SolutionDir)\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props')" />
   <Import Project="$(SolutionDir)\packages\librdkafka.redist.0.9.4\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.0.9.4\build\librdkafka.redist.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -49,11 +49,12 @@
       <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20180429.2\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20180620.1\lib\net452\ETP.DevKit.dll</HintPath>
+    <Reference Include="ETP.DevKit, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev08\lib\net452\ETP.DevKit.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.1.5.0.0\lib\ETP.Messages.dll</HintPath>
+    <Reference Include="ETP.Messages, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.1.6.0-dev06\lib\net40\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -85,7 +86,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.0.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\System.Runtime.CompilerServices.Unsafe.4.0.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
@@ -108,9 +109,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\StoreNotification\StoreNotification12StoreProvider.cs" />
+    <Compile Include="Providers\StoreNotification\StoreNotification12StoreProviderBase.cs" />
     <Compile Include="Providers\StoreNotification\StoreNotificationProducer.cs" />
-    <Compile Include="Providers\StoreNotification\StoreNotificationStoreProvider.cs" />
-    <Compile Include="Providers\StoreNotification\StoreNotificationStoreProviderBase.cs" />
+    <Compile Include="Providers\StoreNotification\StoreNotification11StoreProvider.cs" />
+    <Compile Include="Providers\StoreNotification\StoreNotification11StoreProviderBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

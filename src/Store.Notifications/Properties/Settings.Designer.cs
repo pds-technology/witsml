@@ -76,5 +76,23 @@ namespace PDS.WITSMLstudio.Store.Notifications {
                 return ((bool)(this["KafkaEnableAutoCommit"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("StoreNotification-Insert")]
+        public string KafkaInsertTopicName {
+            get {
+                return ((string)(this["KafkaInsertTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("StoreNotification-Update")]
+        public string KafkaUpdateTopicName {
+            get {
+                return ((string)(this["KafkaUpdateTopicName"]));
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -22,9 +22,9 @@ using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
-using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
-using Energistics.Datatypes.Object;
+using Energistics.Etp.Common;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using PDS.WITSMLstudio.Framework;
@@ -32,8 +32,8 @@ using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Data.Logs;
 using PDS.WITSMLstudio.Store.Data.Channels;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
-using PDS.WITSMLstudio.Store.Providers.Store;
 using PDS.WITSMLstudio.Store.Data.Transactions;
+using PDS.WITSMLstudio.Store.Providers;
 
 namespace PDS.WITSMLstudio.Store.Data.Logs
 {
@@ -484,66 +484,58 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         /// <summary>
         /// Converts a logCurveInfo to an index metadata record.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="indexCurve">The index curve.</param>
         /// <param name="scale">The scale.</param>
         /// <returns></returns>
-        protected override IndexMetadataRecord ToIndexMetadataRecord(Log entity, LogCurveInfo indexCurve, int scale = 3)
+        protected override IIndexMetadataRecord ToIndexMetadataRecord(IEtpAdapter etpAdapter, Log entity, LogCurveInfo indexCurve, int scale = 3)
         {
-            return new IndexMetadataRecord()
-            {
-                Uri = indexCurve.GetUri(entity),
-                Mnemonic = indexCurve.Mnemonic,
-                Description = indexCurve.CurveDescription,
-                Uom = Units.GetUnit(indexCurve.Unit),
-                Scale = scale,
-                IndexType = IsTimeLog(entity, true)
-                    ? ChannelIndexTypes.Time
-                    : ChannelIndexTypes.Depth,
-                Direction = IsIncreasing(entity)
-                    ? IndexDirections.Increasing
-                    : IndexDirections.Decreasing,
-                CustomData = new Dictionary<string, DataValue>(0),
-            };
+            var metadata = etpAdapter.CreateIndexMetadata(
+                uri: indexCurve.GetUri(entity),
+                isTimeIndex: IsTimeLog(entity, true),
+                isIncreasing: IsIncreasing(entity));
+
+            metadata.Mnemonic = indexCurve.Mnemonic;
+            metadata.Description = indexCurve.CurveDescription;
+            metadata.Uom = Units.GetUnit(indexCurve.Unit);
+            metadata.Scale = scale;
+
+            return metadata;
         }
 
         /// <summary>
         /// Converts a logCurveInfo to a channel metadata record.
         /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="curve">The curve.</param>
         /// <param name="indexMetadata">The index metadata.</param>
         /// <returns></returns>
-        protected override ChannelMetadataRecord ToChannelMetadataRecord(Log entity, LogCurveInfo curve, IndexMetadataRecord indexMetadata)
+        protected override IChannelMetadataRecord ToChannelMetadataRecord(IEtpAdapter etpAdapter, Log entity, LogCurveInfo curve, IIndexMetadataRecord indexMetadata)
         {
             var uri = curve.GetUri(entity);
             var isTimeLog = IsTimeLog(entity, true);
             var curveIndexes = GetCurrentIndexRange(entity);
-            var dataObject = new DataObject();
             var unixTime = entity.CommonData.DateTimeLastChange.ToUnixTimeMicroseconds();
 
-            StoreStoreProvider.SetDataObject(dataObject, curve, uri, curve.Mnemonic, 0, unixTime.GetValueOrDefault());
+            var dataObject = etpAdapter.CreateDataObject();
+            etpAdapter.SetDataObject(dataObject, curve, uri, curve.Mnemonic, 0, unixTime.GetValueOrDefault());
 
-            return new ChannelMetadataRecord()
-            {
-                ChannelUri = uri,
-                ContentType = uri.ContentType,
-                DataType = curve.TypeLogData.GetValueOrDefault(LogDataType.@double).ToString().Replace("@", string.Empty),
-                Description = curve.CurveDescription ?? curve.Mnemonic,
-                ChannelName = curve.Mnemonic,
-                Uom = Units.GetUnit(curve.Unit),
-                MeasureClass = curve.ClassWitsml?.Name ?? ObjectTypes.Unknown,
-                Source = curve.DataSource ?? ObjectTypes.Unknown,
-                DomainObject = dataObject,
-                Status = entity.ObjectGrowing.GetValueOrDefault() ? ChannelStatuses.Active : ChannelStatuses.Inactive,
-                StartIndex = curveIndexes[curve.Mnemonic].Start.IndexToScale(indexMetadata.Scale, isTimeLog),
-                EndIndex = curveIndexes[curve.Mnemonic].End.IndexToScale(indexMetadata.Scale, isTimeLog),
-                Indexes = new List<IndexMetadataRecord>()
-                {
-                    indexMetadata
-                },
-                CustomData = new Dictionary<string, DataValue>()
-            };
+            var metadata = etpAdapter.CreateChannelMetadata(uri);
+            metadata.DataType = curve.TypeLogData.GetValueOrDefault(LogDataType.@double).ToString().Replace("@", string.Empty);
+            metadata.Description = curve.CurveDescription ?? curve.Mnemonic;
+            metadata.ChannelName = curve.Mnemonic;
+            metadata.Uom = Units.GetUnit(curve.Unit);
+            metadata.MeasureClass = curve.ClassWitsml?.Name ?? ObjectTypes.Unknown;
+            metadata.Source = curve.DataSource ?? ObjectTypes.Unknown;
+            metadata.DomainObject = dataObject;
+            metadata.Status = etpAdapter.GetChannelStatus(entity.ObjectGrowing.GetValueOrDefault());
+            metadata.StartIndex = curveIndexes[curve.Mnemonic].Start.IndexToScale(indexMetadata.Scale, isTimeLog);
+            metadata.EndIndex = curveIndexes[curve.Mnemonic].End.IndexToScale(indexMetadata.Scale, isTimeLog);
+            metadata.Indexes = new List<IIndexMetadataRecord> { indexMetadata };
+
+            return metadata;
         }
 
         /// <summary>

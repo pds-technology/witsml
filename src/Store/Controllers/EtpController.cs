@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,13 +20,9 @@ using System.ComponentModel.Composition;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using Energistics;
-using Energistics.Datatypes;
-using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Discovery;
-using Energistics.Protocol.GrowingObject;
-using Energistics.Protocol.Store;
-using Energistics.Protocol.StoreNotification;
+using Energistics.Etp;
+using Etp11 = Energistics.Etp.v11;
+using Etp12 = Energistics.Etp.v12;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Controllers
@@ -53,7 +49,8 @@ namespace PDS.WITSMLstudio.Store.Controllers
         // GET: .well-known/etp-server-capabilities
         [Route(".well-known/etp-server-capabilities")]
         [Route("api/etp/.well-known/etp-server-capabilities")]
-        [ResponseType(typeof(ServerCapabilities))]
+        [ResponseType(typeof(Etp11.Datatypes.ServerCapabilities))]
+        [ResponseType(typeof(Etp12.Datatypes.ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
         {
             return ServerCapabilities();
@@ -68,12 +65,29 @@ namespace PDS.WITSMLstudio.Store.Controllers
 
         protected override void RegisterProtocolHandlers(EtpServerHandler handler)
         {
-            handler.Register(() => Container.Resolve<IChannelStreamingProducer>());
-            handler.Register(() => Container.Resolve<IChannelStreamingConsumer>());
-            handler.Register(() => Container.Resolve<IDiscoveryStore>());
-            handler.Register(() => Container.Resolve<IStoreStore>());
-            handler.Register(() => Container.Resolve<IStoreNotificationStore>());
-            handler.Register(() => Container.Resolve<IGrowingObjectStore>());
+            if (handler.Adapter is Etp11.Etp11Adapter)
+            {
+                handler.Register(() => Container.Resolve<Etp11.Protocol.ChannelStreaming.IChannelStreamingProducer>());
+                handler.Register(() => Container.Resolve<Etp11.Protocol.ChannelStreaming.IChannelStreamingConsumer>());
+                handler.Register(() => Container.Resolve<Etp11.Protocol.Discovery.IDiscoveryStore>());
+                handler.Register(() => Container.Resolve<Etp11.Protocol.Store.IStoreStore>());
+                handler.Register(() => Container.Resolve<Etp11.Protocol.StoreNotification.IStoreNotificationStore>());
+                handler.Register(() => Container.Resolve<Etp11.Protocol.GrowingObject.IGrowingObjectStore>());
+            }
+            else
+            {
+                handler.Register(() => Container.Resolve<Etp12.Protocol.ChannelStreaming.IChannelStreamingProducer>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.ChannelStreaming.IChannelStreamingConsumer>());
+                //handler.Register(() => Container.Resolve<Etp12.Protocol.ChannelDataLoad.IChannelDataLoadConsumer>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.Discovery.IDiscoveryStore>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.Store.IStoreStore>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.StoreNotification.IStoreNotificationStore>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.GrowingObject.IGrowingObjectStore>());
+                //handler.Register(() => Container.Resolve<Etp12.Protocol.GrowingObjectNotification.IGrowingObjectNotificationStore>());
+                //handler.Register(() => Container.Resolve<Etp12.Protocol.GrowingObjectQuery.IGrowingObjectQueryStore>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.DiscoveryQuery.IDiscoveryQueryStore>());
+                handler.Register(() => Container.Resolve<Etp12.Protocol.StoreQuery.IStoreQueryStore>());
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -21,30 +21,29 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
-using Energistics.Protocol.StoreNotification;
+using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.v12.Datatypes.Object;
+using Energistics.Etp.v12.Protocol.StoreNotification;
 using Newtonsoft.Json.Linq;
 using PDS.WITSMLstudio.Framework;
-using PDS.WITSMLstudio.Store.Providers.Store;
 
 namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 {
     /// <summary>
     /// Provides a common framework for all Store Notification Store provider implementations.
     /// </summary>
-    /// <seealso cref="Energistics.Protocol.StoreNotification.StoreNotificationStoreHandler" />
-    public abstract class StoreNotificationStoreProviderBase : StoreNotificationStoreHandler
+    /// <seealso cref="StoreNotificationStoreHandler" />
+    public abstract class StoreNotification12StoreProviderBase : StoreNotificationStoreHandler
     {
-        private readonly Dictionary<string, MessageHeader> _headers;
+        private readonly Dictionary<string, IMessageHeader> _headers;
         private readonly List<NotificationRequest> _requests;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoreNotificationStoreProviderBase"/> class.
+        /// Initializes a new instance of the <see cref="StoreNotification12StoreProviderBase"/> class.
         /// </summary>
-        protected StoreNotificationStoreProviderBase()
+        protected StoreNotification12StoreProviderBase()
         {
-            _headers = new Dictionary<string, MessageHeader>();
+            _headers = new Dictionary<string, IMessageHeader>();
             _requests = new List<NotificationRequest>();
         }
 
@@ -53,7 +52,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="request">The request.</param>
-        protected override void HandleNotificationRequest(MessageHeader header, NotificationRequest request)
+        protected override void HandleNotificationRequest(IMessageHeader header, NotificationRequest request)
         {
             base.HandleNotificationRequest(header, request);
             EnsureConnection();
@@ -74,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="request">The request.</param>
-        protected override void HandleCancelNotification(MessageHeader header, CancelNotification request)
+        protected override void HandleCancelNotification(IMessageHeader header, CancelNotification request)
         {
             base.HandleCancelNotification(header, request);
 
@@ -121,29 +120,40 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
         }
 
-        protected virtual void OnNotifyUpsert(string uri, object dataObject, DateTime dateTime)
+        protected virtual void OnNotifyInsert(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeTypes.Upsert);
+            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKinds.insert);
+        }
+
+        protected virtual void OnNotifyUpdate(string uri, object dataObject, DateTime dateTime)
+        {
+            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKinds.update);
         }
 
         protected virtual void OnNotifyDelete(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(DeleteNotification, uri, dataObject, dateTime, ObjectChangeTypes.Delete);
+            var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
+            if (request == null) return;
+
+            IMessageHeader header;
+            if (!_headers.TryGetValue(request.Request.Uuid, out header)) return;
+
+            DeleteNotification(header, uri, dateTime.ToUnixTimeMicroseconds());
         }
 
-        protected virtual void OnNotify(Func<MessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeTypes changeType)
+        protected virtual void OnNotify(Func<IMessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeKinds changeKind)
         {
             var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
             if (request == null) return;
 
-            MessageHeader header;
+            IMessageHeader header;
             if (!_headers.TryGetValue(request.Request.Uuid, out header)) return;
 
             var etpUri = new EtpUri(uri);
 
             action(header, new ObjectChange
             {
-                ChangeType = changeType,
+                ChangeKind = changeKind,
                 ChangeTime = dateTime.ToUnixTimeMicroseconds(),
                 DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject, request.Request.IncludeObjectData)
             });
@@ -175,7 +185,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             var etpDataObject = new DataObject();
 
             // Do not return DataObject.Data if not requested in original subscription
-            StoreStoreProvider.SetDataObject(
+            Session.Adapter.SetDataObject(
                 etpDataObject,
                 includeObjectData ? dataObject : null,
                 uri,

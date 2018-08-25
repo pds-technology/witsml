@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -73,8 +73,21 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 
             var topic = auditHistory.LastChangeType == ChangeInfoType.delete
                 ? KafkaSettings.DeleteTopicName
-                : KafkaSettings.UpsertTopicName;
+                : auditHistory.LastChangeType == ChangeInfoType.add
+                    ? KafkaSettings.InsertTopicName
+                    : KafkaSettings.UpdateTopicName;
 
+            SendNotification(topic, uri, xml);
+
+            // For backward compatibility with ETP v1.1
+            if (auditHistory.LastChangeType != ChangeInfoType.delete)
+            {
+                SendNotification(KafkaSettings.UpsertTopicName, uri, xml);
+            }
+        }
+
+        private void SendNotification(string topic, string uri, string xml)
+        {
             Task.Run(() =>
             {
                 try

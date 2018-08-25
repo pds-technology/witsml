@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using LinqToQuerystring;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;

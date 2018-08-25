@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -28,6 +28,8 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static int PollingIntervalInMilliseconds = Settings.Default.KafkaPollingIntervalInMilliseconds;
         public static bool EnableAutoCommit = Settings.Default.KafkaEnableAutoCommit;
         public static string BrokerList = Settings.Default.KafkaBrokerList;
+        public static string InsertTopicName = Settings.Default.KafkaInsertTopicName;
+        public static string UpdateTopicName = Settings.Default.KafkaUpdateTopicName;
         public static string UpsertTopicName = Settings.Default.KafkaUpsertTopicName;
         public static string DeleteTopicName = Settings.Default.KafkaDeleteTopicName;
         public static string DebugContexts = Settings.Default.KafkaDebugContexts;

@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Core, 2018.1
+// PDS WITSMLstudio Core, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -26,7 +26,7 @@ using PDS.WITSMLstudio.Store.Data.Logs;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
-using Energistics.Datatypes;
+using Energistics.Etp.Common.Datatypes;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 
 namespace PDS.WITSMLstudio.Store.Data
@@ -223,7 +223,7 @@ namespace PDS.WITSMLstudio.Store.Data
                 DevKit.CreateDoubleLogCurveInfo("curve3", "unit3"),
                 DevKit.CreateDoubleLogCurveInfo("curve4", "unit4")
             });
-            var updateDefinitionCurveSet2 = MongoDbUtility.BuildPushEach<Log, LogCurveInfo>(updateDefinitionName, ObjectTypes.LogCurveInfo.ToPascalCase(), curves);
+            var updateDefinitionCurveSet2 = MongoDbUtility.BuildPushEach(updateDefinitionName, ObjectTypes.LogCurveInfo.ToPascalCase(), curves);
             Assert.IsNotNull(updateDefinitionCurveSet2);
             collection.UpdateMany(Builders<Log>.Filter.Eq(ObjectTypes.Uid, Log.Uid), updateDefinitionCurveSet2);
             var updatedLogCurve2 = DevKit.GetAndAssert(Log);

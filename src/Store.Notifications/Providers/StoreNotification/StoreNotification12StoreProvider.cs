@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS WITSMLstudio Store, 2018.1
+// PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
 // 
@@ -23,7 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
-using Energistics.Protocol.StoreNotification;
+using Energistics.Etp.v12.Protocol.StoreNotification;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
@@ -32,10 +32,10 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     /// <summary>
     /// Default implementation of a Store Notification Store provider.
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Providers.StoreNotification.StoreNotificationStoreProviderBase" />
+    /// <seealso cref="StoreNotification12StoreProviderBase" />
     [Export(typeof(IStoreNotificationStore))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class StoreNotificationStoreProvider : StoreNotificationStoreProviderBase
+    public class StoreNotification12StoreProvider : StoreNotification12StoreProviderBase
     {
         private readonly IDictionary<string, object> _config;
         private readonly StringDeserializer _keyDeserializer;
@@ -45,9 +45,9 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         private bool _isCancelled;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoreNotificationStoreProvider"/> class.
+        /// Initializes a new instance of the <see cref="StoreNotification12StoreProvider"/> class.
         /// </summary>
-        public StoreNotificationStoreProvider()
+        public StoreNotification12StoreProvider()
         {
             _timeout = TimeSpan.FromMilliseconds(KafkaSettings.PollingIntervalInMilliseconds);
             _keyDeserializer = new StringDeserializer(Encoding.UTF8);
@@ -130,14 +130,18 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             var dataObject = message.Value;
             var timestamp = DateTime.UtcNow;
 
-            // Detect Upsert/Delete based on topic name
-            if (KafkaSettings.DeleteTopicName.EqualsIgnoreCase(message.Topic))
+            // Detect Insert/Update/Delete based on topic name
+            if (KafkaSettings.InsertTopicName.EqualsIgnoreCase(message.Topic))
+            {
+                OnNotifyInsert(uri, dataObject, timestamp);
+            }
+            else if (KafkaSettings.UpdateTopicName.EqualsIgnoreCase(message.Topic))
+            {
+                OnNotifyUpdate(uri, dataObject, timestamp);
+            }
+            else if (KafkaSettings.DeleteTopicName.EqualsIgnoreCase(message.Topic))
             {
                 OnNotifyDelete(uri, dataObject, timestamp);
-            }
-            else
-            {
-                OnNotifyUpsert(uri, dataObject, timestamp);
             }
         }
     }
