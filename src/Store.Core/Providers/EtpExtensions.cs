@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,6 +127,64 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Resolves the channel streaming producer handler.
+        /// </summary>
+        /// <param name="etpSession">The ETP session.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns>An <see cref="IStreamingProducer"/> instance.</returns>
+        public static IStreamingProducer RegisterChannelStreamingProducer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingProducer> callback = null)
+        {
+            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                var handler = container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName);
+                var producer = handler as IStreamingProducer;
+
+                callback?.Invoke(producer);
+                etpSession.Register(() => handler);
+
+                return producer;
+            }
+            else
+            {
+                var handler = container.Resolve<Energistics.Etp.v12.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName);
+                var producer = handler as IStreamingProducer;
+
+                callback?.Invoke(producer);
+                etpSession.Register(() => handler);
+
+                return producer;
+            }
+        }
+
+        /// <summary>
+        /// Resolves the discovery store handler.
+        /// </summary>
+        /// <param name="etpSession">The ETP session.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns>An <see cref="IProtocolHandler"/> instance.</returns>
+        public static IProtocolHandler RegisterDiscoveryStore(this EtpSession etpSession, IContainer container, string contractName = null, Action<IProtocolHandler> callback = null)
+        {
+            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                var handler = container.Resolve<Energistics.Etp.v11.Protocol.Discovery.IDiscoveryStore>(contractName);
+                callback?.Invoke(handler);
+                etpSession.Register(() => handler);
+                return handler;
+            }
+            else
+            {
+                var handler = container.Resolve<Energistics.Etp.v12.Protocol.Discovery.IDiscoveryStore>(contractName);
+                callback?.Invoke(handler);
+                etpSession.Register(() => handler);
+                return handler;
+            }
+        }
+
+        /// <summary>
         /// Gets the ETP protocols metadata.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
@@ -135,34 +194,6 @@ namespace PDS.WITSMLstudio.Store.Providers
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? new Etp11Protocols()
                 : new Etp12Protocols() as IEtpProtocols;
-        }
-
-        /// <summary>
-        /// Resolves the channel streaming producer handler.
-        /// </summary>
-        /// <param name="etpAdapter">The ETP adapter.</param>
-        /// <param name="container">The composition container.</param>
-        /// <param name="contractName">The contract name.</param>
-        /// <returns>An <see cref="IStreamingProducer"/> instance.</returns>
-        public static IStreamingProducer ResolveChannelStreamingProducerHandler(this IEtpAdapter etpAdapter, IContainer container, string contractName = null)
-        {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
-                ? container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName) as IStreamingProducer
-                : container.Resolve<Energistics.Etp.v12.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName) as IStreamingProducer;
-        }
-
-        /// <summary>
-        /// Resolves the discovery store handler.
-        /// </summary>
-        /// <param name="etpAdapter">The ETP adapter.</param>
-        /// <param name="container">The composition container.</param>
-        /// <param name="contractName">The contract name.</param>
-        /// <returns>An <see cref="IProtocolHandler"/> instance.</returns>
-        public static IProtocolHandler ResolveDiscoveryStoreHandler(this IEtpAdapter etpAdapter, IContainer container, string contractName = null)
-        {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
-                ? container.Resolve<Energistics.Etp.v11.Protocol.Discovery.IDiscoveryStore>(contractName)
-                : container.Resolve<Energistics.Etp.v12.Protocol.Discovery.IDiscoveryStore>(contractName) as IProtocolHandler;
         }
 
         /// <summary>
@@ -237,7 +268,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="messageId">The message identifier.</param>
         /// <returns>A new <see cref="IMessageHeader" /> instance.</returns>
-        public static IMessageHeader CreateChannelMetadataHeader(this IEtpAdapter etpAdapter, int messageId = 0)
+        public static IMessageHeader CreateChannelMetadataHeader(this IEtpAdapter etpAdapter, long messageId = 0)
         {
             if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
             {
