@@ -137,7 +137,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         public static Resource NewProtocol(EtpUri protocolUri, string folderName)
         {
             return New(
-                uuid: Guid.NewGuid().ToString(),
+                uuid: null,
                 uri: protocolUri,
                 resourceType: ResourceTypes.UriProtocol,
                 name: folderName,
@@ -164,7 +164,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 folderUri = folderUri.Append(folderName);
 
             var resource = New(
-                uuid: Guid.NewGuid().ToString(),
+                uuid: null,
                 uri: folderUri,
                 resourceType: ResourceTypes.Folder,
                 name: folderName,

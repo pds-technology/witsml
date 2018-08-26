@@ -247,17 +247,6 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>.
-        /// </summary>
-        /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
-        /// <returns>An <see cref="EtpUri"/> instance.</returns>
-        public static EtpUri GetUri(this Witsml200.AbstractObject entity)
-        {
-            return entity.GetUriFamily()
-                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
-        }
-
-        /// <summary>
         /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>  and parentUri.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -265,7 +254,27 @@ namespace PDS.WITSMLstudio
         /// <returns>An <see cref="EtpUri"/> instance</returns>
         public static EtpUri GetUri(this Witsml200.AbstractObject entity, EtpUri parentUri)
         {
-            return parentUri
+            // Remove query string parameters, if any
+            var uri = parentUri.GetLeftPart();
+
+            if (!IsRootUri(uri))
+            {
+                // Remove trailing separator
+                uri = uri.TrimEnd('/');
+            }
+
+            return new EtpUri(uri)
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>.
+        /// </summary>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUri(this Witsml200.AbstractObject entity)
+        {
+            return entity.GetUriFamily()
                 .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
         }
 
