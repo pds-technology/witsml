@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.ChannelData;
 
@@ -25,7 +26,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     /// <summary>
     /// Defines a common interface for an ETP channel streaming producer implementation.
     /// </summary>
-    public interface IStreamingProducer
+    public interface IStreamingProducer : IProtocolHandler
     {
         /// <summary>
         /// Gets or sets a value indicating whether this instance is a Simple Streamer.
