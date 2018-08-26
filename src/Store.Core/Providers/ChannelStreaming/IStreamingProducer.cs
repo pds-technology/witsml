@@ -23,7 +23,7 @@ using Energistics.Etp.Common.Datatypes.ChannelData;
 namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
 {
     /// <summary>
-    /// Defines a common interface for a channel streaming producer implementation.
+    /// Defines a common interface for an ETP channel streaming producer implementation.
     /// </summary>
     public interface IStreamingProducer
     {
