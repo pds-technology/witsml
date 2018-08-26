@@ -47,11 +47,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev08\lib\net452\ETP.DevKit.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev09\lib\net452\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.1.6.0-dev06\lib\net40\ETP.Messages.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\ETP.1.6.0-dev07\lib\net40\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -1436,6 +1436,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="License.txt" />
     <Content Include="TestData\49025109020000_13346_Slicing_Time_Log.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -225,6 +225,21 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Determines whether the specified index is increasing.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="index">The index.</param>
+        /// <returns><c>true</c> if the index is increasing; otherwise, <c>false</c>.</returns>
+        public static bool IsIncreasing(this IEtpAdapter etpAdapter, IIndexMetadataRecord index)
+        {
+            if (index == null) return false;
+
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? index.Direction == (int) Energistics.Etp.v11.Datatypes.ChannelData.IndexDirections.Increasing
+                : index.Direction == (int) Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Increasing;
+        }
+
+        /// <summary>
         /// Creates a new data object instance.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>

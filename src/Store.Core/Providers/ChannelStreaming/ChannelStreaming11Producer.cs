@@ -41,7 +41,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     /// <seealso cref="ChannelStreamingProducerHandler" />
     [Export(typeof(IChannelStreamingProducer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class ChannelStreaming11Producer : ChannelStreamingProducerHandler
+    public class ChannelStreaming11Producer : ChannelStreamingProducerHandler, IStreamingProducer
     {
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
@@ -75,6 +75,59 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Gets the composition container.
         /// </summary>
         protected IContainer Container { get; }
+
+        /// <summary>
+        /// Gets the minimum message interval.
+        /// </summary>
+        int IStreamingProducer.MinMessageInterval => MaxMessageRate;
+
+        /// <summary>
+        /// Sends a ChannelMetadata message to a consumer.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="channelMetadataRecords">The list of <see cref="IChannelMetadataRecord" /> objects.</param>
+        /// <param name="messageFlag">The message flag.</param>
+        /// <returns>The message identifier.</returns>
+        long IStreamingProducer.ChannelMetadata(IMessageHeader request, IList<IChannelMetadataRecord> channelMetadataRecords, MessageFlags messageFlag)
+        {
+            return ChannelMetadata(request, channelMetadataRecords.Cast<ChannelMetadataRecord>().ToList(), messageFlag);
+        }
+
+        /// <summary>
+        /// Sends a ChannelData message to a consumer.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="dataItems">The list of <see cref="IDataItem" /> objects.</param>
+        /// <param name="messageFlag">The message flag.</param>
+        /// <returns>The message identifier.</returns>
+        long IStreamingProducer.ChannelData(IMessageHeader request, IList<IDataItem> dataItems, MessageFlags messageFlag)
+        {
+            return ChannelData(request, dataItems.Cast<DataItem>().ToList(), messageFlag);
+        }
+
+        /// <summary>
+        /// Sends a ChannelDataChange message to a consumer.
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <param name="dataItems">The data items.</param>
+        /// <returns>The message identifier.</returns>
+        long IStreamingProducer.ChannelDataChange(long channelId, long startIndex, long endIndex, IList<IDataItem> dataItems)
+        {
+            return ChannelDataChange(channelId, startIndex, endIndex, dataItems.Cast<DataItem>().ToList());
+        }
+
+        /// <summary>
+        /// Sends a ChannelStatusChange message to a consumer.
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="isActive">if set to <c>true</c> the channel is active.</param>
+        /// <returns>The message identifier.</returns>
+        long IStreamingProducer.ChannelStatusChange(long channelId, bool isActive)
+        {
+            return ChannelStatusChange(channelId, (ChannelStatuses) Session.Adapter.GetChannelStatus(isActive));
+        }
 
         /// <summary>
         /// Initializes the channel data providers.
