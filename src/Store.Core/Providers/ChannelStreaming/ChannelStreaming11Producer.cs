@@ -82,6 +82,21 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         int IStreamingProducer.MinMessageInterval => MaxMessageRate;
 
         /// <summary>
+        /// Gets or sets the simple streamer uris.
+        /// </summary>
+        public IList<string> SimpleStreamerUris { get; set; }
+
+        /// <summary>
+        /// Initializes the channel streaming producer as a simple streamer.
+        /// </summary>
+        /// <param name="uris">The uris to stream.</param>
+        public void InitializeSimpleStreamer(IList<string> uris)
+        {
+            IsSimpleStreamer = true;
+            SimpleStreamerUris = uris;
+        }
+
+        /// <summary>
         /// Sends a ChannelMetadata message to a consumer.
         /// </summary>
         /// <param name="request">The request.</param>

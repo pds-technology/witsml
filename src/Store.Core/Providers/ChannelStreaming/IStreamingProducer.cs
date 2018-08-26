@@ -30,7 +30,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Gets or sets a value indicating whether this instance is a Simple Streamer.
         /// </summary>
-        bool IsSimpleStreamer { get; }
+        bool IsSimpleStreamer { get; set; }
 
         /// <summary>
         /// Gets the maximum data items.
@@ -41,6 +41,17 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Gets the minimum message interval.
         /// </summary>
         int MinMessageInterval { get; }
+
+        /// <summary>
+        /// Gets or sets the simple streamer uris.
+        /// </summary>
+        IList<string> SimpleStreamerUris { get; set; }
+
+        /// <summary>
+        /// Initializes the channel streaming producer as a simple streamer.
+        /// </summary>
+        /// <param name="uris">The uris to stream.</param>
+        void InitializeSimpleStreamer(IList<string> uris);
 
         /// <summary>
         /// Sends a ChannelMetadata message to a consumer.

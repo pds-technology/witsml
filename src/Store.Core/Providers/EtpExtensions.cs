@@ -23,8 +23,10 @@ using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.ChannelData;
 using Energistics.Etp.Common.Datatypes.Object;
+using PDS.WITSMLstudio.Adapters;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Providers.ChannelStreaming;
 using PDS.WITSMLstudio.Store.Providers.Discovery;
 using PDS.WITSMLstudio.Store.Providers.Store;
 
@@ -122,7 +124,47 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             return uri.IsValid && !string.IsNullOrWhiteSpace(uri.ObjectId);
         }
- 
+
+        /// <summary>
+        /// Gets the ETP protocols metadata.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <returns>A new <see cref="IEtpProtocols"/> instance.</returns>
+        public static IEtpProtocols GetEtpProtocols(this IEtpAdapter etpAdapter)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? new Etp11Protocols()
+                : new Etp12Protocols() as IEtpProtocols;
+        }
+
+        /// <summary>
+        /// Resolves the channel streaming producer handler.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>An <see cref="IStreamingProducer"/> instance.</returns>
+        public static IStreamingProducer ResolveChannelStreamingProducerHandler(this IEtpAdapter etpAdapter, IContainer container, string contractName = null)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName) as IStreamingProducer
+                : container.Resolve<Energistics.Etp.v12.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName) as IStreamingProducer;
+        }
+
+        /// <summary>
+        /// Resolves the discovery store handler.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>An <see cref="IProtocolHandler"/> instance.</returns>
+        public static IProtocolHandler ResolveDiscoveryStoreHandler(this IEtpAdapter etpAdapter, IContainer container, string contractName = null)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? container.Resolve<Energistics.Etp.v11.Protocol.Discovery.IDiscoveryStore>(contractName)
+                : container.Resolve<Energistics.Etp.v12.Protocol.Discovery.IDiscoveryStore>(contractName) as IProtocolHandler;
+        }
+
         /// <summary>
         /// Creates a new index metadata record.
         /// </summary>
@@ -190,6 +232,36 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Creates a new channel metadata record.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns>A new <see cref="IMessageHeader" /> instance.</returns>
+        public static IMessageHeader CreateChannelMetadataHeader(this IEtpAdapter etpAdapter, int messageId = 0)
+        {
+            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                return new Energistics.Etp.v11.Datatypes.MessageHeader
+                {
+                    MessageId = messageId,
+                    Protocol = (int) Energistics.Etp.v11.Protocols.ChannelStreaming,
+                    MessageType = (int) Energistics.Etp.v11.MessageTypes.ChannelStreaming.ChannelMetadata,
+                    MessageFlags = (int) MessageFlags.None,
+                    CorrelationId = 0
+                };
+            }
+
+            return new Energistics.Etp.v11.Datatypes.MessageHeader
+            {
+                MessageId = messageId,
+                Protocol = (int) Energistics.Etp.v12.Protocols.ChannelStreaming,
+                MessageType = (int) Energistics.Etp.v12.MessageTypes.ChannelStreaming.ChannelMetadata,
+                MessageFlags = (int) MessageFlags.None,
+                CorrelationId = 0
+            };
+        }
+
+        /// <summary>
         /// Gets the channel status indicator.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
@@ -205,8 +277,8 @@ namespace PDS.WITSMLstudio.Store.Providers
             }
 
             return isActive
-                ? (int)Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Active
-                : (int)Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Inactive;
+                ? (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Active
+                : (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Inactive;
         }
 
         /// <summary>
@@ -401,6 +473,96 @@ namespace PDS.WITSMLstudio.Store.Providers
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? indexes.Cast<Energistics.Etp.v11.Datatypes.ChannelData.IndexMetadataRecord>().ToList()
                 : indexes.Cast<Energistics.Etp.v12.Datatypes.ChannelData.IndexMetadataRecord>().ToList() as IList;
+        }
+
+        /// <summary>
+        /// Converts a generic collection to an ETP array.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="value">The collection of values.</param>
+        /// <returns>A new ETP array instance.</returns>
+        public static object ToArray(this IEtpAdapter etpAdapter, object value)
+        {
+            var values = value as IList;
+            var type = value?.GetType().GetGenericArguments()[0];
+
+            if (type == typeof(double))
+            {
+                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                    ? new Energistics.Etp.v11.Datatypes.ArrayOfDouble { Values = (IList<double>)values }
+                    : new Energistics.Etp.v12.Datatypes.ArrayOfDouble { Values = (IList<double>)values } as object;
+            }
+            if (type == typeof(float))
+            {
+                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                    ? new Energistics.Etp.v11.Datatypes.ArrayOfFloat { Values = (IList<float>)values }
+                    : new Energistics.Etp.v12.Datatypes.ArrayOfFloat { Values = (IList<float>)values } as object;
+            }
+            if (type == typeof(long))
+            {
+                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                    ? new Energistics.Etp.v11.Datatypes.ArrayOfLong { Values = (IList<long>)values }
+                    : new Energistics.Etp.v12.Datatypes.ArrayOfLong { Values = (IList<long>)values } as object;
+            }
+            if (type == typeof(int))
+            {
+                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                    ? new Energistics.Etp.v11.Datatypes.ArrayOfInt { Values = (IList<int>)values }
+                    : new Energistics.Etp.v12.Datatypes.ArrayOfInt { Values = (IList<int>)values } as object;
+            }
+            if (type == typeof(bool))
+            {
+                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                    ? new Energistics.Etp.v11.Datatypes.ArrayOfBoolean { Values = (IList<bool>)values }
+                    : new Energistics.Etp.v12.Datatypes.ArrayOfBoolean { Values = (IList<bool>)values } as object;
+            }
+
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? new Energistics.Etp.v11.Datatypes.AnyArray { Item = values }
+                : new Energistics.Etp.v12.Datatypes.AnyArray { Item = values } as object;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IDataItem"/> instance using the specified parameters.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="value">The channel data value.</param>
+        /// <param name="indexes">The channel index values.</param>
+        /// <param name="attributes">The data attributes.</param>
+        /// <returns>A new <see cref="IDataItem"/> instance.</returns>
+        public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter, long channelId = 0, object value = null, IList<long> indexes = null, IList<object> attributes = null)
+        {
+            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                return new Energistics.Etp.v11.Datatypes.ChannelData.DataItem
+                {
+                    ChannelId = channelId,
+                    Indexes = indexes?.ToArray() ?? new long[0],
+                    Value = new Energistics.Etp.v11.Datatypes.DataValue { Item = value },
+                    ValueAttributes = attributes?
+                        .Select((x, i) => new Energistics.Etp.v11.Datatypes.DataAttribute
+                        {
+                            AttributeId = i,
+                            AttributeValue = new Energistics.Etp.v11.Datatypes.DataValue { Item = x }
+                        })
+                        .ToArray() ?? new Energistics.Etp.v11.Datatypes.DataAttribute[0]
+                };
+            }
+
+            return new Energistics.Etp.v12.Datatypes.ChannelData.DataItem
+            {
+                ChannelId = channelId,
+                Indexes = indexes?.ToArray() ?? new long[0],
+                Value = new Energistics.Etp.v12.Datatypes.DataValue { Item = value },
+                ValueAttributes = attributes?
+                    .Select((x, i) => new Energistics.Etp.v12.Datatypes.DataAttribute
+                    {
+                        AttributeId = i,
+                        AttributeValue = new Energistics.Etp.v12.Datatypes.DataValue { Item = x }
+                    })
+                    .ToArray() ?? new Energistics.Etp.v12.Datatypes.DataAttribute[0]
+            };
         }
     }
 }

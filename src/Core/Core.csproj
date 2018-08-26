@@ -107,6 +107,9 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Adapters\Etp11Protocols.cs" />
+    <Compile Include="Adapters\Etp12Protocols.cs" />
+    <Compile Include="Adapters\IEtpProtocols.cs" />
     <Compile Include="Adapters\Lithology.cs" />
     <Compile Include="Adapters\AxisDefinition.cs" />
     <Compile Include="Adapters\LengthMeasure.cs" />
