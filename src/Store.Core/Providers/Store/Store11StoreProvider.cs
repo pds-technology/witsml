@@ -86,6 +86,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             double version;
             var uuid = double.TryParse(uri.Version, out version) && version >= 2.0 ? uri.ObjectId : null;
 
+            if (string.IsNullOrWhiteSpace(uuid))
+            {
+                uuid = entity.GetPropertyValue<string>(ObjectTypes.Uuid);
+            }
+
             dataObject.Resource = new Resource
             {
                 Uri = uri,
