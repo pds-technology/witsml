@@ -429,11 +429,12 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="protocolUri">The protocol URI.</param>
         /// <param name="folderName">The folder name.</param>
+        /// <param name="count">Elements count</param>
         /// <returns>The resource instance.</returns>
-        public static IResource NewProtocol(this IEtpAdapter etpAdapter, EtpUri protocolUri, string folderName)
+        public static IResource NewProtocol(this IEtpAdapter etpAdapter, EtpUri protocolUri, string folderName, int count = -1)
         {
             if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
-                return Discovery11StoreProvider.NewProtocol(protocolUri, folderName);
+                return Discovery11StoreProvider.NewProtocol(protocolUri, folderName, count);
 
             return Discovery12StoreProvider.NewProtocol(protocolUri, folderName);
         }

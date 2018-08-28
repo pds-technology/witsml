@@ -111,14 +111,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
         private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources) where T : IResource
         {
-            if (EtpUris.IsRootUri(uri))
-            {
-                resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)"));
-                return;
-            }
-
             var etpUri = new EtpUri(uri);
             var parentUri = etpUri.Parent;
+
+            if (EtpUris.IsRootUri(uri))
+            {
+                resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)", _wellDataProvider.Count(etpUri)));
+                return;
+            }
 
             // Append query string, if any
             if (!string.IsNullOrWhiteSpace(etpUri.Query))
@@ -151,19 +151,17 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             {
                 var wellboreObjectType = typeof (IWellboreObject);
 
-                Providers
+                var witsmlDataAdapters = Providers
                     .OfType<IWitsmlDataAdapter>()
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
-                    .Select(x => EtpContentTypes.GetContentType(x.DataObjectType))
-                    .OrderBy(x => x.ObjectType)
-                    .ForEach(x =>
-                    {
-                        var hasChildren = ObjectTypes.Log.EqualsIgnoreCase(x.ObjectType)
-                            ? _logDataProvider.Count(etpUri)
-                            : -1;
+                    .OrderBy(x => x.DataObjectType.ToString());
 
-                        resources.Add(etpAdapter.NewFolder(etpUri, x, x.ObjectType, hasChildren));
-                    });
+                foreach (var adapter in witsmlDataAdapters)
+                {
+                    var type = EtpContentTypes.GetContentType(adapter.DataObjectType);
+                    var count = adapter.Count(etpUri);
+                    resources.Add(etpAdapter.NewFolder(etpUri, type, type.ObjectType, count));
+                }
             }
             else if (ObjectTypes.Log.EqualsIgnoreCase(etpUri.ObjectType))
             {
@@ -190,7 +188,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: _logDataProvider.Count(entity.GetUri()),
+                count: -1,
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
