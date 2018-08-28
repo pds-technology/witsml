@@ -436,7 +436,7 @@ namespace PDS.WITSMLstudio.Store.Providers
             if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
                 return Discovery11StoreProvider.NewProtocol(protocolUri, folderName, count);
 
-            return Discovery12StoreProvider.NewProtocol(protocolUri, folderName);
+            return Discovery12StoreProvider.NewProtocol(protocolUri, folderName, count);
         }
 
         /// <summary>

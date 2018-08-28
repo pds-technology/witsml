@@ -154,7 +154,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 var witsmlDataAdapters = Providers
                     .OfType<IWitsmlDataAdapter>()
                     .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
-                    .OrderBy(x => x.DataObjectType.ToString());
+                    .OrderBy(x => x.DataObjectType.Name);
 
                 foreach (var adapter in witsmlDataAdapters)
                 {

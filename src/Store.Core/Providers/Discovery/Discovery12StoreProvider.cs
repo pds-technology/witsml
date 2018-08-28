@@ -133,15 +133,16 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// </summary>
         /// <param name="protocolUri">The protocol URI.</param>
         /// <param name="folderName">Name of the folder.</param>
+        /// <param name="count">Elements count</param>
         /// <returns>The resource instance.</returns>
-        public static Resource NewProtocol(EtpUri protocolUri, string folderName)
+        public static Resource NewProtocol(EtpUri protocolUri, string folderName, int count = -1)
         {
             return New(
                 uuid: string.Empty,
                 uri: protocolUri,
                 resourceType: ResourceTypes.UriProtocol,
                 name: folderName,
-                count: -1);
+                count: count);
         }
 
         /// <summary>
