@@ -253,7 +253,7 @@ namespace PDS.WITSMLstudio.Framework
 
             foreach (var item in items)
                 action(item);
-            
+
             return items;
         }
 
@@ -422,8 +422,12 @@ namespace PDS.WITSMLstudio.Framework
                 double index;
 
                 // Ensure enumValue is not numeric
+#if DEBUG
+                if (!double.TryParse(enumValue, out index) && Enum.IsDefined(enumType, enumValue))
+#else
                 if (!double.TryParse(enumValue, out index))
-                    return Enum.Parse(enumType, enumValue);
+#endif
+                    return Enum.Parse(enumType, enumValue, true);
             }
             catch
             {
