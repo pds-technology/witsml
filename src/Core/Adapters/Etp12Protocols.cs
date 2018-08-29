@@ -44,7 +44,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the ChannelDataLoad protocol identifier.
         /// </summary>
-        public int ChannelDataLoad => -1; // (int) Protocols.ChannelDataLoad;
+        public int ChannelDataLoad => (int) Protocols.ChannelDataLoad;
 
         /// <summary>
         /// Gets the Discovery protocol identifier.
