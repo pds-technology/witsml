@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Energistics.Etp.v12.Datatypes.ChannelData;
 
 namespace PDS.WITSMLstudio.Store.Providers.ChannelDataLoad
 {
@@ -30,5 +31,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelDataLoad
         /// <param name="id">The channel identifier.</param>
         /// <returns>The message identifier.</returns>
         long OpenChannel(string uri, long id);
+
+        /// <summary>
+        /// Sends RealtimeData message with the specified dataPoints.
+        /// </summary>
+        /// <param name="dataPoints">The data points.</param>
+        /// <returns></returns>
+        long RealtimeData(IList<DataPoint> dataPoints);
     }
 }

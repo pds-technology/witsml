@@ -42,6 +42,11 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <summary>
         /// Channel range request
         /// </summary>
-        RangeRequest
+        RangeRequest,
+
+        /// <summary>
+        /// Channel Streaming directly to Real-Time for ChannelDataLoad processing
+        /// </summary>
+        ChannelDataLoad
     }
 }

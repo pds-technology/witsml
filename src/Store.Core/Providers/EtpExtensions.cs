@@ -250,6 +250,8 @@ namespace PDS.WITSMLstudio.Store.Providers
                 Direction = isIncreasing
                     ? Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Increasing
                     : Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Decreasing,
+                DepthDatum = string.Empty,
+                TimeDatum = string.Empty,
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
             };
         }
@@ -278,6 +280,7 @@ namespace PDS.WITSMLstudio.Store.Providers
                 ChannelUri = uri?.ToString(),
                 ContentType = uri?.ContentType.ToString(),
                 Status = Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Active,
+                AttributeMetadata = new List<Energistics.Etp.v12.Datatypes.AttributeMetadataRecord>(),
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
             };
         }
