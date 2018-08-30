@@ -748,6 +748,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelDataLoad\IDataLoadProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Producer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Consumer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingContext.cs" />
@@ -811,6 +812,7 @@
   <ItemGroup>
     <Content Include="License.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

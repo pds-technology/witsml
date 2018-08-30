@@ -27,6 +27,7 @@ using Energistics.Etp.Common.Datatypes.Object;
 using PDS.WITSMLstudio.Adapters;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
+using PDS.WITSMLstudio.Store.Providers.ChannelDataLoad;
 using PDS.WITSMLstudio.Store.Providers.ChannelStreaming;
 using PDS.WITSMLstudio.Store.Providers.Discovery;
 using PDS.WITSMLstudio.Store.Providers.Store;
@@ -156,6 +157,25 @@ namespace PDS.WITSMLstudio.Store.Providers
 
                 return producer;
             }
+        }
+
+        /// <summary>
+        /// Registers the channel data load producer.
+        /// </summary>
+        /// <param name="etpSession">The ETP session.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns></returns>
+        public static IDataLoadProducer RegisterChannelDataLoadProducer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IDataLoadProducer> callback = null)
+        {
+            var handler = container.Resolve<Energistics.Etp.v12.Protocol.ChannelDataLoad.IChannelDataLoadProducer>(contractName);
+            var producer = handler as IDataLoadProducer;
+
+            callback?.Invoke(producer);
+            etpSession.Register(() => handler);
+
+            return producer;
         }
 
         /// <summary>
