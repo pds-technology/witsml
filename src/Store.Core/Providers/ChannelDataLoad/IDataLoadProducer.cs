@@ -18,6 +18,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelDataLoad
         IList<string> DataLoadUris { get; set; }
 
         /// <summary>
+        /// Initializes the channel streaming producer as a simple streamer.
+        /// </summary>
+        /// <param name="uris">The uris to stream.</param>
+        void InitializeDataLoad(IList<string> uris);
+
+        /// <summary>
         /// Sends a OpenChannel message to a store.
         /// </summary>
         /// <param name="uri">The channel URI.</param>
