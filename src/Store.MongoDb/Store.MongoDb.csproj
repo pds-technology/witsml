@@ -1,0 +1,522 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PDS.WITSMLstudio.Store</RootNamespace>
+    <AssemblyName>PDS.WITSMLstudio.Store.MongoDb</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\PDS.WITSMLstudio.Store.MongoDb.xml</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PDS.WITSMLstudio.Store.MongoDb.xml</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Avro, Version=0.9.0.0, Culture=neutral, PublicKeyToken=b1248d7eeb9d0814, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20180429.2\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.DevKit, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev11\lib\net452\ETP.DevKit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ETP.Messages, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ETP.1.6.0-dev09\lib\net40\ETP.Messages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="LinqToQuerystring, Version=0.7.0.8, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\LinqToQuerystring.0.7.0.8\lib\net35\LinqToQuerystring.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Bson, Version=2.3.0.157, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\MongoDB.Bson.2.3.0\lib\net45\MongoDB.Bson.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.3.0.157, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\MongoDB.Driver.2.3.0\lib\net45\MongoDB.Driver.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Core, Version=2.3.0.157, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\MongoDB.Driver.Core.2.3.0\lib\net45\MongoDB.Driver.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.GridFS, Version=2.3.0.157, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\MongoDB.Driver.GridFS.2.3.0\lib\net45\MongoDB.Driver.GridFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketBase, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketBase.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperSocket.SocketEngine, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.SocketEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SuperWebSocket, Version=0.9.0.0, Culture=neutral, PublicKeyToken=7ba53b9a7cef5d1c, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperWebSocket.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Data\Activities\Activity200DataAdapter.cs" />
+    <Compile Include="Data\Activities\Activity200DataAdapter.generated.cs">
+      <DependentUpon>Activity200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataAdapter.cs" />
+    <Compile Include="Data\ActivityTemplates\ActivityTemplate200DataAdapter.generated.cs">
+      <DependentUpon>ActivityTemplate200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment141DataAdapter.cs" />
+    <Compile Include="Data\Attachments\Attachment141DataAdapter.generated.cs">
+      <DependentUpon>Attachment141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment200DataAdapter.cs" />
+    <Compile Include="Data\Attachments\Attachment200DataAdapter.generated.cs">
+      <DependentUpon>Attachment200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BhaRuns\BhaRun131DataAdapter.cs" />
+    <Compile Include="Data\BhaRuns\BhaRun131DataAdapter.generated.cs">
+      <DependentUpon>BhaRun131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BhaRuns\BhaRun141DataAdapter.cs" />
+    <Compile Include="Data\BhaRuns\BhaRun141DataAdapter.generated.cs">
+      <DependentUpon>BhaRun141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BhaRuns\BhaRun200DataAdapter.cs" />
+    <Compile Include="Data\BhaRuns\BhaRun200DataAdapter.generated.cs">
+      <DependentUpon>BhaRun200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CementJobEvaluations\CementJobEvaluation200DataAdapter.cs" />
+    <Compile Include="Data\CementJobEvaluations\CementJobEvaluation200DataAdapter.generated.cs">
+      <DependentUpon>CementJobEvaluation200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CementJobs\CementJob131DataAdapter.cs" />
+    <Compile Include="Data\CementJobs\CementJob131DataAdapter.generated.cs">
+      <DependentUpon>CementJob131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CementJobs\CementJob141DataAdapter.cs" />
+    <Compile Include="Data\CementJobs\CementJob141DataAdapter.generated.cs">
+      <DependentUpon>CementJob141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\CementJobs\CementJob200DataAdapter.cs" />
+    <Compile Include="Data\CementJobs\CementJob200DataAdapter.generated.cs">
+      <DependentUpon>CementJob200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.generated.cs">
+      <DependentUpon>ChannelSet200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200DataAdapter.cs" />
+    <Compile Include="Data\Channels\Channel200DataAdapter.generated.cs">
+      <DependentUpon>Channel200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.cs" />
+    <Compile Include="Data\ConvCores\ConvCore131DataAdapter.cs" />
+    <Compile Include="Data\ConvCores\ConvCore131DataAdapter.generated.cs">
+      <DependentUpon>ConvCore131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ConvCores\ConvCore141DataAdapter.cs" />
+    <Compile Include="Data\ConvCores\ConvCore141DataAdapter.generated.cs">
+      <DependentUpon>ConvCore141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataAdapter.cs" />
+    <Compile Include="Data\DataAssuranceRecords\DataAssuranceRecord200DataAdapter.generated.cs">
+      <DependentUpon>DataAssuranceRecord200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs" />
+    <Compile Include="Data\DrillReports\DrillReport141DataAdapter.cs" />
+    <Compile Include="Data\DrillReports\DrillReport141DataAdapter.generated.cs">
+      <DependentUpon>DrillReport141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DrillReports\DrillReport200DataAdapter.cs" />
+    <Compile Include="Data\DrillReports\DrillReport200DataAdapter.generated.cs">
+      <DependentUpon>DrillReport200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\FluidsReports\FluidsReport131DataAdapter.cs" />
+    <Compile Include="Data\FluidsReports\FluidsReport131DataAdapter.generated.cs">
+      <DependentUpon>FluidsReport131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\FluidsReports\FluidsReport141DataAdapter.cs" />
+    <Compile Include="Data\FluidsReports\FluidsReport141DataAdapter.generated.cs">
+      <DependentUpon>FluidsReport141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\FluidsReports\FluidsReport200DataAdapter.cs" />
+    <Compile Include="Data\FluidsReports\FluidsReport200DataAdapter.generated.cs">
+      <DependentUpon>FluidsReport200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\FormationMarkers\FormationMarker131DataAdapter.cs" />
+    <Compile Include="Data\FormationMarkers\FormationMarker131DataAdapter.generated.cs">
+      <DependentUpon>FormationMarker131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\FormationMarkers\FormationMarker141DataAdapter.cs" />
+    <Compile Include="Data\FormationMarkers\FormationMarker141DataAdapter.generated.cs">
+      <DependentUpon>FormationMarker141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\GrowingObjects\GrowingObjectDataAdapterBase.cs" />
+    <Compile Include="Data\Logs\Log131DataAdapter.cs" />
+    <Compile Include="Data\Logs\Log131DataAdapter.generated.cs">
+      <DependentUpon>Log131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log141DataAdapter.cs" />
+    <Compile Include="Data\Logs\Log141DataAdapter.generated.cs">
+      <DependentUpon>Log141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log200DataAdapter.cs" />
+    <Compile Include="Data\Logs\Log200DataAdapter.generated.cs">
+      <DependentUpon>Log200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\LogDataAdapter.cs" />
+    <Compile Include="Data\Messages\Message131DataAdapter.cs" />
+    <Compile Include="Data\Messages\Message131DataAdapter.generated.cs">
+      <DependentUpon>Message131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message141DataAdapter.cs" />
+    <Compile Include="Data\Messages\Message141DataAdapter.generated.cs">
+      <DependentUpon>Message141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MongoDbClassMapper.cs" />
+    <Compile Include="Data\MongoDbClassMapper.generated.cs">
+      <DependentUpon>MongoDbClassMapper.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MongoDbDataAdapter.cs" />
+    <Compile Include="Data\MongoDbDelete.cs" />
+    <Compile Include="Data\MongoDbDeleteContext.cs" />
+    <Compile Include="Data\MongoDbExtensions.cs" />
+    <Compile Include="Data\MongoDbMerge.cs" />
+    <Compile Include="Data\MongoDbQueryContext.cs" />
+    <Compile Include="Data\MongoDbUtility.cs" />
+    <Compile Include="Data\MongoDbQuery.cs" />
+    <Compile Include="Data\MongoDbUpdate.cs" />
+    <Compile Include="Data\MongoDbWrite.cs" />
+    <Compile Include="Data\MudLogReports\MudLogReport200DataAdapter.cs" />
+    <Compile Include="Data\MudLogReports\MudLogReport200DataAdapter.generated.cs">
+      <DependentUpon>MudLogReport200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MudLogs\MudLog131DataAdapter.cs" />
+    <Compile Include="Data\MudLogs\MudLog131DataAdapter.generated.cs">
+      <DependentUpon>MudLog131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MudLogs\MudLog141DataAdapter.cs" />
+    <Compile Include="Data\MudLogs\MudLog141DataAdapter.generated.cs">
+      <DependentUpon>MudLog141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\MudLogs\MudLogDataAdapter.cs" />
+    <Compile Include="Data\OpsReports\OpsReport131DataAdapter.cs" />
+    <Compile Include="Data\OpsReports\OpsReport131DataAdapter.generated.cs">
+      <DependentUpon>OpsReport131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\OpsReports\OpsReport141DataAdapter.cs" />
+    <Compile Include="Data\OpsReports\OpsReport141DataAdapter.generated.cs">
+      <DependentUpon>OpsReport141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\OpsReports\OpsReport200DataAdapter.cs" />
+    <Compile Include="Data\OpsReports\OpsReport200DataAdapter.generated.cs">
+      <DependentUpon>OpsReport200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RecurringElementFilter.cs" />
+    <Compile Include="Data\Rigs\Rig131DataAdapter.cs" />
+    <Compile Include="Data\Rigs\Rig131DataAdapter.generated.cs">
+      <DependentUpon>Rig131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig141DataAdapter.cs" />
+    <Compile Include="Data\Rigs\Rig141DataAdapter.generated.cs">
+      <DependentUpon>Rig141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig200DataAdapter.cs" />
+    <Compile Include="Data\Rigs\Rig200DataAdapter.generated.cs">
+      <DependentUpon>Rig200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapter.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapter.generated.cs">
+      <DependentUpon>RigUtilization200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Risks\Risk131DataAdapter.cs" />
+    <Compile Include="Data\Risks\Risk131DataAdapter.generated.cs">
+      <DependentUpon>Risk131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Risks\Risk141DataAdapter.cs" />
+    <Compile Include="Data\Risks\Risk141DataAdapter.generated.cs">
+      <DependentUpon>Risk141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Risks\Risk200DataAdapter.cs" />
+    <Compile Include="Data\Risks\Risk200DataAdapter.generated.cs">
+      <DependentUpon>Risk200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SidewallCores\SidewallCore131DataAdapter.cs" />
+    <Compile Include="Data\SidewallCores\SidewallCore131DataAdapter.generated.cs">
+      <DependentUpon>SidewallCore131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SidewallCores\SidewallCore141DataAdapter.cs" />
+    <Compile Include="Data\SidewallCores\SidewallCore141DataAdapter.generated.cs">
+      <DependentUpon>SidewallCore141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\StimJobStages\StimJobStage200DataAdapter.cs" />
+    <Compile Include="Data\StimJobStages\StimJobStage200DataAdapter.generated.cs">
+      <DependentUpon>StimJobStage200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\StimJobs\StimJob141DataAdapter.cs" />
+    <Compile Include="Data\StimJobs\StimJob141DataAdapter.generated.cs">
+      <DependentUpon>StimJob141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\StimJobs\StimJob200DataAdapter.cs" />
+    <Compile Include="Data\StimJobs\StimJob200DataAdapter.generated.cs">
+      <DependentUpon>StimJob200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SurveyPrograms\SurveyProgram131DataAdapter.cs" />
+    <Compile Include="Data\SurveyPrograms\SurveyProgram131DataAdapter.generated.cs">
+      <DependentUpon>SurveyProgram131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SurveyPrograms\SurveyProgram141DataAdapter.cs" />
+    <Compile Include="Data\SurveyPrograms\SurveyProgram141DataAdapter.generated.cs">
+      <DependentUpon>SurveyProgram141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SurveyPrograms\SurveyProgram200DataAdapter.cs" />
+    <Compile Include="Data\SurveyPrograms\SurveyProgram200DataAdapter.generated.cs">
+      <DependentUpon>SurveyProgram200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Targets\Target131DataAdapter.cs" />
+    <Compile Include="Data\Targets\Target131DataAdapter.generated.cs">
+      <DependentUpon>Target131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Targets\Target141DataAdapter.cs" />
+    <Compile Include="Data\Targets\Target141DataAdapter.generated.cs">
+      <DependentUpon>Target141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory131DataAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataAdapter.generated.cs">
+      <DependentUpon>Trajectory131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory141DataAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141DataAdapter.generated.cs">
+      <DependentUpon>Trajectory141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200DataAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200DataAdapter.generated.cs">
+      <DependentUpon>Trajectory200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\TrajectoryDataAdapter.cs" />
+    <Compile Include="Data\Transactions\DbTransactionDataAdapter.cs" />
+    <Compile Include="Data\Transactions\MongoTransaction.cs" />
+    <Compile Include="Data\Transactions\TransactionEnums.cs" />
+    <Compile Include="Data\Tubulars\Tubular131DataAdapter.cs" />
+    <Compile Include="Data\Tubulars\Tubular131DataAdapter.generated.cs">
+      <DependentUpon>Tubular131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Tubulars\Tubular141DataAdapter.cs" />
+    <Compile Include="Data\Tubulars\Tubular141DataAdapter.generated.cs">
+      <DependentUpon>Tubular141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Tubulars\Tubular200DataAdapter.cs" />
+    <Compile Include="Data\Tubulars\Tubular200DataAdapter.generated.cs">
+      <DependentUpon>Tubular200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry131DataAdapter.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131DataAdapter.generated.cs">
+      <DependentUpon>WbGeometry131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141DataAdapter.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141DataAdapter.generated.cs">
+      <DependentUpon>WbGeometry141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.cs" />
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.generated.cs">
+      <DependentUpon>WellboreCompletion200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreGeologies\WellboreGeology200DataAdapter.cs" />
+    <Compile Include="Data\WellboreGeologies\WellboreGeology200DataAdapter.generated.cs">
+      <DependentUpon>WellboreGeology200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreGeometries\WellboreGeometry200DataAdapter.cs" />
+    <Compile Include="Data\WellboreGeometries\WellboreGeometry200DataAdapter.generated.cs">
+      <DependentUpon>WellboreGeometry200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreMarkerSets\WellboreMarkerSet200DataAdapter.cs" />
+    <Compile Include="Data\WellboreMarkerSets\WellboreMarkerSet200DataAdapter.generated.cs">
+      <DependentUpon>WellboreMarkerSet200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreMarkers\WellboreMarker200DataAdapter.cs" />
+    <Compile Include="Data\WellboreMarkers\WellboreMarker200DataAdapter.generated.cs">
+      <DependentUpon>WellboreMarker200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131DataAdapter.generated.cs">
+      <DependentUpon>Wellbore131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore141DataAdapter.generated.cs">
+      <DependentUpon>Wellbore141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore200DataAdapter.cs" />
+    <Compile Include="Data\Wellbores\Wellbore131DataAdapter.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141DataAdapter.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200DataAdapter.generated.cs">
+      <DependentUpon>Wellbore200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.cs" />
+    <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.generated.cs">
+      <DependentUpon>WellCMLedger200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.generated.cs">
+      <DependentUpon>WellCompletion200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellLogs\WellLog131DataAdapter.cs" />
+    <Compile Include="Data\WellLogs\WellLog131DataAdapter.generated.cs">
+      <DependentUpon>WellLog131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well131DataAdapter.cs" />
+    <Compile Include="Data\Wells\Well131DataAdapter.generated.cs">
+      <DependentUpon>Well131DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well141DataAdapter.cs" />
+    <Compile Include="Data\Wells\Well141DataAdapter.generated.cs">
+      <DependentUpon>Well141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well200DataAdapter.cs" />
+    <Compile Include="Data\Wells\Well200DataAdapter.generated.cs">
+      <DependentUpon>Well200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\GrowingObjects\DbGrowingObject.cs" />
+    <Compile Include="Data\GrowingObjects\DbGrowingObjectDataAdapter.cs" />
+    <Compile Include="Models\ChannelDataChunk.cs" />
+    <Compile Include="Models\ChunkExtensions.cs" />
+    <Compile Include="Data\Transactions\DbTransaction.cs" />
+    <Compile Include="Data\MongoDbUpdateContext.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>PDS.WITSMLstudio.Store.MongoDb</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ext\witsml\src\Framework\Framework.csproj">
+      <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
+      <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
+      <Name>Store.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
+      <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+      <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
+      <Name>Store.MongoDb.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
+    xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
+    xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
+)</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
