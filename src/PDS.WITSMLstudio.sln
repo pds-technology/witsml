@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb.Common", "Sto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.UserAdmin", "Store.UserAdmin\Store.UserAdmin.csproj", "{347D0962-B422-4ACB-97AA-4BB78854A282}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.MongoDb", "Store.MongoDb\Store.MongoDb.csproj", "{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{347D0962-B422-4ACB-97AA-4BB78854A282}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{347D0962-B422-4ACB-97AA-4BB78854A282}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{347D0962-B422-4ACB-97AA-4BB78854A282}.Release|Any CPU.Build.0 = Release|Any CPU
+		{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -484,19 +484,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework\Framework.csproj">
+    <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
+    <ProjectReference Include="..\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Store.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
       <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
       <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
@@ -507,10 +507,8 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
-    xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
-    xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Store.IntegrationTest\$(OutDir) /y
-)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
