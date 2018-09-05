@@ -279,6 +279,10 @@
       <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
       <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb\Store.MongoDb.csproj">
+      <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
+      <Name>Store.MongoDb</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Store.Web\Store.Web.csproj">
       <Project>{5ff377f4-56c5-49d9-ba0a-1955a33c4902}</Project>
       <Name>Store.Web</Name>
@@ -290,10 +294,6 @@
     <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
-      <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
-      <Name>Store.MongoDb</Name>
     </ProjectReference>
     <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj">
       <Project>{987b6304-b4a6-4d57-acc3-7209175286a6}</Project>
