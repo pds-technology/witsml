@@ -17,13 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Specialized;
-using System.Configuration;
 using System.IO;
-using System.Web.Security;
 using CommandLine;
 using PDS.WITSMLstudio.Framework.Web;
-using PDS.WITSMLstudio.Store.Security;
 
 namespace PDS.WITSMLstudio.Store.UserAdmin
 {
@@ -54,75 +50,14 @@ namespace PDS.WITSMLstudio.Store.UserAdmin
                     });
         }
 
-        private static MongoDbMembershipProvider GetProvider()
+        public static int AddUser(AddOptions opts)
         {
-            var config = new NameValueCollection(ConfigurationManager.AppSettings);
-
-            var provider = new MongoDbMembershipProvider();
-            provider.Initialize(MongoDbMembershipProvider.ProviderName, config);
-
-            return provider;
+            return string.IsNullOrEmpty(UserAdmin.AddUser(opts)) ? Success : Error;
         }
 
-        private static int AddUser(AddOptions opts)
+        public static int RemoveUser(RemoveOptions opts)
         {
-            MembershipCreateStatus status;
-
-            var username = opts.Username;
-            var password = opts.Password ?? Membership.GeneratePassword(8, 2);
-            var email = opts.Email ?? "witsml@pds.nl";
-
-            var provider = GetProvider();
-            var saved = provider.GetUser(username, false);
-
-            if (saved != null)
-            {
-                Console.WriteLine($"User '{username}' already exists");
-                return Error;
-            }
-
-            var user = provider.CreateUser(
-                username: username,
-                password: password,
-                email: email,
-                passwordQuestion: null,
-                passwordAnswer: null,
-                isApproved: true,
-                providerUserKey: null,
-                status: out status);
-
-            if (user == null || status != MembershipCreateStatus.Success)
-            {
-                Console.WriteLine($"Error creating user '{username}'");
-                return Error;
-            }
-
-            saved = provider.GetUser(username, false);
-
-            if (saved == null || !provider.ValidateUser(username, password))
-            {
-                Console.WriteLine($"Error validating user '{username}'");
-                return Error;
-            }
-
-            Console.WriteLine("email:     {0}", email);
-            Console.WriteLine("username:  {0}", username);
-            Console.WriteLine("password:  {0}", password);
-
-            return Success;
-        }
-
-        private static int RemoveUser(RemoveOptions opts)
-        {
-            var provider = GetProvider();
-
-            if (!provider.DeleteUser(opts.Username, true))
-            {
-                Console.WriteLine($"Error deleting user '{opts.Username}'");
-                return Error;
-            }
-
-            return Success;
+            return string.IsNullOrEmpty(UserAdmin.RemoveUser(opts)) ? Success : Error;
         }
     }
 }
