@@ -19,6 +19,7 @@
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.IO;
 using PDS.WITSMLstudio.Framework.Properties;
 
 namespace PDS.WITSMLstudio.Framework
@@ -31,27 +32,40 @@ namespace PDS.WITSMLstudio.Framework
         private static readonly string _defaultAssemblySearchPattern = Settings.Default.DefaultAssemblySearchPattern;
 
         /// <summary>
+        /// Gets or sets the configuration path.
+        /// </summary>
+        public static string ConfigurationPath { get; set; } = Settings.Default.DefaultConfigurationPath;
+
+        /// <summary>
+        /// Gets or sets the name of the container configuration file.
+        /// </summary>
+        public static string ContainerConfigurationFileName { get; set; } = Settings.Default.ContainerConfigurationFileName;
+
+        /// <summary>
         /// Creates a composition container using the specified assembly path.
         /// </summary>
         /// <param name="assemblyPath">The assembly path.</param>
         /// <returns>The composition container instance.</returns>
         public static IContainer Create(string assemblyPath = ".")
         {
-            var catalog = new AggregateCatalog
-            (
-                new DirectoryCatalog(assemblyPath, _defaultAssemblySearchPattern)
-            );
-
-            return Create(catalog);
+            var catalog = new DirectoryCatalog(assemblyPath, _defaultAssemblySearchPattern);
+            return Create(new AggregateCatalog(catalog), catalog.FullPath);
         }
 
         /// <summary>
         /// Creates a composition container using the specified catalog.
         /// </summary>
         /// <param name="catalog">The catalog.</param>
+        /// <param name="assemblyPath">The assembly path.</param>
         /// <returns>A composition container instance.</returns>
-        public static IContainer Create(ComposablePartCatalog catalog)
+        public static IContainer Create(ComposablePartCatalog catalog, string assemblyPath = null)
         {
+            if (!string.IsNullOrWhiteSpace(assemblyPath))
+            {
+                var fullPath = Path.Combine(assemblyPath, ConfigurationPath, ContainerConfigurationFileName);
+                catalog = new ConfiguredCatalog(catalog, fullPath);
+            }
+
             var container = new CompositionContainer(catalog, true);
             var instance = new Container(container);
 

@@ -40,5 +40,23 @@ namespace PDS.WITSMLstudio.Framework.Properties {
                 return ((string)(this["DefaultAssemblySearchPattern"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Configuration")]
+        public string DefaultConfigurationPath {
+            get {
+                return ((string)(this["DefaultConfigurationPath"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Container.config.json")]
+        public string ContainerConfigurationFileName {
+            get {
+                return ((string)(this["ContainerConfigurationFileName"]));
+            }
+        }
     }
 }
