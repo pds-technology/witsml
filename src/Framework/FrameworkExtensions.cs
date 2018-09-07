@@ -415,9 +415,9 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns></returns>
         public static object ParseEnum(this Type enumType, string enumValue)
         {
-            enumType = Nullable.GetUnderlyingType(enumType) ?? enumType;
-
             if (string.IsNullOrWhiteSpace(enumValue)) return null;
+
+            enumType = Nullable.GetUnderlyingType(enumType) ?? enumType;
 
             try
             {
