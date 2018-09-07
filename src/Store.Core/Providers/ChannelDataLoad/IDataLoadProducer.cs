@@ -38,5 +38,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelDataLoad
         /// <param name="dataPoints">The data points.</param>
         /// <returns></returns>
         long RealtimeData(IList<DataPoint> dataPoints);
+
+        /// <summary>
+        /// Sends InfillRealtimeData message with the specified dataPoints.
+        /// </summary>
+        /// <param name="dataPoints">The data points.</param>
+        /// <returns></returns>
+        long InfillRealtimeData(IList<DataPoint> dataPoints);
     }
 }
