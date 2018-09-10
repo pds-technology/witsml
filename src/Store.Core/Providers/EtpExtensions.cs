@@ -416,7 +416,7 @@ namespace PDS.WITSMLstudio.Store.Providers
                     .ToList(),
                 SupportedObjects = supportedObjects,
                 SupportedEncodings = string.Join(";", supportedEncodings),
-                SupportedCompression = new List<string>(),
+                SupportedCompression = new[] { OptionsIn.CompressionMethod.Gzip.Value },
                 ContactInformation = new Energistics.Etp.v12.Datatypes.Contact
                 {
                     OrganizationName = WitsmlSettings.DefaultVendorName,
