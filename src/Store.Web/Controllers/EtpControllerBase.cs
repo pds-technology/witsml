@@ -72,13 +72,28 @@ namespace PDS.WITSMLstudio.Store.Controllers
         public List<IEtpDataProvider> DataAdapters { get; set; }
 
         /// <summary>
+        /// Gets the list of supported ETP versions.
+        /// </summary>
+        /// <returns>A list of supported ETP versions.</returns>
+        protected virtual IList<string> GetEtpVersions()
+        {
+            return new[] { EtpSettings.Etp11SubProtocol, EtpSettings.Etp12SubProtocol };
+        }
+
+        /// <summary>
         /// Gets the server's capabilities.
         /// </summary>
         /// <returns>A <see cref="ServerCapabilities"/> object.</returns>
-        protected IHttpActionResult ServerCapabilities()
+        protected virtual IHttpActionResult ServerCapabilities()
         {
-            var context = HttpContext.Current;
-            var etpSubProtocol = GetRequestedEtpSubProtocol(context?.Request.QueryString);
+            var parameters = HttpContext.Current?.Request.QueryString;
+
+            if (parameters?[EtpSettings.GetVersionsHeader].EqualsIgnoreCase(bool.TrueString) ?? false)
+            {
+                return Ok(GetEtpVersions());
+            }
+
+            var etpSubProtocol = GetRequestedEtpSubProtocol(parameters);
             var buffer = WebSocket.CreateClientBuffer(ushort.MaxValue, ushort.MaxValue);
 
             using (var stream = new MemoryStream())
@@ -96,7 +111,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// Get the list of client Web Socket connections.
         /// </summary>
         /// <returns>An <see cref="IHttpActionResult"/> containing the list of clients.</returns>
-        protected IHttpActionResult ClientList()
+        protected virtual IHttpActionResult ClientList()
         {
             var clients = EtpServerHandler.Clients.Select(c =>
             {
@@ -189,19 +204,8 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// <returns>The requested ETP sub protocol.</returns>
         protected virtual string GetRequestedEtpSubProtocol(NameValueCollection parameters)
         {
-            var etpVersion = parameters?[EtpSettings.EtpVersionHeader] ?? string.Empty;
-
-            switch (etpVersion)
-            {
-                case "1.1":
-                    return EtpSettings.Etp11SubProtocol;
-
-                case "1.2":
-                    return EtpSettings.Etp12SubProtocol;
-
-                default:
-                    return EtpSettings.LegacySubProtocol;
-            }
+            var etpVersion = parameters?[EtpSettings.GetVersionHeader] ?? string.Empty;
+            return EtpSettings.EtpSubProtocols.Contains(etpVersion) ? etpVersion : EtpSettings.LegacySubProtocol;
         }
 
         /// <summary>
