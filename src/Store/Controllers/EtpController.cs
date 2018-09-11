@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Net.Http;
 using System.Web.Http;
@@ -49,6 +50,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
         // GET: .well-known/etp-server-capabilities
         [Route(".well-known/etp-server-capabilities")]
         [Route("api/etp/.well-known/etp-server-capabilities")]
+        [ResponseType(typeof(List<string>))]
         [ResponseType(typeof(Etp11.Datatypes.ServerCapabilities))]
         [ResponseType(typeof(Etp12.Datatypes.ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
