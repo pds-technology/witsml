@@ -518,7 +518,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             metadata.Status = etpAdapter.GetChannelStatus(entity.ObjectGrowing.GetValueOrDefault());
             metadata.StartIndex = curveIndexes[curve.Mnemonic.Value].Start.IndexToScale(indexMetadata.Scale, isTimeLog);
             metadata.EndIndex = curveIndexes[curve.Mnemonic.Value].End.IndexToScale(indexMetadata.Scale, isTimeLog);
-            metadata.Indexes = new List<IIndexMetadataRecord> { indexMetadata };
+            metadata.Indexes = etpAdapter.ToList(indexMetadata);
 
             return metadata;
         }

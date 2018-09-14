@@ -469,7 +469,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             metadata.Status = etpAdapter.GetChannelStatus(entity.GrowingStatus == ChannelStatus.active);
             metadata.StartIndex = entity.MDMin?.Value.IndexToScale(indexMetadata.Scale);
             metadata.EndIndex = entity.MDMax?.Value.IndexToScale(indexMetadata.Scale);
-            metadata.Indexes = new List<IIndexMetadataRecord> { indexMetadata };
+            metadata.Indexes = etpAdapter.ToList(indexMetadata);
 
             return metadata;
         }
