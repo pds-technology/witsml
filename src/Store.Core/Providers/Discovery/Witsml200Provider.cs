@@ -247,7 +247,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uuid: entity.Uuid,
                 uri: entity.GetUri(parentUri),
                 resourceType: ResourceTypes.DataObject,
-                name: $"{entity.Citation.Title}({entity.Mnemonic})",
+                name: $"{entity.Citation.Title} ({entity.Mnemonic})",
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
