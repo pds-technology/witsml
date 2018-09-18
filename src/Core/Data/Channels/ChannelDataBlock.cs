@@ -169,7 +169,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // Secondary indexes
             if (indexes.Count > 1)
             {
-                channelIndexes.AddRange(indexes);
+                channelIndexes.AddRange(indexes.Skip(1));  // Skip 1 for the primary index that was already added.
             }
 
             // Ensure available channel value slots

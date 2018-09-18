@@ -366,6 +366,113 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Determines the data type of the index.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="index">The index.</param>
+        /// <returns><c>true</c> if the index is increasing; otherwise, <c>false</c>.</returns>
+        public static string GetDataType(this IEtpAdapter etpAdapter, IIndexMetadataRecord index)
+        {
+            if (index == null) return string.Empty;
+
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? "long"
+                : etpAdapter.IsTimeIndex(index) ? "long" : "double";
+        }
+
+        /// <summary>
+        /// Returns the specified indexValue as an object of the correct type.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="index">The index metadata.</param>
+        /// <param name="indexValue">The index value.</param>
+        /// <returns>
+        ///   <c>true</c> if the index is increasing; otherwise, <c>false</c>.
+        /// </returns>
+        public static object GetIndexValue(this IEtpAdapter etpAdapter, IIndexMetadataRecord index, long? indexValue)
+        {
+            if (index == null) return string.Empty;
+
+            var value = indexValue ?? 0;
+
+            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter || etpAdapter.IsTimeIndex(index)) return value;
+
+            return (double)value;
+        }
+
+
+        /// <summary>
+        /// Creates a new data item instance.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <returns>A new <see cref="IDataItem"/> instance.</returns>
+        public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? (IDataItem)new Energistics.Etp.v11.Datatypes.ChannelData.DataItem()
+                : (IDataItem)new Energistics.Etp.v12.Datatypes.ChannelData.DataItem();
+        }
+
+        /// <summary>
+        /// Creates a new data object instance.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <returns>A new <see cref="IDataValue"/> instance.</returns>
+        public static IDataValue CreateDataValue(this IEtpAdapter etpAdapter)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? (IDataValue)new Energistics.Etp.v11.Datatypes.DataValue()
+                : (IDataValue)new Energistics.Etp.v12.Datatypes.DataValue();
+        }
+
+        /// <summary>
+        /// Creates the channel streaming information instance.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <returns>An <see cref="IChannelStreamingInfo"/> instance</returns>
+        public static IChannelStreamingInfo CreateChannelStreamingInfo(this IEtpAdapter etpAdapter)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? (IChannelStreamingInfo)new Energistics.Etp.v11.Datatypes.ChannelData.ChannelStreamingInfo()
+                : (IChannelStreamingInfo)new Energistics.Etp.v12.Datatypes.ChannelData.ChannelStreamingInfo();
+        }
+
+        /// <summary>
+        /// Creates the streaming start index instance.
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <returns>An <see cref="IStreamingStartIndex"/> instance</returns>
+        public static IStreamingStartIndex CreateStreamingStartIndex(this IEtpAdapter etpAdapter)
+        {
+            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                ? (IStreamingStartIndex)new Energistics.Etp.v11.Datatypes.ChannelData.StreamingStartIndex()
+                : (IStreamingStartIndex)new Energistics.Etp.v12.Datatypes.ChannelData.StreamingStartIndex();
+        }
+
+        /// <summary>
+        /// Casts a list of data attributes to the correct type
+        /// </summary>
+        /// <param name="etpAdapter">The ETP adapter.</param>
+        /// <param name="dataAttributes">The data attributes.</param>
+        /// <returns>
+        /// A new <see cref="IDataObject" /> instance.
+        /// </returns>
+        public static IList ToDataAttributes(this IEtpAdapter etpAdapter, IList dataAttributes)
+        {
+            var castedDataAttribtes = new List<IDataAttribute>();
+
+            foreach (var dataAttribute in dataAttributes)
+            {
+                if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+                    castedDataAttribtes.Add(dataAttribute as Energistics.Etp.v11.Datatypes.DataAttribute);
+                else
+                    castedDataAttribtes.Add(dataAttribute as Energistics.Etp.v12.Datatypes.DataAttribute);
+            }
+
+            return castedDataAttribtes;
+        }
+
+        /// <summary>
         /// Creates a new data object instance.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>

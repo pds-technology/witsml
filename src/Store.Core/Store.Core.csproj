@@ -748,6 +748,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelDataLoad\IDataLoadConsumer.cs" />
     <Compile Include="Providers\ChannelDataLoad\IDataLoadProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Producer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming12Consumer.cs" />
@@ -756,6 +757,7 @@
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming11Consumer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingTypes.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
+    <Compile Include="Providers\ChannelStreaming\IStreamingConsumer.cs" />
     <Compile Include="Providers\ChannelStreaming\IStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\TransferModes.cs" />
     <Compile Include="Providers\DiscoveryQuery\DiscoveryQuery12StoreProvider.cs" />
