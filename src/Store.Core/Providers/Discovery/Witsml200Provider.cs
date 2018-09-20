@@ -83,7 +83,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}" /> instance containing the event data.</param>
         public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Discovery.GetResources, IList<Etp11.Datatypes.Object.Resource>> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            string serverSortOrder;
+            GetResources(etpAdapter, args.Message.Uri, args.Context, out serverSortOrder);
         }
 
         /// <summary>
@@ -93,7 +94,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            string serverSortOrder;
+            GetResources(etpAdapter, args.Message.Uri, args.Context, out serverSortOrder);
         }
 
         /// <summary>
@@ -101,17 +103,26 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{FindResources, IList}"/> instance containing the event data.</param>
-        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, Etp12.Protocol.DiscoveryQuery.ResourceResponse> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            var count = args.Context.Resources.Count;
+            string serverSortOrder;
+
+            GetResources(etpAdapter, args.Message.Uri, args.Context.Resources, out serverSortOrder);
+
+            if (args.Context.Resources.Count > count)
+                args.Context.ServerSortOrder = serverSortOrder;
         }
 
-        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources) where T : IResource
+        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources, out string serverSortOrder) where T : IResource
         {
+            // Default to Name in IResource
+            serverSortOrder = ObjectTypes.NameProperty;
+
             if (EtpUris.IsRootUri(uri))
             {
-                resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)"));
-                resources.Add(etpAdapter.NewProtocol(EtpUris.Eml210, "EML Common (2.1)"));
+                var childCount = CreateFoldersByObjectType(etpAdapter, EtpUris.Witsml200).Count;
+                resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)", childCount));
                 return;
             }
 
@@ -139,11 +150,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 {
                     var log = _logDataProvider.Get(parentUri);
                     log?.ChannelSet?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
+                    serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
                 else if (!isChannelDataAdapterEnabled && ObjectTypes.Channel.EqualsIgnoreCase(etpUri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var set = _channelSetDataProvider.Get(parentUri);
                     set?.Channel?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
+                    serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
                 else
                 {
@@ -151,6 +164,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     var contentType = EtpContentTypes.GetContentType(objectType);
                     var hasChildren = contentType.IsRelatedTo(EtpContentTypes.Eml210) ? 0 : -1;
                     var dataProvider = GetDataProvider(etpUri.ObjectType);
+                    serverSortOrder = dataProvider.ServerSortOrder;
 
                     dataProvider
                         .GetAll(parentUri)

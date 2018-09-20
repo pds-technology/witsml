@@ -72,7 +72,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}" /> instance containing the event data.</param>
         public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp11.Protocol.Discovery.GetResources, IList<Etp11.Datatypes.Object.Resource>> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            string serverSortOrder;
+            GetResources(etpAdapter, args.Message.Uri, args.Context, out serverSortOrder);
         }
 
         /// <summary>
@@ -82,7 +83,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            string serverSortOrder;
+            GetResources(etpAdapter, args.Message.Uri, args.Context, out serverSortOrder);
         }
 
         /// <summary>
@@ -90,17 +92,26 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{FindResources, IList}"/> instance containing the event data.</param>
-        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        public void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, Etp12.Protocol.DiscoveryQuery.ResourceResponse> args)
         {
-            GetResources(etpAdapter, args.Message.Uri, args.Context);
+            var count = args.Context.Resources.Count;
+            string serverSortOrder;
+
+            GetResources(etpAdapter, args.Message.Uri, args.Context.Resources, out serverSortOrder);
+
+            if (args.Context.Resources.Count > count)
+                args.Context.ServerSortOrder = serverSortOrder;
         }
 
-        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources) where T : IResource
+        private void GetResources<T>(IEtpAdapter etpAdapter, string uri, IList<T> resources, out string serverSortOrder) where T : IResource
         {
+            // Default to Name in IResource
+            serverSortOrder = ObjectTypes.NameProperty;
+
             if (EtpUris.IsRootUri(uri))
             {
-                // NOTE: This entry added by the Witsml200Provider so that it appears at the end of the list
-                //resources.Add(etpAdapter.NewProtocol(EtpUris.Eml210, "EML Common (2.1)"));
+                var childCount = CreateFoldersByObjectType(etpAdapter, EtpUris.Eml210).Count;
+                resources.Add(etpAdapter.NewProtocol(EtpUris.Eml210, "EML Common (2.1)", childCount));
                 return;
             }
 
@@ -126,11 +137,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 var contentType = EtpContentTypes.GetContentType(objectType);
                 var hasChildren = contentType.IsRelatedTo(EtpContentTypes.Eml210) ? 0 : -1;
                 var dataProvider = GetDataProvider(etpUri.ObjectType);
+                serverSortOrder = dataProvider.ServerSortOrder;
 
                 dataProvider
                     .GetAll(parentUri)
                     .Cast<AbstractObject>()
-                    .ForEach(x => resources.Add(ToResource(etpAdapter, x, hasChildren)));
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri, hasChildren)));
             }
             //else
             //{
@@ -199,20 +211,15 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
         }
 
-        private IResource ToResource(IEtpAdapter etpAdapter, AbstractObject entity, int hasChildren = -1)
+        private IResource ToResource(IEtpAdapter etpAdapter, AbstractObject entity, EtpUri parentUri, int hasChildren = -1)
         {
             return etpAdapter.CreateResource(
                 uuid: entity.Uuid,
-                uri: entity.GetUri(),
+                uri: entity.GetUri(parentUri),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: hasChildren,
-                lastChanged: GetLastChanged(entity));
-        }
-
-        private long GetLastChanged(AbstractObject entity)
-        {
-            return entity?.Citation?.LastUpdate?.ToUnixTimeMicroseconds() ?? 0;
+                lastChanged: entity.GetLastChangedMicroseconds());
         }
     }
 }

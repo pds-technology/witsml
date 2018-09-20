@@ -29,6 +29,11 @@ namespace PDS.WITSMLstudio.Store.Data
     public interface IEtpDataProvider
     {
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        string ServerSortOrder { get; }
+
+        /// <summary>
         /// Adds the content types managed by this data adapter to the collection of <see cref="EtpContentType"/>.
         /// </summary>
         /// <param name="contentTypes">A collection of content types.</param>

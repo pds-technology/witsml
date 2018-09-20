@@ -66,6 +66,11 @@ namespace PDS.WITSMLstudio.Store.Data
         public Type DataObjectType => typeof(T);
 
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        public virtual string ServerSortOrder => ObjectTypes.NameProperty;
+
+        /// <summary>
         /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
         /// </summary>
         /// <returns>A new <see cref="IWitsmlTransaction" /> instance.</returns>

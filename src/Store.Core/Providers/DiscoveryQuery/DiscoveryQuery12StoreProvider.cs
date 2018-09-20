@@ -22,7 +22,6 @@ using System.Linq;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.v12.Datatypes;
-using Energistics.Etp.v12.Datatypes.Object;
 using Energistics.Etp.v12.Protocol.DiscoveryQuery;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -53,7 +52,7 @@ namespace PDS.WITSMLstudio.Store.Providers.DiscoveryQuery
         {
             var capabilities = base.GetCapabilities();
 
-            capabilities[MaxGetResourcesResponse] = new DataValue
+            capabilities[MaxResponseCount] = new DataValue
             {
                 Item = WitsmlSettings.MaxGetResourcesResponse
             };
@@ -65,7 +64,7 @@ namespace PDS.WITSMLstudio.Store.Providers.DiscoveryQuery
         /// Handles the FindResources message of the DiscoveryQuery protocol.
         /// </summary>
         /// <param name="args">The ProtocolEventArgs{FindResources, IList{Resource}} instance containing the event data.</param>
-        protected override void HandleFindResources(ProtocolEventArgs<FindResources, IList<Resource>> args)
+        protected override void HandleFindResources(ProtocolEventArgs<FindResources, ResourceResponse> args)
         {
             if (!EtpUris.IsRootUri(args.Message.Uri))
             {
@@ -79,11 +78,12 @@ namespace PDS.WITSMLstudio.Store.Providers.DiscoveryQuery
             }
 
             var max = WitsmlSettings.MaxGetResourcesResponse;
+            var resources = args.Context.Resources;
 
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
             {
                 // TODO: Optimize inside each version specific provider
-                if (args.Context.Count >= max) break;
+                if (resources.Count >= max) break;
 
                 try
                 {
@@ -97,11 +97,11 @@ namespace PDS.WITSMLstudio.Store.Providers.DiscoveryQuery
             }
 
             // Limit max number of FindResourcesResponse returned to customer
-            while (args.Context.Count > max)
-                args.Context.RemoveAt(args.Context.Count - 1);
+            while (resources.Count > max)
+                resources.RemoveAt(resources.Count - 1);
 
             // Check for empty query results
-            if (!(args.Context?.Any()).GetValueOrDefault())
+            if (!resources.Any())
             {
                 Acknowledge(args.Header.MessageId, MessageFlags.NoData);
                 args.Cancel = true;

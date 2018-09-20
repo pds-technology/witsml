@@ -16,12 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
-using Energistics.Etp.v12.Datatypes.Object;
 using Energistics.Etp.v12.Protocol.StoreQuery;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -56,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreQuery
         /// Handles the FindObjects message of the Store protocol.
         /// </summary>
         /// <param name="args">The <see cref="ProtocolEventArgs{FindObjects, DataObject}"/> instance containing the event data.</param>
-        protected override void HandleFindObjects(ProtocolEventArgs<FindObjects, IList<DataObject>> args)
+        protected override void HandleFindObjects(ProtocolEventArgs<FindObjects, DataObjectResponse> args)
         {
             try
             {
@@ -79,7 +77,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreQuery
                 provider.FindObjects(Session.Adapter, args);
 
                 // Check for empty query results
-                if (!(args.Context?.Any()).GetValueOrDefault())
+                if (!(args.Context?.DataObjects.Any()).GetValueOrDefault())
                 {
                     Acknowledge(args.Header.MessageId, MessageFlags.NoData);
                     args.Cancel = true;

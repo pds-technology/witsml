@@ -88,9 +88,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
-        public void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, IList<Etp12.Datatypes.Object.DataObject>> args)
+        public void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, Etp12.Protocol.StoreQuery.DataObjectResponse> args)
         {
-            FindObjects(etpAdapter, args.Message.Uri, args.Context);
+            string serverSortOrder;
+            FindObjects(etpAdapter, args.Message.Uri, args.Context.DataObjects, out serverSortOrder);
+            args.Context.ServerSortOrder = serverSortOrder;
         }
 
         private void GetObject(IEtpAdapter etpAdapter, string uri, Energistics.Etp.Common.Datatypes.Object.IDataObject dataObject)
@@ -103,10 +105,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             etpAdapter.SetDataObject(dataObject, list, etpUri, GetName(entity), lastChanged: GetLastChanged(entity));
         }
 
-        private void FindObjects(IEtpAdapter etpAdapter, string uri, IList<Etp12.Datatypes.Object.DataObject> context)
+        private void FindObjects(IEtpAdapter etpAdapter, string uri, IList<Etp12.Datatypes.Object.DataObject> context, out string serverSortOrder)
         {
             var etpUri = new EtpUri(uri);
             var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+
+            serverSortOrder = dataAdapter.ServerSortOrder;
 
             foreach (var result in dataAdapter.GetAll(etpUri))
             {

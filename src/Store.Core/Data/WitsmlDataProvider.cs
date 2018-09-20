@@ -50,6 +50,11 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        public virtual string ServerSortOrder => DataAdapter.ServerSortOrder;
+
+        /// <summary>
         /// Gets the logger.
         /// </summary>
         /// <value>The logger.</value>

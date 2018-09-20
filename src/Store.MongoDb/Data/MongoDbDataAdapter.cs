@@ -60,6 +60,11 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        public override string ServerSortOrder => ObjectTypes.Uid.EqualsIgnoreCase(IdPropertyName) ? ObjectTypes.NameProperty : ObjectTypes.DefaultSortOrder;
+
+        /// <summary>
         /// Gets the database provider used for accessing MongoDb.
         /// </summary>
         /// <value>The database provider.</value>

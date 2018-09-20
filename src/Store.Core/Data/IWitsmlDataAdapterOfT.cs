@@ -30,6 +30,11 @@ namespace PDS.WITSMLstudio.Store.Data
     public interface IWitsmlDataAdapter<T>
     {
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        string ServerSortOrder { get; }
+
+        /// <summary>
         /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
         /// </summary>
         /// <returns>A new <see cref="IWitsmlTransaction"/> instance.</returns>

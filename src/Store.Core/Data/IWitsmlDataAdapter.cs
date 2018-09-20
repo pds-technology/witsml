@@ -33,6 +33,11 @@ namespace PDS.WITSMLstudio.Store.Data
         Type DataObjectType { get; }
 
         /// <summary>
+        /// Gets the server sort order.
+        /// </summary>
+        string ServerSortOrder { get; }
+
+        /// <summary>
         /// Determines whether the data object exists in the data store.
         /// </summary>
         /// <param name="uri">The data object URI.</param>

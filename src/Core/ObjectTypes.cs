@@ -36,6 +36,11 @@ namespace PDS.WITSMLstudio
     public static partial class ObjectTypes
     {
         /// <summary>
+        /// The default sort order for v2.0 and above.
+        /// </summary>
+        public const string DefaultSortOrder = "Citation/Title, Uuid";
+
+        /// <summary>
         /// The ObjectType identifier for an Id.
         /// </summary>
         public const string Id = "Id";

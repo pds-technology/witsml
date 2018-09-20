@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Energistics.Etp.Common;
 using Etp11 = Energistics.Etp.v11;
 using Etp12 = Energistics.Etp.v12;
@@ -53,6 +52,6 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The <see cref="ProtocolEventArgs{FindObjects, DataObject}"/> instance containing the event data.</param>
-        void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, IList<Etp12.Datatypes.Object.DataObject>> args);
+        void FindObjects(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.StoreQuery.FindObjects, Etp12.Protocol.StoreQuery.DataObjectResponse> args);
     }
 }

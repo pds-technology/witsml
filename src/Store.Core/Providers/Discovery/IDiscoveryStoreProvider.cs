@@ -53,6 +53,6 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
         /// <param name="args">The ProtocolEventArgs{FindResources, IList{Resource}} instance containing the event data.</param>
-        void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, IList<Etp12.Datatypes.Object.Resource>> args);
+        void FindResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.DiscoveryQuery.FindResources, Etp12.Protocol.DiscoveryQuery.ResourceResponse> args);
     }
 }
