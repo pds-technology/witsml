@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props" Condition="Exists('..\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props')" />
+  <Import Project="$(SolutionDir)\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props')" />
   <Import Project="$(SolutionDir)\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.0.11.4\build\librdkafka.redist.props')" />
   <Import Project="$(SolutionDir)\packages\librdkafka.redist.0.9.4\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.0.9.4\build\librdkafka.redist.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -44,7 +44,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Confluent.Kafka, Version=0.11.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Confluent.Kafka.0.11.5\lib\net45\Confluent.Kafka.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\Confluent.Kafka.0.11.5\lib\net45\Confluent.Kafka.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
@@ -52,7 +52,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev16\lib\net452\ETP.DevKit.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit.1.2.0-dev17\lib\net452\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -88,7 +88,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.0.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\System.Runtime.CompilerServices.Unsafe.4.0.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.Linq" />
@@ -148,7 +148,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\librdkafka.redist.0.11.5\build\librdkafka.redist.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
