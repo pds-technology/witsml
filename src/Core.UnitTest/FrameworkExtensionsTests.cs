@@ -111,6 +111,32 @@ namespace PDS.WITSMLstudio
         }
 
         [TestMethod]
+        public void FrameworkExtensions_IsMatch()
+        {
+            {
+                // it is an extension
+                Assert.IsTrue("hello".IsMatch(null));
+                Assert.IsTrue("hello".IsMatch(""));
+                Assert.IsTrue("hello".IsMatch("    "));
+                Assert.IsTrue("hello".IsMatch("hello"));
+                Assert.IsTrue("Hello".IsMatch("hello"));
+
+                Assert.IsFalse("".IsMatch("*"));
+            }
+            {
+                // it can be used as a static method alright
+                Assert.IsTrue(FrameworkExtensions.IsMatch(null, null));
+                Assert.IsTrue(FrameworkExtensions.IsMatch("hello", null));
+                Assert.IsTrue(FrameworkExtensions.IsMatch("hello", ""));
+                Assert.IsTrue(FrameworkExtensions.IsMatch("hello", "    "));
+                Assert.IsTrue(FrameworkExtensions.IsMatch("hello", "hello"));
+
+                Assert.IsFalse(FrameworkExtensions.IsMatch("", "*"));
+                Assert.IsFalse(FrameworkExtensions.IsMatch(null, "hello"));
+            }
+        }
+
+        [TestMethod]
         public void FrameworkExtensions_ToCamelCase_Converts_String_To_CamelCase()
         {
             var word = string.Empty;

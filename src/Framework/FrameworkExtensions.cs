@@ -215,6 +215,20 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
+        /// Determines whether the string matches the specified pattern
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="pattern">The pattern.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified pattern is match; otherwise, <c>false</c>.
+        /// Empty or null pattern will always match
+        /// </returns>
+        public static bool IsMatch(this string value, string pattern)
+        {
+            return string.IsNullOrWhiteSpace(pattern) || value.EqualsIgnoreCase(pattern);
+        }
+
+        /// <summary>
         /// Converts the specified string to camel case.
         /// </summary>
         /// <param name="value">The value.</param>
