@@ -165,14 +165,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (ObjectTypes.Wellbore.EqualsIgnoreCase(etpUri.ObjectType))
             {
-                var wellboreObjectType = typeof(IWellboreObject);
-
-                var witsmlDataAdapters = Providers
-                    .OfType<IWitsmlDataAdapter>()
-                    .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
-                    .OrderBy(x => x.DataObjectType.Name);
-
-                foreach (var adapter in witsmlDataAdapters)
+                foreach (var adapter in GetWellboreDataAdapters())
                 {
                     var type = EtpContentTypes.GetContentType(adapter.DataObjectType);
                     var count = adapter.Count(etpUri);
@@ -185,6 +178,16 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 log?.LogCurveInfo?.ForEach(x => resources.Add(ToResource(etpAdapter, log, x)));
                 serverSortOrder = string.Empty;
             }
+        }
+
+        private IEnumerable<IWitsmlDataAdapter> GetWellboreDataAdapters()
+        {
+            var wellboreObjectType = typeof(IWellboreObject);
+
+            return Providers
+                .OfType<IWitsmlDataAdapter>()
+                .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
+                .OrderBy(x => x.DataObjectType.Name);
         }
 
         private IResource ToResource(IEtpAdapter etpAdapter, Well entity)
@@ -205,7 +208,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: _logDataProvider.Count(entity.GetUri()),
+                count: GetWellboreDataAdapters().Count(),
                 lastChanged: entity.GetLastChangedMicroseconds());
         }
 
