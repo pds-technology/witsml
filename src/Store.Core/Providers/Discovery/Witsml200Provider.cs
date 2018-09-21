@@ -229,6 +229,10 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     if (string.IsNullOrWhiteSpace(uri.ObjectId) || string.IsNullOrWhiteSpace(propertyName))
                         return x.ContentType.IsRelatedTo(EtpContentTypes.Witsml200); // || x.ReferenceInfo == null;
 
+                    // Fix for child data object references being treated as parent references
+                    if (ObjectTypes.IsChildObjectReference(x.ContentType, propertyName))
+                        return false;
+
                     // Data object sub folders, e.g. Well and Wellbore
                     return (x.ContentType.IsRelatedTo(EtpContentTypes.Eml210) && x.ReferenceInfo != null) ||
                            x.PropertyInfo?.PropertyType == typeof(DataObjectReference) ||

@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using Energistics.Etp.Common.Datatypes;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Prodml200 = Energistics.DataAccess.PRODML200;
 using Resqml210 = Energistics.DataAccess.RESQML210;
@@ -127,9 +128,14 @@ namespace PDS.WITSMLstudio
         private static readonly string[] _decoratorObjects = { Activity, DataAssuranceRecord };
 
         /// <summary>
-        /// The object type map
+        /// The object type map.
         /// </summary>
         public static readonly IDictionary<string, string> ObjectTypeMap;
+
+        /// <summary>
+        /// The child object reference map.
+        /// </summary>
+        public static readonly IDictionary<EtpContentType, string[]> ChildObjectReferences;
 
         /// <summary>
         /// Initializes the <see cref="ObjectTypes"/> class.
@@ -143,6 +149,30 @@ namespace PDS.WITSMLstudio
                 .Where(x => x != null)
                 .Cast<string>()
                 .ToDictionary(x => x, StringComparer.InvariantCultureIgnoreCase);
+
+            ChildObjectReferences = new Dictionary<EtpContentType, string[]>
+            {
+                { EtpContentTypes.Witsml200.For(BhaRun), new [] { "Tubular" }},
+                { EtpContentTypes.Witsml200.For(CementJob), new [] { "HoleConfig" }},
+                { EtpContentTypes.Witsml200.For(MudLogReport), new [] { "WellboreGeometry" }},
+                //{ EtpContentTypes.Witsml200.For(MudLogReportInterval), new [] { "CuttingsGeologyInterval" }},
+                //{ EtpContentTypes.Witsml200.For(MudLogReportInterval), new [] { "InterpretedGeologyInterval" }},
+                //{ EtpContentTypes.Witsml200.For(MudLogReportInterval), new [] { "ShowEvaluationInterval" }},
+                { EtpContentTypes.Witsml200.For(OpsReport), new [] { "WellboreGeometry" }},
+                { EtpContentTypes.Witsml200.For(TrajectoryStation), new [] { "IscwsaToolErrorModel" }}
+            };
+        }
+
+        /// <summary>
+        /// Determines whether the specified property name is for a child data object reference.
+        /// </summary>
+        /// <param name="contentType">The content type.</param>
+        /// <param name="propertyName">The property name.</param>
+        /// <returns><c>true</c> if the property name is for a child data object reference; otherwise, <c>false</c>.</returns>
+        public static bool IsChildObjectReference(EtpContentType contentType, string propertyName)
+        {
+            string[] values;
+            return ChildObjectReferences.TryGetValue(contentType, out values) && (values?.ContainsIgnoreCase(propertyName) ?? false);
         }
 
         /// <summary>
