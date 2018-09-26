@@ -52,5 +52,11 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <returns>The database interface.</returns>
         IMongoDatabase GetDatabase();
+
+        /// <summary>
+        /// Sets the Mongo database connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        void SetConnectionString(string connectionString);
     }
 }
