@@ -121,9 +121,39 @@ namespace PDS.WITSMLstudio
         /// </summary>
         public const string ChannelIndex = "channelIndex";
 
-        private static readonly string[] _growingObjects = { Log, MudLog, Trajectory };
+        /// <summary>
+        /// The ObjectType identifier for a CuttingsGeology.
+        /// </summary>
+        public const string CuttingsGeology = "cuttingsGeology";
 
-        private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
+        /// <summary>
+        /// The ObjectType identifier for a CuttingsGeologyInterval.
+        /// </summary>
+        public const string CuttingsGeologyInterval = "cuttingsGeologyInterval";
+
+        /// <summary>
+        /// The ObjectType identifier for a InterpretedGeology.
+        /// </summary>
+        public const string InterpretedGeology = "interpretedGeology";
+
+        /// <summary>
+        /// The ObjectType identifier for a InterpretedGeologyInterval.
+        /// </summary>
+        public const string InterpretedGeologyInterval = "interpretedGeologyInterval";
+
+        /// <summary>
+        /// The ObjectType identifier for a ShowEvaluation.
+        /// </summary>
+        public const string ShowEvaluation = "showEvaluation";
+
+        /// <summary>
+        /// The ObjectType identifier for a ShowEvaluationInterval.
+        /// </summary>
+        public const string ShowEvaluationInterval = "showEvaluationInterval";
+
+        private static readonly string[] _growingObjects = { Log, MudLog, Trajectory, CuttingsGeology, InterpretedGeology, ShowEvaluation };
+
+        private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation, CuttingsGeologyInterval, InterpretedGeologyInterval, ShowEvaluationInterval };
 
         private static readonly string[] _decoratorObjects = { Activity, DataAssuranceRecord };
 
