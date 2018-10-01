@@ -112,6 +112,9 @@ namespace PDS.WITSMLstudio.Store.Providers
             // e.g. eml://witsml20/Trajectory{s} or eml://witsml20/Trajectory(uid)
             if (ObjectTypes.Trajectory.EqualsIgnoreCase(objectType)) return true;
 
+            // e.g. eml://witsml20/WellboreGeology{s} or eml://witsml20/WellboreGeology(uid)
+            if (ObjectTypes.WellboreGeology.EqualsIgnoreCase(objectType)) return true;
+
             return false;
         }
 
