@@ -83,6 +83,17 @@ namespace PDS.WITSMLstudio.Store.UserAdmin
             return errorMessage;
         }
 
+        /// <summary>
+        /// Gets the user email.
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <returns>The email of the specified user.</returns>
+        public static string GetUserEmail(string userName)
+        {
+            var provider = GetProvider();
+            return provider.GetUser(userName, false)?.Email;
+        }
+
         private static MongoDbMembershipProvider GetProvider()
         {
             var config = new NameValueCollection(ConfigurationManager.AppSettings);
