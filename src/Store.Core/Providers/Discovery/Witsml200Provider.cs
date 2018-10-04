@@ -196,13 +196,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             {
                 var wellboreGeology = _wellboreGeologyDataProvider.Get(etpUri);
 
-                var hasChildren = wellboreGeology.CuttingsIntervalSet == null ? 0 : 1;
+                var hasChildren = 0;
                 resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(CuttingsGeology)), ObjectTypes.CuttingsGeology.ToPascalCase(), hasChildren));
 
-                hasChildren = wellboreGeology.InterpretedGeologyIntervalSet == null ? 0 : 1;
                 resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(InterpretedGeology)), ObjectTypes.InterpretedGeology.ToPascalCase(), hasChildren));
 
-                hasChildren = wellboreGeology.ShowIntervalSet == null ? 0 : 1;
                 resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(ShowEvaluation)), ObjectTypes.ShowEvaluation.ToPascalCase(), hasChildren));
             }
             else
