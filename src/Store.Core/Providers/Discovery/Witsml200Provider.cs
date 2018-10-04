@@ -162,27 +162,6 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     set?.Channel?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
                     serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
-                else if (ObjectTypes.CuttingsGeology.EqualsIgnoreCase(etpUri.ObjectType))
-                {
-                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
-
-                    if (wellboreGeology.CuttingsIntervalSet != null)
-                        resources.Add(ToResource(etpAdapter, wellboreGeology.CuttingsIntervalSet, parentUri));
-                }
-                else if (ObjectTypes.InterpretedGeology.EqualsIgnoreCase(etpUri.ObjectType))
-                {
-                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
-
-                    if (wellboreGeology.InterpretedGeologyIntervalSet != null)
-                        resources.Add(ToResource(etpAdapter, wellboreGeology.InterpretedGeologyIntervalSet, parentUri));
-                }
-                else if (ObjectTypes.ShowEvaluation.EqualsIgnoreCase(etpUri.ObjectType))
-                {
-                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
-
-                    if (wellboreGeology.ShowIntervalSet != null)
-                        resources.Add(ToResource(etpAdapter, wellboreGeology.ShowIntervalSet, parentUri));
-                }
                 else
                 {
                     var objectType = ObjectTypes.GetObjectType(etpUri.ObjectType, etpUri.Version);
