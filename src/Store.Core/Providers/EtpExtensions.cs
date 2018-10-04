@@ -115,6 +115,15 @@ namespace PDS.WITSMLstudio.Store.Providers
             // e.g. eml://witsml20/WellboreGeology{s} or eml://witsml20/WellboreGeology(uid)
             if (ObjectTypes.WellboreGeology.EqualsIgnoreCase(objectType)) return true;
 
+            // e.g. eml://witsml20/CuttingsGeology{s} or eml://witsml20/CuttingsGeology(uid)
+            if (ObjectTypes.CuttingsGeology.EqualsIgnoreCase(objectType)) return true;
+
+            // e.g. eml://witsml20/InterpretedGeology{s} or eml://witsml20/InterpretedGeology(uid)
+            if (ObjectTypes.InterpretedGeology.EqualsIgnoreCase(objectType)) return true;
+
+            // e.g. eml://witsml20/ShowEvaluation{s} or eml://witsml20/ShowEvaluation(uid)
+            if (ObjectTypes.ShowEvaluation.EqualsIgnoreCase(objectType)) return true;
+
             return false;
         }
 

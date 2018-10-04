@@ -43,6 +43,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private readonly IContainer _container;
         private readonly IEtpDataProvider<Log> _logDataProvider;
         private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
+        private readonly IEtpDataProvider<WellboreGeology> _wellboreGeologyDataProvider;
         private readonly IList<EtpContentType> _contentTypes;
 
         /// <summary>
@@ -51,15 +52,18 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="container">The composition container.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
+        /// <param name="wellboreGeologyDataProvider">The wellbore geology data Provider.</param>
         [ImportingConstructor]
         public Witsml200Provider(
             IContainer container,
             IEtpDataProvider<Log> logDataProvider,
-            IEtpDataProvider<ChannelSet> channelSetDataProvider)
+            IEtpDataProvider<ChannelSet> channelSetDataProvider,
+            IEtpDataProvider<WellboreGeology> wellboreGeologyDataProvider)
         {
             _container = container;
             _logDataProvider = logDataProvider;
             _channelSetDataProvider = channelSetDataProvider;
+            _wellboreGeologyDataProvider = wellboreGeologyDataProvider;
             _contentTypes = new List<EtpContentType>();
         }
 
@@ -158,6 +162,27 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     set?.Channel?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
                     serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
+                else if (ObjectTypes.CuttingsGeology.EqualsIgnoreCase(etpUri.ObjectType))
+                {
+                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
+
+                    if (wellboreGeology.CuttingsIntervalSet != null)
+                        resources.Add(ToResource(etpAdapter, wellboreGeology.CuttingsIntervalSet, parentUri));
+                }
+                else if (ObjectTypes.InterpretedGeology.EqualsIgnoreCase(etpUri.ObjectType))
+                {
+                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
+
+                    if (wellboreGeology.InterpretedGeologyIntervalSet != null)
+                        resources.Add(ToResource(etpAdapter, wellboreGeology.InterpretedGeologyIntervalSet, parentUri));
+                }
+                else if (ObjectTypes.ShowEvaluation.EqualsIgnoreCase(etpUri.ObjectType))
+                {
+                    var wellboreGeology = _wellboreGeologyDataProvider.Get(parentUri);
+
+                    if (wellboreGeology.ShowIntervalSet != null)
+                        resources.Add(ToResource(etpAdapter, wellboreGeology.ShowIntervalSet, parentUri));
+                }
                 else
                 {
                     var objectType = ObjectTypes.GetObjectType(etpUri.ObjectType, etpUri.Version);
@@ -187,6 +212,19 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
                 CreateFoldersByObjectType(etpAdapter, etpUri, "ChannelSet", ObjectTypes.Channel, hasChildren)
                     .ForEach(resources.Add);
+            }
+            else if (ObjectTypes.WellboreGeology.EqualsIgnoreCase(etpUri.ObjectType))
+            {
+                var wellboreGeology = _wellboreGeologyDataProvider.Get(etpUri);
+
+                var hasChildren = wellboreGeology.CuttingsIntervalSet == null ? 0 : 1;
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(CuttingsGeology)), ObjectTypes.CuttingsGeology.ToPascalCase(), hasChildren));
+
+                hasChildren = wellboreGeology.InterpretedGeologyIntervalSet == null ? 0 : 1;
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(InterpretedGeology)), ObjectTypes.InterpretedGeology.ToPascalCase(), hasChildren));
+
+                hasChildren = wellboreGeology.ShowIntervalSet == null ? 0 : 1;
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(ShowEvaluation)), ObjectTypes.ShowEvaluation.ToPascalCase(), hasChildren));
             }
             else
             {
