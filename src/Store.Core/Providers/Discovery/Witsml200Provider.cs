@@ -125,7 +125,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
             if (EtpUris.IsRootUri(uri))
             {
-                var childCount = CreateFoldersByObjectType(etpAdapter, EtpUris.Witsml200).Count;
+                var childCount = CreateFoldersByObjectType(etpAdapter, EtpUris.Witsml200, skipChildCount: true).Count;
                 resources.Add(etpAdapter.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)", childCount));
                 return;
             }
@@ -194,14 +194,10 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (ObjectTypes.WellboreGeology.EqualsIgnoreCase(etpUri.ObjectType))
             {
-                var wellboreGeology = _wellboreGeologyDataProvider.Get(etpUri);
-
-                var hasChildren = 0;
-                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(CuttingsGeology)), ObjectTypes.CuttingsGeology.ToPascalCase(), hasChildren));
-
-                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(InterpretedGeology)), ObjectTypes.InterpretedGeology.ToPascalCase(), hasChildren));
-
-                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(ShowEvaluation)), ObjectTypes.ShowEvaluation.ToPascalCase(), hasChildren));
+                const int childCount = 0;
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(CuttingsGeology)), ObjectTypes.CuttingsGeology.ToPascalCase(), childCount));
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(InterpretedGeology)), ObjectTypes.InterpretedGeology.ToPascalCase(), childCount));
+                resources.Add(etpAdapter.NewFolder(etpUri, EtpContentTypes.GetContentType(typeof(ShowEvaluation)), ObjectTypes.ShowEvaluation.ToPascalCase(), childCount));
             }
             else
             {
@@ -212,7 +208,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
         }
 
-        private IList<IResource> CreateFoldersByObjectType(IEtpAdapter etpAdapter, EtpUri uri, string propertyName = null, string additionalObjectType = null, int childCount = 0)
+        private IList<IResource> CreateFoldersByObjectType(IEtpAdapter etpAdapter, EtpUri uri, string propertyName = null, string additionalObjectType = null, int childCount = 0, bool skipChildCount = false)
         {
             if (!_contentTypes.Any())
             {
@@ -261,7 +257,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     var hasChildren = childCount;
 
                     // Query for child object count if this is not the specified "additionalObjectType"
-                    if (!x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
+                    if (!skipChildCount && !x.ContentType.ObjectType.EqualsIgnoreCase(additionalObjectType))
                         hasChildren = dataProvider.Count(uri);
 
                     return etpAdapter.NewFolder(uri, x.ContentType, folderName, hasChildren);

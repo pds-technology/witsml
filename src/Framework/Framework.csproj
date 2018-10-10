@@ -71,6 +71,7 @@
     <Compile Include="Container.cs" />
     <Compile Include="ContainerFactory.cs" />
     <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="Enum.cs" />
     <Compile Include="FrameworkExtensions.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
