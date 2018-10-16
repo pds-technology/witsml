@@ -128,8 +128,9 @@ namespace PDS.WITSMLstudio.Framework
         /// <param name="element">The element.</param>
         /// <param name="type">The type.</param>
         /// <param name="removeTypePrefix">if set to <c>true</c> any type prefix will be removed.</param>
+        /// <param name="elementNameOverride"></param>
         /// <returns>A new <see cref="XElement"/> instance.</returns>
-        public static XElement UpdateRootElementName(this XElement element, Type type, bool removeTypePrefix = false)
+        public static XElement UpdateRootElementName(this XElement element, Type type, bool removeTypePrefix = false, string elementNameOverride = null)
         {
             var xmlRoot = XmlAttributeCache<XmlRootAttribute>.GetCustomAttribute(type);
             var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(type);
@@ -147,6 +148,11 @@ namespace PDS.WITSMLstudio.Framework
                     elementName = elementName.Substring(4);
                 else if (elementName.StartsWith("cs_"))
                     elementName = elementName.Substring(3);
+            }
+
+            if (!string.IsNullOrWhiteSpace(elementNameOverride))
+            {
+                elementName = elementNameOverride;
             }
 
             if (element.Name.LocalName.Equals(elementName))

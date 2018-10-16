@@ -157,6 +157,17 @@ namespace PDS.WITSMLstudio
 
         private static readonly string[] _decoratorObjects = { Activity, DataAssuranceRecord };
 
+        private static Dictionary<Type, string> _elementNameOverrides = new Dictionary<Type, string>
+        {
+            { typeof(Witsml200.CuttingsGeology), "CuttingsIntervalSet"},
+            { typeof(Witsml200.CuttingsGeologyInterval), "CuttingsInterval"},
+            { typeof(Witsml200.InterpretedGeology), "InterpretedGeologyIntervalSet"},
+            { typeof(Witsml200.InterpretedGeologyInterval), "GeologicIntervalInterpreted"},
+            { typeof(Witsml200.ComponentSchemas.InterpretedIntervalLithology), "InterpretedLithology"},
+            { typeof(Witsml200.ShowEvaluation), "ShowIntervalSet"},
+            { typeof(Witsml200.ShowEvaluationInterval), "EvaluatedIntervalShow"}
+        };
+
         /// <summary>
         /// The object type map.
         /// </summary>
@@ -570,6 +581,18 @@ namespace PDS.WITSMLstudio
                 : pluralString.EndsWith("s")
                 ? pluralString.Substring(0, pluralString.Length - 1)
                 : pluralString;
+        }
+
+        /// <summary>
+        /// Gets the element name override.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>Name override</returns>
+        public static string GetElementNameOverride(Type objectType)
+        {
+            string elementName;
+            _elementNameOverrides.TryGetValue(objectType, out elementName);
+            return elementName;
         }
     }
 }

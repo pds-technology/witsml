@@ -181,7 +181,8 @@ namespace PDS.WITSMLstudio
 
             if (root == null) return string.Empty;
 
-            root = root.UpdateRootElementName(obj.GetType(), removeTypePrefix);
+            var elementName = ObjectTypes.GetElementNameOverride(obj.GetType());
+            root = root.UpdateRootElementName(obj.GetType(), removeTypePrefix, elementNameOverride: elementName);
 
             if (ObjectTypes.GetVersion(root).StartsWith("1."))
             {
