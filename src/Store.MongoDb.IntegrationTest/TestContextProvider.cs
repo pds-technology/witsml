@@ -48,7 +48,7 @@ namespace PDS.WITSMLstudio.Store
             if (context.Properties.Contains("MongoDbConnection"))
             {
                 var connection = context.Properties["MongoDbConnection"].ToString();
-                var provider = new DatabaseProvider(devKit.Container, new [] { new MongoDbClassMapper() }, connection);
+                var provider = new DatabaseProvider(new [] { new MongoDbClassMapper() }, connection);
                 devKit.Container.Register<IDatabaseProvider>(provider);
             }
         }
