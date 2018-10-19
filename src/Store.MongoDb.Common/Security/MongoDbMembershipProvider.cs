@@ -368,8 +368,7 @@ namespace PDS.WITSMLstudio.Store.Security
             }
 
             var resolver = GlobalConfiguration.Configuration.DependencyResolver;
-            var provider = resolver.GetService(typeof(IDatabaseProvider)) as IDatabaseProvider;
-            Db = provider.GetDatabase();
+            DatabaseProvider = resolver.GetService(typeof(IDatabaseProvider)) as IDatabaseProvider;
 
             //string conectionStr = string.IsNullOrWhiteSpace(Mongo.ConnectionString) ? ConfigurationManager.ConnectionStrings[config["connectionStringName"]].ConnectionString
             //    : Mongo.ConnectionString;
@@ -396,13 +395,15 @@ namespace PDS.WITSMLstudio.Store.Security
         internal const string FailurePassword = "password";
         internal const string FailurePasswordAnswer = "passwordAnswer";
         internal MachineKeySection machineKey;
-        internal IMongoDatabase Db;//= Mongo.Create(ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString);
+        //internal IMongoDatabase Db;//= Mongo.Create(ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString);
+        internal IDatabaseProvider DatabaseProvider;
         int pPasswordAttemptWindow;
         int pMaxInvalidPasswordAttempts;
 
         private IMongoCollection<DbUser> Collection()
         {
-            return Db.GetCollection<DbUser>(DbCollectionName);
+            var db = DatabaseProvider.GetDatabase();
+            return db.GetCollection<DbUser>(DbCollectionName);
         }
 
         private IQueryable<DbUser> Query()
