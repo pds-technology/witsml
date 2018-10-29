@@ -120,8 +120,7 @@ namespace PDS.WITSMLstudio.Framework
             // TextFieldParser iterates when it detects new line characters
             value = value.Replace("\n", " ");
 
-            using (var reader = new StringReader(value))
-            using (var parser = new TextFieldParser(reader))
+            using (var parser = new TextFieldParser(new StringReader(value)))
             {
                 parser.SetDelimiters(separator);
 
