@@ -85,8 +85,12 @@ namespace PDS.WITSMLstudio.Linq
             var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
             var objectType = ObjectTypes.GetObjectType<T>();
             var xmlIn = WitsmlParser.ToXml(Query, true);
+            var originalXmlIn = xmlIn;
 
-            Context.LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
+            if (Context.Connection.CompressRequests)
+                ClientCompression.Compress(ref xmlIn, ref optionsIn);
+
+            Context.LogQuery(Functions.GetFromStore, objectType, originalXmlIn, optionsIn);
 
             using (var client = Context.Connection.CreateClientProxy().WithUserAgent())
             {
@@ -108,6 +112,10 @@ namespace PDS.WITSMLstudio.Linq
 
                 try
                 {
+                    // Handle servers that compress the response to a compressed request.
+                    if (Context.Connection.CompressRequests)
+                        xmlOut = ClientCompression.SafeDecompress(xmlOut);
+
                     if (returnCode > 0)
                     {
                         var document = WitsmlParser.Parse(xmlOut);
@@ -122,7 +130,7 @@ namespace PDS.WITSMLstudio.Linq
                     suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
                 }
 
-                Context.LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+                Context.LogResponse(Functions.GetFromStore, objectType, originalXmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
                 return result;
             }
         }

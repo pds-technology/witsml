@@ -378,11 +378,15 @@ namespace PDS.WITSMLstudio.Query
 
         private IEnergisticsCollection ExecuteGetFromStoreQuery(string objectType, string xmlIn, string optionsIn, bool logQuery = true, bool logResponse = true)
         {
-            if (logQuery)
-                LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
-
             IEnergisticsCollection result = null;
             string suppMsgOut, xmlOut;
+            var originalXmlIn = xmlIn;
+
+            if (Connection.CompressRequests)
+                ClientCompression.Compress(ref xmlIn, ref optionsIn);
+
+            if (logQuery)
+                LogQuery(Functions.GetFromStore, objectType, originalXmlIn, optionsIn);
 
             var returnCode = ExecuteQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn, out xmlOut, out suppMsgOut);
 
@@ -396,6 +400,10 @@ namespace PDS.WITSMLstudio.Query
 
             try
             {
+                // Handle servers that compress the response to a compressed request.
+                if (Connection.CompressRequests)
+                    xmlOut = ClientCompression.SafeDecompress(xmlOut);
+
                 if (returnCode > 0)
                 {
                     var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
@@ -412,7 +420,7 @@ namespace PDS.WITSMLstudio.Query
             }
 
             if (logResponse)
-                LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+                LogResponse(Functions.GetFromStore, objectType, originalXmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
 
             return result;
         }

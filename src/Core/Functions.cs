@@ -25,7 +25,7 @@ namespace PDS.WITSMLstudio
     /// </summary>
     public enum Functions
     {
-        // SOAP
+        #region SOAP
         /// <summary>
         /// Get Base Message
         /// </summary>
@@ -67,8 +67,9 @@ namespace PDS.WITSMLstudio
         /// </summary>
         [Description("Delete From Store")]
         DeleteFromStore,
+        #endregion
 
-        // ETP
+        #region ETP
         /// <summary>
         /// Get Object
         /// </summary>
@@ -140,5 +141,6 @@ namespace PDS.WITSMLstudio
         /// </summary>
         [Description("Find Resources")]
         FindResources
+        #endregion
     }
 }
