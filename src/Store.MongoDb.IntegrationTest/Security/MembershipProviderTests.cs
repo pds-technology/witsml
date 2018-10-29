@@ -44,9 +44,9 @@ namespace PDS.WITSMLstudio.Store.Security
         }
 
         [TestMethod]
-        public void MongoDbMembershipProvider_Initialize_resolves_mongo_database_successfully()
+        public void MongoDbMembershipProvider_Initialize_resolves_mongo_database_provider_successfully()
         {
-            Assert.IsNotNull(Provider.Db);
+            Assert.IsNotNull(Provider.DatabaseProvider);
         }
 
         [TestMethod]
