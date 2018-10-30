@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
     [TestClass]
     public partial class ChannelSet200StoreTests : ChannelSet200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ChannelSet200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

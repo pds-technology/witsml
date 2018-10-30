@@ -23,8 +23,10 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobStages
     /// </summary>
     public partial class StimJobStage200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             StimJobStage.Uid = DevKit.Uid();
             StimJobStage.Number = 1;
         }

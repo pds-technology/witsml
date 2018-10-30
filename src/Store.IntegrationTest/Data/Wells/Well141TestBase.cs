@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     /// </summary>
     public partial class Well141TestBase
     {
-        partial void AfterEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
             WitsmlSettings.DefaultTimeZone = DevKitAspect.DefaultTimeZone;
         }

@@ -33,6 +33,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
 
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Wellbore.Number = "123";
             Wellbore.NumGovt = "Gov 123";
 

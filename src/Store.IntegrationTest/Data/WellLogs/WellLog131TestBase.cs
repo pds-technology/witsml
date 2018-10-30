@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellLogs
     /// </summary>
     public partial class WellLog131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellLog.IndexType = LogIndexType.datetime;
         }
     }

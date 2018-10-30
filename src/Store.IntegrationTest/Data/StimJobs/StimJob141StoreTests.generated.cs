@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
     [TestClass]
     public partial class StimJob141StoreTests : StimJob141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public StimJob141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

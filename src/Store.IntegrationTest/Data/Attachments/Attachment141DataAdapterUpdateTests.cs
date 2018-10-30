@@ -30,6 +30,8 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     {
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Attachment.FileName = "image.png";
             Attachment.FileType = "image/png";
         }

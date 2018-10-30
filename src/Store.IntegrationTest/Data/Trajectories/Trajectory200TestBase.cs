@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// </summary>
     public partial class Trajectory200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Trajectory.GrowingStatus = ChannelStatus.inactive;
             Trajectory.ServiceCompany = "Service Company T";
         }

@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
     /// </summary>
     public partial class WellboreCompletion200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellboreCompletion.NameWellCompletion = "WellboreCompletion";
             WellboreCompletion.ReferenceWellbore = new DataObjectReference
             {

@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
     [TestClass]
     public partial class OpsReport141StoreTests : OpsReport141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public OpsReport141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

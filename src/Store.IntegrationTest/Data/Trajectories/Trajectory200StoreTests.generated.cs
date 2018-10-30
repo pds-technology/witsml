@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     [TestClass]
     public partial class Trajectory200StoreTests : Trajectory200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Trajectory200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

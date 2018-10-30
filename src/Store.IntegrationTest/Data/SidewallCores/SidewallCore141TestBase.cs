@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
     /// </summary>
     public partial class SidewallCore141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             SidewallCore.MDCore = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
         }
     }

@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     [TestClass]
     public partial class FormationMarker141StoreTests : FormationMarker141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public FormationMarker141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

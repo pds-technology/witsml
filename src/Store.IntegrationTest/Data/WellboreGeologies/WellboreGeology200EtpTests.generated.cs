@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
     [TestClass]
     public partial class WellboreGeology200EtpTests : WellboreGeology200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreGeology200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

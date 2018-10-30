@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
     [TestClass]
     public partial class SidewallCore141EtpTests : SidewallCore141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public SidewallCore141EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

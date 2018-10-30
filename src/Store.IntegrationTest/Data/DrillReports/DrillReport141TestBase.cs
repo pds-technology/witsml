@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
     /// </summary>
     public partial class DrillReport141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             DrillReport.DateTimeStart = new Timestamp(DateTimeOffset.UtcNow);
             DrillReport.DateTimeEnd = new Timestamp(DateTimeOffset.UtcNow);
         }

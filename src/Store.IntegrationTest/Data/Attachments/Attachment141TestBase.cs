@@ -23,8 +23,10 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     /// </summary>
     public partial class Attachment141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Attachment.Content = new byte[] { 0 };
         }
     }

@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     [TestClass]
     public partial class SurveyProgram141StoreTests : SurveyProgram141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public SurveyProgram141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

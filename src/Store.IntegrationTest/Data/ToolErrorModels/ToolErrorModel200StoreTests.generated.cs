@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
     [TestClass]
     public partial class ToolErrorModel200StoreTests : ToolErrorModel200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ToolErrorModel200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
 {
-    public abstract partial class FormationMarker141TestBase : IntegrationTestBase
+    public abstract partial class FormationMarker141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<formationMarkers version=\"1.4.1.1\"><formationMarker /></formationMarkers>";
         public const string QueryInvalidNamespace = "<formationMarkers xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></formationMarkers>";
         public const string QueryMissingVersion = "<formationMarkers xmlns=\"http://www.witsml.org/schemas/1series\"></formationMarkers>";
         public const string QueryEmptyRoot = "<formationMarkers xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></formationMarkers>";
         public const string QueryEmptyObject = "<formationMarkers xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><formationMarker /></formationMarkers>";
-
         public const string BasicXMLTemplate = "<formationMarkers xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><formationMarker uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</formationMarker></formationMarkers>";
+
+        protected FormationMarker141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public FormationMarker FormationMarker { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<FormationMarker> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             FormationMarker = new FormationMarker
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("FormationMarker"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new FormationMarker());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

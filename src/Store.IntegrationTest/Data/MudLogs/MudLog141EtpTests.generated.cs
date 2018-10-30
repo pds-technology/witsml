@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     [TestClass]
     public partial class MudLog141EtpTests : MudLog141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public MudLog141EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
     [TestClass]
     public partial class Target141EtpTests : Target141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Target141EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

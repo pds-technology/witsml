@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
     [TestClass]
     public partial class WellboreCompletion200StoreTests : WellboreCompletion200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreCompletion200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

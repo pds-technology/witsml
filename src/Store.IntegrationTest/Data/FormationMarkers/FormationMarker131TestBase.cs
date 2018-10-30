@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     /// </summary>
     public partial class FormationMarker131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             FormationMarker.MDTopSample = new MeasuredDepthCoord(0, MeasuredDepthUom.ft) { Datum = "SL" };
         }
     }

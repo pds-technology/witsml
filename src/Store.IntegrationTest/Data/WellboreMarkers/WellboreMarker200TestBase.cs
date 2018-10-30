@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
     /// </summary>
     public partial class WellboreMarker200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellboreMarker.MD = new MeasuredDepthCoord(0, LengthUom.ft) { Datum = "SL" };
         }
     }

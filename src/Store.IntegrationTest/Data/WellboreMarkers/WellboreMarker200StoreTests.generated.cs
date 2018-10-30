@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkers
     [TestClass]
     public partial class WellboreMarker200StoreTests : WellboreMarker200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreMarker200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

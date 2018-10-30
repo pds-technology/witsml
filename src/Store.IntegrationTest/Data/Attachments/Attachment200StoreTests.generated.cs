@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     [TestClass]
     public partial class Attachment200StoreTests : Attachment200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Attachment200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

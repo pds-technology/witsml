@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
     /// </summary>
     public partial class WellboreMarkerSet200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellboreMarkerSet.MarkerSetInterval = new MdInterval()
             {
                 Datum = "SL",

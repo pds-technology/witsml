@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.SidewallCores
 {
-    public abstract partial class SidewallCore141TestBase : IntegrationTestBase
+    public abstract partial class SidewallCore141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<sidewallCores version=\"1.4.1.1\"><sidewallCore /></sidewallCores>";
         public const string QueryInvalidNamespace = "<sidewallCores xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></sidewallCores>";
         public const string QueryMissingVersion = "<sidewallCores xmlns=\"http://www.witsml.org/schemas/1series\"></sidewallCores>";
         public const string QueryEmptyRoot = "<sidewallCores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></sidewallCores>";
         public const string QueryEmptyObject = "<sidewallCores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><sidewallCore /></sidewallCores>";
-
         public const string BasicXMLTemplate = "<sidewallCores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><sidewallCore uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</sidewallCore></sidewallCores>";
+
+        protected SidewallCore141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public SidewallCore SidewallCore { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<SidewallCore> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             SidewallCore = new SidewallCore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("SidewallCore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new SidewallCore());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

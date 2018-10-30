@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Risks
     [TestClass]
     public partial class Risk131StoreTests : Risk131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Risk131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

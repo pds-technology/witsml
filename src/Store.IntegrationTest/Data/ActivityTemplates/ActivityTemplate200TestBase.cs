@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
     /// </summary>
     public partial class ActivityTemplate200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             ActivityTemplate.Parameter = new List<ParameterTemplate>
             {
                 new ParameterTemplate

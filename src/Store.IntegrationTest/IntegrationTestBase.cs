@@ -43,7 +43,7 @@ using PDS.WITSMLstudio.Framework;
 namespace PDS.WITSMLstudio.Store
 {
     /// <summary>
-    /// Common base class for all ETP integration tests.
+    /// Common base class for all integration tests.
     /// </summary>
     public abstract class IntegrationTestBase
     {

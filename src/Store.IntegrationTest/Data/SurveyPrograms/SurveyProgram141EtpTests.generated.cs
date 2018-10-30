@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     [TestClass]
     public partial class SurveyProgram141EtpTests : SurveyProgram141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public SurveyProgram141EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

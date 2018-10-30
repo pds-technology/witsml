@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
     /// </summary>
     public partial class WellboreGeometry200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellboreGeometry.GrowingStatus = ChannelStatus.active;
             WellboreGeometry.Wellbore = new DataObjectReference
             {

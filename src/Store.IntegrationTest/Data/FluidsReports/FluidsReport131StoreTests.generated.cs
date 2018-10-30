@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     [TestClass]
     public partial class FluidsReport131StoreTests : FluidsReport131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public FluidsReport131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

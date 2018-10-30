@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
     /// </summary>
     public partial class WellboreGeology200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WellboreGeology.MDInterval = new MdInterval
             {
                 Datum = "SL",

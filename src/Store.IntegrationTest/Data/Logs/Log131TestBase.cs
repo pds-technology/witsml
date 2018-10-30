@@ -28,36 +28,16 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     /// </summary>
     public partial class Log131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Log.IndexType = LogIndexType.measureddepth;
             Log.IndexCurve = new IndexCurve
             {
                 ColumnIndex = 0,
                 Value = "MD"
             };
-        }
-
-        partial void AfterEachTest()
-        {
-            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
-            CompatibilitySettings.LogAllowPutObjectWithData = DevKitAspect.DefaultLogAllowPutObjectWithData;
-            CompatibilitySettings.InvalidDataRowSetting = DevKitAspect.DefaultInvalidDataRowSetting;
-            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
-
-            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
-            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;
-            WitsmlSettings.LogMaxDataPointsUpdate = DevKitAspect.DefaultLogMaxDataPointsAdd;
-            WitsmlSettings.LogMaxDataPointsAdd = DevKitAspect.DefaultLogMaxDataPointsUpdate;
-            WitsmlSettings.LogMaxDataPointsDelete = DevKitAspect.DefaultLogMaxDataPointsDelete;
-            WitsmlSettings.LogMaxDataNodesGet = DevKitAspect.DefaultLogMaxDataNodesGet;
-            WitsmlSettings.LogMaxDataNodesAdd = DevKitAspect.DefaultLogMaxDataNodesAdd;
-            WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
-            WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
-            WitsmlSettings.LogGrowingTimeoutPeriod = DevKitAspect.DefaultLogGrowingTimeoutPeriod;
-            WitsmlSettings.MaxDataLength = DevKitAspect.DefaultMaxDataLength;
-            WitsmlOperationContext.Current = null;
         }
     }
 }

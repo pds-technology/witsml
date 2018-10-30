@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
     [TestClass]
     public partial class ToolErrorTermSet141StoreTests : ToolErrorTermSet141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ToolErrorTermSet141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

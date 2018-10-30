@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
     [TestClass]
     public partial class DrillReport141StoreTests : DrillReport141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public DrillReport141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

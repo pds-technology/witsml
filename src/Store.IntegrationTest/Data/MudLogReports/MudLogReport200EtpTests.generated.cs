@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogReports
     [TestClass]
     public partial class MudLogReport200EtpTests : MudLogReport200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public MudLogReport200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

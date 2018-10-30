@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
 {
-    public abstract partial class SurveyProgram141TestBase : IntegrationTestBase
+    public abstract partial class SurveyProgram141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<surveyPrograms version=\"1.4.1.1\"><surveyProgram /></surveyPrograms>";
         public const string QueryInvalidNamespace = "<surveyPrograms xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></surveyPrograms>";
         public const string QueryMissingVersion = "<surveyPrograms xmlns=\"http://www.witsml.org/schemas/1series\"></surveyPrograms>";
         public const string QueryEmptyRoot = "<surveyPrograms xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></surveyPrograms>";
         public const string QueryEmptyObject = "<surveyPrograms xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><surveyProgram /></surveyPrograms>";
-
         public const string BasicXMLTemplate = "<surveyPrograms xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><surveyProgram uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</surveyProgram></surveyPrograms>";
+
+        protected SurveyProgram141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public SurveyProgram SurveyProgram { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<SurveyProgram> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             SurveyProgram = new SurveyProgram
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("SurveyProgram"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new SurveyProgram());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

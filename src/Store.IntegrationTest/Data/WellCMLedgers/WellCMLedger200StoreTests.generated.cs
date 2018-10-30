@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellCMLedgers
     [TestClass]
     public partial class WellCMLedger200StoreTests : WellCMLedger200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellCMLedger200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

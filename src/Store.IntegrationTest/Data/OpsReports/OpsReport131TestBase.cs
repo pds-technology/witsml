@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
     /// </summary>
     public partial class OpsReport131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             OpsReport.DateTime = new Timestamp(DateTimeOffset.UtcNow);
         }
     }

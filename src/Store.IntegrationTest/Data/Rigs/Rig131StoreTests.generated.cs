@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     [TestClass]
     public partial class Rig131StoreTests : Rig131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Rig131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

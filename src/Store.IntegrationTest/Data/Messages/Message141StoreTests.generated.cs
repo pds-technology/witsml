@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
     [TestClass]
     public partial class Message141StoreTests : Message141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Message141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
     [TestClass]
     public partial class WellboreGeology200StoreTests : WellboreGeology200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreGeology200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

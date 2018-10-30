@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
     [TestClass]
     public partial class BhaRun141StoreTests : BhaRun141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public BhaRun141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
     [TestClass]
     public partial class Activity200StoreTests : Activity200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Activity200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

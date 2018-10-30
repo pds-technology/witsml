@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellCompletions
     [TestClass]
     public partial class WellCompletion200StoreTests : WellCompletion200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellCompletion200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -27,8 +27,10 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
     /// </summary>
     public partial class Channel200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Channel.ChannelClass = DevKit.ToPropertyKindReference("length");
             Channel.DataType = EtpDataType.@double;
             Channel.GrowingStatus = ChannelStatus.inactive;

@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.DownholeComponents
     [TestClass]
     public partial class DownholeComponent200StoreTests : DownholeComponent200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public DownholeComponent200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

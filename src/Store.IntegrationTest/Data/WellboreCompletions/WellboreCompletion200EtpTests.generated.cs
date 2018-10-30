@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreCompletions
     [TestClass]
     public partial class WellboreCompletion200EtpTests : WellboreCompletion200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreCompletion200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -27,8 +27,10 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
     /// </summary>
     public partial class StimJob200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             StimJob.Kind = "Test";
             StimJob.CustomerName = "PDS";
             StimJob.ServiceCompany = "CompanyA";

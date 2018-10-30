@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
     [TestClass]
     public partial class CementJobEvaluation200EtpTests : CementJobEvaluation200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public CementJobEvaluation200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

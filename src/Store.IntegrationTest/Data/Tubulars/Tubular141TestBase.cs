@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
     /// </summary>
     public partial class Tubular141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Tubular.TypeTubularAssy = TubularAssembly.casing;
         }
     }

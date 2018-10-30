@@ -38,12 +38,12 @@ namespace PDS.WITSMLstudio.Store
 {
     public abstract class DevKitAspect : DataGenerator
     {
-        public static readonly bool DefaultAllowDuplicateNonRecurringElements;
-        public static readonly bool DefaultLogAllowPutObjectWithData;
-        public static readonly bool DefaultTrajectoryAllowPutObjectWithData;
-        public static readonly bool DefaultMudLogAllowPutObjectWithData;
-        public static readonly InvalidDataRowSetting DefaultInvalidDataRowSetting;
-        public static readonly UnknownElementSetting DefaultUnknownElementSetting;
+        public static readonly bool DefaultAllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
+        public static readonly bool DefaultLogAllowPutObjectWithData = Settings.Default.LogAllowPutObjectWithData;
+        public static readonly bool DefaultTrajectoryAllowPutObjectWithData = Settings.Default.TrajectoryAllowPutObjectWithData;
+        public static readonly bool DefaultMudLogAllowPutObjectWithData = Settings.Default.MudLogAllowPutObjectWithData;
+        public static readonly InvalidDataRowSetting DefaultInvalidDataRowSetting = (InvalidDataRowSetting)Enum.Parse(typeof(InvalidDataRowSetting), Settings.Default.InvalidDataRowSetting);
+        public static readonly UnknownElementSetting DefaultUnknownElementSetting = (UnknownElementSetting) Enum.Parse(typeof(UnknownElementSetting), Settings.Default.UnknownElementSetting);
 
         public static readonly int DefaultXmlOutDebugSize = WitsmlSettings.TruncateXmlOutDebugSize;
         public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
@@ -70,18 +70,9 @@ namespace PDS.WITSMLstudio.Store
         public static readonly int DefaultMudLogGrowingTimeoutPeriod = WitsmlSettings.MudLogGrowingTimeoutPeriod;
         public static readonly string DefaultTimeZone = WitsmlSettings.DefaultTimeZone;
         public static readonly int DefaultMaxDataLength = WitsmlSettings.MaxDataLength;
+        public static readonly bool DefaultIsRequestCompressionEnabled = WitsmlSettings.IsRequestCompressionEnabled;
 
         public readonly string TimeZone = "-06:00";
-
-        static DevKitAspect()
-        {
-            DefaultAllowDuplicateNonRecurringElements = Settings.Default.AllowDuplicateNonRecurringElements;
-            DefaultLogAllowPutObjectWithData = Settings.Default.LogAllowPutObjectWithData;
-            DefaultTrajectoryAllowPutObjectWithData = Settings.Default.TrajectoryAllowPutObjectWithData;
-            DefaultMudLogAllowPutObjectWithData = Settings.Default.MudLogAllowPutObjectWithData;
-            Enum.TryParse(Settings.Default.InvalidDataRowSetting, out DefaultInvalidDataRowSetting);
-            Enum.TryParse(Settings.Default.UnknownElementSetting, out DefaultUnknownElementSetting);
-        }
 
         protected DevKitAspect(string url, WMLSVersion version, TestContext context)
         {
@@ -115,7 +106,44 @@ namespace PDS.WITSMLstudio.Store
 
         public string ConnectionUrl { get; set; }
 
-        public TList Query<TList>() where TList : IEnergisticsCollection
+        public static void RestoreDefaultSettings()
+        {
+            CompatibilitySettings.AllowDuplicateNonRecurringElements = DefaultAllowDuplicateNonRecurringElements;
+            CompatibilitySettings.LogAllowPutObjectWithData = DefaultLogAllowPutObjectWithData;
+            CompatibilitySettings.TrajectoryAllowPutObjectWithData = DefaultTrajectoryAllowPutObjectWithData;
+            CompatibilitySettings.MudLogAllowPutObjectWithData = DefaultMudLogAllowPutObjectWithData;
+            CompatibilitySettings.InvalidDataRowSetting = DefaultInvalidDataRowSetting;
+            CompatibilitySettings.UnknownElementSetting = DefaultUnknownElementSetting;
+
+            WitsmlSettings.TruncateXmlOutDebugSize = DefaultXmlOutDebugSize;
+            WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
+            WitsmlSettings.LogMaxDataPointsGet = DefaultLogMaxDataPointsGet;
+            WitsmlSettings.LogMaxDataPointsAdd = DefaultLogMaxDataPointsAdd;
+            WitsmlSettings.LogMaxDataPointsUpdate = DefaultLogMaxDataPointsUpdate;
+            WitsmlSettings.LogMaxDataPointsDelete = DefaultLogMaxDataPointsDelete;
+            WitsmlSettings.LogMaxDataNodesGet = DefaultLogMaxDataNodesGet;
+            WitsmlSettings.LogMaxDataNodesAdd = DefaultLogMaxDataNodesAdd;
+            WitsmlSettings.LogMaxDataNodesUpdate = DefaultLogMaxDataNodesUpdate;
+            WitsmlSettings.LogMaxDataNodesDelete = DefaultLogMaxDataNodesDelete;
+            WitsmlSettings.TrajectoryMaxDataNodesGet = DefaultTrajectoryMaxDataNodesGet;
+            WitsmlSettings.TrajectoryMaxDataNodesAdd = DefaultTrajectoryMaxDataNodesAdd;
+            WitsmlSettings.TrajectoryMaxDataNodesUpdate = DefaultTrajectoryMaxDataNodesUpdate;
+            WitsmlSettings.TrajectoryMaxDataNodesDelete = DefaultTrajectoryMaxDataNodesDelete;
+            WitsmlSettings.MudLogMaxDataNodesGet = DefaultMudLogMaxDataNodesGet;
+            WitsmlSettings.MudLogMaxDataNodesAdd = DefaultMudLogMaxDataNodesAdd;
+            WitsmlSettings.MudLogMaxDataNodesUpdate = DefaultMudLogMaxDataNodesUpdate;
+            WitsmlSettings.MudLogMaxDataNodesDelete = DefaultMudLogMaxDataNodesDelete;
+            WitsmlSettings.MaxStationCount = DefaultMaxStationCount;
+            WitsmlSettings.LogGrowingTimeoutPeriod = DefaultLogGrowingTimeoutPeriod;
+            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = DefaultTrajectoryGrowingTimeoutPeriod;
+            WitsmlSettings.MudLogGrowingTimeoutPeriod = DefaultMudLogGrowingTimeoutPeriod;
+            WitsmlSettings.DefaultTimeZone = DefaultTimeZone;
+            WitsmlSettings.MaxDataLength = DefaultMaxDataLength;
+            WitsmlSettings.IsRequestCompressionEnabled = DefaultIsRequestCompressionEnabled;
+        }
+
+    public TList Query<TList>() where TList : IEnergisticsCollection
         {
             return WITSMLWebServiceConnection
                 .BuildEmptyQuery<TList>()

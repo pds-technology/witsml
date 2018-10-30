@@ -33,28 +33,25 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
 {
-    public abstract partial class ToolErrorTermSet141TestBase : IntegrationTestBase
+    public abstract partial class ToolErrorTermSet141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<toolErrorTermSets version=\"1.4.1.1\"><toolErrorTermSet /></toolErrorTermSets>";
         public const string QueryInvalidNamespace = "<toolErrorTermSets xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></toolErrorTermSets>";
         public const string QueryMissingVersion = "<toolErrorTermSets xmlns=\"http://www.witsml.org/schemas/1series\"></toolErrorTermSets>";
         public const string QueryEmptyRoot = "<toolErrorTermSets xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></toolErrorTermSets>";
         public const string QueryEmptyObject = "<toolErrorTermSets xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><toolErrorTermSet /></toolErrorTermSets>";
-
         public const string BasicXMLTemplate = "<toolErrorTermSets xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><toolErrorTermSet uid=\"{0}\">{1}</toolErrorTermSet></toolErrorTermSets>";
 
+        protected ToolErrorTermSet141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
+
         public ToolErrorTermSet ToolErrorTermSet { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<ToolErrorTermSet> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -62,37 +59,16 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
 
             ToolErrorTermSet = new ToolErrorTermSet
             {
-
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("ToolErrorTermSet")
             };
 
             QueryEmptyList = DevKit.List(new ToolErrorTermSet());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
         }
     }
 }

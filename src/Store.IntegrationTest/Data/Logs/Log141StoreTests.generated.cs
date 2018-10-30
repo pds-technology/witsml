@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     [TestClass]
     public partial class Log141StoreTests : Log141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Log141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

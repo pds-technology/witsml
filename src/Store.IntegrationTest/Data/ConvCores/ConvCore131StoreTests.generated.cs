@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.ConvCores
     [TestClass]
     public partial class ConvCore131StoreTests : ConvCore131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ConvCore131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

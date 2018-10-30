@@ -23,8 +23,10 @@
     /// </summary>
     public partial class StimJob141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             StimJob.Kind = "Test";
             StimJob.ApiNumber = "API";
             StimJob.CustomerName = "PDS";

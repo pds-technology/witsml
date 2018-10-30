@@ -33,52 +33,30 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
 {
-    public abstract partial class ToolErrorTermSet200TestBase : IntegrationTestBase
+    public abstract partial class ToolErrorTermSet200TestBase : IntegrationTestFixtureBase<DevKit200Aspect>
     {
+
+        protected ToolErrorTermSet200TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public ToolErrorTermSet ToolErrorTermSet { get; set; }
 
-        public DevKit200Aspect DevKit { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit200Aspect(TestContext);
 
             ToolErrorTermSet = new ToolErrorTermSet
             {
-
                 SchemaVersion = EtpUris.GetUriFamily(typeof(ToolErrorTermSet)).Version,
-
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("ToolErrorTermSet")
             };
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
         }
     }
 }

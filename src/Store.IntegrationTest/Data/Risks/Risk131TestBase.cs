@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.Risks
     /// </summary>
     public partial class Risk131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Risk.Type = RiskType.nearmiss;
             Risk.Category = RiskCategory.HSE;
         }

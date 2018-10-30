@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
     [TestClass]
     public partial class DataAssuranceRecord200StoreTests : DataAssuranceRecord200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public DataAssuranceRecord200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

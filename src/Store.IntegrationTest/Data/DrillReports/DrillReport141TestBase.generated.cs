@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.DrillReports
 {
-    public abstract partial class DrillReport141TestBase : IntegrationTestBase
+    public abstract partial class DrillReport141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<drillReports version=\"1.4.1.1\"><drillReport /></drillReports>";
         public const string QueryInvalidNamespace = "<drillReports xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></drillReports>";
         public const string QueryMissingVersion = "<drillReports xmlns=\"http://www.witsml.org/schemas/1series\"></drillReports>";
         public const string QueryEmptyRoot = "<drillReports xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></drillReports>";
         public const string QueryEmptyObject = "<drillReports xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><drillReport /></drillReports>";
-
         public const string BasicXMLTemplate = "<drillReports xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><drillReport uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</drillReport></drillReports>";
+
+        protected DrillReport141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DrillReport DrillReport { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<DrillReport> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             DrillReport = new DrillReport
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("DrillReport"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new DrillReport());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
     /// </summary>
     public partial class DataAssuranceRecord200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             DataAssuranceRecord.Conformance = false;
             DataAssuranceRecord.Date = DateTimeOffset.UtcNow;
             DataAssuranceRecord.Origin = DevKit.GetType().Assembly.FullName;

@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     /// </summary>
     public partial class WbGeometry131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             WbGeometry.DateTimeReport = DateTimeOffset.Now;
         }
     }

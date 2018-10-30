@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Attachments
 {
-    public abstract partial class Attachment141TestBase : IntegrationTestBase
+    public abstract partial class Attachment141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<attachments version=\"1.4.1.1\"><attachment /></attachments>";
         public const string QueryInvalidNamespace = "<attachments xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></attachments>";
         public const string QueryMissingVersion = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\"></attachments>";
         public const string QueryEmptyRoot = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></attachments>";
         public const string QueryEmptyObject = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><attachment /></attachments>";
-
         public const string BasicXMLTemplate = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</attachment></attachments>";
+
+        protected Attachment141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<Attachment> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             Attachment = new Attachment
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Attachment"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new Attachment());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

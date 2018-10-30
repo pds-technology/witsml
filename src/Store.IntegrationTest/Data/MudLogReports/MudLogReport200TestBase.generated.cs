@@ -33,77 +33,50 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.MudLogReports
 {
-    public abstract partial class MudLogReport200TestBase : IntegrationTestBase
+    public abstract partial class MudLogReport200TestBase : IntegrationTestFixtureBase<DevKit200Aspect>
     {
+
+        protected MudLogReport200TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public MudLogReport MudLogReport { get; set; }
 
-        public DevKit200Aspect DevKit { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
-
                 GeographicLocationWGS84 = DevKit.Location(),
                 SchemaVersion = "2.0",
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
-
                 Well = DevKit.DataObjectReference(Well),
                 SchemaVersion = "2.0"
-
             };
             MudLogReport = new MudLogReport
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("MudLogReport"),
-
                 Wellbore = DevKit.DataObjectReference(Wellbore),
                 SchemaVersion = EtpUris.GetUriFamily(typeof(MudLogReport)).Version,
-
             };
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert(Well);
             DevKit.AddAndAssert(Wellbore);
-
         }
     }
 }

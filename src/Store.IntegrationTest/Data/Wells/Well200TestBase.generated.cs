@@ -33,54 +33,32 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Wells
 {
-    public abstract partial class Well200TestBase : IntegrationTestBase
+    public abstract partial class Well200TestBase : IntegrationTestFixtureBase<DevKit200Aspect>
     {
+
+        protected Well200TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
 
-        public DevKit200Aspect DevKit { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
-
                 GeographicLocationWGS84 = DevKit.Location(),
                 SchemaVersion = "2.0",
-
                 TimeZone = DevKit.TimeZone
             };
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
         }
     }
 }

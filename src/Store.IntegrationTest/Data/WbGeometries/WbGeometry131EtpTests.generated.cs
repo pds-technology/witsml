@@ -46,22 +46,9 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     [TestClass]
     public partial class WbGeometry131EtpTests : WbGeometry131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WbGeometry131EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

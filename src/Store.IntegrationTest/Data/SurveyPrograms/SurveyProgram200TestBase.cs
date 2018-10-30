@@ -23,8 +23,10 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     /// </summary>
     public partial class SurveyProgram200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             SurveyProgram.SurveyVer = 1;
         }
     }

@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
     /// </summary>
     public partial class CementJobEvaluation200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             CementJobEvaluation.CementJob = new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.CementJob),

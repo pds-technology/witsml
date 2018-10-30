@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
     [TestClass]
     public partial class CementJobEvaluation200StoreTests : CementJobEvaluation200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public CementJobEvaluation200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

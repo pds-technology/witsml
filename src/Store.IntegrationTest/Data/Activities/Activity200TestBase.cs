@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
     /// </summary>
     public partial class Activity200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Activity.ActivityDescriptor = DevKit.DataObjectReference(ObjectTypes.Well, DevKit.Name(), DevKit.Uid());
             Activity.Parameter = new List<AbstractActivityParameter>
             {

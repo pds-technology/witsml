@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Messages
 {
-    public abstract partial class Message141TestBase : IntegrationTestBase
+    public abstract partial class Message141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<messages version=\"1.4.1.1\"><message /></messages>";
         public const string QueryInvalidNamespace = "<messages xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></messages>";
         public const string QueryMissingVersion = "<messages xmlns=\"http://www.witsml.org/schemas/1series\"></messages>";
         public const string QueryEmptyRoot = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></messages>";
         public const string QueryEmptyObject = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><message /></messages>";
-
         public const string BasicXMLTemplate = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><message uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</message></messages>";
+
+        protected Message141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Message Message { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<Message> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             Message = new Message
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Message"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new Message());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

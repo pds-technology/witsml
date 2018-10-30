@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
     [TestClass]
     public partial class ActivityTemplate200EtpTests : ActivityTemplate200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ActivityTemplate200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

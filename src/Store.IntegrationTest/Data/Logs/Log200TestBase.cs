@@ -29,8 +29,10 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     {
         public Log200Generator LogGenerator { get; set; }
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             LogGenerator = new Log200Generator();
             Log.ChannelSet = new List<ChannelSet>();
         }

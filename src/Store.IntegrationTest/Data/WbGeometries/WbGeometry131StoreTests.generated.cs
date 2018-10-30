@@ -37,18 +37,9 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     [TestClass]
     public partial class WbGeometry131StoreTests : WbGeometry131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WbGeometry131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

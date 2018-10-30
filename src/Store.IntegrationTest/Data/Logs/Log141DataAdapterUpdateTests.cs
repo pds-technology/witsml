@@ -48,6 +48,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             // Test data directory
             _dataDir = new DirectoryInfo(@".\TestData").FullName;
         }

@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
     /// </summary>
     public partial class Message141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Message.DateTime = DateTimeOffset.Now;
             Message.TypeMessage = MessageType.informational;
         }

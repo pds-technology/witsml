@@ -26,8 +26,10 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogReports
     /// </summary>
     public partial class MudLogReport200TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             MudLogReport.GrowingStatus = ChannelStatus.active;
             MudLogReport.ReportMDInterval = new MdInterval
             {

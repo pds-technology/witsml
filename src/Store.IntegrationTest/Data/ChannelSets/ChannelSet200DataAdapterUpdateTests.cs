@@ -39,6 +39,8 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             _channelDataProvider = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
         }
 

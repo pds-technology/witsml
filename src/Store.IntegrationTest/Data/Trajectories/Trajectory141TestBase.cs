@@ -26,23 +26,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// </summary>
     public partial class Trajectory141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Trajectory.ServiceCompany = "Service Company T";
-        }
-
-        partial void AfterEachTest()
-        {
-            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
-            CompatibilitySettings.TrajectoryAllowPutObjectWithData = DevKitAspect.DefaultTrajectoryAllowPutObjectWithData;
-            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
-
-            WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
-            WitsmlSettings.TrajectoryMaxDataNodesGet = DevKitAspect.DefaultTrajectoryMaxDataNodesGet;
-            WitsmlSettings.TrajectoryMaxDataNodesAdd = DevKitAspect.DefaultTrajectoryMaxDataNodesAdd;
-            WitsmlSettings.TrajectoryMaxDataNodesUpdate = DevKitAspect.DefaultTrajectoryMaxDataNodesUpdate;
-            WitsmlSettings.TrajectoryMaxDataNodesDelete = DevKitAspect.DefaultTrajectoryMaxDataNodesDelete;
-            WitsmlSettings.TrajectoryGrowingTimeoutPeriod = DevKitAspect.DefaultTrajectoryGrowingTimeoutPeriod;
         }
 
         public void TestReset(int maxStationCount)

@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.RigUtilizations
     [TestClass]
     public partial class RigUtilization200StoreTests : RigUtilization200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public RigUtilization200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
     [TestClass]
     public partial class SidewallCore131StoreTests : SidewallCore131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public SidewallCore131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

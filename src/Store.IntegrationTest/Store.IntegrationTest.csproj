@@ -1396,6 +1396,7 @@
     <Compile Include="Data\WitsmlQueryTemplateTests.cs" />
     <Compile Include="Data\WitsmlQueryParserTests.cs" />
     <Compile Include="IntegrationTestBase.cs" />
+    <Compile Include="IntegrationTestFixtureBase.cs" />
     <Compile Include="ITestContextProvider.cs" />
     <Compile Include="Linq\Witsml131ContextTests.cs" />
     <Compile Include="Linq\Witsml141ContextTests.cs" />

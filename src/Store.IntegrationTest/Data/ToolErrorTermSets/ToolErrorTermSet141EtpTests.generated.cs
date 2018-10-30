@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
     [TestClass]
     public partial class ToolErrorTermSet141EtpTests : ToolErrorTermSet141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public ToolErrorTermSet141EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

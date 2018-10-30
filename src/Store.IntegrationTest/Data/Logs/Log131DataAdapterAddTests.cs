@@ -36,6 +36,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             _channelDataProvider = DevKit.Container.Resolve<IChannelDataProvider>(ObjectNames.Log131);
         }
 

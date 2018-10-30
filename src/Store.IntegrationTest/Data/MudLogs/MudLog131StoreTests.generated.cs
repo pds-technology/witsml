@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     [TestClass]
     public partial class MudLog131StoreTests : MudLog131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public MudLog131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

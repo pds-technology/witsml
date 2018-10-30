@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
     [TestClass]
     public partial class Tubular131StoreTests : Tubular131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Tubular131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

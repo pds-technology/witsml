@@ -36,18 +36,9 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
     [TestClass]
     public partial class Target141StoreTests : Target141TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Target141StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

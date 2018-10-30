@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.StimJobs
 {
-    public abstract partial class StimJob141TestBase : IntegrationTestBase
+    public abstract partial class StimJob141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<stimJobs version=\"1.4.1.1\"><stimJob /></stimJobs>";
         public const string QueryInvalidNamespace = "<stimJobs xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></stimJobs>";
         public const string QueryMissingVersion = "<stimJobs xmlns=\"http://www.witsml.org/schemas/1series\"></stimJobs>";
         public const string QueryEmptyRoot = "<stimJobs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></stimJobs>";
         public const string QueryEmptyObject = "<stimJobs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><stimJob /></stimJobs>";
-
         public const string BasicXMLTemplate = "<stimJobs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><stimJob uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</stimJob></stimJobs>";
+
+        protected StimJob141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public StimJob StimJob { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<StimJob> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             StimJob = new StimJob
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("StimJob"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new StimJob());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

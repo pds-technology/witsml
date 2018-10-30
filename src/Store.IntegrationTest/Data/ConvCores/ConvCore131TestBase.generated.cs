@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.ConvCores
 {
-    public abstract partial class ConvCore131TestBase : IntegrationTestBase
+    public abstract partial class ConvCore131TestBase : IntegrationTestFixtureBase<DevKit131Aspect>
     {
-
         public const string QueryMissingNamespace = "<convCores version=\"1.3.1.1\"><convCore /></convCores>";
         public const string QueryInvalidNamespace = "<convCores xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></convCores>";
         public const string QueryMissingVersion = "<convCores xmlns=\"http://www.witsml.org/schemas/131\"></convCores>";
         public const string QueryEmptyRoot = "<convCores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></convCores>";
         public const string QueryEmptyObject = "<convCores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><convCore /></convCores>";
-
         public const string BasicXMLTemplate = "<convCores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><convCore uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</convCore></convCores>";
+
+        protected ConvCore131TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public ConvCore ConvCore { get; set; }
-
-        public DevKit131Aspect DevKit { get; set; }
-
         public List<ConvCore> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit131Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.ConvCores
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MDCurrent = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             ConvCore = new ConvCore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("ConvCore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new ConvCore());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

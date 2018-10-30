@@ -37,6 +37,10 @@ namespace PDS.WITSMLstudio.Store
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
+        public DevKit131Aspect(TestContext context) : this(context, null)
+        {
+        }
+
         public DevKit131Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML131, context)
         {
             LogGenerator = new Log131Generator();

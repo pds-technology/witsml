@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     [TestClass]
     public partial class Well131StoreTests : Well131TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public Well131StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

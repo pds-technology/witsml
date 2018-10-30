@@ -33,30 +33,27 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.MudLogs
 {
-    public abstract partial class MudLog141TestBase : IntegrationTestBase
+    public abstract partial class MudLog141TestBase : IntegrationTestFixtureBase<DevKit141Aspect>
     {
-
         public const string QueryMissingNamespace = "<mudLogs version=\"1.4.1.1\"><mudLog /></mudLogs>";
         public const string QueryInvalidNamespace = "<mudLogs xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></mudLogs>";
         public const string QueryMissingVersion = "<mudLogs xmlns=\"http://www.witsml.org/schemas/1series\"></mudLogs>";
         public const string QueryEmptyRoot = "<mudLogs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></mudLogs>";
         public const string QueryEmptyObject = "<mudLogs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><mudLog /></mudLogs>";
-
         public const string BasicXMLTemplate = "<mudLogs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><mudLog uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</mudLog></mudLogs>";
+
+        protected MudLog141TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public MudLog MudLog { get; set; }
-
-        public DevKit141Aspect DevKit { get; set; }
-
         public List<MudLog> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -66,60 +63,34 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Wellbore"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-
             };
             MudLog = new MudLog
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("MudLog"),
-
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name
-
             };
 
             QueryEmptyList = DevKit.List(new MudLog());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
         }
     }
 }

@@ -26,25 +26,12 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     /// </summary>
     public partial class MudLog141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             MudLog.MudLogCompany = "SLS Company";
             MudLog.MudLogEngineers = "John A, John B";
-        }
-
-        partial void AfterEachTest()
-        {
-            CompatibilitySettings.AllowDuplicateNonRecurringElements = DevKitAspect.DefaultAllowDuplicateNonRecurringElements;
-            CompatibilitySettings.MudLogAllowPutObjectWithData = DevKitAspect.DefaultMudLogAllowPutObjectWithData;
-            CompatibilitySettings.InvalidDataRowSetting = DevKitAspect.DefaultInvalidDataRowSetting;
-            CompatibilitySettings.UnknownElementSetting = DevKitAspect.DefaultUnknownElementSetting;
-
-            WitsmlSettings.MudLogMaxDataNodesGet = DevKitAspect.DefaultMudLogMaxDataNodesGet;
-            WitsmlSettings.MudLogMaxDataNodesAdd = DevKitAspect.DefaultMudLogMaxDataNodesAdd;
-            WitsmlSettings.MudLogMaxDataNodesUpdate = DevKitAspect.DefaultMudLogMaxDataNodesUpdate;
-            WitsmlSettings.MudLogMaxDataNodesDelete = DevKitAspect.DefaultMudLogMaxDataNodesDelete;
-            WitsmlSettings.MudLogGrowingTimeoutPeriod = DevKitAspect.DefaultMudLogGrowingTimeoutPeriod;
-            WitsmlOperationContext.Current = null;
         }
 
         public void TestReset(int maxGeologyIntervalCount)

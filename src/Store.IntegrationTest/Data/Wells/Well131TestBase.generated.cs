@@ -33,28 +33,25 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.Wells
 {
-    public abstract partial class Well131TestBase : IntegrationTestBase
+    public abstract partial class Well131TestBase : IntegrationTestFixtureBase<DevKit131Aspect>
     {
-
         public const string QueryMissingNamespace = "<wells version=\"1.3.1.1\"><well /></wells>";
         public const string QueryInvalidNamespace = "<wells xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></wells>";
         public const string QueryMissingVersion = "<wells xmlns=\"http://www.witsml.org/schemas/131\"></wells>";
         public const string QueryEmptyRoot = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></wells>";
         public const string QueryEmptyObject = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><well /></wells>";
-
         public const string BasicXMLTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><well uid=\"{0}\">{1}</well></wells>";
 
+        protected Well131TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
+
         public Well Well { get; set; }
-
-        public DevKit131Aspect DevKit { get; set; }
-
         public List<Well> QueryEmptyList { get; set; }
 
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit131Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
@@ -64,36 +61,15 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             {
                 Uid = DevKit.Uid(),
                 Name = DevKit.Name("Well"),
-
                 TimeZone = DevKit.TimeZone
             };
 
             QueryEmptyList = DevKit.List(new Well());
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
         }
     }
 }

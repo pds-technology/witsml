@@ -25,8 +25,10 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
     /// </summary>
     public partial class BhaRun131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             BhaRun.Tubular = new RefNameString(DevKit.Uid());
         }
     }

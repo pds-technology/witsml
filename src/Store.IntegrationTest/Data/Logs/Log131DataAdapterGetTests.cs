@@ -36,6 +36,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     {
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             // Sets the depth and time chunk size
             WitsmlSettings.DepthRangeSize = 1000;
             WitsmlSettings.TimeRangeSize = 86400000000; // Number of microseconds equals to one day

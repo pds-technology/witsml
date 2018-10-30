@@ -28,8 +28,10 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// </summary>
     public partial class FluidsReport131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             FluidsReport.DateTime = new Timestamp(DateTimeOffset.UtcNow);
             FluidsReport.MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft);
         }

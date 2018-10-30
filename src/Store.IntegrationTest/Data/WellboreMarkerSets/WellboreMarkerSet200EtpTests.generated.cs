@@ -43,22 +43,9 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
     [TestClass]
     public partial class WellboreMarkerSet200EtpTests : WellboreMarkerSet200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public WellboreMarkerSet200EtpTests()
+            : base(true)
         {
-            EtpSetUp(DevKit.Container);
-            BeforeEachTest();
-            _server.Start();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            _server?.Stop();
-            EtpCleanUp();
-            AfterEachTest();
         }
 
         [TestMethod]

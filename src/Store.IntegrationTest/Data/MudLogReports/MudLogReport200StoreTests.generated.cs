@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogReports
     [TestClass]
     public partial class MudLogReport200StoreTests : MudLogReport200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public MudLogReport200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]

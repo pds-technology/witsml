@@ -33,77 +33,50 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.WITSMLstudio.Store.Data.OpsReports
 {
-    public abstract partial class OpsReport200TestBase : IntegrationTestBase
+    public abstract partial class OpsReport200TestBase : IntegrationTestFixtureBase<DevKit200Aspect>
     {
+
+        protected OpsReport200TestBase(bool isEtpTest = false)
+            : base(isEtpTest)
+        {
+        }
 
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public OpsReport OpsReport { get; set; }
 
-        public DevKit200Aspect DevKit { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        protected override void PrepareData()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
-            DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
-
                 GeographicLocationWGS84 = DevKit.Location(),
                 SchemaVersion = "2.0",
-
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
-
                 Well = DevKit.DataObjectReference(Well),
                 SchemaVersion = "2.0"
-
             };
             OpsReport = new OpsReport
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("OpsReport"),
-
                 Wellbore = DevKit.DataObjectReference(Wellbore),
                 SchemaVersion = EtpUris.GetUriFamily(typeof(OpsReport)).Version,
-
             };
 
-            BeforeEachTest();
-            OnTestSetUp();
         }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            AfterEachTest();
-            OnTestCleanUp();
-            DevKit.Container.Dispose();
-            DevKit = null;
-        }
-
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected virtual void OnTestSetUp() { }
-
-        protected virtual void OnTestCleanUp() { }
 
         protected virtual void AddParents()
         {
-
             DevKit.AddAndAssert(Well);
             DevKit.AddAndAssert(Wellbore);
-
         }
     }
 }

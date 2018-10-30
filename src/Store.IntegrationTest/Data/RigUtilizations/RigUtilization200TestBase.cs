@@ -27,8 +27,10 @@ namespace PDS.WITSMLstudio.Store.Data.RigUtilizations
     {
         public Rig Rig { get; set; }
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             Rig = new Rig
             {
                 Uuid = DevKit.Uid(),

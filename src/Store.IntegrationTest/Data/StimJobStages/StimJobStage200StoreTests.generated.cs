@@ -34,18 +34,9 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobStages
     [TestClass]
     public partial class StimJobStage200StoreTests : StimJobStage200TestBase
     {
-        partial void BeforeEachTest();
-
-        partial void AfterEachTest();
-
-        protected override void OnTestSetUp()
+        public StimJobStage200StoreTests()
+            : base(false)
         {
-            BeforeEachTest();
-        }
-
-        protected override void OnTestCleanUp()
-        {
-            AfterEachTest();
         }
 
         [TestMethod]
