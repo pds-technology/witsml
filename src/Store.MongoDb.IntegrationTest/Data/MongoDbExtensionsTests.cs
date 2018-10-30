@@ -37,6 +37,8 @@ namespace PDS.WITSMLstudio.Store.Data
         
         protected override void OnTestSetUp()
         {
+            base.OnTestSetUp();
+
             _provider = DevKit.Container.Resolve<IDatabaseProvider>();
         }
 
