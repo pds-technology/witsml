@@ -371,7 +371,7 @@ namespace PDS.WITSMLstudio.Store
             if (collection == null) return string.Empty;
             EnsureCapServerProviders();
 
-            var optionsIn = OptionsIn.Parse(request.OptionsIn);
+            var optionsIn = WitsmlOperationContext.Current.OptionsIn;
             string requestedVersion;
 
             // Attempt transformation if client requested a different version

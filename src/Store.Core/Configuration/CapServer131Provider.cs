@@ -65,17 +65,19 @@ namespace PDS.WITSMLstudio.Store.Configuration
 
             base.ValidateRequest();
 
-            var optionsIn = OptionsIn.Parse(request.Options);
+            var optionsIn = context.OptionsIn;
 
             if (request.Function == Functions.GetFromStore)
             {
+                
                 ValidateKeywords(optionsIn,
                     OptionsIn.ReturnElements.Keyword,
                     OptionsIn.MaxReturnNodes.Keyword,
                     OptionsIn.RequestLatestValues.Keyword,
                     OptionsIn.RequestObjectSelectionCapability.Keyword,
                     OptionsIn.DataVersion.Keyword,
-                    OptionsIn.IntervalRangeInclusion.Keyword);
+                    OptionsIn.IntervalRangeInclusion.Keyword,
+                    WitsmlSettings.IsRequestCompressionEnabled ? OptionsIn.CompressionMethod.Keyword : null);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);
@@ -84,11 +86,15 @@ namespace PDS.WITSMLstudio.Store.Configuration
             }
             else if (request.Function == Functions.AddToStore)
             {
+                if (WitsmlSettings.IsRequestCompressionEnabled)
+                    ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }
             else if (request.Function == Functions.UpdateInStore)
             {
+                if (WitsmlSettings.IsRequestCompressionEnabled)
+                    ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }

@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel;
-
 namespace PDS.WITSMLstudio
 {
     /// <summary>

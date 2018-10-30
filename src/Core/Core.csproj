@@ -124,6 +124,7 @@
     <Compile Include="Compatibility\CompatibilitySettings.cs" />
     <Compile Include="Compatibility\InvalidDataRowSetting.cs" />
     <Compile Include="Compatibility\UnknownElementSetting.cs" />
+    <Compile Include="CompressionUtil.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistory.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistoryList.cs" />
     <Compile Include="Data\DataObjectNavigationContext.cs" />

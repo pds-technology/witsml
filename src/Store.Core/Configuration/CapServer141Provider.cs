@@ -65,7 +65,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
 
             base.ValidateRequest();
 
-            var optionsIn = OptionsIn.Parse(request.Options);
+            var optionsIn = context.OptionsIn;
 
             if (request.Function == Functions.GetFromStore)
             {
@@ -89,14 +89,12 @@ namespace PDS.WITSMLstudio.Store.Configuration
             else if (request.Function == Functions.AddToStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword, OptionsIn.DataVersion.Keyword);
-                ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }
             else if (request.Function == Functions.UpdateInStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword, OptionsIn.DataVersion.Keyword);
-                ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }
@@ -148,7 +146,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
             capServer.ApiVers = "1.4.1";
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
-            capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
+            capServer.CompressionMethod = WitsmlSettings.IsRequestCompressionEnabled ? OptionsIn.CompressionMethod.Gzip.Value : OptionsIn.CompressionMethod.None.Value;
             capServer.MaxRequestLatestValues = WitsmlSettings.MaxRequestLatestValues;
             capServer.ChangeDetectionPeriod = WitsmlSettings.ChangeDetectionPeriod;
             capServer.CascadedDelete = WitsmlSettings.IsCascadeDeleteEnabled;

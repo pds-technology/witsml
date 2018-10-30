@@ -249,6 +249,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static string DefaultDescribeUri = Properties.Settings.Default.DefaultDescribeUri;
 
         /// <summary>
+        /// Whether or not to request compression is supported.
+        /// </summary>
+        public static bool IsRequestCompressionEnabled = Properties.Settings.Default.IsRequestCompressionEnabled;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

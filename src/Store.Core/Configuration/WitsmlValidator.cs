@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.WITSMLstudio.Framework;
@@ -46,7 +47,14 @@ namespace PDS.WITSMLstudio.Store.Configuration
             _log.DebugFormat("Validating WITSML request for {0}", context.Request.ObjectType);
 
             ValidateUserAgent(WebOperationContext.Current);
-            context.Document = ValidateInputTemplate(context.Request.Xml);
+
+            context.OptionsIn = OptionsIn.Parse(context.Request.Options);
+
+            // Document version is derived from the input string so it needs to be decompressed before the below checks.
+            context.RequestCompressed = ValidateCompressedInput(context.Request.Function, context.Request.Xml, context.OptionsIn);
+
+            var xml = context.RequestCompressed ? CompressionUtil.DecompressRequest(context.Request.Xml) : context.Request.Xml;
+            context.Document = ValidateInputTemplate(xml);
 
             var dataSchemaVersion = ObjectTypes.GetVersion(context.Document.Root);
             ValidateDataSchemaVersion(dataSchemaVersion);
@@ -210,33 +218,47 @@ namespace PDS.WITSMLstudio.Store.Configuration
         }
 
         /// <summary>
-        /// Validates the supported compressionMethod configuration option.
+        /// Validates compression options and input. 
         /// </summary>
-        /// <param name="options">The options.</param>
-        /// <param name="compressionMethod">The compression method.</param>
-        /// <exception cref="WitsmlException"></exception>
-        public static void ValidateCompressionMethod(Dictionary<string, string> options, string compressionMethod)
+        /// <param name="function">The WITSML API function being called.</param>
+        /// <param name="xml">The XML input to validate.</param>
+        /// <param name="options">The options in to validate.</param>
+        /// <returns><c>true</c> if the input is compressed; <c>false</c> otherwise.</returns>
+        public static bool ValidateCompressedInput(Functions function, string xml, Dictionary<string, string> options)
         {
-            _log.DebugFormat("Validating compression method: {0}", compressionMethod);
-
             string optionValue;
-            if (!options.TryGetValue(OptionsIn.CompressionMethod.Keyword, out optionValue))
+            options.TryGetValue(OptionsIn.CompressionMethod.Keyword, out optionValue);
+
+            if (optionValue != null && !function.SupportsRequestCompression())
             {
-                return;
+                // A compression method was provided for a function that does not support it.
+
+                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction);
             }
 
-            // Validate compression method value
-            if (!OptionsIn.CompressionMethod.None.Equals(optionValue) &&
-                !OptionsIn.CompressionMethod.Gzip.Equals(optionValue))
+            if (string.IsNullOrEmpty(optionValue) || OptionsIn.CompressionMethod.None.Equals(optionValue))
             {
+                // No compression method is specified
+
+                return false;
+            }
+            else if (OptionsIn.CompressionMethod.Gzip.Equals(optionValue))
+            {
+                // GZip compression is specified
+
+                if (!WitsmlSettings.IsRequestCompressionEnabled)
+                    throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer);
+
+                if (!ClientCompression.IsBase64EncodedAndGZipCompressed(xml))
+                    throw new WitsmlException(ErrorCodes.CannotDecompressQuery);
+
+                return true;
+            }
+            else
+            {
+                // An invalid compression type is specified.
+
                 throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
-            }
-
-            // Validate compression method is supported
-            if (!OptionsIn.CompressionMethod.None.Equals(optionValue) &&
-                !optionValue.EqualsIgnoreCase(compressionMethod))
-            {
-                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer);
             }
         }
 

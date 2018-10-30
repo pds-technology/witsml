@@ -146,5 +146,8 @@
     <Setting Name="DefaultDescribeUri" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="IsRequestCompressionEnabled" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
