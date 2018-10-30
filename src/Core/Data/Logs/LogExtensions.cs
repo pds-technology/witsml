@@ -38,6 +38,7 @@ namespace PDS.WITSMLstudio.Data.Logs
         private static readonly ILog _log = LogManager.GetLogger(typeof (LogExtensions));
         private static readonly int _maxDataDelimiterLength = Settings.Default.MaxDataDelimiterLength;
         private static readonly string _dataDelimiterExclusions = @"[\d\s\.\+\-]";
+        private static readonly Regex _dataDelimterExclusionsRegex = new Regex(_dataDelimiterExclusions, RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Determines whether the <see cref="Witsml131.Log"/> is increasing.
@@ -354,8 +355,7 @@ namespace PDS.WITSMLstudio.Data.Logs
             if (log.DataDelimiter.Length > _maxDataDelimiterLength) return false;
 
             // check for invalid characters
-            var regEx = new Regex(_dataDelimiterExclusions);
-            return !regEx.IsMatch(log.DataDelimiter);
+            return !_dataDelimterExclusionsRegex.IsMatch(log.DataDelimiter);
         }
 
         /// <summary>

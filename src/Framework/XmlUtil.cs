@@ -45,7 +45,7 @@ namespace PDS.WITSMLstudio.Framework
         static XmlUtil()
         {
             Xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-            _regex = new Regex(@"(?<selector>[//]+)?(?<namespace>[A-z0-9_]+:)?(?<element>[\@\*A-z0-9_\[\]]+)");
+            _regex = new Regex(@"(?<selector>[//]+)?(?<namespace>[A-z0-9_]+:)?(?<element>[\@\*A-z0-9_\[\]]+)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         }
 
         /// <summary>
