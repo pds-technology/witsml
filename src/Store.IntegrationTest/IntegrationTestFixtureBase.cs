@@ -49,7 +49,8 @@ namespace PDS.WITSMLstudio.Store
         [TestInitialize]
         public void TestSetUp()
         {
-            Logger.Debug($"Executing {TestContext.TestName}");
+            log4net.ThreadContext.Properties["TestName"] = TestContext.TestName;
+            Logger.Info($"Setting up {TestContext.TestName}");
             DevKit = (TDevKitAspect)Activator.CreateInstance(typeof(TDevKitAspect), TestContext);
 
             PrepareData();
@@ -60,6 +61,8 @@ namespace PDS.WITSMLstudio.Store
                 EtpSetUp(DevKit.Container);
                 _server.Start();
             }
+
+            Logger.Info($"Setup is complete for {TestContext.TestName}");
         }
 
         /// <summary>
@@ -69,6 +72,7 @@ namespace PDS.WITSMLstudio.Store
         [TestCleanup]
         public void TestCleanUp()
         {
+            Logger.Info($"Cleaning up {TestContext.TestName}");
             if (_isEtpTest)
             {
                 _server?.Stop();
@@ -82,6 +86,9 @@ namespace PDS.WITSMLstudio.Store
 
             DevKitAspect.RestoreDefaultSettings();
             WitsmlOperationContext.Current = null;
+
+            Logger.Info($"Cleanup is complete for {TestContext.TestName}");
+            log4net.ThreadContext.Properties["TestName"] = null;
         }
 
         /// <summary>

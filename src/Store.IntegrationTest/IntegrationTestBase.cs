@@ -113,9 +113,9 @@ namespace PDS.WITSMLstudio.Store
         /// </summary>
         protected void EtpCleanUp()
         {
-            TestSettings.Reset();
             _client.Dispose();
             _server.Dispose();
+            TestSettings.Reset();
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace PDS.WITSMLstudio.Store
         {
             var version = GetType().Assembly.GetName().Version.ToString();
             var server = new EtpSocketServer(port, GetType().AssemblyQualifiedName, version);
-            server.Output = server.Logger.Info;
+            
             return server;
         }
 
@@ -144,8 +144,7 @@ namespace PDS.WITSMLstudio.Store
             var etpSubProtocol = EtpSettings.LegacySubProtocol;
 
             var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, etpSubProtocol, headers);
-            client.Output = client.Logger.Info;
-
+            
             return client;
         }
 
