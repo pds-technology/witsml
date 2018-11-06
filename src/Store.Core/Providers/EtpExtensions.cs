@@ -217,6 +217,36 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Registers the store customer.
+        /// </summary>
+        /// <param name="etpSession">The ETP session.</param>
+        /// <param name="container">The container.</param>
+        /// <param name="contractName">Name of the contract.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns></returns>
+        public static IEtpStoreCustomer RegisterStoreCustomer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IEtpStoreCustomer> callback = null)
+        {
+            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                var handler = container.Resolve<Energistics.Etp.v11.Protocol.Store.IStoreCustomer>(contractName);
+                var customer = handler as IEtpStoreCustomer;
+
+                callback?.Invoke(customer);
+                etpSession.Register(() => handler);
+                return customer;
+            }
+            else
+            {
+                var handler = container.Resolve<Energistics.Etp.v12.Protocol.Store.IStoreCustomer>(contractName);
+                var customer = handler as IEtpStoreCustomer;
+
+                callback?.Invoke(customer);
+                etpSession.Register(() => handler);
+                return customer;
+            }
+        }
+
+        /// <summary>
         /// Gets the ETP protocols metadata.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>

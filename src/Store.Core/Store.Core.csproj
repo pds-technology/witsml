@@ -774,6 +774,7 @@
     <Compile Include="Providers\GrowingObject\GrowingObject11StoreProvider.cs" />
     <Compile Include="Providers\StoreNotification\IStoreNotificationProducer.cs" />
     <Compile Include="Providers\StoreQuery\StoreQuery12StoreProvider.cs" />
+    <Compile Include="Providers\Store\IEtpStoreCustomer.cs" />
     <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
     <Compile Include="Providers\Store\Store12StoreProvider.cs" />
     <Compile Include="Providers\Store\StoreStore131Provider.cs" />
