@@ -23,6 +23,7 @@ using System.Threading;
 using System.Web;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
+using Energistics.Etp.Common.Datatypes.Object;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -134,6 +135,11 @@ namespace PDS.WITSMLstudio.Store
         /// </summary>
         /// <value>The XML document.</value>
         public XDocument Document { get; set; }
+
+        /// <summary>
+        /// Gets or sets the data object.
+        /// </summary>
+        public IDataObject DataObject { get; set; }
 
         /// <summary>
         /// Gets or sets the data schema version for the context.
