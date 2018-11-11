@@ -23,6 +23,7 @@ using System.Linq;
 using System.Threading;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.Common.Datatypes.ChannelData;
 using Energistics.Etp.v12.Datatypes.ChannelData;
 using Energistics.Etp.v12.Protocol.ChannelStreaming;
 using PDS.WITSMLstudio.Framework;
@@ -39,7 +40,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
     /// <seealso cref="ChannelStreamingConsumerHandler" />
     [Export(typeof(IChannelStreamingConsumer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class ChannelStreaming12Consumer : ChannelStreamingConsumerHandler
+    public class ChannelStreaming12Consumer : ChannelStreamingConsumerHandler, IStreamingConsumer
     {
         private static readonly int _maxMessageRate = Settings.Default.MaxMessageRate;
 
@@ -47,7 +48,6 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
         private Timer _flushIntervalTimer;
-        private bool _isSimpleStreamer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreaming12Consumer"/> class.
@@ -62,6 +62,19 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is simple streamer.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is simple streamer; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsSimpleStreamer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the basic streamer uris.
+        /// </summary>
+        public IList<string> BasicStreamerUris { get; set; }
+
+        /// <summary>
         /// Called when the ETP session is opened.
         /// </summary>
         /// <param name="requestedProtocols">The requested protocols.</param>
@@ -72,15 +85,39 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             if (!supportedProtocols.Contains(Protocol, Role)) return;
 
             // Check the protocol capabilities for the SimpleStreamer flag
-            _isSimpleStreamer = requestedProtocols.IsSimpleStreamer() || supportedProtocols.IsSimpleStreamer();
+            IsSimpleStreamer = requestedProtocols.IsSimpleStreamer() || supportedProtocols.IsSimpleStreamer();
 
             Start(minMessageInterval: _maxMessageRate);
 
             // Do not send ChannelDescribe to a SimpleStreamer
-            if (_isSimpleStreamer) return;
+            if (IsSimpleStreamer) return;
 
             if (!string.IsNullOrEmpty(WitsmlSettings.DefaultDescribeUri))
                 ChannelDescribe(new[] { WitsmlSettings.DefaultDescribeUri });
+
+            if (BasicStreamerUris?.Any() ?? false)
+                ChannelDescribe(BasicStreamerUris);
+        }
+
+        /// <summary>
+        /// Initializes the channel streaming consumer as a basic streamer.
+        /// </summary>
+        /// <param name="uris">The uris to stream.</param>
+        public void InitializeBasicStreamer(IList<string> uris)
+        {
+            BasicStreamerUris = uris?.ToList();
+        }
+
+        /// <summary>
+        /// Gets the channel metadata record for the specified channelId
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <returns>
+        /// An <see cref="T:Energistics.Etp.Common.Datatypes.ChannelData.IChannelMetadataRecord" /> for the specified channelId
+        /// </returns>
+        public IChannelMetadataRecord GetChannelMetadataRecord(long channelId)
+        {
+            return ChannelMetadataRecords.FirstOrDefault(x => x.ChannelId == channelId);
         }
 
         /// <summary>
@@ -114,7 +151,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             InitializeDataBlocks(header.MessageId, channelMetadata.Channels);
 
             // Do not send ChannelStreamingStart to a SimpleStreamer
-            if (_isSimpleStreamer) return;
+            if (IsSimpleStreamer) return;
 
             var infos = channelMetadata.Channels
                 .Select(ToChannelStreamingInfo)
@@ -152,7 +189,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             }
 
             // Do not send ChannelStreamingStop to a SimpleStreamer
-            if (!_isSimpleStreamer)
+            if (!IsSimpleStreamer)
             {
                 // Notify producer to stop streaming the channels
                 ChannelStreamingStop(channelsToBeStopped.Select(x => x.ChannelId).ToList());

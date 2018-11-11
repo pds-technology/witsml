@@ -140,6 +140,38 @@ namespace PDS.WITSMLstudio.Store.Providers
         }
 
         /// <summary>
+        /// Resolves the channel streaming consumer handler.
+        /// </summary>
+        /// <param name="etpSession">The ETP session.</param>
+        /// <param name="container">The composition container.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <param name="callback">The callback.</param>
+        /// <returns>An <see cref="IStreamingConsumer"/> instance.</returns>
+        public static IStreamingConsumer RegisterChannelStreamingConsumer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingConsumer> callback = null)
+        {
+            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            {
+                var handler = container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingConsumer>(contractName);
+                var consumer = handler as IStreamingConsumer;
+
+                callback?.Invoke(consumer);
+                etpSession.Register(() => handler);
+
+                return consumer;
+            }
+            else
+            {
+                var handler = container.Resolve<Energistics.Etp.v12.Protocol.ChannelStreaming.IChannelStreamingConsumer>(contractName);
+                var consumer = handler as IStreamingConsumer;
+
+                callback?.Invoke(consumer);
+                etpSession.Register(() => handler);
+
+                return consumer;
+            }
+        }
+
+        /// <summary>
         /// Resolves the channel streaming producer handler.
         /// </summary>
         /// <param name="etpSession">The ETP session.</param>
