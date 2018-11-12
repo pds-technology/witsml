@@ -21,7 +21,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
-using Energistics.Etp.v12.Datatypes;
 using Energistics.Etp.v12.Protocol.DiscoveryQuery;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -43,22 +42,6 @@ namespace PDS.WITSMLstudio.Store.Providers.DiscoveryQuery
         /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IDiscoveryStoreProvider> Providers { get; set; }
-
-        /// <summary>
-        /// Gets the capabilities supported by the protocol handler.
-        /// </summary>
-        /// <returns>A collection of protocol capabilities.</returns>
-        public override IDictionary<string, IDataValue> GetCapabilities()
-        {
-            var capabilities = base.GetCapabilities();
-
-            capabilities[MaxResponseCount] = new DataValue
-            {
-                Item = WitsmlSettings.MaxGetResourcesResponse
-            };
-
-            return capabilities;
-        }
 
         /// <summary>
         /// Handles the FindResources message of the DiscoveryQuery protocol.

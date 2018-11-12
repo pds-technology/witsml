@@ -24,11 +24,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.WebSockets;
-using Energistics.Etp;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using PDS.WITSMLstudio.Framework;
@@ -98,10 +98,10 @@ namespace PDS.WITSMLstudio.Store.Controllers
 
             using (var stream = new MemoryStream())
             using (var webSocket = WebSocket.CreateClientWebSocket(stream, etpSubProtocol, ushort.MaxValue, ushort.MaxValue, WebSocket.DefaultKeepAliveInterval, false, buffer))
-            using (var handler = CreateEtpServerHandler(webSocket, null))
+            using (var etpServer = CreateEtpServer(webSocket, null))
             {
                 var supportedObjects = GetSupportedObjects();
-                var capServer = handler.CreateServerCapabilities(supportedObjects, _supportedEncodings);
+                var capServer = etpServer.CreateServerCapabilities(supportedObjects, _supportedEncodings);
 
                 return Ok(capServer);
             }
@@ -113,7 +113,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// <returns>An <see cref="IHttpActionResult"/> containing the list of clients.</returns>
         protected virtual IHttpActionResult ClientList()
         {
-            var clients = EtpServerHandler.Clients.Select(c =>
+            var clients = Energistics.Etp.Native.EtpServer.Clients.Select(c =>
             {
                 var handler = c.Value;
                 //var core = handler.Handler<ICoreServer>() as CoreServerHandler;
@@ -205,7 +205,7 @@ namespace PDS.WITSMLstudio.Store.Controllers
         protected virtual string GetRequestedEtpSubProtocol(NameValueCollection parameters)
         {
             var etpVersion = parameters?[EtpSettings.GetVersionHeader] ?? string.Empty;
-            return EtpSettings.EtpSubProtocols.Contains(etpVersion) ? etpVersion : EtpSettings.LegacySubProtocol;
+            return EtpSettings.EtpSubProtocols.Contains(etpVersion) ? etpVersion : EtpSettings.Etp11SubProtocol;
         }
 
         /// <summary>
@@ -216,10 +216,12 @@ namespace PDS.WITSMLstudio.Store.Controllers
         protected virtual async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var headers = GetWebSocketHeaders(context.Headers, context.QueryString);
-            using (var handler = CreateEtpServerHandler(context.WebSocket, headers))
+            using (var etpServer = CreateEtpServer(context.WebSocket, headers))
             {
-                handler.SupportedObjects = GetSupportedObjects();
-                await handler.Accept(context);
+                etpServer.SupportedObjects = GetSupportedObjects();
+                //await etpServer.Accept(context);
+
+                await etpServer.HandleConnection(CancellationToken.None);
             }
         }
 
@@ -229,18 +231,18 @@ namespace PDS.WITSMLstudio.Store.Controllers
         /// <param name="socket">The WebSocket.</param>
         /// <param name="headers">The headers.</param>
         /// <returns></returns>
-        protected virtual EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
+        protected virtual Energistics.Etp.Native.EtpServer CreateEtpServer(WebSocket socket, IDictionary<string, string> headers)
         {
-            var handler = new EtpServerHandler(socket, _defaultServerName, _overrideServerVersion, headers);
-            RegisterProtocolHandlers(handler);
-            return handler;
+            var etpServer = new Energistics.Etp.Native.EtpServer(socket, _defaultServerName, _overrideServerVersion, headers);
+            RegisterProtocolHandlers(etpServer);
+            return etpServer;
         }
 
         /// <summary>
-        /// Registers the protocol handlers supported by the specified <see cref="EtpServerHandler"/>.
+        /// Registers the protocol handlers supported by the specified <see cref="IEtpServer" />.
         /// </summary>
-        /// <param name="handler">The handler.</param>
-        protected virtual void RegisterProtocolHandlers(EtpServerHandler handler)
+        /// <param name="etpServer">The ETP server.</param>
+        protected virtual void RegisterProtocolHandlers(IEtpServer etpServer)
         {
         }
 

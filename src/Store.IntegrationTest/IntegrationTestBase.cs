@@ -141,7 +141,7 @@ namespace PDS.WITSMLstudio.Store
         {
             var version = GetType().Assembly.GetName().Version.ToString();
             var headers = Energistics.Etp.Security.Authorization.Basic(TestSettings.Username, TestSettings.Password);
-            var etpSubProtocol = EtpSettings.LegacySubProtocol;
+            var etpSubProtocol = EtpSettings.Etp11SubProtocol;
 
             var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, etpSubProtocol, headers);
             client.Output = client.Logger.Info;

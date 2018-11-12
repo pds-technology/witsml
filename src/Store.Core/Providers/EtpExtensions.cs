@@ -319,11 +319,11 @@ namespace PDS.WITSMLstudio.Store.Providers
             {
                 Uri = uri?.ToString(),
                 IndexKind = isTimeIndex
-                    ? Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKinds.Time
-                    : Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKinds.Depth,
+                    ? Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKind.Time
+                    : Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKind.Depth,
                 Direction = isIncreasing
-                    ? Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Increasing
-                    : Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Decreasing,
+                    ? Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Increasing
+                    : Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Decreasing,
                 DepthDatum = string.Empty,
                 TimeDatum = string.Empty,
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
@@ -353,7 +353,7 @@ namespace PDS.WITSMLstudio.Store.Providers
             {
                 ChannelUri = uri?.ToString(),
                 ContentType = uri?.ContentType.ToString(),
-                Status = Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Active,
+                Status = Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatusKind.Active,
                 AttributeMetadata = new List<Energistics.Etp.v12.Datatypes.AttributeMetadataRecord>(),
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
             };
@@ -405,8 +405,8 @@ namespace PDS.WITSMLstudio.Store.Providers
             }
 
             return isActive
-                ? (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Active
-                : (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatuses.Inactive;
+                ? (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatusKind.Active
+                : (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatusKind.Inactive;
         }
 
         /// <summary>
@@ -421,7 +421,7 @@ namespace PDS.WITSMLstudio.Store.Providers
 
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? index.IndexKind == (int) Energistics.Etp.v11.Datatypes.ChannelData.ChannelIndexTypes.Time
-                : index.IndexKind == (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKinds.Time;
+                : index.IndexKind == (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKind.Time;
         }
 
         /// <summary>
@@ -436,7 +436,7 @@ namespace PDS.WITSMLstudio.Store.Providers
 
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? index.Direction == (int) Energistics.Etp.v11.Datatypes.ChannelData.IndexDirections.Increasing
-                : index.Direction == (int) Energistics.Etp.v12.Datatypes.ChannelData.IndexDirections.Increasing;
+                : index.Direction == (int) Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Increasing;
         }
 
         /// <summary>
@@ -484,7 +484,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? (IDataItem)new Energistics.Etp.v11.Datatypes.ChannelData.DataItem()
-                : (IDataItem)new Energistics.Etp.v12.Datatypes.ChannelData.DataItem();
+                : new Energistics.Etp.v12.Datatypes.ChannelData.DataItem();
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
                 ? (IDataValue)new Energistics.Etp.v11.Datatypes.DataValue()
-                : (IDataValue)new Energistics.Etp.v12.Datatypes.DataValue();
+                : new Energistics.Etp.v12.Datatypes.DataValue();
         }
 
         /// <summary>
@@ -507,8 +507,8 @@ namespace PDS.WITSMLstudio.Store.Providers
         public static IChannelStreamingInfo CreateChannelStreamingInfo(this IEtpAdapter etpAdapter)
         {
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
-                ? (IChannelStreamingInfo)new Energistics.Etp.v11.Datatypes.ChannelData.ChannelStreamingInfo()
-                : (IChannelStreamingInfo)new Energistics.Etp.v12.Datatypes.ChannelData.ChannelStreamingInfo();
+                ? new Energistics.Etp.v11.Datatypes.ChannelData.ChannelStreamingInfo()
+                : null;
         }
 
         /// <summary>
@@ -519,8 +519,8 @@ namespace PDS.WITSMLstudio.Store.Providers
         public static IStreamingStartIndex CreateStreamingStartIndex(this IEtpAdapter etpAdapter)
         {
             return etpAdapter is Energistics.Etp.v11.Etp11Adapter
-                ? (IStreamingStartIndex)new Energistics.Etp.v11.Datatypes.ChannelData.StreamingStartIndex()
-                : (IStreamingStartIndex)new Energistics.Etp.v12.Datatypes.ChannelData.StreamingStartIndex();
+                ? new Energistics.Etp.v11.Datatypes.ChannelData.StreamingStartIndex()
+                : null;
         }
 
         /// <summary>
@@ -767,14 +767,14 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="indexes">The channel index values.</param>
         /// <param name="attributes">The data attributes.</param>
         /// <returns>A new <see cref="IDataItem"/> instance.</returns>
-        public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter, long channelId = 0, object value = null, IList<long> indexes = null, IList<object> attributes = null)
+        public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter, long channelId, object value = null, IList<object> indexes = null, IList<object> attributes = null)
         {
             if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
             {
                 return new Energistics.Etp.v11.Datatypes.ChannelData.DataItem
                 {
                     ChannelId = channelId,
-                    Indexes = indexes?.ToArray() ?? new long[0],
+                    Indexes = indexes?.Cast<long>().ToArray() ?? new long[0],
                     Value = new Energistics.Etp.v11.Datatypes.DataValue { Item = value },
                     ValueAttributes = attributes?
                         .Select((x, i) => new Energistics.Etp.v11.Datatypes.DataAttribute
@@ -789,7 +789,8 @@ namespace PDS.WITSMLstudio.Store.Providers
             return new Energistics.Etp.v12.Datatypes.ChannelData.DataItem
             {
                 ChannelId = channelId,
-                Indexes = indexes?.ToArray() ?? new long[0],
+                Indexes = indexes?.Select(i => new Energistics.Etp.v12.Datatypes.IndexValue { Item = i }).ToList() ??
+                    new List<Energistics.Etp.v12.Datatypes.IndexValue>(),
                 Value = new Energistics.Etp.v12.Datatypes.DataValue { Item = value },
                 ValueAttributes = attributes?
                     .Select((x, i) => new Energistics.Etp.v12.Datatypes.DataAttribute
