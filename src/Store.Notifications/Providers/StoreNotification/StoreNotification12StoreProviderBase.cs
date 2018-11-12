@@ -22,6 +22,7 @@ using System.Linq;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using Energistics.Etp.Common.Datatypes;
+using Energistics.Etp.v12.Datatypes;
 using Energistics.Etp.v12.Datatypes.Object;
 using Energistics.Etp.v12.Protocol.StoreNotification;
 using Newtonsoft.Json.Linq;
@@ -35,7 +36,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     /// <seealso cref="StoreNotificationStoreHandler" />
     public abstract class StoreNotification12StoreProviderBase : StoreNotificationStoreHandler
     {
-        private readonly Dictionary<string, IMessageHeader> _headers;
+        private readonly Dictionary<Uuid, IMessageHeader> _headers;
         private readonly List<NotificationRequest> _requests;
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         /// </summary>
         protected StoreNotification12StoreProviderBase()
         {
-            _headers = new Dictionary<string, IMessageHeader>();
+            _headers = new Dictionary<Uuid, IMessageHeader>();
             _requests = new List<NotificationRequest>();
         }
 
@@ -57,7 +58,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             base.HandleNotificationRequest(header, request);
             EnsureConnection();
 
-            if (_requests.Any(x => x.Request.Uuid.EqualsIgnoreCase(request.Request.Uuid)))
+            if (_requests.Any(x => x.Request.Uuid.Equals(request.Request.Uuid)))
             {
                 // TODO: Should this be an error?
             }
@@ -77,7 +78,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         {
             base.HandleCancelNotification(header, request);
 
-            var message = _requests.FirstOrDefault(x => x.Request.Uuid.EqualsIgnoreCase(request.RequestUuid));
+            var message = _requests.FirstOrDefault(x => x.Request.Uuid.Equals(request.RequestUuid));
 
             if (message == null)
             {
@@ -122,12 +123,12 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 
         protected virtual void OnNotifyInsert(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKinds.insert);
+            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKind.insert);
         }
 
         protected virtual void OnNotifyUpdate(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKinds.update);
+            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKind.update);
         }
 
         protected virtual void OnNotifyDelete(string uri, object dataObject, DateTime dateTime)
@@ -141,7 +142,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             DeleteNotification(header, uri, dateTime.ToUnixTimeMicroseconds());
         }
 
-        protected virtual void OnNotify(Func<IMessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeKinds changeKind)
+        protected virtual void OnNotify(Func<IMessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeKind changeKind)
         {
             var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
             if (request == null) return;
