@@ -61,7 +61,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <param name="channelMetadataRecords">The list of <see cref="IChannelMetadataRecord" /> objects.</param>
         /// <param name="messageFlag">The message flag.</param>
         /// <returns>The message identifier.</returns>
-        long ChannelMetadata(IMessageHeader request, IList<IChannelMetadataRecord> channelMetadataRecords, MessageFlags messageFlag = MessageFlags.FinalPart);
+        long ChannelMetadata(IMessageHeader request, IList<IChannelMetadataRecord> channelMetadataRecords, MessageFlags messageFlag = MessageFlags.MultiPartAndFinalPart);
 
         /// <summary>
         /// Sends a ChannelData message to a consumer.

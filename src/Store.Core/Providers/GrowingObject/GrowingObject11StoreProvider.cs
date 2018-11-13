@@ -221,7 +221,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
             dataObjects.ForEach((dataObject, i) =>
             {
                 var flag = i >= dataObjects.Count - 1
-                    ? MessageFlags.FinalPart
+                    ? MessageFlags.MultiPartAndFinalPart
                     : MessageFlags.MultiPart;
 
                 ObjectFragment(uri, dataObject.Resource.ContentType, dataObject.Data, messageId, flag);

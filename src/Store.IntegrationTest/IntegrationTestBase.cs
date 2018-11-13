@@ -30,6 +30,7 @@ using Energistics.Etp;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Protocol.Core;
+using Energistics.Etp.Native;
 using Energistics.Etp.v11;
 using Energistics.Etp.v11.Datatypes.Object;
 using Energistics.Etp.v11.Protocol.ChannelStreaming;
@@ -48,8 +49,8 @@ namespace PDS.WITSMLstudio.Store
     public abstract class IntegrationTestBase
     {
         private IContainer _container;
-        protected EtpSocketServer _server;
-        protected EtpClient _client;
+        protected IEtpSelfHostedWebServer _server;
+        protected IEtpClient _client;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntegrationTestBase"/> class.
@@ -113,37 +114,40 @@ namespace PDS.WITSMLstudio.Store
         /// </summary>
         protected void EtpCleanUp()
         {
-            _client.Dispose();
-            _server.Dispose();
+            _client?.Dispose();
+            _server?.Dispose();
+            _client = null;
+            _server = null;
+
             TestSettings.Reset();
         }
 
         /// <summary>
-        /// Creates an <see cref="EtpSocketServer"/> instance.
+        /// Creates an <see cref="IEtpSelfHostedWebServer"/> instance.
         /// </summary>
         /// <param name="port">The port number.</param>
-        /// <returns>A new <see cref="EtpSocketServer"/> instance.</returns>
-        protected EtpSocketServer CreateServer(int port)
+        /// <returns>A new <see cref="IEtpSelfHostedWebServer"/> instance.</returns>
+        protected IEtpSelfHostedWebServer CreateServer(int port)
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var server = new EtpSocketServer(port, GetType().AssemblyQualifiedName, version);
+            var server = EtpFactory.CreateSelfHostedWebServer(port, GetType().AssemblyQualifiedName, version);
             
             return server;
         }
 
         /// <summary>
-        /// Creates an <see cref="EtpClient"/> instance configurated with the
+        /// Creates an <see cref="IEtpClient"/> instance configurated with the
         /// current connection and authorization parameters.
         /// </summary>
         /// <param name="url">The WebSocket URL.</param>
-        /// <returns>A new <see cref="EtpClient"/> instance.</returns>
-        protected EtpClient CreateClient(string url)
+        /// <returns>A new <see cref="IEtpClient"/> instance.</returns>
+        protected IEtpClient CreateClient(string url)
         {
             var version = GetType().Assembly.GetName().Version.ToString();
             var headers = Energistics.Etp.Security.Authorization.Basic(TestSettings.Username, TestSettings.Password);
             var etpSubProtocol = EtpSettings.Etp11SubProtocol;
 
-            var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, etpSubProtocol, headers);
+            var client = EtpFactory.CreateClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, etpSubProtocol, headers);
             
             return client;
         }
@@ -153,7 +157,7 @@ namespace PDS.WITSMLstudio.Store
         /// </summary>
         /// <param name="client">The ETP client.</param>
         /// <returns>The ETP client.</returns>
-        protected EtpClient InitClient(EtpClient client)
+        protected IEtpClient InitClient(IEtpClient client)
         {
             // Register client handlers
             client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
@@ -238,7 +242,7 @@ namespace PDS.WITSMLstudio.Store
                 args.Add(e);
 
                 if (task.Status == TaskStatus.Created &&
-                    (e.Header.MessageFlags == (int)MessageFlags.FinalPart ||
+                    (e.Header.IsFinalResponse() ||
                     (maxMultiPartsToReturn > 0 && args.Count >= maxMultiPartsToReturn)))
                     task.Start();
             });
@@ -269,7 +273,7 @@ namespace PDS.WITSMLstudio.Store
                 args.Add(e);
 
                 if (task.Status == TaskStatus.Created &&
-                    (e.Header.MessageFlags == (int)MessageFlags.FinalPart ||
+                    (e.Header.IsFinalResponse() ||
                     (maxMultiPartsToReturn > 0 && args.Count >= maxMultiPartsToReturn)))
                     task.Start();
             });
@@ -357,7 +361,7 @@ namespace PDS.WITSMLstudio.Store
                     x => client.Handler<ICoreClient>().OnOpenSession += x);
 
                 // Wait for Open connection
-                var isOpen = await _client.OpenAsync();
+                var isOpen = await _client.OpenAsyncWithTimeout();
                 Assert.IsTrue(isOpen);
 
                 // Wait for OpenSession

@@ -20,6 +20,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Energistics.Etp;
+using Energistics.Etp.Common;
 
 namespace PDS.WITSMLstudio.Store
 {
@@ -34,36 +35,11 @@ namespace PDS.WITSMLstudio.Store
         /// <param name="client">The client.</param>
         /// <param name="milliseconds">The timeout, in milliseconds.</param>
         /// <returns>An awaitable task.</returns>
-        public static async Task<bool> OpenAsync(this EtpClient client, int? milliseconds = null)
+        public static async Task<bool> OpenAsyncWithTimeout(this IEtpClient client, int? milliseconds = null)
         {
-            var task = new Task<bool>(() => client.IsOpen);
+            await client.OpenAsync().WaitAsync(milliseconds);
 
-            client.SocketOpened += (s, e) => task.Start();
-            client.Open();
-
-            return await task.WaitAsync(milliseconds);
-        }
-
-        /// <summary>
-        /// Executes an action and waits the specified timeout for an error to occur.
-        /// </summary>
-        /// <param name="client">The client.</param>
-        /// <param name="action">The action to execute.</param>
-        /// <param name="milliseconds">The timeout, in milliseconds.</param>
-        /// <returns>An awaitable task.</returns>
-        public static async Task<bool> ErrorAsync(this EtpClient client, Action action, int? milliseconds = null)
-        {
-            var task = new Task<bool>(() => true);
-
-            client.SocketError += (s, e) =>
-            {
-                if (task.Status == TaskStatus.Created)
-                    task.Start();
-            };
-
-            action();
-
-            return await task.WaitAsync();
+            return client.IsOpen;
         }
 
         /// <summary>

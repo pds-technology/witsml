@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS WITSMLstudio Store, 2018.3
 //
 // Copyright 2018 PDS Americas LLC
@@ -81,7 +81,7 @@ namespace PDS.WITSMLstudio.Store
 
             OnTestCleanUp();
 
-            DevKit.Container.Dispose();
+            DevKit?.Container.Dispose();
             DevKit = null;
 
             DevKitAspect.RestoreDefaultSettings();

@@ -797,7 +797,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Assert.AreEqual(uris.Count, channels.Count, "Channel count does not match the URI count");
 
             // Verify that the last ChannelMetadata message has a messageFlag of 0x2.
-            Assert.AreEqual((int)MessageFlags.FinalPart, args.Select(x => x.Header.MessageFlags).Last());
+            Assert.IsTrue(args.Select(x => x.Header).Last().IsFinalPart());
 
             // Verify that the ChannelMetadata message correlationId matches the corresponding ChannelDescribe messageId
             foreach (var arg in args)

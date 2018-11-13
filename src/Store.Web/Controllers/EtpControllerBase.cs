@@ -219,8 +219,6 @@ namespace PDS.WITSMLstudio.Store.Controllers
             using (var etpServer = CreateEtpServer(context.WebSocket, headers))
             {
                 etpServer.SupportedObjects = GetSupportedObjects();
-                //await etpServer.Accept(context);
-
                 await etpServer.HandleConnection(CancellationToken.None);
             }
         }
