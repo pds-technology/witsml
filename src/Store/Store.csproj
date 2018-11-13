@@ -125,6 +125,10 @@
       <HintPath>$(SolutionDir)\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SuperSocket.ClientEngine, Version=0.10.0.0, Culture=neutral, PublicKeyToken=ee9af13f57f00acc, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\SuperSocket.ClientEngine.Core.0.10.0\lib\net45\SuperSocket.ClientEngine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
       <Private>True</Private>
@@ -212,8 +216,8 @@
       <Private>True</Private>
       <HintPath>$(SolutionDir)\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
     </Reference>
-    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+    <Reference Include="WebSocket4Net, Version=0.15.2.11, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\WebSocket4Net.0.15.2\lib\net45\WebSocket4Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
