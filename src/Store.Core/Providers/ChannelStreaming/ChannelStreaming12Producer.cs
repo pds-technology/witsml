@@ -58,6 +58,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Channels = new Dictionary<long, Tuple<EtpUri, IChannelMetadataRecord>>();
             _channelStreamingContextLists = new List<IList<ChannelStreamingContext>>();
             _providers = InitializeChannelDataProviders();
+            IsSimpleStreamer = true;
         }
 
         /// <summary>
@@ -75,6 +76,16 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Gets the composition container.
         /// </summary>
         protected IContainer Container { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is a Simple Streamer.
+        /// </summary>
+        public bool IsSimpleStreamer { get; set; }
+
+        /// <summary>
+        /// Gets the minimum message interval.
+        /// </summary>
+        public int MinMessageInterval { get; set; }
 
         /// <summary>
         /// Gets or sets the simple streamer uris.
@@ -125,7 +136,8 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <returns>The message identifier.</returns>
         long IStreamingProducer.ChannelDataChange(long channelId, long startIndex, long endIndex, IList<IDataItem> dataItems)
         {
-            return ChannelDataChange(channelId, startIndex, endIndex, dataItems.Cast<DataItem>().ToList());
+            //return ChannelDataChange(channelId, startIndex, endIndex, dataItems.Cast<DataItem>().ToList());
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -136,7 +148,19 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <returns>The message identifier.</returns>
         long IStreamingProducer.ChannelStatusChange(long channelId, bool isActive)
         {
-            return ChannelStatusChange(channelId, (ChannelStatuses)Session.Adapter.GetChannelStatus(isActive));
+            //return ChannelStatusChange(channelId, (ChannelStatuses)Session.Adapter.GetChannelStatus(isActive));
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sends a ChannelRemove message to a consumer.
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="reason">The reason.</param>
+        /// <returns>The message identifier.</returns>
+        long IStreamingProducer.ChannelRemove(long channelId, string reason)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -197,63 +221,62 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             base.Dispose(disposing);
         }
 
+        ///// <summary>
+        ///// Handles the channel describe.
+        ///// </summary>
+        ///// <param name="args">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
+        //protected override void HandleChannelDescribe(ProtocolEventArgs<ChannelDescribe, IList<ChannelMetadataRecord>> args)
+        //{
+        //    var uris = args.Message.Uris.Contains(EtpUri.RootUri)
+        //        ? new[] { EtpUris.Witsml131, EtpUris.Witsml141, EtpUris.Witsml200 }
+        //        : args.Message.Uris.Select(x => new EtpUri(x));
+        //
+        //    foreach (var family in uris.ToLookup(x => x.Version))
+        //    {
+        //        var providers = _providers[family.Key];
+        //        foreach (var provider in providers)
+        //        {
+        //            var metadata = provider.GetChannelMetadata(Session.Adapter, family.ToArray());
+        //
+        //            metadata.ForEach(m =>
+        //            {
+        //                // Check by uri if we have the metadata in our dictionary.
+        //                var channelMetadataRecord = Channels.Values
+        //                    .Select(c => c.Item2)
+        //                    .FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
+        //
+        //                // if not add it and set its channelId
+        //                if (channelMetadataRecord == null)
+        //                {
+        //                    var channelUri = new EtpUri(m.ChannelUri);
+        //                    var parentUri = channelUri.Parent;
+        //
+        //                    // e.g. Trajectory channels
+        //                    if (string.IsNullOrWhiteSpace(parentUri.ObjectId))
+        //                        parentUri = channelUri;
+        //
+        //                    m.ChannelId = Channels.Keys.Count;
+        //                    Channels.Add(m.ChannelId, new Tuple<EtpUri, IChannelMetadataRecord>(parentUri, m));
+        //                    channelMetadataRecord = m;
+        //                }
+        //
+        //                args.Context.Add(channelMetadataRecord);
+        //            });
+        //        }
+        //    }
+        //}
+
         /// <summary>
-        /// Handles the channel describe.
-        /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
-        protected override void HandleChannelDescribe(ProtocolEventArgs<ChannelDescribe, IList<ChannelMetadataRecord>> args)
-        {
-            var uris = args.Message.Uris.Contains(EtpUri.RootUri)
-                ? new[] { EtpUris.Witsml131, EtpUris.Witsml141, EtpUris.Witsml200 }
-                : args.Message.Uris.Select(x => new EtpUri(x));
-
-            foreach (var family in uris.ToLookup(x => x.Version))
-            {
-                var providers = _providers[family.Key];
-                foreach (var provider in providers)
-                {
-                    var metadata = provider.GetChannelMetadata(Session.Adapter, family.ToArray());
-
-                    metadata.ForEach(m =>
-                    {
-                        // Check by uri if we have the metadata in our dictionary.
-                        var channelMetadataRecord = Channels.Values
-                            .Select(c => c.Item2)
-                            .FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
-
-                        // if not add it and set its channelId
-                        if (channelMetadataRecord == null)
-                        {
-                            var channelUri = new EtpUri(m.ChannelUri);
-                            var parentUri = channelUri.Parent;
-
-                            // e.g. Trajectory channels
-                            if (string.IsNullOrWhiteSpace(parentUri.ObjectId))
-                                parentUri = channelUri;
-
-                            m.ChannelId = Channels.Keys.Count;
-                            Channels.Add(m.ChannelId, new Tuple<EtpUri, IChannelMetadataRecord>(parentUri, m));
-                            channelMetadataRecord = m;
-                        }
-
-                        args.Context.Add(channelMetadataRecord);
-                    });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the channel streaming start.
+        /// Handles the start streaming.
         /// </summary>
         /// <param name="header">The header.</param>
-        /// <param name="channelStreamingStart">The channel streaming start.</param>
-        protected override void HandleChannelStreamingStart(IMessageHeader header, ChannelStreamingStart channelStreamingStart)
+        /// <param name="startStreaming">The start streaming.</param>
+        protected override void HandleStartStreaming(IMessageHeader header, StartStreaming startStreaming)
         {
-            // no action needed if streaming already started
-            //if (_tokenSource != null)
-            //    return;
+            // No action needed if streaming already started
+            if (_tokenSource != null) return;
 
-            base.HandleChannelStreamingStart(header, channelStreamingStart);
+            base.HandleStartStreaming(header, startStreaming);
 
             Request = null;
 
@@ -262,34 +285,36 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             var token = _tokenSource.Token;
 
             Logger.Debug("Channel Streaming starting.");
-            Task.Run(() => StartChannelStreaming(header.MessageId, channelStreamingStart.Channels, token), token);
+
+            var channelIds = Channels.Keys.ToList();
+            Task.Run(() => StartChannelStreaming(header.MessageId, channelIds, token), token);
         }
 
+        ///// <summary>
+        ///// Handles the channel range request.
+        ///// </summary>
+        ///// <param name="header">The header.</param>
+        ///// <param name="channelRangeRequest">The channel range request.</param>
+        //protected override void HandleChannelRangeRequest(IMessageHeader header, ChannelRangeRequest channelRangeRequest)
+        //{
+        //    base.HandleChannelRangeRequest(header, channelRangeRequest);
+        //
+        //    Request = header;
+        //
+        //    if (_tokenSource == null)
+        //        _tokenSource = new CancellationTokenSource();
+        //    var token = _tokenSource.Token;
+        //
+        //    Logger.Debug("Channel Range Request starting.");
+        //    Task.Run(() => StartChannelRangeRequest(channelRangeRequest.ChannelRanges, token), token);
+        //}
+
         /// <summary>
-        /// Handles the channel range request.
+        /// Handles the stop streaming.
         /// </summary>
         /// <param name="header">The header.</param>
-        /// <param name="channelRangeRequest">The channel range request.</param>
-        protected override void HandleChannelRangeRequest(IMessageHeader header, ChannelRangeRequest channelRangeRequest)
-        {
-            base.HandleChannelRangeRequest(header, channelRangeRequest);
-
-            Request = header;
-
-            if (_tokenSource == null)
-                _tokenSource = new CancellationTokenSource();
-            var token = _tokenSource.Token;
-
-            Logger.Debug("Channel Range Request starting.");
-            Task.Run(() => StartChannelRangeRequest(channelRangeRequest.ChannelRanges, token), token);
-        }
-
-        /// <summary>
-        /// Handles the channel streaming stop.
-        /// </summary>
-        /// <param name="header">The header.</param>
-        /// <param name="channelStreamingStop">The channel streaming stop.</param>
-        protected override void HandleChannelStreamingStop(IMessageHeader header, ChannelStreamingStop channelStreamingStop)
+        /// <param name="stopStreaming">The stop streaming.</param>
+        protected override void HandleStopStreaming(IMessageHeader header, StopStreaming stopStreaming)
         {
             // no action needed if streaming not in progress
             if (_tokenSource == null)
@@ -298,9 +323,9 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 return;
             }
 
-            StopStreamingChannels(header.MessageId, channelStreamingStop.Channels);
+            StopStreamingChannels(header.MessageId, Channels.Keys.ToList());
 
-            base.HandleChannelStreamingStop(header, channelStreamingStop);
+            base.HandleStopStreaming(header, stopStreaming);
         }
 
         /// <summary>
@@ -340,30 +365,30 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// Starts the channel streaming.
         /// </summary>
         /// <param name="messageId">The message identifier.</param>
-        /// <param name="infos">The infos.</param>
+        /// <param name="channelIds">The channel identifiers.</param>
         /// <param name="token">The token.</param>
-        protected virtual void StartChannelStreaming(long messageId, IList<ChannelStreamingInfo> infos, CancellationToken token)
+        protected virtual void StartChannelStreaming(long messageId, IList<long> channelIds, CancellationToken token)
         {
-            List<long> channelIds = ValidateAndRemoveStreamingChannels(messageId, infos);
+            //List<long> channelIds = ValidateAndRemoveStreamingChannels(messageId, infos);
 
             // Get the channel metadata and parent uri for the channels to start streaming
             var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
 
             // Join ChannelStreamingInfos and infoChannels into a list of ChannelStreamingContext
             var streamingContextList =
-                from info in infos
-                join infoChannel in infoChannels on info.ChannelId equals infoChannel.Item2.ChannelId
-                select new ChannelStreamingContext()
+                from channelId in channelIds
+                join infoChannel in infoChannels on channelId equals infoChannel.Item2.ChannelId
+                select new ChannelStreamingContext
                 {
-                    ChannelId = info.ChannelId,
+                    ChannelId = channelId,
                     ChannelMetadata = infoChannel.Item2,
                     ParentUri = infoChannel.Item1,
-                    StartIndex = info.StartIndex.Item as long?, // indexValue
+                    StartIndex = null, // info.StartIndex.Item as long?, // indexValue
                     EndIndex = null,
-                    IndexCount = info.StartIndex.Item as int? ?? 0, // indexCount
-                    ChannelStreamingType = ToChannelStreamingType(info.StartIndex.Item),
+                    IndexCount = 0, // info.StartIndex.Item as int? ?? 0, // indexCount
+                    ChannelStreamingType = ToChannelStreamingType(null), // info.StartIndex.Item
                     RangeRequestHeader = null,
-                    ReceiveChangeNotification = info.ReceiveChangeNotification
+                    ReceiveChangeNotification = false // info.ReceiveChangeNotification
                 };
 
             StartChannelStreamingContextGroups(streamingContextList, token);
@@ -385,88 +410,88 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
         }
 
-        /// <summary>
-        /// Starts the channel range request.
-        /// </summary>
-        /// <param name="infos">The infos.</param>
-        /// <param name="token">The token.</param>
-        protected virtual void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
-        {
-            // Validate each channel range info
-            ValidateChannelRangeInfos(infos);
+        ///// <summary>
+        ///// Starts the channel range request.
+        ///// </summary>
+        ///// <param name="infos">The infos.</param>
+        ///// <param name="token">The token.</param>
+        //protected virtual void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
+        //{
+        //    // Validate each channel range info
+        //    ValidateChannelRangeInfos(infos);
+        //
+        //    // Return if there are no valid channel range infos remaining
+        //    if (infos.Count < 1)
+        //        return;
+        //
+        //    var channelIds = infos.SelectMany(c => c.ChannelId).Distinct();
+        //
+        //    // Get the channel metadata and parent uri for the channels to start range request
+        //    var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
+        //
+        //    var flatRangeInfos =
+        //        infos.SelectMany(
+        //            i => i.ChannelId.Select(c => new { ChannelId = c, i.StartIndex, i.EndIndex }));
+        //
+        //    // Join FlatRangeInfos and infoChannels into a list of ChannelStreamingContext
+        //    var streamingContextList =
+        //        from info in flatRangeInfos
+        //        join infoChannel in infoChannels on info.ChannelId equals infoChannel.Item2.ChannelId
+        //        select new ChannelStreamingContext
+        //        {
+        //            ChannelId = info.ChannelId,
+        //            ChannelMetadata = infoChannel.Item2,
+        //            ParentUri = infoChannel.Item1,
+        //            StartIndex = info.StartIndex,
+        //            EndIndex = info.EndIndex,
+        //            IndexCount = 0,
+        //            ChannelStreamingType = ChannelStreamingTypes.RangeRequest,
+        //            RangeRequestHeader = Request,
+        //            ReceiveChangeNotification = false
+        //        };
+        //
+        //    // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex
+        //    var streamingContextGrouping =
+        //        from x in streamingContextList
+        //        group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
+        //
+        //    // Start a Task for each context group
+        //    Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
+        //}
 
-            // Return if there are no valid channel range infos remaining
-            if (infos.Count < 1)
-                return;
-
-            var channelIds = infos.SelectMany(c => c.ChannelId).Distinct();
-
-            // Get the channel metadata and parent uri for the channels to start range request
-            var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
-
-            var flatRangeInfos =
-                infos.SelectMany(
-                    i => i.ChannelId.Select(c => new { ChannelId = c, i.StartIndex, i.EndIndex }));
-
-            // Join FlatRangeInfos and infoChannels into a list of ChannelStreamingContext
-            var streamingContextList =
-                from info in flatRangeInfos
-                join infoChannel in infoChannels on info.ChannelId equals infoChannel.Item2.ChannelId
-                select new ChannelStreamingContext()
-                {
-                    ChannelId = info.ChannelId,
-                    ChannelMetadata = infoChannel.Item2,
-                    ParentUri = infoChannel.Item1,
-                    StartIndex = info.StartIndex,
-                    EndIndex = info.EndIndex,
-                    IndexCount = 0,
-                    ChannelStreamingType = ChannelStreamingTypes.RangeRequest,
-                    RangeRequestHeader = Request,
-                    ReceiveChangeNotification = false
-                };
-
-            // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex
-            var streamingContextGrouping =
-                from x in streamingContextList
-                group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
-
-            // Start a Task for each context group
-            Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
-        }
-
-        /// <summary>
-        /// Validates the and remove streaming channels.
-        /// </summary>
-        /// <param name="messageId">The message identifier.</param>
-        /// <param name="infos">The infos.</param>
-        /// <returns></returns>
-        protected List<long> ValidateAndRemoveStreamingChannels(long messageId, IList<ChannelStreamingInfo> infos)
-        {
-            var channelIds = infos
-                .Select(i => i.ChannelId)
-                .Distinct()
-                .ToList();
-
-            // Get an array of any channelId that are already streaming.
-            var streamingChannels = GetStreamingChannels(channelIds);
-            var streamingChannelIds = streamingChannels.Select(c => c.ChannelId).ToArray();
-
-            // Send a EINVALID_STATE message if any are already streaming.
-            if (streamingChannels.Length > 0)
-            {
-                streamingChannels.ForEach(c =>
-                    this.InvalidState($"Channel {c.ChannelId} ({c.ChannelName}) is already streaming.", messageId));
-                Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
-            }
-
-            // Remove the channelIds that are already streaming and continue with the rest.
-            streamingChannelIds.ForEach(s => channelIds.Remove(s));
-
-            // Remove the infos for channels that are already streaming.
-            var streamingInfos = infos.Where(i => streamingChannelIds.Contains(i.ChannelId)).ToList();
-            streamingInfos.ForEach(i => infos.Remove(i));
-            return channelIds;
-        }
+        ///// <summary>
+        ///// Validates the and remove streaming channels.
+        ///// </summary>
+        ///// <param name="messageId">The message identifier.</param>
+        ///// <param name="infos">The infos.</param>
+        ///// <returns></returns>
+        //protected List<long> ValidateAndRemoveStreamingChannels(long messageId, IList<ChannelStreamingInfo> infos)
+        //{
+        //    var channelIds = infos
+        //        .Select(i => i.ChannelId)
+        //        .Distinct()
+        //        .ToList();
+        //
+        //    // Get an array of any channelId that are already streaming.
+        //    var streamingChannels = GetStreamingChannels(channelIds);
+        //    var streamingChannelIds = streamingChannels.Select(c => c.ChannelId).ToArray();
+        //
+        //    // Send a EINVALID_STATE message if any are already streaming.
+        //    if (streamingChannels.Length > 0)
+        //    {
+        //        streamingChannels.ForEach(c =>
+        //            this.InvalidState($"Channel {c.ChannelId} ({c.ChannelName}) is already streaming.", messageId));
+        //        Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
+        //    }
+        //
+        //    // Remove the channelIds that are already streaming and continue with the rest.
+        //    streamingChannelIds.ForEach(s => channelIds.Remove(s));
+        //
+        //    // Remove the infos for channels that are already streaming.
+        //    var streamingInfos = infos.Where(i => streamingChannelIds.Contains(i.ChannelId)).ToList();
+        //    streamingInfos.ForEach(i => infos.Remove(i));
+        //    return channelIds;
+        //}
 
         /// <summary>
         /// To the type of the channel streaming.
@@ -513,14 +538,14 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             var parentUri = firstContext.ParentUri;
             var indexes = firstContext.ChannelMetadata.Indexes.Cast<IIndexMetadataRecord>().ToList();
             var primaryIndex = indexes[0];
-            var isTimeIndex = indexes.Select(i => i.IndexKind == (int) ChannelIndexKinds.Time).ToArray();
+            var isTimeIndex = indexes.Select(i => i.IndexKind == (int) ChannelIndexKind.Time).ToArray();
             var requestLatestValues =
                 channelStreamingType == ChannelStreamingTypes.IndexCount
                     ? firstContext.IndexCount
                     : channelStreamingType == ChannelStreamingTypes.LatestValue
                         ? 1
                         : (int?)null;
-            var increasing = primaryIndex.Direction == (int) IndexDirections.Increasing;
+            var increasing = primaryIndex.Direction == (int) IndexDirection.Increasing;
             bool? firstStart = null;
 
             // Loop until there is a cancellation or all channals have been removed
@@ -576,7 +601,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                     .Where(
                         c =>
                             (c.ChannelStreamingType != ChannelStreamingTypes.RangeRequest &&
-                            c.ChannelMetadata.Status != (int) ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
+                            c.ChannelMetadata.Status != (int) ChannelStatusKind.Active && c.ChannelMetadata.EndIndex.HasValue &&
                             c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
 
                             (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
@@ -587,7 +612,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 completedContexts.ForEach(c =>
                 {
                     // Notify consumer if the ReceiveChangeNotification field is true
-                    if (c.ChannelMetadata.Status != (int) ChannelStatuses.Active && c.ReceiveChangeNotification)
+                    if (c.ChannelMetadata.Status != (int) ChannelStatusKind.Active && c.ReceiveChangeNotification)
                     {
                         // TODO: Decide which message shoud be sent...
                         // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);
@@ -679,12 +704,12 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             var values = record[1];
 
             // Create a list of all of the records indexes, scaled
-            var indexValues = new List<long>();
+            var indexValues = new List<object>();
             for (var i = 0; i < indexes.Count; i++)
             {
                 var indexValue = isTimeIndex[i]
                     ? DateTimeOffset.Parse(indexes[i].ToString()).ToUnixTimeMicroseconds()
-                    : ((double)indexes[i]).IndexToScale(scale);
+                    : indexes[i];
                 indexValues.Add(indexValue);
             }
             //indexes.ForEach(x =>
@@ -695,7 +720,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             //    indexValues.Add(indexValue);
             //});
 
-            var primaryIndexValue = indexValues[0];
+            var primaryIndexValue = Convert.ToDouble(indexValues[0]);
 
             // For each channel
             foreach (var context in contextList)
@@ -704,14 +729,14 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 var channel = context.ChannelMetadata;
 
                 // Create a range for the current start index.
-                var start = new Range<double?>(Convert.ToDouble(context.StartIndex), null);
+                var start = new Range<double?>(context.StartIndex.HasValue ? Convert.ToDouble(context.StartIndex) : (double?)null, null);
 
                 // If we have an established Start and it starts after the current primaryIndexValue then skip this value.
                 if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: !firstStart))
                     continue;
 
                 // Update the current StartIndex for our context with the current index value
-                context.StartIndex = primaryIndexValue;
+                context.StartIndex = indexValues[0] as long? ?? primaryIndexValue.IndexToScale(scale);
 
                 // If the data does not include values for the channel we're streaming, then skip
                 if (!mnemonics.Contains(channel.ChannelName))
@@ -728,7 +753,9 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 yield return new DataItem
                 {
                     ChannelId = context.ChannelId,
-                    Indexes = indexValues.ToArray(),
+                    Indexes = indexValues
+                        .Select(i => new IndexValue { Item = i })
+                        .ToList(),
                     ValueAttributes = attributes
                         .Select((x, i) => new DataAttribute
                         {
@@ -739,7 +766,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                             }
                         })
                         .ToArray(),
-                    Value = new DataValue()
+                    Value = new DataValue
                     {
                         Item = value
                     }
@@ -813,59 +840,58 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
             return token.IsCancellationRequested || contextList.Count == 0;
         }
 
+        ///// <summary>
+        ///// Validates the channel range request.
+        ///// </summary>
+        ///// <param name="infos">The infos.</param>
+        //protected void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
+        //{
+        //    // Remove invalid channel range infos from streaming context
+        //    infos
+        //        .Select((info, i) => new
+        //        {
+        //            Channels = info.ChannelId
+        //                .Where(channelId => Channels.ContainsKey(channelId))
+        //                .Select(channelId => Channels[channelId].Item2),
+        //            Info = info,
+        //            Index = i
+        //        })
+        //        .Where(x =>
+        //            x.Channels.Any(channel =>
+        //                ValidateRangeRequestIndexes(x.Info.StartIndex, x.Info.EndIndex,
+        //                    channel.Indexes.Cast<IIndexMetadataRecord>().First().Direction == (int) IndexDirection.Increasing))
+        //        )
+        //        .Select(x => x.Index)
+        //        .Reverse()
+        //        .ForEach(infos.RemoveAt);
+        //}
 
-        /// <summary>
-        /// Validates the channel range request.
-        /// </summary>
-        /// <param name="infos">The infos.</param>
-        protected void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
-        {
-            // Remove invalid channel range infos from streaming context
-            infos
-                .Select((info, i) => new
-                {
-                    Channels = info.ChannelId
-                        .Where(channelId => Channels.ContainsKey(channelId))
-                        .Select(channelId => Channels[channelId].Item2),
-                    Info = info,
-                    Index = i
-                })
-                .Where(x =>
-                    x.Channels.Any(channel =>
-                        ValidateRangeRequestIndexes(x.Info.StartIndex, x.Info.EndIndex,
-                            channel.Indexes.Cast<IIndexMetadataRecord>().First().Direction == (int) IndexDirections.Increasing))
-                )
-                .Select(x => x.Index)
-                .Reverse()
-                .ForEach(infos.RemoveAt);
-        }
-
-        /// <summary>
-        /// Validates the range request indexes.
-        /// </summary>
-        /// <param name="startIndex">The start index.</param>
-        /// <param name="endIndex">The end index.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns></returns>
-        protected bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
-        {
-            if (increasing)
-            {
-                if (startIndex > endIndex)
-                {
-                    this.InvalidArgument("startIndex > endIndex", Request.MessageId);
-                    return true;
-                }
-            }
-            else
-            {
-                if (startIndex < endIndex)
-                {
-                    this.InvalidArgument("startIndex < endIndex", Request.MessageId);
-                    return true;
-                }
-            }
-            return false;
-        }
+        ///// <summary>
+        ///// Validates the range request indexes.
+        ///// </summary>
+        ///// <param name="startIndex">The start index.</param>
+        ///// <param name="endIndex">The end index.</param>
+        ///// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        ///// <returns></returns>
+        //protected bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
+        //{
+        //    if (increasing)
+        //    {
+        //        if (startIndex > endIndex)
+        //        {
+        //            this.InvalidArgument("startIndex > endIndex", Request.MessageId);
+        //            return true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (startIndex < endIndex)
+        //        {
+        //            this.InvalidArgument("startIndex < endIndex", Request.MessageId);
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
     }
 }
