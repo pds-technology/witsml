@@ -110,6 +110,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void WitsmlValidator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
         {
+            WitsmlSettings.IsRequestCompressionEnabled = false;
+
             var response = DevKit.Add<WellList, Well>(Well, optionsIn: "compressionMethod=gzip");
 
             Assert.IsNotNull(response);

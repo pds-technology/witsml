@@ -107,6 +107,8 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         [TestMethod]
         public void Trajectory141Validator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
         {
+            WitsmlSettings.IsRequestCompressionEnabled = false;
+
             AddParents();
 
             var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "compressionMethod=gzip");

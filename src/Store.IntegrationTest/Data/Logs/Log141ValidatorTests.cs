@@ -210,6 +210,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void WitsmlValidator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
         {
+            WitsmlSettings.IsRequestCompressionEnabled = false;
+
             AddParents();
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
