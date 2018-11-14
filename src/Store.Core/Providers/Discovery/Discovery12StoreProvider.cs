@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -98,7 +97,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         {
             return new Resource
             {
-                Uuid = string.IsNullOrWhiteSpace(uuid) ? Guid.Empty.ToUuid() : Guid.Parse(uuid).ToUuid(),
+                Uuid = uuid ?? string.Empty,
                 Uri = uri,
                 Name = name,
                 ChildCount = count,

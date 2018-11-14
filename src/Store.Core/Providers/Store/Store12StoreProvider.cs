@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Etp;
@@ -94,7 +93,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             dataObject.Resource = new Resource
             {
                 Uri = uri,
-                Uuid = string.IsNullOrWhiteSpace(uuid) ? Guid.Empty.ToUuid() : Guid.Parse(uuid).ToUuid(),
+                Uuid = uuid ?? string.Empty,
                 Name = name,
                 ChildCount = childCount,
                 ContentType = uri.ContentType,
