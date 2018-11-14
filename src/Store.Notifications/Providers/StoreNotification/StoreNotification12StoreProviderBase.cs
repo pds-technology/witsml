@@ -37,7 +37,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
     public abstract class StoreNotification12StoreProviderBase : StoreNotificationStoreHandler
     {
         private readonly Dictionary<Uuid, IMessageHeader> _headers;
-        private readonly List<NotificationRequest> _requests;
+        private readonly List<SubscribeNotification> _requests;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreNotification12StoreProviderBase"/> class.
@@ -45,40 +45,40 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
         protected StoreNotification12StoreProviderBase()
         {
             _headers = new Dictionary<Uuid, IMessageHeader>();
-            _requests = new List<NotificationRequest>();
+            _requests = new List<SubscribeNotification>();
         }
 
         /// <summary>
-        /// Handles the notification request.
+        /// Handles the subscribe notification request.
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="request">The request.</param>
-        protected override void HandleNotificationRequest(IMessageHeader header, NotificationRequest request)
+        protected override void HandleSubscribeNotification(IMessageHeader header, SubscribeNotification request)
         {
-            base.HandleNotificationRequest(header, request);
+            base.HandleSubscribeNotification(header, request);
             EnsureConnection();
 
-            if (_requests.Any(x => x.Request.Uuid.Equals(request.Request.Uuid)))
+            if (_requests.Any(x => x.Request.RequestUuid.Equals(request.Request.RequestUuid)))
             {
                 // TODO: Should this be an error?
             }
             else
             {
-                _headers[request.Request.Uuid] = header;
+                _headers[request.Request.RequestUuid] = header;
                 _requests.Add(request);
             }
         }
 
         /// <summary>
-        /// Handles the cancel notification.
+        /// Handles the unsubscribe notification request.
         /// </summary>
         /// <param name="header">The header.</param>
         /// <param name="request">The request.</param>
-        protected override void HandleCancelNotification(IMessageHeader header, CancelNotification request)
+        protected override void HandleUnsubscribeNotification(IMessageHeader header, UnsubscribeNotification request)
         {
-            base.HandleCancelNotification(header, request);
+            base.HandleUnsubscribeNotification(header, request);
 
-            var message = _requests.FirstOrDefault(x => x.Request.Uuid.Equals(request.RequestUuid));
+            var message = _requests.FirstOrDefault(x => x.Request.RequestUuid.Equals(request.RequestUuid));
 
             if (message == null)
             {
@@ -87,7 +87,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             else
             {
                 _requests.Remove(message);
-                _headers.Remove(message.Request.Uuid);
+                _headers.Remove(message.Request.RequestUuid);
             }
         }
 
@@ -123,12 +123,12 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 
         protected virtual void OnNotifyInsert(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKind.insert);
+            OnNotify(ObjectChanged, uri, dataObject, dateTime, ObjectChangeKind.insert);
         }
 
         protected virtual void OnNotifyUpdate(string uri, object dataObject, DateTime dateTime)
         {
-            OnNotify(ChangeNotification, uri, dataObject, dateTime, ObjectChangeKind.update);
+            OnNotify(ObjectChanged, uri, dataObject, dateTime, ObjectChangeKind.update);
         }
 
         protected virtual void OnNotifyDelete(string uri, object dataObject, DateTime dateTime)
@@ -137,9 +137,9 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             if (request == null) return;
 
             IMessageHeader header;
-            if (!_headers.TryGetValue(request.Request.Uuid, out header)) return;
+            if (!_headers.TryGetValue(request.Request.RequestUuid, out header)) return;
 
-            DeleteNotification(header, uri, dateTime.ToUnixTimeMicroseconds());
+            ObjectDeleted(header, uri, dateTime.ToUnixTimeMicroseconds());
         }
 
         protected virtual void OnNotify(Func<IMessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeKind changeKind)
@@ -148,7 +148,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             if (request == null) return;
 
             IMessageHeader header;
-            if (!_headers.TryGetValue(request.Request.Uuid, out header)) return;
+            if (!_headers.TryGetValue(request.Request.RequestUuid, out header)) return;
 
             var etpUri = new EtpUri(uri);
 
