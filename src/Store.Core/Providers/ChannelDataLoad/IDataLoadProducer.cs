@@ -27,23 +27,22 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelDataLoad
         /// <summary>
         /// Sends a OpenChannel message to a store.
         /// </summary>
-        /// <param name="uri">The channel URI.</param>
-        /// <param name="id">The channel identifier.</param>
+        /// <param name="channels">The channels.</param>
         /// <returns>The message identifier.</returns>
-        long OpenChannel(string uri, long id);
+        long OpenChannel(IList<ChannelMetadataRecord> channels);
 
         /// <summary>
-        /// Sends RealtimeData message with the specified dataPoints.
+        /// Sends a RealtimeData message with the specified data items.
         /// </summary>
         /// <param name="dataItems">The data items.</param>
-        /// <returns></returns>
+        /// <returns>The message identifier.</returns>
         long RealtimeData(IList<DataItem> dataItems);
 
         /// <summary>
-        /// Sends InfillRealtimeData message with the specified dataPoints.
+        /// Sends an InfillData message with the specified data items.
         /// </summary>
         /// <param name="dataItems">The data items.</param>
-        /// <returns></returns>
-        long InfillRealtimeData(IList<DataItem> dataItems);
+        /// <returns>The message identifier.</returns>
+        long InfillData(IList<DataItem> dataItems);
     }
 }

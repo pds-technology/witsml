@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit", "..\ext\etp-devkit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETP.Messages", "..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj", "{1A788A14-70D7-4B2B-96A3-086C86D0C925}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit.UnitTest", "..\..\etp-devkit\src\DevKit.UnitTest\DevKit.UnitTest.csproj", "{BC953158-9584-45CF-BA13-10CE67348759}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,10 @@ Global
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC953158-9584-45CF-BA13-10CE67348759}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC953158-9584-45CF-BA13-10CE67348759}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC953158-9584-45CF-BA13-10CE67348759}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC953158-9584-45CF-BA13-10CE67348759}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +114,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{30DE888B-A6B7-4528-AD89-324A7F9B0F4C} = {66C87641-4BE6-47AD-9853-31F64CF7AF78}
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925} = {66C87641-4BE6-47AD-9853-31F64CF7AF78}
+		{BC953158-9584-45CF-BA13-10CE67348759} = {66C87641-4BE6-47AD-9853-31F64CF7AF78}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D96FB7B6-A780-431B-90DE-BBB91B80FDE6}
