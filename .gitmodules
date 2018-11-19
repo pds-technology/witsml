@@ -1,0 +1,4 @@
+[submodule "ext/etp-devkit"]
+	path = ext/etp-devkit
+	url = ../etp-devkit
+	branch = etp1.2
