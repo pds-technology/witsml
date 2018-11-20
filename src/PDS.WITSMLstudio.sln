@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A788A14-70D7-4B2B-96A3-086C86D0C925} = {1A788A14-70D7-4B2B-96A3-086C86D0C925}
+		{30DE888B-A6B7-4528-AD89-324A7F9B0F4C} = {30DE888B-A6B7-4528-AD89-324A7F9B0F4C}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.UnitTest", "Core.UnitTest\Core.UnitTest.csproj", "{750F795F-0C36-4CB3-9372-C4A5A716C635}"
 EndProject
@@ -40,10 +44,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ETP.DevKit", "ETP.DevKit", "{66C87641-4BE6-47AD-9853-31F64CF7AF78}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit", "..\ext\etp-devkit\src\DevKit\DevKit.csproj", "{30DE888B-A6B7-4528-AD89-324A7F9B0F4C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A788A14-70D7-4B2B-96A3-086C86D0C925} = {1A788A14-70D7-4B2B-96A3-086C86D0C925}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETP.Messages", "..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj", "{1A788A14-70D7-4B2B-96A3-086C86D0C925}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit.UnitTest", "..\..\etp-devkit\src\DevKit.UnitTest\DevKit.UnitTest.csproj", "{BC953158-9584-45CF-BA13-10CE67348759}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit.UnitTest", "..\ext\etp-devkit\src\DevKit.UnitTest\DevKit.UnitTest.csproj", "{BC953158-9584-45CF-BA13-10CE67348759}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

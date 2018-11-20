@@ -46,7 +46,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="uri">The URI.</param>
         /// <param name="messageId">The message identifier.</param>
         /// <returns>A new <see cref="EtpUri" /> instance.</returns>
-        public static EtpUri CreateAndValidateUri(this EtpProtocolHandler handler, string uri, long messageId = 0)
+        public static EtpUri CreateAndValidateUri(this IProtocolHandler handler, string uri, long messageId = 0)
         {
             var etpUri = new EtpUri(uri);
 
@@ -65,7 +65,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="etpUri">The ETP URI.</param>
         /// <param name="messageId">The message identifier.</param>
         /// <returns></returns>
-        public static bool ValidateUriObjectType(this EtpProtocolHandler handler, EtpUri etpUri, long messageId = 0)
+        public static bool ValidateUriObjectType(this IProtocolHandler handler, EtpUri etpUri, long messageId = 0)
         {
             if (!string.IsNullOrWhiteSpace(etpUri.ObjectType))
                 return true;
@@ -147,9 +147,9 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="contractName">The contract name.</param>
         /// <param name="callback">The callback.</param>
         /// <returns>An <see cref="IStreamingConsumer"/> instance.</returns>
-        public static IStreamingConsumer RegisterChannelStreamingConsumer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingConsumer> callback = null)
+        public static IStreamingConsumer RegisterChannelStreamingConsumer(this IEtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingConsumer> callback = null)
         {
-            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpSession.SupportedVersion == EtpVersion.v11)
             {
                 var handler = container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingConsumer>(contractName);
                 var consumer = handler as IStreamingConsumer;
@@ -179,9 +179,9 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="contractName">The contract name.</param>
         /// <param name="callback">The callback.</param>
         /// <returns>An <see cref="IStreamingProducer"/> instance.</returns>
-        public static IStreamingProducer RegisterChannelStreamingProducer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingProducer> callback = null)
+        public static IStreamingProducer RegisterChannelStreamingProducer(this IEtpSession etpSession, IContainer container, string contractName = null, Action<IStreamingProducer> callback = null)
         {
-            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpSession.SupportedVersion == EtpVersion.v11)
             {
                 var handler = container.Resolve<Energistics.Etp.v11.Protocol.ChannelStreaming.IChannelStreamingProducer>(contractName);
                 var producer = handler as IStreamingProducer;
@@ -211,7 +211,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="contractName">The contract name.</param>
         /// <param name="callback">The callback.</param>
         /// <returns></returns>
-        public static IDataLoadProducer RegisterChannelDataLoadProducer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IDataLoadProducer> callback = null)
+        public static IDataLoadProducer RegisterChannelDataLoadProducer(this IEtpSession etpSession, IContainer container, string contractName = null, Action<IDataLoadProducer> callback = null)
         {
             var handler = container.Resolve<Energistics.Etp.v12.Protocol.ChannelDataLoad.IChannelDataLoadProducer>(contractName);
             var producer = handler as IDataLoadProducer;
@@ -230,9 +230,9 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="contractName">The contract name.</param>
         /// <param name="callback">The callback.</param>
         /// <returns>An <see cref="IProtocolHandler"/> instance.</returns>
-        public static IProtocolHandler RegisterDiscoveryStore(this EtpSession etpSession, IContainer container, string contractName = null, Action<IProtocolHandler> callback = null)
+        public static IProtocolHandler RegisterDiscoveryStore(this IEtpSession etpSession, IContainer container, string contractName = null, Action<IProtocolHandler> callback = null)
         {
-            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpSession.SupportedVersion == EtpVersion.v11)
             {
                 var handler = container.Resolve<Energistics.Etp.v11.Protocol.Discovery.IDiscoveryStore>(contractName);
                 callback?.Invoke(handler);
@@ -256,9 +256,9 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="contractName">Name of the contract.</param>
         /// <param name="callback">The callback.</param>
         /// <returns></returns>
-        public static IEtpStoreCustomer RegisterStoreCustomer(this EtpSession etpSession, IContainer container, string contractName = null, Action<IEtpStoreCustomer> callback = null)
+        public static IEtpStoreCustomer RegisterStoreCustomer(this IEtpSession etpSession, IContainer container, string contractName = null, Action<IEtpStoreCustomer> callback = null)
         {
-            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpSession.SupportedVersion == EtpVersion.v11)
             {
                 var handler = container.Resolve<Energistics.Etp.v11.Protocol.Store.IStoreCustomer>(contractName);
                 var customer = handler as IEtpStoreCustomer;
@@ -285,7 +285,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IEtpProtocols"/> instance.</returns>
         public static IEtpProtocols GetEtpProtocols(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? new Etp11Protocols()
                 : new Etp12Protocols() as IEtpProtocols;
         }
@@ -300,7 +300,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IIndexMetadataRecord" /> instance.</returns>
         public static IIndexMetadataRecord CreateIndexMetadata(this IEtpAdapter etpAdapter, EtpUri? uri = null, bool isTimeIndex = true, bool isIncreasing = true)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 return new Energistics.Etp.v11.Datatypes.ChannelData.IndexMetadataRecord
                 {
@@ -338,7 +338,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IChannelMetadataRecord"/> instance.</returns>
         public static IChannelMetadataRecord CreateChannelMetadata(this IEtpAdapter etpAdapter, EtpUri? uri = null)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 return new Energistics.Etp.v11.Datatypes.ChannelData.ChannelMetadataRecord
                 {
@@ -367,7 +367,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IMessageHeader" /> instance.</returns>
         public static IMessageHeader CreateChannelMetadataHeader(this IEtpAdapter etpAdapter, long messageId = 0)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 return new Energistics.Etp.v11.Datatypes.MessageHeader
                 {
@@ -397,7 +397,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A channel status indicator.</returns>
         public static int GetChannelStatus(this IEtpAdapter etpAdapter, bool isActive)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 return isActive
                     ? (int) Energistics.Etp.v11.Datatypes.ChannelData.ChannelStatuses.Active
@@ -419,7 +419,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             if (index == null) return false;
 
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? index.IndexKind == (int) Energistics.Etp.v11.Datatypes.ChannelData.ChannelIndexTypes.Time
                 : index.IndexKind == (int) Energistics.Etp.v12.Datatypes.ChannelData.ChannelIndexKind.Time;
         }
@@ -434,7 +434,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             if (index == null) return false;
 
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? index.Direction == (int) Energistics.Etp.v11.Datatypes.ChannelData.IndexDirections.Increasing
                 : index.Direction == (int) Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Increasing;
         }
@@ -449,7 +449,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         {
             if (index == null) return string.Empty;
 
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? "long"
                 : etpAdapter.IsTimeIndex(index) ? "long" : "double";
         }
@@ -469,9 +469,10 @@ namespace PDS.WITSMLstudio.Store.Providers
 
             var value = indexValue ?? 0;
 
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter || etpAdapter.IsTimeIndex(index)) return value;
+            if (etpAdapter.SupportedVersion == EtpVersion.v11 || etpAdapter.IsTimeIndex(index))
+                return value;
 
-            return (double)value;
+            return (double) value;
         }
 
 
@@ -482,7 +483,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IDataItem"/> instance.</returns>
         public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? (IDataItem)new Energistics.Etp.v11.Datatypes.ChannelData.DataItem()
                 : new Energistics.Etp.v12.Datatypes.ChannelData.DataItem();
         }
@@ -494,7 +495,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IDataValue"/> instance.</returns>
         public static IDataValue CreateDataValue(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? (IDataValue)new Energistics.Etp.v11.Datatypes.DataValue()
                 : new Energistics.Etp.v12.Datatypes.DataValue();
         }
@@ -506,7 +507,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>An <see cref="IChannelStreamingInfo"/> instance</returns>
         public static IChannelStreamingInfo CreateChannelStreamingInfo(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? new Energistics.Etp.v11.Datatypes.ChannelData.ChannelStreamingInfo()
                 : null;
         }
@@ -518,7 +519,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>An <see cref="IStreamingStartIndex"/> instance</returns>
         public static IStreamingStartIndex CreateStreamingStartIndex(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? new Energistics.Etp.v11.Datatypes.ChannelData.StreamingStartIndex()
                 : null;
         }
@@ -537,7 +538,7 @@ namespace PDS.WITSMLstudio.Store.Providers
 
             foreach (var dataAttribute in dataAttributes)
             {
-                if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+                if (etpAdapter.SupportedVersion == EtpVersion.v11)
                     castedDataAttribtes.Add(dataAttribute as Energistics.Etp.v11.Datatypes.DataAttribute);
                 else
                     castedDataAttribtes.Add(dataAttribute as Energistics.Etp.v12.Datatypes.DataAttribute);
@@ -553,7 +554,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IDataObject"/> instance.</returns>
         public static IDataObject CreateDataObject(this IEtpAdapter etpAdapter)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? new Energistics.Etp.v11.Datatypes.Object.DataObject()
                 : new Energistics.Etp.v12.Datatypes.Object.DataObject() as IDataObject;
         }
@@ -567,7 +568,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new server capabilities instance.</returns>
         public static object CreateServerCapabilities(this IEtpSession etpSession, IList<string> supportedObjects, IList<string> supportedEncodings)
         {
-            if (etpSession.Adapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpSession.SupportedVersion == EtpVersion.v11)
             {
                 return new Energistics.Etp.v11.Datatypes.ServerCapabilities
                 {
@@ -621,7 +622,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>The resource instance.</returns>
         public static IResource CreateResource(this IEtpAdapter etpAdapter, string uuid, EtpUri uri, ResourceTypes resourceType, string name, int count = 0, long lastChanged = 0)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
                 return Discovery11StoreProvider.New(uuid, uri, resourceType, name, count, lastChanged);
 
             return Discovery12StoreProvider.New(uuid, uri, resourceType, name, count, lastChanged);
@@ -637,7 +638,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>The resource instance.</returns>
         public static IResource NewProtocol(this IEtpAdapter etpAdapter, EtpUri protocolUri, string folderName, int count = -1)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
                 return Discovery11StoreProvider.NewProtocol(protocolUri, folderName, count);
 
             return Discovery12StoreProvider.NewProtocol(protocolUri, folderName, count);
@@ -655,7 +656,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IResource"/> instance.</returns>
         public static IResource NewFolder(this IEtpAdapter etpAdapter, EtpUri parentUri, EtpContentType contentType, string folderName, int childCount = -1, bool appendFolderName = false)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
                 return Discovery11StoreProvider.NewFolder(parentUri, contentType, folderName, childCount, appendFolderName);
 
             return Discovery12StoreProvider.NewFolder(parentUri, contentType, folderName, childCount, appendFolderName);
@@ -675,7 +676,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="compress">if set to <c>true</c> compress the data object.</param>
         public static void SetDataObject<T>(this IEtpAdapter etpAdapter, IDataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0, bool compress = true)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 Store11StoreProvider.SetDataObject(dataObject, entity, uri, name, childCount, lastChanged, compress);
             }
@@ -693,7 +694,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A non-generic collection.</returns>
         public static IList ToList(this IEtpAdapter etpAdapter, IList<IChannelMetadataRecord> channels)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? channels.Cast<Energistics.Etp.v11.Datatypes.ChannelData.ChannelMetadataRecord>().ToList()
                 : channels.Cast<Energistics.Etp.v12.Datatypes.ChannelData.ChannelMetadataRecord>().ToList() as IList;
         }
@@ -706,7 +707,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A non-generic collection.</returns>
         public static IList ToList(this IEtpAdapter etpAdapter, IList<IIndexMetadataRecord> indexes)
         {
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? indexes.Cast<Energistics.Etp.v11.Datatypes.ChannelData.IndexMetadataRecord>().ToList()
                 : indexes.Cast<Energistics.Etp.v12.Datatypes.ChannelData.IndexMetadataRecord>().ToList() as IList;
         }
@@ -724,36 +725,36 @@ namespace PDS.WITSMLstudio.Store.Providers
 
             if (type == typeof(double))
             {
-                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                return etpAdapter.SupportedVersion == EtpVersion.v11
                     ? new Energistics.Etp.v11.Datatypes.ArrayOfDouble { Values = (IList<double>)values }
                     : new Energistics.Etp.v12.Datatypes.ArrayOfDouble { Values = (IList<double>)values } as object;
             }
             if (type == typeof(float))
             {
-                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                return etpAdapter.SupportedVersion == EtpVersion.v11
                     ? new Energistics.Etp.v11.Datatypes.ArrayOfFloat { Values = (IList<float>)values }
                     : new Energistics.Etp.v12.Datatypes.ArrayOfFloat { Values = (IList<float>)values } as object;
             }
             if (type == typeof(long))
             {
-                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                return etpAdapter.SupportedVersion == EtpVersion.v11
                     ? new Energistics.Etp.v11.Datatypes.ArrayOfLong { Values = (IList<long>)values }
                     : new Energistics.Etp.v12.Datatypes.ArrayOfLong { Values = (IList<long>)values } as object;
             }
             if (type == typeof(int))
             {
-                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                return etpAdapter.SupportedVersion == EtpVersion.v11
                     ? new Energistics.Etp.v11.Datatypes.ArrayOfInt { Values = (IList<int>)values }
                     : new Energistics.Etp.v12.Datatypes.ArrayOfInt { Values = (IList<int>)values } as object;
             }
             if (type == typeof(bool))
             {
-                return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+                return etpAdapter.SupportedVersion == EtpVersion.v11
                     ? new Energistics.Etp.v11.Datatypes.ArrayOfBoolean { Values = (IList<bool>)values }
                     : new Energistics.Etp.v12.Datatypes.ArrayOfBoolean { Values = (IList<bool>)values } as object;
             }
 
-            return etpAdapter is Energistics.Etp.v11.Etp11Adapter
+            return etpAdapter.SupportedVersion == EtpVersion.v11
                 ? new Energistics.Etp.v11.Datatypes.AnyArray { Item = values }
                 : new Energistics.Etp.v12.Datatypes.AnyArray { Item = values } as object;
         }
@@ -769,7 +770,7 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <returns>A new <see cref="IDataItem"/> instance.</returns>
         public static IDataItem CreateDataItem(this IEtpAdapter etpAdapter, long channelId, object value = null, IList<object> indexes = null, IList<object> attributes = null)
         {
-            if (etpAdapter is Energistics.Etp.v11.Etp11Adapter)
+            if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 return new Energistics.Etp.v11.Datatypes.ChannelData.DataItem
                 {
