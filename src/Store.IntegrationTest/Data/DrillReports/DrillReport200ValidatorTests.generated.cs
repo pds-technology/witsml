@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
     [TestClass]
     public partial class DrillReport200ValidatorTests : DrillReport200TestBase
     {
-
     }
 }

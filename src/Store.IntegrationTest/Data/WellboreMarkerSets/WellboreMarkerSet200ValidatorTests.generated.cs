@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
     [TestClass]
     public partial class WellboreMarkerSet200ValidatorTests : WellboreMarkerSet200TestBase
     {
-
     }
 }

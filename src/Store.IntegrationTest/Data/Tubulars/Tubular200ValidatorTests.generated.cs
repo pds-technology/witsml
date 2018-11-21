@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
     [TestClass]
     public partial class Tubular200ValidatorTests : Tubular200TestBase
     {
-
     }
 }

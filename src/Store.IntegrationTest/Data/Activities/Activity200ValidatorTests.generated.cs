@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Activities
     [TestClass]
     public partial class Activity200ValidatorTests : Activity200TestBase
     {
-
     }
 }

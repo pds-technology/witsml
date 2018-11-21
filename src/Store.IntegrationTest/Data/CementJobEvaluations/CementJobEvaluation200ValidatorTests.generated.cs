@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
     [TestClass]
     public partial class CementJobEvaluation200ValidatorTests : CementJobEvaluation200TestBase
     {
-
     }
 }

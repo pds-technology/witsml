@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     [TestClass]
     public partial class MudLog141ValidatorTests : MudLog141TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -130,9 +129,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         public void MudLog141Validator_AddToStore_Error_406_MudLog_Missing_Parent_Uid()
         {
             AddParents();
-
             MudLog.UidWellbore = null;
-
             DevKit.AddAndAssert(MudLog, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -167,16 +164,53 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         #region Error -409
 
         [TestMethod]
-        public void MudLog141Validator_UpdateInStore_Error_409_MudLog_QueryIn_Must_Conform_To_Schema()
+        public void MudLog141Validator_AddToStore_Error_409_MudLog_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.MudLog, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_UpdateInStore_Error_409_MudLog_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
-
                 $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.MudLog, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_GetFromStore_Error_409_MudLog_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.MudLog, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_DeleteFromStore_Error_409_MudLog_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.MudLog, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -194,15 +228,12 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -415
-
         #region Error -416
 
         [TestMethod]
         public void MudLog141Validator_DeleteFromStore_Error_416_MudLog_Delete_With_Empty_UID()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             MudLog.CommonData = new CommonData
             {
@@ -215,7 +246,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.MudLog, deleteXml, null, null);
@@ -231,9 +261,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_DeleteFromStore_Error_418_MudLog_Delete_With_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             MudLog.CommonData = new CommonData
             {
@@ -246,7 +274,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.MudLog, deleteXml, null, null);
@@ -262,9 +289,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_DeleteFromStore_Error_419_MudLog_Deleting_Empty_NonRecurring_Container_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             MudLog.CommonData = new CommonData
             {
@@ -277,7 +302,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.MudLog, deleteXml, null, null);
@@ -287,19 +311,16 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -419
-
         #region Error -420
 
         [TestMethod]
         public void MudLog141Validator_DeleteFromStore_Error_420_MudLog_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(MudLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.MudLog, deleteXml, null, null);
 
@@ -308,6 +329,57 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void MudLog141Validator_AddToStore_Error_426_MudLog_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.MudLog, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_UpdateInStore_Error_426_MudLog_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.MudLog, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_GetFromStore_Error_426_MudLog_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
+                $"<name>{MudLog.Name}</name><name>{MudLog.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.MudLog, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -325,9 +397,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_GetFromStore_Error_438_MudLog_Recurring_Elements_Have_Inconsistent_Selection()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -342,7 +412,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var queryXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
@@ -361,9 +430,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_GetFromStore_Error_439_MudLog_Recurring_Elements_Has_Empty_Selection_Value()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -378,7 +445,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var queryXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
@@ -391,7 +457,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -439
-
         #region Error -444
 
         [TestMethod]
@@ -399,7 +464,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         {
             AddParents();
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
-
             var updateXml = "<mudLogs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><mudLog uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></mudLog><mudLog uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></mudLog></mudLogs>";
             updateXml = string.Format(updateXml, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid);
 
@@ -414,9 +478,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_UpdateInStore_Error_445_MudLog_Empty_New_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             MudLog.CommonData = new CommonData
@@ -448,9 +510,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_UpdateInStore_Error_448_MudLog_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             MudLog.CommonData = new CommonData
@@ -464,7 +524,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var updateXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
                 "</commonData>");
@@ -480,9 +539,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_AddToStore_Error_464_MudLog_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -500,9 +557,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_UpdateInStore_Error_464_MudLog_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             MudLog.CommonData = new CommonData
@@ -529,15 +584,12 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -464
-
         #region Error -468
 
         [TestMethod]
         public void MudLog141Validator_UpdateInStore_Error_468_MudLog_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
             var response = DevKit.UpdateInStore(ObjectTypes.MudLog, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -550,7 +602,6 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_AddToStore_Error_478_MudLog_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -562,6 +613,57 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void MudLog141Validator_AddToStore_Error_479_MudLog_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.MudLog, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_UpdateInStore_Error_479_MudLog_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.MudLog, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void MudLog141Validator_GetFromStore_Error_479_MudLog_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.MudLog, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -591,13 +693,9 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_UpdateInStore_Error_484_MudLog_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.MudLog, nonConformingXml, null, null);
@@ -611,19 +709,15 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         [TestMethod]
         public void MudLog141Validator_AddToStore_Error_486_MudLog_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

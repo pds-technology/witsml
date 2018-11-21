@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     [TestClass]
     public partial class SurveyProgram200ValidatorTests : SurveyProgram200TestBase
     {
-
     }
 }

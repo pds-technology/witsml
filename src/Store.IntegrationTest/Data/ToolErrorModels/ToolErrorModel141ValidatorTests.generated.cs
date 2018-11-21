@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
     [TestClass]
     public partial class ToolErrorModel141ValidatorTests : ToolErrorModel141TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -146,16 +145,53 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         #region Error -409
 
         [TestMethod]
-        public void ToolErrorModel141Validator_UpdateInStore_Error_409_ToolErrorModel_QueryIn_Must_Conform_To_Schema()
+        public void ToolErrorModel141Validator_AddToStore_Error_409_ToolErrorModel_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_UpdateInStore_Error_409_ToolErrorModel_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
-
                 $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_GetFromStore_Error_409_ToolErrorModel_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_DeleteFromStore_Error_409_ToolErrorModel_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -173,13 +209,11 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         }
 
         #endregion Error -415
-
         #region Error -416
 
         [TestMethod]
         public void ToolErrorModel141Validator_DeleteFromStore_Error_416_ToolErrorModel_Delete_With_Empty_UID()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorModel.CommonData = new CommonData
             {
@@ -192,7 +226,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorModel, deleteXml, null, null);
@@ -208,7 +241,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_DeleteFromStore_Error_418_ToolErrorModel_Delete_With_Missing_Uid()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorModel.CommonData = new CommonData
             {
@@ -221,7 +253,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorModel, deleteXml, null, null);
@@ -237,7 +268,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_DeleteFromStore_Error_419_ToolErrorModel_Deleting_Empty_NonRecurring_Container_Element()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorModel.CommonData = new CommonData
             {
@@ -250,7 +280,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorModel, deleteXml, null, null);
@@ -260,7 +289,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         }
 
         #endregion Error -419
-
         #region Error -420
 
         [TestMethod]
@@ -270,7 +298,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorModel, deleteXml, null, null);
 
@@ -279,6 +306,57 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_AddToStore_Error_426_ToolErrorModel_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_UpdateInStore_Error_426_ToolErrorModel_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorModel141Validator_GetFromStore_Error_426_ToolErrorModel_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
+                $"<name>{ToolErrorModel.Name}</name><name>{ToolErrorModel.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -296,7 +374,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_GetFromStore_Error_438_ToolErrorModel_Recurring_Elements_Have_Inconsistent_Selection()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -311,7 +388,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var queryXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
@@ -330,7 +406,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_GetFromStore_Error_439_ToolErrorModel_Recurring_Elements_Has_Empty_Selection_Value()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -345,7 +420,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var queryXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
@@ -358,7 +432,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         }
 
         #endregion Error -439
-
         #region Error -444
 
         [TestMethod]
@@ -366,7 +439,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         {
             AddParents();
             DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
-
             var updateXml = "<toolErrorModels xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><toolErrorModel uid=\"{0}\"></toolErrorModel><toolErrorModel uid=\"{0}\"></toolErrorModel></toolErrorModels>";
             updateXml = string.Format(updateXml, ToolErrorModel.Uid);
 
@@ -381,7 +453,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_UpdateInStore_Error_445_ToolErrorModel_Empty_New_Element()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorModel.CommonData = new CommonData
@@ -413,7 +484,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_UpdateInStore_Error_448_ToolErrorModel_Missing_Uid()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorModel.CommonData = new CommonData
@@ -427,7 +497,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
             DevKit.AddAndAssert(ToolErrorModel);
 
             var updateXml = string.Format(BasicXMLTemplate,ToolErrorModel.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
                 "</commonData>");
@@ -443,7 +512,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_AddToStore_Error_464_ToolErrorModel_Uid_Not_Unique()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -461,7 +529,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_UpdateInStore_Error_464_ToolErrorModel_Uid_Not_Unique()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorModel.CommonData = new CommonData
@@ -488,13 +555,11 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         }
 
         #endregion Error -464
-
         #region Error -468
 
         [TestMethod]
         public void ToolErrorModel141Validator_UpdateInStore_Error_468_ToolErrorModel_No_Schema_Version_Declared()
         {
-
             DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorModel, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -520,11 +585,8 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         [TestMethod]
         public void ToolErrorModel141Validator_UpdateInStore_Error_484_ToolErrorModel_Update_Will_Delete_Required_Element()
         {
-
             DevKit.AddAndAssert<ToolErrorModelList, ToolErrorModel>(ToolErrorModel);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorModel, nonConformingXml, null, null);
@@ -540,15 +602,12 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         {
 
             var xmlIn = string.Format(BasicXMLTemplate, ToolErrorModel.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

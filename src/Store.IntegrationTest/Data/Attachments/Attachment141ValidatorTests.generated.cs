@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     [TestClass]
     public partial class Attachment141ValidatorTests : Attachment141TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -123,9 +122,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         public void Attachment141Validator_AddToStore_Error_406_Attachment_Missing_Parent_Uid()
         {
             AddParents();
-
             Attachment.UidWellbore = null;
-
             DevKit.AddAndAssert(Attachment, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -160,16 +157,53 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         #region Error -409
 
         [TestMethod]
-        public void Attachment141Validator_UpdateInStore_Error_409_Attachment_QueryIn_Must_Conform_To_Schema()
+        public void Attachment141Validator_AddToStore_Error_409_Attachment_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.Attachment, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_409_Attachment_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
-
                 $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Attachment, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_GetFromStore_Error_409_Attachment_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.Attachment, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_DeleteFromStore_Error_409_Attachment_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.Attachment, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -187,15 +221,12 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -415
-
         #region Error -416
 
         [TestMethod]
         public void Attachment141Validator_DeleteFromStore_Error_416_Attachment_Delete_With_Empty_UID()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Attachment.CommonData = new CommonData
             {
@@ -208,7 +239,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
@@ -224,9 +254,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_DeleteFromStore_Error_418_Attachment_Delete_With_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Attachment.CommonData = new CommonData
             {
@@ -239,7 +267,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
@@ -255,9 +282,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_DeleteFromStore_Error_419_Attachment_Deleting_Empty_NonRecurring_Container_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Attachment.CommonData = new CommonData
             {
@@ -270,7 +295,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
@@ -280,19 +304,16 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -419
-
         #region Error -420
 
         [TestMethod]
         public void Attachment141Validator_DeleteFromStore_Error_420_Attachment_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(Attachment);
 
             var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
 
@@ -301,6 +322,57 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void Attachment141Validator_AddToStore_Error_426_Attachment_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Attachment, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_426_Attachment_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Attachment, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_GetFromStore_Error_426_Attachment_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                $"<name>{Attachment.Name}</name><name>{Attachment.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Attachment, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -318,9 +390,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_GetFromStore_Error_438_Attachment_Recurring_Elements_Have_Inconsistent_Selection()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -335,7 +405,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var queryXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
@@ -354,9 +423,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_GetFromStore_Error_439_Attachment_Recurring_Elements_Has_Empty_Selection_Value()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -371,7 +438,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var queryXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
@@ -384,7 +450,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -439
-
         #region Error -444
 
         [TestMethod]
@@ -392,7 +457,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         {
             AddParents();
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
-
             var updateXml = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></attachment><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></attachment></attachments>";
             updateXml = string.Format(updateXml, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid);
 
@@ -407,9 +471,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_445_Attachment_Empty_New_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Attachment.CommonData = new CommonData
@@ -441,9 +503,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_448_Attachment_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Attachment.CommonData = new CommonData
@@ -457,7 +517,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
             DevKit.AddAndAssert(Attachment);
 
             var updateXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
                 "</commonData>");
@@ -473,9 +532,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_AddToStore_Error_464_Attachment_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -493,9 +550,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_464_Attachment_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Attachment.CommonData = new CommonData
@@ -522,15 +577,12 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -464
-
         #region Error -468
 
         [TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_468_Attachment_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
             var response = DevKit.UpdateInStore(ObjectTypes.Attachment, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -543,7 +595,6 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_AddToStore_Error_478_Attachment_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -555,6 +606,57 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void Attachment141Validator_AddToStore_Error_479_Attachment_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Attachment, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_479_Attachment_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Attachment, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_GetFromStore_Error_479_Attachment_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Attachment, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -584,13 +686,9 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_484_Attachment_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Attachment, nonConformingXml, null, null);
@@ -604,19 +702,15 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         [TestMethod]
         public void Attachment141Validator_AddToStore_Error_486_Attachment_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

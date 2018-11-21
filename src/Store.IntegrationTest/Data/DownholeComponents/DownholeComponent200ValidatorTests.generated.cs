@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.DownholeComponents
     [TestClass]
     public partial class DownholeComponent200ValidatorTests : DownholeComponent200TestBase
     {
-
     }
 }

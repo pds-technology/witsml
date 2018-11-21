@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     [TestClass]
     public partial class Rig200ValidatorTests : Rig200TestBase
     {
-
     }
 }

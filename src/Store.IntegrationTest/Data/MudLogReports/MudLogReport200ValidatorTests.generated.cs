@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogReports
     [TestClass]
     public partial class MudLogReport200ValidatorTests : MudLogReport200TestBase
     {
-
     }
 }

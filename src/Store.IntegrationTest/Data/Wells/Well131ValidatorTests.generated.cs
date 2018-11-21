@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     [TestClass]
     public partial class Well131ValidatorTests : Well131TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -146,16 +145,53 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         #region Error -409
 
         [TestMethod]
-        public void Well131Validator_UpdateInStore_Error_409_Well_QueryIn_Must_Conform_To_Schema()
+        public void Well131Validator_AddToStore_Error_409_Well_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Well131Validator_UpdateInStore_Error_409_Well_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<WellList, Well>(Well);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
-
                 $"<name>{Well.Name}</name><name>{Well.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Well, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Well131Validator_GetFromStore_Error_409_Well_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Well131Validator_DeleteFromStore_Error_409_Well_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.Well, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -173,7 +209,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         }
 
         #endregion Error -415
-
         #region Error -420
 
         [TestMethod]
@@ -183,7 +218,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             DevKit.AddAndAssert(Well);
 
             var deleteXml = string.Format(BasicXMLTemplate,Well.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
@@ -192,6 +226,57 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void Well131Validator_AddToStore_Error_426_Well_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Well131Validator_UpdateInStore_Error_426_Well_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Well, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Well131Validator_GetFromStore_Error_426_Well_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
+                $"<name>{Well.Name}</name><name>{Well.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -203,7 +288,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         }
 
         #endregion Error -433
-
         #region Error -444
 
         [TestMethod]
@@ -211,7 +295,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
             AddParents();
             DevKit.AddAndAssert<WellList, Well>(Well);
-
             var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><well uid=\"{0}\"></well><well uid=\"{0}\"></well></wells>";
             updateXml = string.Format(updateXml, Well.Uid);
 
@@ -220,13 +303,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         }
 
         #endregion Error -444
-
         #region Error -468
 
         [TestMethod]
         public void Well131Validator_UpdateInStore_Error_468_Well_No_Schema_Version_Declared()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
             var response = DevKit.UpdateInStore(ObjectTypes.Well, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -252,11 +333,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void Well131Validator_UpdateInStore_Error_484_Well_Update_Will_Delete_Required_Element()
         {
-
             DevKit.AddAndAssert<WellList, Well>(Well);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Well, nonConformingXml, null, null);
@@ -272,15 +350,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
 
             var xmlIn = string.Format(BasicXMLTemplate, Well.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

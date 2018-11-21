@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
     [TestClass]
     public partial class Well200ValidatorTests : Well200TestBase
     {
-
     }
 }

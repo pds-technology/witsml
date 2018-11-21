@@ -191,7 +191,8 @@ namespace PDS.WITSMLstudio.Store
             }
             catch (WitsmlException ex)
             {
-                var response = new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.Message);
+                var errorCode = ex.ErrorCode.CorrectNonConformingErrorCodes(WitsmlOperationContext.Current.RequestCompressed);
+                var response = new WMLS_GetFromStoreResponse((short)errorCode, string.Empty, ex.Message);
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
@@ -234,7 +235,8 @@ namespace PDS.WITSMLstudio.Store
             }
             catch (WitsmlException ex)
             {
-                var response = new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.Message);
+                var errorCode = ex.ErrorCode.CorrectNonConformingErrorCodes(WitsmlOperationContext.Current.RequestCompressed);
+                var response = new WMLS_AddToStoreResponse((short)errorCode, ex.Message);
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
@@ -277,7 +279,8 @@ namespace PDS.WITSMLstudio.Store
             }
             catch (WitsmlException ex)
             {
-                var response = new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.Message);
+                var errorCode = ex.ErrorCode.CorrectNonConformingErrorCodes(WitsmlOperationContext.Current.RequestCompressed);
+                var response = new WMLS_UpdateInStoreResponse((short)errorCode, ex.Message);
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }

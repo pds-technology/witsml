@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     [TestClass]
     public partial class FormationMarker131ValidatorTests : FormationMarker131TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -123,9 +122,7 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         public void FormationMarker131Validator_AddToStore_Error_406_FormationMarker_Missing_Parent_Uid()
         {
             AddParents();
-
             FormationMarker.UidWellbore = null;
-
             DevKit.AddAndAssert(FormationMarker, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -160,16 +157,53 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         #region Error -409
 
         [TestMethod]
-        public void FormationMarker131Validator_UpdateInStore_Error_409_FormationMarker_QueryIn_Must_Conform_To_Schema()
+        public void FormationMarker131Validator_AddToStore_Error_409_FormationMarker_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_UpdateInStore_Error_409_FormationMarker_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
-
                 $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_GetFromStore_Error_409_FormationMarker_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_DeleteFromStore_Error_409_FormationMarker_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -187,19 +221,16 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         }
 
         #endregion Error -415
-
         #region Error -420
 
         [TestMethod]
         public void FormationMarker131Validator_DeleteFromStore_Error_420_FormationMarker_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(FormationMarker);
 
             var deleteXml = string.Format(BasicXMLTemplate,FormationMarker.UidWell, FormationMarker.UidWellbore,FormationMarker.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.FormationMarker, deleteXml, null, null);
 
@@ -208,6 +239,57 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void FormationMarker131Validator_AddToStore_Error_426_FormationMarker_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.FormationMarker, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_UpdateInStore_Error_426_FormationMarker_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_GetFromStore_Error_426_FormationMarker_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
+                $"<name>{FormationMarker.Name}</name><name>{FormationMarker.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.FormationMarker, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -219,7 +301,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         }
 
         #endregion Error -433
-
         #region Error -444
 
         [TestMethod]
@@ -227,7 +308,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         {
             AddParents();
             DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
-
             var updateXml = "<formationMarkers xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><formationMarker uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></formationMarker><formationMarker uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></formationMarker></formationMarkers>";
             updateXml = string.Format(updateXml, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid);
 
@@ -236,15 +316,12 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         }
 
         #endregion Error -444
-
         #region Error -468
 
         [TestMethod]
         public void FormationMarker131Validator_UpdateInStore_Error_468_FormationMarker_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
             var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -257,7 +334,6 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         [TestMethod]
         public void FormationMarker131Validator_AddToStore_Error_478_FormationMarker_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -269,6 +345,57 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void FormationMarker131Validator_AddToStore_Error_479_FormationMarker_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.FormationMarker, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_UpdateInStore_Error_479_FormationMarker_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void FormationMarker131Validator_GetFromStore_Error_479_FormationMarker_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.FormationMarker, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -298,13 +425,9 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         [TestMethod]
         public void FormationMarker131Validator_UpdateInStore_Error_484_FormationMarker_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
@@ -318,19 +441,15 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         [TestMethod]
         public void FormationMarker131Validator_AddToStore_Error_486_FormationMarker_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

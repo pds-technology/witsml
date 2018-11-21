@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
     [TestClass]
     public partial class ToolErrorTermSet141ValidatorTests : ToolErrorTermSet141TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -146,16 +145,53 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         #region Error -409
 
         [TestMethod]
-        public void ToolErrorTermSet141Validator_UpdateInStore_Error_409_ToolErrorTermSet_QueryIn_Must_Conform_To_Schema()
+        public void ToolErrorTermSet141Validator_AddToStore_Error_409_ToolErrorTermSet_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_UpdateInStore_Error_409_ToolErrorTermSet_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
-
                 $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_GetFromStore_Error_409_ToolErrorTermSet_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_DeleteFromStore_Error_409_ToolErrorTermSet_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -173,13 +209,11 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         }
 
         #endregion Error -415
-
         #region Error -416
 
         [TestMethod]
         public void ToolErrorTermSet141Validator_DeleteFromStore_Error_416_ToolErrorTermSet_Delete_With_Empty_UID()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorTermSet.CommonData = new CommonData
             {
@@ -192,7 +226,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorTermSet, deleteXml, null, null);
@@ -208,7 +241,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_DeleteFromStore_Error_418_ToolErrorTermSet_Delete_With_Missing_Uid()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorTermSet.CommonData = new CommonData
             {
@@ -221,7 +253,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorTermSet, deleteXml, null, null);
@@ -237,7 +268,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_DeleteFromStore_Error_419_ToolErrorTermSet_Deleting_Empty_NonRecurring_Container_Element()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             ToolErrorTermSet.CommonData = new CommonData
             {
@@ -250,7 +280,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorTermSet, deleteXml, null, null);
@@ -260,7 +289,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         }
 
         #endregion Error -419
-
         #region Error -420
 
         [TestMethod]
@@ -270,7 +298,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var deleteXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.ToolErrorTermSet, deleteXml, null, null);
 
@@ -279,6 +306,57 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_AddToStore_Error_426_ToolErrorTermSet_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_UpdateInStore_Error_426_ToolErrorTermSet_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void ToolErrorTermSet141Validator_GetFromStore_Error_426_ToolErrorTermSet_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
+                $"<name>{ToolErrorTermSet.Name}</name><name>{ToolErrorTermSet.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -296,7 +374,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_GetFromStore_Error_438_ToolErrorTermSet_Recurring_Elements_Have_Inconsistent_Selection()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -311,7 +388,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var queryXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
@@ -330,7 +406,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_GetFromStore_Error_439_ToolErrorTermSet_Recurring_Elements_Has_Empty_Selection_Value()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -345,7 +420,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var queryXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
@@ -358,7 +432,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         }
 
         #endregion Error -439
-
         #region Error -444
 
         [TestMethod]
@@ -366,7 +439,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         {
             AddParents();
             DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
-
             var updateXml = "<toolErrorTermSets xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><toolErrorTermSet uid=\"{0}\"></toolErrorTermSet><toolErrorTermSet uid=\"{0}\"></toolErrorTermSet></toolErrorTermSets>";
             updateXml = string.Format(updateXml, ToolErrorTermSet.Uid);
 
@@ -381,7 +453,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_UpdateInStore_Error_445_ToolErrorTermSet_Empty_New_Element()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorTermSet.CommonData = new CommonData
@@ -413,7 +484,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_UpdateInStore_Error_448_ToolErrorTermSet_Missing_Uid()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorTermSet.CommonData = new CommonData
@@ -427,7 +497,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
             DevKit.AddAndAssert(ToolErrorTermSet);
 
             var updateXml = string.Format(BasicXMLTemplate,ToolErrorTermSet.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
                 "</commonData>");
@@ -443,7 +512,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_AddToStore_Error_464_ToolErrorTermSet_Uid_Not_Unique()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -461,7 +529,6 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_UpdateInStore_Error_464_ToolErrorTermSet_Uid_Not_Unique()
         {
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             ToolErrorTermSet.CommonData = new CommonData
@@ -488,13 +555,11 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         }
 
         #endregion Error -464
-
         #region Error -468
 
         [TestMethod]
         public void ToolErrorTermSet141Validator_UpdateInStore_Error_468_ToolErrorTermSet_No_Schema_Version_Declared()
         {
-
             DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorTermSet, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -520,11 +585,8 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         [TestMethod]
         public void ToolErrorTermSet141Validator_UpdateInStore_Error_484_ToolErrorTermSet_Update_Will_Delete_Required_Element()
         {
-
             DevKit.AddAndAssert<ToolErrorTermSetList, ToolErrorTermSet>(ToolErrorTermSet);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.ToolErrorTermSet, nonConformingXml, null, null);
@@ -540,15 +602,12 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         {
 
             var xmlIn = string.Format(BasicXMLTemplate, ToolErrorTermSet.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
     [TestClass]
     public partial class ToolErrorModel200ValidatorTests : ToolErrorModel200TestBase
     {
-
     }
 }

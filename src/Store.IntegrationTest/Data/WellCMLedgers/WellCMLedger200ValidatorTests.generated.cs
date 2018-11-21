@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.WellCMLedgers
     [TestClass]
     public partial class WellCMLedger200ValidatorTests : WellCMLedger200TestBase
     {
-
     }
 }

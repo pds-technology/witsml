@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
     [TestClass]
     public partial class BhaRun200ValidatorTests : BhaRun200TestBase
     {
-
     }
 }

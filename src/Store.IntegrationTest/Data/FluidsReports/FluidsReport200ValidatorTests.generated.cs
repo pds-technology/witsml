@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     [TestClass]
     public partial class FluidsReport200ValidatorTests : FluidsReport200TestBase
     {
-
     }
 }

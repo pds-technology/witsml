@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     [TestClass]
     public partial class Log141ValidatorTests : Log141TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -130,9 +129,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         public void Log141Validator_AddToStore_Error_406_Log_Missing_Parent_Uid()
         {
             AddParents();
-
             Log.UidWellbore = null;
-
             DevKit.AddAndAssert(Log, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -167,16 +164,53 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         #region Error -409
 
         [TestMethod]
-        public void Log141Validator_UpdateInStore_Error_409_Log_QueryIn_Must_Conform_To_Schema()
+        public void Log141Validator_AddToStore_Error_409_Log_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.Log, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_409_Log_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
-
                 $"<name>{Log.Name}</name><name>{Log.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Log, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_409_Log_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.Log, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_DeleteFromStore_Error_409_Log_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.Log, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -194,15 +228,12 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -415
-
         #region Error -416
 
         [TestMethod]
         public void Log141Validator_DeleteFromStore_Error_416_Log_Delete_With_Empty_UID()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Log.CommonData = new CommonData
             {
@@ -215,7 +246,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
@@ -231,9 +261,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_DeleteFromStore_Error_418_Log_Delete_With_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Log.CommonData = new CommonData
             {
@@ -246,7 +274,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
@@ -262,9 +289,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_DeleteFromStore_Error_419_Log_Deleting_Empty_NonRecurring_Container_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             Log.CommonData = new CommonData
             {
@@ -277,7 +302,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
@@ -287,19 +311,16 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -419
-
         #region Error -420
 
         [TestMethod]
         public void Log141Validator_DeleteFromStore_Error_420_Log_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(Log);
 
             var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
 
@@ -308,6 +329,57 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_426_Log_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Log, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_426_Log_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Log, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_426_Log_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                $"<name>{Log.Name}</name><name>{Log.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Log, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -325,9 +397,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_GetFromStore_Error_438_Log_Recurring_Elements_Have_Inconsistent_Selection()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -342,7 +412,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var queryXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
@@ -361,9 +430,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_GetFromStore_Error_439_Log_Recurring_Elements_Has_Empty_Selection_Value()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
 
@@ -378,7 +445,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var queryXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
                 "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
@@ -391,7 +457,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -439
-
         #region Error -444
 
         [TestMethod]
@@ -399,7 +464,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         {
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
-
             var updateXml = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><log uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></log><log uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></log></logs>";
             updateXml = string.Format(updateXml, Log.UidWell, Log.UidWellbore, Log.Uid);
 
@@ -414,9 +478,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_445_Log_Empty_New_Element()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Log.CommonData = new CommonData
@@ -448,9 +510,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_448_Log_Missing_Uid()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Log.CommonData = new CommonData
@@ -464,7 +524,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var updateXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-
                 "<commonData>" +
                 $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
                 "</commonData>");
@@ -480,9 +539,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_AddToStore_Error_464_Log_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -500,9 +557,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_464_Log_Uid_Not_Unique()
         {
-
             AddParents();
-
             var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             Log.CommonData = new CommonData
@@ -529,15 +584,12 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -464
-
         #region Error -468
 
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_468_Log_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
             var response = DevKit.UpdateInStore(ObjectTypes.Log, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -550,7 +602,6 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_AddToStore_Error_478_Log_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -562,6 +613,57 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_479_Log_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Log, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_479_Log_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Log, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_479_Log_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Log, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -591,13 +693,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_484_Log_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<LogList, Log>(Log);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Log, nonConformingXml, null, null);
@@ -611,19 +709,15 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [TestMethod]
         public void Log141Validator_AddToStore_Error_486_Log_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

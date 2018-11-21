@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     [TestClass]
     public partial class FluidsReport131ValidatorTests : FluidsReport131TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -123,9 +122,7 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         public void FluidsReport131Validator_AddToStore_Error_406_FluidsReport_Missing_Parent_Uid()
         {
             AddParents();
-
             FluidsReport.UidWellbore = null;
-
             DevKit.AddAndAssert(FluidsReport, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -160,16 +157,53 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         #region Error -409
 
         [TestMethod]
-        public void FluidsReport131Validator_UpdateInStore_Error_409_FluidsReport_QueryIn_Must_Conform_To_Schema()
+        public void FluidsReport131Validator_AddToStore_Error_409_FluidsReport_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_UpdateInStore_Error_409_FluidsReport_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
-
                 $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_GetFromStore_Error_409_FluidsReport_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_DeleteFromStore_Error_409_FluidsReport_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -187,19 +221,16 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         }
 
         #endregion Error -415
-
         #region Error -420
 
         [TestMethod]
         public void FluidsReport131Validator_DeleteFromStore_Error_420_FluidsReport_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(FluidsReport);
 
             var deleteXml = string.Format(BasicXMLTemplate,FluidsReport.UidWell, FluidsReport.UidWellbore,FluidsReport.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.FluidsReport, deleteXml, null, null);
 
@@ -208,6 +239,57 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void FluidsReport131Validator_AddToStore_Error_426_FluidsReport_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.FluidsReport, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_UpdateInStore_Error_426_FluidsReport_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_GetFromStore_Error_426_FluidsReport_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
+                $"<name>{FluidsReport.Name}</name><name>{FluidsReport.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.FluidsReport, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -219,7 +301,6 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         }
 
         #endregion Error -433
-
         #region Error -444
 
         [TestMethod]
@@ -227,7 +308,6 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         {
             AddParents();
             DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
-
             var updateXml = "<fluidsReports xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><fluidsReport uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></fluidsReport><fluidsReport uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></fluidsReport></fluidsReports>";
             updateXml = string.Format(updateXml, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid);
 
@@ -236,15 +316,12 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         }
 
         #endregion Error -444
-
         #region Error -468
 
         [TestMethod]
         public void FluidsReport131Validator_UpdateInStore_Error_468_FluidsReport_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
             var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -257,7 +334,6 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         [TestMethod]
         public void FluidsReport131Validator_AddToStore_Error_478_FluidsReport_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -269,6 +345,57 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void FluidsReport131Validator_AddToStore_Error_479_FluidsReport_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.FluidsReport, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_UpdateInStore_Error_479_FluidsReport_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void FluidsReport131Validator_GetFromStore_Error_479_FluidsReport_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.FluidsReport, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -298,13 +425,9 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         [TestMethod]
         public void FluidsReport131Validator_UpdateInStore_Error_484_FluidsReport_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
@@ -318,19 +441,15 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         [TestMethod]
         public void FluidsReport131Validator_AddToStore_Error_486_FluidsReport_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

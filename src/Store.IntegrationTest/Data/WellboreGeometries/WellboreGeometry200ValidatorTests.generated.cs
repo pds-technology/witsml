@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeometries
     [TestClass]
     public partial class WellboreGeometry200ValidatorTests : WellboreGeometry200TestBase
     {
-
     }
 }

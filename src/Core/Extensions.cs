@@ -313,6 +313,22 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Converts input template non-conforming error codes to the correct error code depending on whether the request is compressed or not.
+        /// </summary>
+        /// <param name="errorCode">The initial error code.</param>
+        /// <param name="requestCompressed">Whether or not the input request was compressed.</param>
+        /// <returns><see cref="ErrorCodes.CompressedInputNonConforming"/> if <paramref name="requestCompressed"/> is
+        /// <see cref="ErrorCodes.InputTemplateNonConforming"/> and <paramref name="errorCode"/> is <c>true</c>; otherwise
+        /// the input errror code.</returns>
+        public static ErrorCodes CorrectNonConformingErrorCodes(this ErrorCodes errorCode, bool requestCompressed)
+        {
+            if (requestCompressed && errorCode == ErrorCodes.InputTemplateNonConforming)
+                return ErrorCodes.CompressedInputNonConforming;
+
+            return errorCode;
+        }
+
+        /// <summary>
         /// Gets the missing element uid error code.
         /// </summary>
         /// <param name="function">The function.</param>

@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.RigUtilizations
     [TestClass]
     public partial class RigUtilization200ValidatorTests : RigUtilization200TestBase
     {
-
     }
 }

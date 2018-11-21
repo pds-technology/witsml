@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
     [TestClass]
     public partial class Target131ValidatorTests : Target131TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -123,9 +122,7 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         public void Target131Validator_AddToStore_Error_406_Target_Missing_Parent_Uid()
         {
             AddParents();
-
             Target.UidWellbore = null;
-
             DevKit.AddAndAssert(Target, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -160,16 +157,53 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         #region Error -409
 
         [TestMethod]
-        public void Target131Validator_UpdateInStore_Error_409_Target_QueryIn_Must_Conform_To_Schema()
+        public void Target131Validator_AddToStore_Error_409_Target_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.Target, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_UpdateInStore_Error_409_Target_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<TargetList, Target>(Target);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
-
                 $"<name>{Target.Name}</name><name>{Target.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Target, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_GetFromStore_Error_409_Target_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.Target, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_DeleteFromStore_Error_409_Target_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.Target, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -187,19 +221,16 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         }
 
         #endregion Error -415
-
         #region Error -420
 
         [TestMethod]
         public void Target131Validator_DeleteFromStore_Error_420_Target_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(Target);
 
             var deleteXml = string.Format(BasicXMLTemplate,Target.UidWell, Target.UidWellbore,Target.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Target, deleteXml, null, null);
 
@@ -208,6 +239,57 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void Target131Validator_AddToStore_Error_426_Target_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Target, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_UpdateInStore_Error_426_Target_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Target, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_GetFromStore_Error_426_Target_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
+                $"<name>{Target.Name}</name><name>{Target.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Target, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -219,7 +301,6 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         }
 
         #endregion Error -433
-
         #region Error -444
 
         [TestMethod]
@@ -227,7 +308,6 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         {
             AddParents();
             DevKit.AddAndAssert<TargetList, Target>(Target);
-
             var updateXml = "<targets xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><target uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></target><target uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></target></targets>";
             updateXml = string.Format(updateXml, Target.UidWell, Target.UidWellbore, Target.Uid);
 
@@ -236,15 +316,12 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         }
 
         #endregion Error -444
-
         #region Error -468
 
         [TestMethod]
         public void Target131Validator_UpdateInStore_Error_468_Target_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<TargetList, Target>(Target);
             var response = DevKit.UpdateInStore(ObjectTypes.Target, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -257,7 +334,6 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         [TestMethod]
         public void Target131Validator_AddToStore_Error_478_Target_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             Wellbore.Uid = Wellbore.Uid.ToUpper();
             Wellbore.UidWell = Well.Uid.ToUpper();
@@ -269,6 +345,57 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void Target131Validator_AddToStore_Error_479_Target_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Target, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_UpdateInStore_Error_479_Target_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Target, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Target131Validator_GetFromStore_Error_479_Target_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TargetList, Target>(Target);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Target, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -298,13 +425,9 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         [TestMethod]
         public void Target131Validator_UpdateInStore_Error_484_Target_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<TargetList, Target>(Target);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Target, nonConformingXml, null, null);
@@ -318,19 +441,15 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
         [TestMethod]
         public void Target131Validator_AddToStore_Error_486_Target_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

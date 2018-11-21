@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobStages
     [TestClass]
     public partial class StimJobStage200ValidatorTests : StimJobStage200TestBase
     {
-
     }
 }

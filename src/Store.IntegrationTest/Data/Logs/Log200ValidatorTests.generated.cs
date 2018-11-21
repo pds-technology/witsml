@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     [TestClass]
     public partial class Log200ValidatorTests : Log200TestBase
     {
-
     }
 }

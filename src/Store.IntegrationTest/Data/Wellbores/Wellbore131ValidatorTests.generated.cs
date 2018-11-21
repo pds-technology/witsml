@@ -36,7 +36,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
     [TestClass]
     public partial class Wellbore131ValidatorTests : Wellbore131TestBase
     {
-
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -123,9 +122,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         public void Wellbore131Validator_AddToStore_Error_406_Wellbore_Missing_Parent_Uid()
         {
             AddParents();
-
             Wellbore.UidWell = null;
-
             DevKit.AddAndAssert(Wellbore, ErrorCodes.MissingElementUidForAdd);
         }
 
@@ -160,16 +157,53 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         #region Error -409
 
         [TestMethod]
-        public void Wellbore131Validator_UpdateInStore_Error_409_Wellbore_QueryIn_Must_Conform_To_Schema()
+        public void Wellbore131Validator_AddToStore_Error_409_Wellbore_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var response = DevKit.AddToStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_409_Wellbore_XmlIn_Must_Conform_To_Schema()
         {
             AddParents();
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
-
                 $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_GetFromStore_Error_409_Wellbore_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var response = DevKit.GetFromStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_DeleteFromStore_Error_409_Wellbore_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
@@ -187,19 +221,16 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         }
 
         #endregion Error -415
-
         #region Error -420
 
         [TestMethod]
         public void Wellbore131Validator_DeleteFromStore_Error_420_Wellbore_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
-
             AddParents();
 
             DevKit.AddAndAssert(Wellbore);
 
             var deleteXml = string.Format(BasicXMLTemplate,Wellbore.UidWell, Wellbore.Uid,
-
                 "<name />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
@@ -208,6 +239,57 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         }
 
         #endregion Error -420
+
+        #region Error -426
+
+        [TestMethod]
+        public void Wellbore131Validator_AddToStore_Error_426_Wellbore_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Wellbore, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_426_Wellbore_Compressed_XmlIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_GetFromStore_Error_426_Wellbore_Compressed_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref nonConformingXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Wellbore, nonConformingXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CompressedInputNonConforming, response.Result);
+        }
+
+        #endregion Error -426
 
         #region Error -433
 
@@ -219,7 +301,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         }
 
         #endregion Error -433
-
         #region Error -444
 
         [TestMethod]
@@ -227,7 +308,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         {
             AddParents();
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
             var updateXml = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wellbore uidWell=\"{0}\" uid=\"{1}\"></wellbore><wellbore uidWell=\"{0}\" uid=\"{1}\"></wellbore></wellbores>";
             updateXml = string.Format(updateXml, Wellbore.UidWell, Wellbore.Uid);
 
@@ -236,15 +316,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         }
 
         #endregion Error -444
-
         #region Error -468
 
         [TestMethod]
         public void Wellbore131Validator_UpdateInStore_Error_468_Wellbore_No_Schema_Version_Declared()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -257,7 +334,6 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         [TestMethod]
         public void Wellbore131Validator_AddToStore_Error_478_Wellbore_Parent_Uid_Case_Not_Matching()
         {
-
             Well.Uid = Well.Uid.ToUpper();
             AddParents();
 
@@ -267,6 +343,57 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         }
 
         #endregion Error -478
+
+        #region Error -479
+
+        [TestMethod]
+        public void Wellbore131Validator_AddToStore_Error_479_Wellbore_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.AddToStore(ObjectTypes.Wellbore, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_479_Wellbore_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore131Validator_GetFromStore_Error_479_Wellbore_Cannot_Decompress_XmlIn()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var uncompressedXml = "abcd1234";
+            var compressedXml = uncompressedXml;
+
+            var optionsIn = string.Empty;
+            ClientCompression.Compress(ref compressedXml, ref optionsIn);
+
+            var response = DevKit.GetFromStore(ObjectTypes.Wellbore, uncompressedXml, null, optionsIn);
+            Assert.AreEqual((short)ErrorCodes.CannotDecompressQuery, response.Result);
+        }
+
+        #endregion Error -479
 
         #region Error -481
 
@@ -296,13 +423,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         [TestMethod]
         public void Wellbore131Validator_UpdateInStore_Error_484_Wellbore_Update_Will_Delete_Required_Element()
         {
-
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
-
             var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
-
                 $"<name></name>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
@@ -316,19 +439,15 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         [TestMethod]
         public void Wellbore131Validator_AddToStore_Error_486_Wellbore_Data_Object_Types_Dont_Match()
         {
-
             AddParents();
 
             var xmlIn = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
-
                 string.Empty);
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         #endregion Error -486
-
     }
 }

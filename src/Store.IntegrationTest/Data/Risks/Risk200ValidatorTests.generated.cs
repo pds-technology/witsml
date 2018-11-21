@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.Risks
     [TestClass]
     public partial class Risk200ValidatorTests : Risk200TestBase
     {
-
     }
 }

@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.DataAssuranceRecords
     [TestClass]
     public partial class DataAssuranceRecord200ValidatorTests : DataAssuranceRecord200TestBase
     {
-
     }
 }

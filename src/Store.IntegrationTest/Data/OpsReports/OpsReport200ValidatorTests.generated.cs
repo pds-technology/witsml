@@ -36,6 +36,5 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
     [TestClass]
     public partial class OpsReport200ValidatorTests : OpsReport200TestBase
     {
-
     }
 }
