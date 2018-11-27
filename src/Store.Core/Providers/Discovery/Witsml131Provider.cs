@@ -187,7 +187,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             return Providers
                 .OfType<IWitsmlDataAdapter>()
                 .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
-                .OrderBy(x => x.DataObjectType.Name);
+                .OrderBy(x => x.GetType().Name);
         }
 
         private IResource ToResource(IEtpAdapter etpAdapter, Well entity)
