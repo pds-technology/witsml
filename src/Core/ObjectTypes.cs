@@ -200,7 +200,8 @@ namespace PDS.WITSMLstudio
                 //{ EtpContentTypes.Witsml200.For(MudLogReportInterval), new [] { "InterpretedGeologyInterval" }},
                 //{ EtpContentTypes.Witsml200.For(MudLogReportInterval), new [] { "ShowEvaluationInterval" }},
                 { EtpContentTypes.Witsml200.For(OpsReport), new [] { "WellboreGeometry" }},
-                { EtpContentTypes.Witsml200.For(TrajectoryStation), new [] { "IscwsaToolErrorModel" }}
+                { EtpContentTypes.Witsml200.For(TrajectoryStation), new [] { "IscwsaToolErrorModel" }},
+                { EtpContentTypes.Witsml200.For(WellboreMarker), new [] { "Trajectory" }}
             };
         }
 
