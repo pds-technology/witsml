@@ -42,6 +42,11 @@ namespace PDS.WITSMLstudio.Adapters
         public int ChannelDataFrame => (int) Protocols.ChannelDataFrame;
 
         /// <summary>
+        /// Gets the ChannelSubscribe protocol identifier.
+        /// </summary>
+        public int ChannelSubscribe => -1;
+
+        /// <summary>
         /// Gets the ChannelDataLoad protocol identifier.
         /// </summary>
         public int ChannelDataLoad => -1;
