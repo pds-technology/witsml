@@ -324,8 +324,12 @@ namespace PDS.WITSMLstudio.Store.Providers
                 Direction = isIncreasing
                     ? Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Increasing
                     : Energistics.Etp.v12.Datatypes.ChannelData.IndexDirection.Decreasing,
+                Interval = new Energistics.Etp.v12.Datatypes.Object.IndexInterval(),
                 DepthDatum = string.Empty,
                 TimeDatum = string.Empty,
+                StartIndex = null,
+                EndIndex = null,
+                Uom = string.Empty,
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
             };
         }
@@ -355,6 +359,7 @@ namespace PDS.WITSMLstudio.Store.Providers
                 ContentType = uri?.ContentType.ToString(),
                 Status = Energistics.Etp.v12.Datatypes.ChannelData.ChannelStatusKind.Active,
                 AttributeMetadata = new List<Energistics.Etp.v12.Datatypes.AttributeMetadataRecord>(),
+                AxisVectorLengths = new List<int>(),
                 CustomData = new Dictionary<string, Energistics.Etp.v12.Datatypes.DataValue>()
             };
         }
@@ -676,6 +681,9 @@ namespace PDS.WITSMLstudio.Store.Providers
         /// <param name="compress">if set to <c>true</c> compress the data object.</param>
         public static void SetDataObject<T>(this IEtpAdapter etpAdapter, IDataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1, long lastChanged = 0, bool compress = true)
         {
+            // There's nothing to set if the data object 
+            if (dataObject == null) return;
+
             if (etpAdapter.SupportedVersion == EtpVersion.v11)
             {
                 Store11StoreProvider.SetDataObject(dataObject, entity, uri, name, childCount, lastChanged, compress);
