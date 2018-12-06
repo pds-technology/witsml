@@ -153,13 +153,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 if (!isChannelDataAdapterEnabled && ObjectTypes.ChannelSet.EqualsIgnoreCase(etpUri.ObjectType) && ObjectTypes.Log.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var log = _logDataProvider.Get(parentUri);
-                    log?.ChannelSet?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
+                    log?.ChannelSet?.OrderBy(x => x.Citation.Title).ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
                     serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
                 else if (!isChannelDataAdapterEnabled && ObjectTypes.Channel.EqualsIgnoreCase(etpUri.ObjectType) && ObjectTypes.ChannelSet.EqualsIgnoreCase(parentUri.ObjectType))
                 {
                     var set = _channelSetDataProvider.Get(parentUri);
-                    set?.Channel?.ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
+                    set?.Channel?.OrderBy(x => x.Citation.Title).ForEach(x => resources.Add(ToResource(etpAdapter, x, parentUri)));
                     serverSortOrder = _channelSetDataProvider.ServerSortOrder;
                 }
                 else
