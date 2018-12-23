@@ -68,7 +68,7 @@ namespace PDS.WITSMLstudio
         /// <returns>The UnitOfMeasure if not null or empty; value null if otherwise</returns>
         public static UnitOfMeasure? GetUnitOfMeasure(string uom)
         {
-            return (UnitOfMeasure?) typeof(UnitOfMeasure).ParseEnum(uom);
+            return (UnitOfMeasure?) typeof(UnitOfMeasure).ParseEnum(uom, false);
         }
     }
 }
