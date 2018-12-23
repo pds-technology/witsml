@@ -28,10 +28,11 @@ namespace PDS.WITSMLstudio.Framework
         /// Parses the specified enumeration value.
         /// </summary>
         /// <param name="enumValue">The enum value.</param>
+        /// <param name="ignoreCase">if set to <c>true</c> comparison is case insensitive.</param>
         /// <returns>The parsed enumeration value.</returns>
-        public static T Parse(string enumValue)
+        public static T Parse(string enumValue, bool ignoreCase = true)
         {
-            return (T) typeof(T).ParseEnum(enumValue);
+            return (T) typeof(T).ParseEnum(enumValue, ignoreCase);
         }
     }
 }
