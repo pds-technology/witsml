@@ -18,6 +18,8 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace PDS.WITSMLstudio.Framework
@@ -28,7 +30,8 @@ namespace PDS.WITSMLstudio.Framework
     /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
     public static class XmlAttributeCache<TAttribute> where TAttribute : Attribute
     {
-        private static readonly ConcurrentDictionary<MemberInfo, TAttribute> _cache = new ConcurrentDictionary<MemberInfo, TAttribute>();
+        private static readonly ConcurrentDictionary<MemberInfo, TAttribute> _cacheSingle = new ConcurrentDictionary<MemberInfo, TAttribute>();
+        private static readonly ConcurrentDictionary<MemberInfo, List<TAttribute>> _cacheMulti = new ConcurrentDictionary<MemberInfo, List<TAttribute>>();
 
         /// <summary>
         /// Gets the custom attribute.  Tries to get it from the cache first and then through reflection if not in the cache.
@@ -41,13 +44,33 @@ namespace PDS.WITSMLstudio.Framework
                 return null;
 
             TAttribute attribute;
-            if (_cache.TryGetValue(member, out attribute))
+            if (_cacheSingle.TryGetValue(member, out attribute))
                 return attribute;
 
             attribute = member.GetCustomAttribute<TAttribute>();
-            _cache[member] = attribute;
+            _cacheSingle[member] = attribute;
 
             return attribute;
+        }
+
+        /// <summary>
+        /// Gets the custom attributes.  Tries to get them from the cache first and then through reflection if not in the cache.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <returns>The attributes or <c>null</c> if no such attributes exist.</returns>
+        public static List<TAttribute> GetCustomAttributes(MemberInfo member)
+        {
+            if (member == null)
+                return null;
+
+            List<TAttribute> attributes;
+            if (_cacheMulti.TryGetValue(member, out attributes))
+                return attributes;
+
+            attributes = member.GetCustomAttributes<TAttribute>().ToList();
+            _cacheMulti[member] = attributes;
+
+            return attributes;
         }
 
         /// <summary>
