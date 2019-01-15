@@ -16,6 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+using PDS.WITSMLstudio.Framework;
+
 namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
@@ -63,7 +70,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
             return new RequestContext(
                 function: Functions.GetFromStore,
                 objectType: request.WMLtypeIn,
-                xml: request.QueryIn,
+                xml: DecompressQueryIn(request.QueryIn, request.OptionsIn),
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }
@@ -78,7 +85,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
             return new RequestContext(
                 function: Functions.AddToStore,
                 objectType: request.WMLtypeIn,
-                xml: request.XMLin,
+                xml: DecompressQueryIn(request.XMLin, request.OptionsIn),
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }
@@ -93,7 +100,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
             return new RequestContext(
                 function: Functions.UpdateInStore,
                 objectType: request.WMLtypeIn,
-                xml: request.XMLin,
+                xml: DecompressQueryIn(request.XMLin, request.OptionsIn),
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }
@@ -108,7 +115,7 @@ namespace PDS.WITSMLstudio.Store.Configuration
             return new RequestContext(
                 function: Functions.DeleteFromStore,
                 objectType: request.WMLtypeIn,
-                xml: request.QueryIn,
+                xml: DecompressQueryIn(request.QueryIn, request.OptionsIn),
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }
@@ -127,5 +134,50 @@ namespace PDS.WITSMLstudio.Store.Configuration
                 options: null,
                 capabilities: null);
         }
+
+        /// <summary>
+        /// Decompresses the input XML/Query string based on the compressionMethod OptionsIn parameter (if any)
+        /// The request context will end up with the uncompressed XML data for further validation and processing.
+        /// </summary>
+        /// <param name="requestQueryIn">The input XML/Query for the request</param>
+        /// <param name="requestOptionsIn">The OptionsIn dictionary supplied with the request</param>
+        /// <returns></returns>
+        private static string DecompressQueryIn(string requestQueryIn, string requestOptionsIn)
+        {
+            Dictionary<string, string> optionsDict = OptionsIn.Parse(requestOptionsIn);
+
+            //if not specified or "none"
+            if (!optionsDict.ContainsKey(OptionsIn.CompressionMethod.Keyword) ||
+                (optionsDict[OptionsIn.CompressionMethod.Keyword]
+                    .EqualsIgnoreCase(OptionsIn.CompressionMethod.None.Value)))
+            {
+                return requestQueryIn;
+            }
+
+            if (optionsDict[OptionsIn.CompressionMethod.Keyword].EqualsIgnoreCase(OptionsIn.CompressionMethod.Gzip.Value))
+            {
+                using (MemoryStream msIn = new MemoryStream())
+                {
+                    byte[] data = Convert.FromBase64String(requestQueryIn);
+                    msIn.Write(data, 0, data.Length);
+                    msIn.Seek(0, SeekOrigin.Begin);
+
+                    using (GZipStream gzs = new GZipStream(msIn, CompressionMode.Decompress))
+                    {
+                        using (MemoryStream msOut = new MemoryStream())
+                        {
+                            gzs.CopyTo(msOut);
+
+                            return Encoding.UTF8.GetString(msOut.ToArray());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                throw new WitsmlException(ErrorCodes.CompressedInputNonConforming, "Compression method not supported.");
+            }
+        }
     }
+
 }

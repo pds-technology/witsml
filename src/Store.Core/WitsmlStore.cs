@@ -156,11 +156,12 @@ namespace PDS.WITSMLstudio.Store
         /// </returns>
         public WMLS_GetFromStoreResponse WMLS_GetFromStore(WMLS_GetFromStoreRequest request)
         {
-            var context = WitsmlOperationContext.Current.Request = request.ToContext();
+            
             var version = string.Empty;
 
             try
             {
+                var context = WitsmlOperationContext.Current.Request = request.ToContext();
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
@@ -183,7 +184,7 @@ namespace PDS.WITSMLstudio.Store
             catch (ContainerException)
             {
                 var response = new WMLS_GetFromStoreResponse((short)ErrorCodes.DataObjectNotSupported, string.Empty,
-                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+                    "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
 
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
@@ -204,11 +205,12 @@ namespace PDS.WITSMLstudio.Store
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_AddToStoreResponse WMLS_AddToStore(WMLS_AddToStoreRequest request)
         {
-            var context = WitsmlOperationContext.Current.Request = request.ToContext();
+            
             var version = string.Empty;
 
             try
             {
+                var context = WitsmlOperationContext.Current.Request = request.ToContext();
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
@@ -226,7 +228,7 @@ namespace PDS.WITSMLstudio.Store
             catch (ContainerException)
             {
                 var response = new WMLS_AddToStoreResponse((short)ErrorCodes.DataObjectNotSupported,
-                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+                    "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
 
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
@@ -247,14 +249,15 @@ namespace PDS.WITSMLstudio.Store
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_UpdateInStoreResponse WMLS_UpdateInStore(WMLS_UpdateInStoreRequest request)
         {
-            var context = WitsmlOperationContext.Current.Request = request.ToContext();
+            
             var version = string.Empty;
 
             try
             {
+                var context = WitsmlOperationContext.Current.Request = request.ToContext();
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
-
+                
                 UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders);
                 version = WitsmlOperationContext.Current.DataSchemaVersion;
@@ -269,7 +272,7 @@ namespace PDS.WITSMLstudio.Store
             catch (ContainerException)
             {
                 var response = new WMLS_UpdateInStoreResponse((short)ErrorCodes.DataObjectNotSupported,
-                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+                    "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
 
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
@@ -290,11 +293,12 @@ namespace PDS.WITSMLstudio.Store
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_DeleteFromStoreResponse WMLS_DeleteFromStore(WMLS_DeleteFromStoreRequest request)
         {
-            var context = WitsmlOperationContext.Current.Request = request.ToContext();
+            
             var version = string.Empty;
 
             try
             {
+                var context = WitsmlOperationContext.Current.Request = request.ToContext();
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
@@ -312,7 +316,7 @@ namespace PDS.WITSMLstudio.Store
             catch (ContainerException)
             {
                 var response = new WMLS_DeleteFromStoreResponse((short)ErrorCodes.DataObjectNotSupported,
-                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+                    "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
 
                 _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
