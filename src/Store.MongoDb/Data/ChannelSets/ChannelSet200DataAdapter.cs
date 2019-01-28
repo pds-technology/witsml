@@ -187,6 +187,8 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
                 Dictionary<string, Range<double?>> ranges;
                 logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
 
+                var missingMnemonics = mnemonics.Where(m => !ranges.Keys.ContainsIgnoreCase(m)).ToList();
+                missingMnemonics.ForEach(m => mnemonics.Remove(m));
 
                 // Test if we're finished reading data
                 finished =                              // Finished if...
