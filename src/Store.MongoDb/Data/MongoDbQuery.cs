@@ -129,7 +129,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Navigates the root element.
         /// </summary>
         /// <param name="returnElements">The return elements.</param>
-        internal void Navigate(string returnElements)
+        public void Navigate(string returnElements)
         {
             // Check if to project fields
             Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||

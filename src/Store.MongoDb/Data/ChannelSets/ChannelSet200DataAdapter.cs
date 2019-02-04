@@ -128,12 +128,6 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
             var entity = GetEntity(uri);
             var queryMnemonics = mnemonics.ToArray();
-            var allMnemonics = GetAllMnemonics(entity);
-            var mnemonicIndexes = ComputeMnemonicIndexes(entity, allMnemonics, queryMnemonics);
-            var keys = mnemonicIndexes.Keys.ToArray();
-            var units = GetUnitList(entity, keys);
-            var dataTypes = GetDataTypeList(entity, keys);
-            var nullValues = GetNullValueList(entity, keys);
 
             // Create a context to pass information required by the ChannelDataReader.
             var context = new ResponseContext()
@@ -182,11 +176,19 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
 
                 // Get a reader to process the log's channel data records
                 var reader = records.GetReader();
+                var allMnemonics = reader.AllMnemonics;
+                var mnemonicIndexes = ComputeMnemonicIndexes(entity, allMnemonics, queryMnemonics);
+                var keys = mnemonicIndexes.Keys.ToArray();
+                var units = GetUnitList(entity, keys);
+                var dataTypes = GetDataTypeList(entity, keys);
+                var nullValues = GetNullValueList(entity, keys);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
                 Dictionary<string, Range<double?>> ranges;
                 logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
 
+                var missingMnemonics = mnemonics.Where(m => !ranges.Keys.ContainsIgnoreCase(m)).ToList();
+                missingMnemonics.ForEach(m => mnemonics.Remove(m));
 
                 // Test if we're finished reading data
                 finished =                              // Finished if...
