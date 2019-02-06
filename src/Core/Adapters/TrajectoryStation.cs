@@ -150,6 +150,69 @@ namespace PDS.WITSMLstudio.Adapters
         public double? DoglegSeverity => _trajectoryStation131?.DoglegSeverity.Value ?? _trajectoryStation141?.DoglegSeverity.Value;
 
         /// <summary>
+        /// Gets the vertical section
+        /// </summary>
+        public LengthMeasure VertSect
+        {
+            get
+            {
+                if (null != _trajectoryStation131 && null != _trajectoryStation131.VertSect)
+                {
+                    return new LengthMeasure(_trajectoryStation131.VertSect);
+                }
+
+                if (null != _trajectoryStation141 && null != _trajectoryStation141.VertSect)
+                {
+                    return new LengthMeasure(_trajectoryStation141.VertSect);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Returns the dispEw / easting value
+        /// </summary>
+        public LengthMeasure Easting
+        {
+            get
+            {
+                if (null != _trajectoryStation131 && null != _trajectoryStation131.DispEW)
+                {
+                    return new LengthMeasure(_trajectoryStation131.DispEW);
+                }
+
+                if (null != _trajectoryStation141 && null != _trajectoryStation141.DispEW)
+                {
+                    return new LengthMeasure(_trajectoryStation141.DispEW);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// returns the dispNs / northing value
+        /// </summary>
+        public LengthMeasure Northing
+        {
+            get
+            {
+                if (null != _trajectoryStation131 && null != _trajectoryStation131.DispNS)
+                {
+                    return new LengthMeasure(_trajectoryStation131.VertSect);
+                }
+
+                if (null != _trajectoryStation141 && null != _trajectoryStation141.DispNS)
+                {
+                    return new LengthMeasure(_trajectoryStation141.DispNS);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Gets the trajectory stations.
         /// </summary>
         public List<Location> Location { get; private set; }
