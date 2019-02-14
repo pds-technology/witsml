@@ -156,12 +156,12 @@ namespace PDS.WITSMLstudio.Adapters
         {
             get
             {
-                if (null != _trajectoryStation131 && null != _trajectoryStation131.VertSect)
+                if (_trajectoryStation131?.VertSect != null)
                 {
                     return new LengthMeasure(_trajectoryStation131.VertSect);
                 }
 
-                if (null != _trajectoryStation141 && null != _trajectoryStation141.VertSect)
+                if (_trajectoryStation141?.VertSect != null)
                 {
                     return new LengthMeasure(_trajectoryStation141.VertSect);
                 }
@@ -177,12 +177,12 @@ namespace PDS.WITSMLstudio.Adapters
         {
             get
             {
-                if (null != _trajectoryStation131 && null != _trajectoryStation131.DispEW)
+                if (_trajectoryStation131?.DispEW != null)
                 {
                     return new LengthMeasure(_trajectoryStation131.DispEW);
                 }
 
-                if (null != _trajectoryStation141 && null != _trajectoryStation141.DispEW)
+                if (_trajectoryStation141?.DispEW != null)
                 {
                     return new LengthMeasure(_trajectoryStation141.DispEW);
                 }
@@ -198,12 +198,12 @@ namespace PDS.WITSMLstudio.Adapters
         {
             get
             {
-                if (null != _trajectoryStation131 && null != _trajectoryStation131.DispNS)
+                if (_trajectoryStation131?.DispNS != null)
                 {
                     return new LengthMeasure(_trajectoryStation131.DispNS);
                 }
 
-                if (null != _trajectoryStation141 && null != _trajectoryStation141.DispNS)
+                if (_trajectoryStation141?.DispNS != null)
                 {
                     return new LengthMeasure(_trajectoryStation141.DispNS);
                 }
