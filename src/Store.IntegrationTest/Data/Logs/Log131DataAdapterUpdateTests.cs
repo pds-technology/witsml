@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,7 @@ using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.GrowingObjects;
 using PDS.WITSMLstudio.Store.Jobs;
@@ -39,6 +41,109 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
     {
         private const int GrowingTimeoutPeriod = 10;
         private string _dataDir = new DirectoryInfo(@".\TestData").FullName;
+
+        //NAB - adapted from performance test adding large time series
+        [TestMethod]
+        [Description("Test updating a log range with points within and just beyond the limit of LogMaxDataNodesGet size")]
+        public void Log131DataAdapter_UpdateInStore_New_Data_Range_Exceeding_LogMaxDataNodesGet()
+        {
+            AddParents();
+            
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            // Add 40 more mnemonics
+            for (int i = 0; i < 40; i++)
+            {
+                Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateDoubleLogCurveInfo($"Curve{i}", "m", (short)i));
+            }
+
+            // Set column indexes
+            for (int i = 0; i < Log.LogCurveInfo.Count; i++)
+            {
+                Log.LogCurveInfo[i].ColumnIndex = (short?)(i + 1);
+            }
+
+            //generate at least 2x the size of LogMaxDataNodesGet so we can update within a block at n+1
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), WitsmlSettings.LogMaxDataNodesGet * 2, 1, false, false);
+
+            for (int i = 0; i < Log.LogData.Count; i++)
+            {
+                for (int x = 0; x < Log.LogCurveInfo.Count - 3; x++)
+                {
+                    Log.LogData[i] += $",{i}";
+                }
+            }
+
+            //partition the data so we don't exceed the max update node size
+            List<string> logData = Log.LogData;
+            IList<IEnumerable<string>> chunks = Log.LogData.Partition(WitsmlSettings.LogMaxDataNodesUpdate).ToList();
+
+            Log.LogData = null;
+            Log.Uid = DevKit.Uid();
+            Log.Name = DevKit.Name($"LogMaxDataNodesGetPlusOne");
+
+            //add the log
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            //query the log make sure it's there
+            Log queryLog = new Log
+            {
+                Uid = Log.Uid,
+                Name = Log.Name,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
+                NameWell = Log.NameWell,
+                NameWellbore = Log.NameWellbore
+            };
+
+            DevKit.GetAndAssert(queryLog);
+
+            //add the chunks
+            foreach (IEnumerable<string> chunk in chunks)
+            {
+                Log.LogData = chunk.ToList();
+                DevKit.UpdateAndAssert(Log);
+            }
+
+            //so now we have to construct an update that will cause a failure - something that lives beyond the 10k node default limit which will cause a new chunk to be created
+            //instead of merging the data into the chunk it belongs in
+            string firstIndex = logData[0].Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)[0];
+
+            Log.LogData.Clear();
+
+            //first update will be at the very beginning of the range so we force the server to seek from start
+            string[] items = chunks[0].First().Split<string>(",");// .Split(new[] {","}, StringSplitOptions.None);
+            items[0] = firstIndex;
+            Log.LogData.Add(string.Join(",", items));
+
+            //last update will be in the middle of the second 10k chunk of data (we need this update to be beyond the 10k hard default limit to break things)
+            items = chunks.Last().Skip(Convert.ToInt32(chunks.Last().Count() / 2)).Take(1).First().Split<string>(",");
+            Log.LogData.Add(string.Join(",", items));
+
+            //this will succeed, but will leave the chunk collection silently corrupted
+            DevKit.UpdateAndAssert(Log);
+
+            Log.LogData.Clear();
+
+            //now we construct an update that will include the newly created bad chunk and the original good chunk
+            //we will take rows surrounding roughly the middle of the last chunk and perform an update that covers -2 -> +2
+            items = chunks.Last().Skip(Convert.ToInt32(chunks.Last().Count() / 2) - 2).Take(1).First()
+                .Split<string>(",");
+
+            Log.LogData.Add(string.Join(",",items));
+
+            items = chunks.Last().Skip(Convert.ToInt32(chunks.Last().Count() / 2) + 2).Take(1).First()
+                .Split<string>(",");
+                
+            Log.LogData.Add(string.Join(",", items));
+
+            //this update will fail because we've now tried to update a range with the broken chunk and the original good chunk. 
+            DevKit.UpdateAndAssert(Log);
+
+            //query the log to make sure it doesn't blow up
+            DevKit.GetAndAssert(queryLog);
+        }
 
         [TestMethod]
         public void Log131DataAdapter_UpdateInStore_AppendLog_Data()

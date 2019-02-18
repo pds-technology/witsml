@@ -48,6 +48,44 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         /// <summary>The bucket name</summary>
         public const string BucketName = "channelData";
 
+
+        /// <summary>
+        /// Encapsulates the results of a chunk-by-chunk search for data within range or within node count limit
+        /// </summary>
+        public class GetDataFilterResult
+        {
+            /// <summary>
+            /// Number of rows fetched
+            /// </summary>
+            public int Count { get; set; }
+            /// <summary>
+            /// Whether the fetch process should continue fetching data as the limiter Func has not been satisfied
+            /// </summary>
+            public bool Keep { get; set; }
+        }
+
+        /// <summary>
+        /// Function to provide strict MaxDataNodes limiting for querying channel data chunks
+        /// </summary>
+        public static readonly Func<ChannelDataChunk, Range<double?>, GetDataFilterResult, GetDataFilterResult> GetDataLogMaxDataNodesGetLimiter =
+            (channelDataChunk, range, filterResult) =>
+            {
+                filterResult.Keep = filterResult.Count <= WitsmlSettings.LogMaxDataNodesGet;
+                filterResult.Count += channelDataChunk.RecordCount;
+                return filterResult;
+            };
+
+        /// <summary>
+        /// Function to provide returning channel data chunks until we reach the end, or the specified range limits have been found (whichever happens first)
+        /// </summary>
+        public static Func<ChannelDataChunk, Range<double?>, GetDataFilterResult, GetDataFilterResult> GetDataSearchUntilFoundOrEndChunkLimiter =
+            (channelDataChunk, range, filterResult) =>
+            {
+                filterResult.Count += channelDataChunk.RecordCount;
+                filterResult.Keep = channelDataChunk.Indices[0].End < range.End;
+                return filterResult;
+            };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter" /> class.
         /// </summary>
@@ -67,26 +105,24 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         /// <param name="range">The index range to select data for.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <param name="reverse">if set to <c>true</c> if the ascending flag was reversed.</param>
+        /// <param name="fetchLimiter">user-provided Func that provides the logic for how much data should be inspected to find what we're looking for. null defaults to LogMaxDataNodesGet (limit strictly based on row/node count), also available is GetDataSearchUntilFoundOrEndChunkLimiter which will search up to and including the last chunk which is outside the requested range </param>
         /// <returns>
         /// A collection of <see cref="List{ChannelDataChunk}" /> items.
         /// </returns>
         /// <exception cref="WitsmlException"></exception>
-        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending, bool reverse = false)
+        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending, bool reverse = false, Func<ChannelDataChunk, Range<double?>, GetDataFilterResult, GetDataFilterResult> fetchLimiter = null)
         {
             Logger.DebugFormat("Getting channel data for {0}; Index Channel: {1}; {2}", uri, indexChannel, range);
 
             try
             {
                 var filter = BuildDataFilter(uri, indexChannel, range, reverse ? !ascending : ascending);
-                var count = 0;
+                GetDataFilterResult result = new GetDataFilterResult();
+                Func<ChannelDataChunk, Range<double?>, GetDataFilterResult, GetDataFilterResult> f =
+                    fetchLimiter ?? GetDataLogMaxDataNodesGetLimiter;
 
                 var data = GetData(filter, ascending)
-                    .TakeWhile(x =>
-                    {
-                        var keep = count <= WitsmlSettings.LogMaxDataNodesGet;
-                        count += x.RecordCount;
-                        return keep;
-                    })
+                    .TakeWhile(x => f(x, range, result).Keep )
                     .ToList();
 
                 GetMongoFileData(data);
@@ -169,7 +205,8 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
                       );
 
                 // Get DataChannelChunk list from database for the computed range and URI
-                var results = GetData(reader.Uri, indexChannel.Mnemonic, chunkRange, increasing);
+                //specifically using a chunk limiter that will seek until the end of range is found regardless of the default read limit in the config file
+                var results = GetData(reader.Uri, indexChannel.Mnemonic, chunkRange, increasing, false, GetDataSearchUntilFoundOrEndChunkLimiter);
 
                 // Backup existing chunks for the transaction
                 AttachChunks(results);
