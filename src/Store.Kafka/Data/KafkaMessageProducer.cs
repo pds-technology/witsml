@@ -18,31 +18,34 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Text;
+using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
-using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
-    /// Kafka data adapter that encapsulates CRUD functionality for WITSML objects.
+    /// Provides a method to send data object messages using a Kafka producer.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MessageDataAdapter{T}" />
-    public abstract class KafkaDataAdapter<T> : MessageDataAdapter<T> where T : class
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDataObjectMessageProducer" />
+    [Export(typeof(IDataObjectMessageProducer))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public class KafkaMessageProducer : IDataObjectMessageProducer
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(KafkaMessageProducer));
+
         private readonly IDictionary<string, object> _config;
         private readonly StringSerializer _keySerializer;
         private readonly StringSerializer _valueSerializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KafkaDataAdapter{T}"/> class.
+        /// Initializes a new instance of the <see cref="KafkaMessageProducer"/> class.
         /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="objectName">The object name.</param>
-        protected KafkaDataAdapter(IContainer container, ObjectName objectName) : base(container, objectName)
+        [ImportingConstructor]
+        public KafkaMessageProducer()
         {
             _keySerializer = new StringSerializer(Encoding.UTF8);
             _valueSerializer = new StringSerializer(Encoding.UTF8);
@@ -55,21 +58,21 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
-        /// Sends the message.
+        /// Sends the message asynchronously.
         /// </summary>
         /// <param name="topic">The topic.</param>
         /// <param name="key">The key.</param>
         /// <param name="payload">The payload.</param>
-        protected override void SendMessageCore(string topic, string key, string payload)
+        /// <returns>An awaitable task.</returns>
+        public async Task SendMessageAsync(string topic, string key, string payload)
         {
             using (var producer = new Producer<string, string>(_config, _keySerializer, _valueSerializer))
             {
-                Logger.Debug($"{producer.Name} producing on topic: {topic}; key: {key}; message:{Environment.NewLine}{payload}");
+                _log.Debug($"{producer.Name} producing on topic: {topic}; key: {key}; message:{Environment.NewLine}{payload}");
 
-                var task = producer.ProduceAsync(topic, key, payload);
-                var result = task.Result;
+                var message = await producer.ProduceAsync(topic, key, payload);
 
-                Logger.Debug($"Partition: {result.Partition}; Offset: {result.Offset}");
+                _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
             }
         }
     }

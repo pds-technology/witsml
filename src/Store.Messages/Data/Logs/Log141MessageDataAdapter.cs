@@ -21,25 +21,25 @@ using Energistics.DataAccess.WITSML141;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.WITSMLstudio.Store.Data.Wells
+namespace PDS.WITSMLstudio.Store.Data.Logs
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.KafkaDataAdapter{Well}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MessageDataAdapter{Log}" />
     /// <seealso cref="PDS.WITSMLstudio.Store.Configuration.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
-    [Export(typeof(IWitsmlDataAdapter<Well>))]
-    [Export141(ObjectTypes.Well, typeof(IWitsmlDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export141(ObjectTypes.Log, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141KafkaDataAdapter : KafkaDataAdapter<Well>, IWitsml141Configuration
+    public class Log141MessageDataAdapter : MessageDataAdapter<Log>, IWitsml141Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Well141KafkaDataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log141MessageDataAdapter"/> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         [ImportingConstructor]
-        public Well141KafkaDataAdapter(IContainer container) : base(container, ObjectNames.Well141)
+        public Log141MessageDataAdapter(IContainer container) : base(container, ObjectNames.Log141)
         {
             Logger.Debug("Instance created.");
         }
@@ -50,12 +50,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            Logger.DebugFormat("Getting the supported capabilities for Well data version {0}.", capServer.Version);
+            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
 
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
-            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
+            //capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
     }
 }

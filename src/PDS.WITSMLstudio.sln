@@ -54,6 +54,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit.UnitTest", "..\ext\e
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Kafka", "Store.Kafka\Store.Kafka.csproj", "{6C68527D-E0D4-496B-A59A-7F1ED48A745F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Messages", "Store.Messages\Store.Messages.csproj", "{9D63958F-4424-4BE8-BC07-906ABE28C032}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,10 @@ Global
 		{6C68527D-E0D4-496B-A59A-7F1ED48A745F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C68527D-E0D4-496B-A59A-7F1ED48A745F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C68527D-E0D4-496B-A59A-7F1ED48A745F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D63958F-4424-4BE8-BC07-906ABE28C032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D63958F-4424-4BE8-BC07-906ABE28C032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D63958F-4424-4BE8-BC07-906ABE28C032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D63958F-4424-4BE8-BC07-906ABE28C032}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

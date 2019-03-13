@@ -41,6 +41,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             ObjectName = objectName;
             MessageHandler = ResolveHandler();
+            MessageProducer = container.Resolve<IDataObjectMessageProducer>();
         }
 
         /// <summary>
@@ -52,6 +53,11 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Gets the data object message handler.
         /// </summary>
         protected IDataObjectMessageHandler MessageHandler { get; }
+
+        /// <summary>
+        /// Gets the message producer.
+        /// </summary>
+        protected IDataObjectMessageProducer MessageProducer { get; }
 
         /// <summary>
         /// Gets a value indicating whether validation is enabled for this data adapter.
@@ -456,12 +462,12 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="topicName">The topic name.</param>
         protected virtual void SendMessage(DataObjectMessage message, string topicName)
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 try
                 {
                     var payload = MessageHandler.FormatMessage(message);
-                    SendMessageCore(topicName, message.Uri, payload);
+                    await MessageProducer.SendMessageAsync(topicName, message.Uri, payload);
                 }
                 catch (Exception ex)
                 {
@@ -469,14 +475,6 @@ namespace PDS.WITSMLstudio.Store.Data
                 }
             });
         }
-
-        /// <summary>
-        /// Sends the message.
-        /// </summary>
-        /// <param name="topic">The topic.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="payload">The payload.</param>
-        protected abstract void SendMessageCore(string topic, string key, string payload);
 
         /// <summary>
         /// Resolves the data object message handler for the current data object type.

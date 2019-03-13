@@ -21,25 +21,25 @@ using Energistics.DataAccess.WITSML141;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
-namespace PDS.WITSMLstudio.Store.Data.Wellbores
+namespace PDS.WITSMLstudio.Store.Data.Wells
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.KafkaDataAdapter{Wellbore}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MessageDataAdapter{Well}" />
     /// <seealso cref="PDS.WITSMLstudio.Store.Configuration.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
-    [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
-    [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<Well>))]
+    [Export141(ObjectTypes.Well, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore141KafkaDataAdapter : KafkaDataAdapter<Wellbore>, IWitsml141Configuration
+    public class Well141MessageDataAdapter : MessageDataAdapter<Well>, IWitsml141Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141KafkaDataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Well141MessageDataAdapter"/> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         [ImportingConstructor]
-        public Wellbore141KafkaDataAdapter(IContainer container) : base(container, ObjectNames.Wellbore141)
+        public Well141MessageDataAdapter(IContainer container) : base(container, ObjectNames.Well141)
         {
             Logger.Debug("Instance created.");
         }
@@ -50,12 +50,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            Logger.DebugFormat("Getting the supported capabilities for Wellbore data version {0}.", capServer.Version);
+            Logger.DebugFormat("Getting the supported capabilities for Well data version {0}.", capServer.Version);
 
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
-            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
+            //capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
+            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
     }
 }

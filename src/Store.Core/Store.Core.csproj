@@ -251,8 +251,6 @@
     </Compile>
     <Compile Include="Data\DataObjectMapper.cs" />
     <Compile Include="Data\DataObjectMappingContext.cs" />
-    <Compile Include="Data\DataObjectMessage.cs" />
-    <Compile Include="Data\DataObjectMessageHandler.cs" />
     <Compile Include="Data\DataObjectValidationContext.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
@@ -346,7 +344,6 @@
       <DependentUpon>Log200Validator.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Logs\LogExtensions.cs" />
-    <Compile Include="Data\MessageDataAdapter.cs" />
     <Compile Include="Data\Messages\Message131DataProvider.cs" />
     <Compile Include="Data\Messages\Message131DataProvider.generated.cs">
       <DependentUpon>Message131DataProvider.cs</DependentUpon>

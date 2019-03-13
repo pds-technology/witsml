@@ -16,26 +16,22 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
-using PDS.WITSMLstudio.Store.Transactions;
+using System.Threading.Tasks;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
-    /// Placeholder for a Kafka transaction.
+    /// Defines a method to send data object messages.
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Transactions.WitsmlTransaction" />
-    [Export(typeof(IWitsmlTransaction))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class KafkaTransaction : WitsmlTransaction
+    public interface IDataObjectMessageProducer
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="KafkaTransaction"/> class.
+        /// Sends the message asynchronously.
         /// </summary>
-        [ImportingConstructor]
-        public KafkaTransaction()
-        {
-            InitializeRootTransaction();
-        }
+        /// <param name="topic">The topic.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="payload">The payload.</param>
+        /// <returns>An awaitable task.</returns>
+        Task SendMessageAsync(string topic, string key, string payload);
     }
 }
