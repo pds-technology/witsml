@@ -45,8 +45,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
-        /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
-        void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args);
+        /// <param name="args">The ProtocolEventArgs{GetTreeResources, IList{Resource}} instance containing the event data.</param>
+        void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetTreeResources, IList<Etp12.Datatypes.Object.Resource>> args);
 
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.

@@ -44,14 +44,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         public IEnumerable<IDiscoveryStoreProvider> Providers { get; set; }
 
         /// <summary>
-        /// Handles the GetResources message of the Discovery protocol.
+        /// Handles the GetTreeResources message of the Discovery protocol.
         /// </summary>
-        /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
-        protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
+        /// <param name="args">The ProtocolEventArgs{GetTreeResources, IList{Resource}} instance containing the event data.</param>
+        protected override void HandleGetTreeResources(ProtocolEventArgs<GetTreeResources, IList<Resource>> args)
         {
-            if (!EtpUris.IsRootUri(args.Message.Uri))
+            if (!EtpUris.IsRootUri(args.Message.Context.Uri))
             {
-                var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
+                var uri = this.CreateAndValidateUri(args.Message.Context.Uri, args.Header.MessageId);
 
                 if (!uri.IsValid)
                 {
@@ -73,7 +73,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 }
                 catch (ContainerException ex)
                 {
-                    this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
+                    this.UnsupportedObject(ex, args.Message.Context.Uri, args.Header.MessageId);
                     return;
                 }
             }
@@ -100,7 +100,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 Uuid = uuid ?? string.Empty,
                 Uri = uri,
                 Name = name,
-                ChildCount = count,
+                TargetCount = count,
                 ContentType = uri.ContentType,
                 ResourceType = (ResourceKind)(int)resourceType,
                 CustomData = new Dictionary<string, string>(),
