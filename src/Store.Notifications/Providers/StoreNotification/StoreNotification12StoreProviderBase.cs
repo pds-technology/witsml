@@ -133,7 +133,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 
         protected virtual void OnNotifyDelete(string uri, object dataObject, DateTime dateTime)
         {
-            var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
+            var request = _requests.FirstOrDefault(x => x.Request.Context.Uri.EqualsIgnoreCase(uri));
             if (request == null) return;
 
             IMessageHeader header;
@@ -144,7 +144,7 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
 
         protected virtual void OnNotify(Func<IMessageHeader, ObjectChange, long> action, string uri, object dataObject, DateTime dateTime, ObjectChangeKind changeKind)
         {
-            var request = _requests.FirstOrDefault(x => x.Request.Uri.EqualsIgnoreCase(uri));
+            var request = _requests.FirstOrDefault(x => x.Request.Context.Uri.EqualsIgnoreCase(uri));
             if (request == null) return;
 
             IMessageHeader header;
