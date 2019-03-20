@@ -30,10 +30,11 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <summary>
     /// Provides a method to send data object messages using a Kafka producer.
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDataObjectMessageProducer" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MessageProducerBase" />
+    /// <seealso cref="System.IDisposable" />
     [Export(typeof(IDataObjectMessageProducer))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class KafkaMessageProducer : IDataObjectMessageProducer, IDisposable
+    public class KafkaMessageProducer : MessageProducerBase, IDisposable
     {
         #region Fields 
 
@@ -76,7 +77,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="key">The key.</param>
         /// <param name="payload">The payload.</param>
         /// <returns>An awaitable task.</returns>
-        public async Task SendMessageAsync(string topic, string key, string payload)
+        public override async Task SendMessageAsync(string topic, string key, string payload)
         {
             using (var producer = new Producer<string, string>(_config, _keySerializer, _valueSerializer))
             {

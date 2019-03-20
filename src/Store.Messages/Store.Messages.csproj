@@ -56,14 +56,20 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200MessageDataAdapter.cs" />
+    <Compile Include="Data\Channels\Channel200MessageDataAdapter.cs" />
     <Compile Include="Data\DataObjectMessage.cs" />
     <Compile Include="Data\DataObjectMessageHandler.cs" />
     <Compile Include="Data\IDataObjectMessageHandler.cs" />
     <Compile Include="Data\IDataObjectMessageProducer.cs" />
+    <Compile Include="Data\Logs\Log200MessageDataAdapter.cs" />
+    <Compile Include="Data\MessageProducerBase.cs" />
     <Compile Include="Data\MessageTransaction.cs" />
     <Compile Include="Data\Logs\Log141MessageDataAdapter.cs" />
     <Compile Include="Data\MessageDataAdapter.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200MessageDataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore141MessageDataAdapter.cs" />
+    <Compile Include="Data\Wells\Well200MessageDataAdapter.cs" />
     <Compile Include="Data\Wells\Well141MessageDataAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
