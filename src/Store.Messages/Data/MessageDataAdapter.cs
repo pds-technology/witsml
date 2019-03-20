@@ -327,7 +327,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (MessageHandler.IsMessageValid(message, topicName))
                 {
-                    SendMessage(message, topicName);
+                    SendMessage(message, topicName).Wait();
                 }
             }
             catch (Exception ex)
@@ -366,7 +366,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (MessageHandler.IsMessageValid(message, topicName))
                 {
-                    SendMessage(message, topicName);
+                    SendMessage(message, topicName).Wait();
                 }
             }
             catch (Exception ex)
@@ -405,7 +405,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (MessageHandler.IsMessageValid(message, topicName))
                 {
-                    SendMessage(message, topicName);
+                    SendMessage(message, topicName).Wait();
                 }
             }
             catch (Exception ex)
@@ -443,7 +443,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (MessageHandler.IsMessageValid(message, topicName))
                 {
-                    SendMessage(message, topicName);
+                    SendMessage(message, topicName).Wait();
                 }
             }
             catch (Exception ex)
@@ -460,20 +460,19 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="topicName">The topic name.</param>
-        protected virtual void SendMessage(DataObjectMessage message, string topicName)
+        protected virtual async Task SendMessage(DataObjectMessage message, string topicName)
         {
-            Task.Run(async () =>
+            try
             {
-                try
-                {
-                    var payload = MessageHandler.FormatMessage(message);
-                    await MessageProducer.SendMessageAsync(topicName, message.Uri, payload);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn($"Error sending message for topic: {topicName}", ex);
-                }
-            });
+                var payload = MessageHandler.FormatMessage(message);
+                await MessageProducer.SendMessageAsync(topicName, message.Uri, payload);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Error sending message for topic: {topicName}", ex);
+
+                throw ex;
+            }
         }
 
         /// <summary>

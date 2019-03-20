@@ -33,13 +33,21 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDataObjectMessageProducer" />
     [Export(typeof(IDataObjectMessageProducer))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class KafkaMessageProducer : IDataObjectMessageProducer
+    public class KafkaMessageProducer : IDataObjectMessageProducer, IDisposable
     {
+        #region Fields 
+
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(KafkaMessageProducer));
 
         private readonly IDictionary<string, object> _config;
         private readonly StringSerializer _keySerializer;
         private readonly StringSerializer _valueSerializer;
+
+        private bool _disposed = false;
+
+        #endregion
+
+        #region Constructors 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KafkaMessageProducer"/> class.
@@ -57,6 +65,10 @@ namespace PDS.WITSMLstudio.Store.Data
             };
         }
 
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Sends the message asynchronously.
         /// </summary>
@@ -72,8 +84,49 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 var message = await producer.ProduceAsync(topic, key, payload);
 
+                if (message.Error)
+                {
+                    throw new KafkaException(message.Error);
+                }
+
                 _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
             }
         }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, 
+        /// releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        #endregion
+
+        #region Private / Protected Methods
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources
+        /// </summary>
+        /// <param name="disposing">
+        /// <c>true</c> to release both managed and unmanaged resources
+        /// <c>false</c> to release only unmanaged resources
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _keySerializer.Dispose();
+                    _valueSerializer.Dispose();
+                }
+
+                _disposed = true;
+            }
+        }
+
+        #endregion
     }
 }
