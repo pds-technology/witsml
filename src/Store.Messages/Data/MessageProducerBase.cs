@@ -32,6 +32,11 @@ namespace PDS.WITSMLstudio.Store.Data
     public abstract class MessageProducerBase : IDataObjectMessageProducer
     {
         /// <summary>
+        /// Gets the working directory.
+        /// </summary>
+        protected string WorkingDirectory => HttpContext.Current?.Server.MapPath("~/bin") ?? Environment.CurrentDirectory;
+
+        /// <summary>
         /// Sends the message asynchronously.
         /// </summary>
         /// <param name="topic">The topic.</param>
@@ -41,15 +46,24 @@ namespace PDS.WITSMLstudio.Store.Data
         public abstract Task SendMessageAsync(string topic, string key, string payload);
 
         /// <summary>
+        /// Gets the full configuration file path.
+        /// </summary>
+        /// <param name="fileName">The file name.</param>
+        /// <returns>The full path to the configuration file.</returns>
+        protected virtual string GetConfigFilePath(string fileName)
+        {
+            return Path.Combine(WorkingDirectory, $@"{ContainerFactory.ConfigurationPath}\{fileName}");
+        }
+
+        /// <summary>
         /// Loads the configuration file.
         /// </summary>
         /// <typeparam name="TSettings">The settings type.</typeparam>
         /// <param name="fileName">The file name.</param>
         /// <returns>A new <see cref="TSettings"/> instance.</returns>
-        protected TSettings LoadConfigFile<TSettings>(string fileName) where TSettings : new()
+        protected virtual TSettings LoadConfigFile<TSettings>(string fileName) where TSettings : new()
         {
-            var workingDirectory = HttpContext.Current?.Server.MapPath("~/bin") ?? Environment.CurrentDirectory;
-            var configFilePath = Path.Combine(workingDirectory, $@"{ContainerFactory.ConfigurationPath}\{fileName}");
+            var configFilePath = GetConfigFilePath(fileName);
 
             if (!File.Exists(configFilePath))
                 return new TSettings();

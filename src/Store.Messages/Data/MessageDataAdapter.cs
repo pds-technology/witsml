@@ -195,7 +195,8 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A collection of data objects retrieved from the data store.</returns>
         protected virtual List<T> GetAll(WitsmlQueryParser parser)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return new List<T>();
         }
 
         /// <summary>
@@ -205,7 +206,8 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A data object retrieved from the data store.</returns>
         protected virtual T GetObject(EtpUri uri)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return null;
         }
 
         /// <summary>
