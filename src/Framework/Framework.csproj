@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="Range.cs" />
     <Compile Include="TaskRunner.cs" />
+    <Compile Include="TimestampConverter.cs" />
     <Compile Include="XmlAttributeCache.cs" />
     <Compile Include="XmlUtil.cs" />
   </ItemGroup>

@@ -16,10 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Web;
 using Energistics.Etp.Common.Datatypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -45,9 +47,12 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         protected virtual JsonSerializerSettings JsonSettings { get; } = new JsonSerializerSettings
         {
+            NullValueHandling = NullValueHandling.Ignore,
+            ContractResolver = new MessageContractResolver(),
             Converters = new JsonConverter[]
             {
-                new StringEnumConverter()
+                new StringEnumConverter(),
+                new TimestampConverter()
             }
         };
 
@@ -81,6 +86,17 @@ namespace PDS.WITSMLstudio.Store.Data
             message.Function = witsmlContext.Request.Function;
             message.OptionsIn = witsmlContext.Request.Options;
             message.ObjectType = objectType;
+
+            var commonDataObject = dataObject as Energistics.DataAccess.ICommonDataObject;
+            var abstractDataObject = dataObject as Energistics.DataAccess.WITSML200.AbstractObject;
+
+            message.CreatedDateTime = commonDataObject?.CommonData?.DateTimeCreation == null
+                ? abstractDataObject?.Citation?.Creation?.ToUniversalTime()
+                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeCreation.Value).UtcDateTime;
+
+            message.LastUpdateDateTime = commonDataObject?.CommonData?.DateTimeLastChange == null
+                ? abstractDataObject?.Citation?.LastUpdate?.ToUniversalTime()
+                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeLastChange.Value).UtcDateTime;
 
             return message;
         }

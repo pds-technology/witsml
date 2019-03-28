@@ -472,8 +472,7 @@ namespace PDS.WITSMLstudio.Store.Data
             catch (Exception ex)
             {
                 Logger.Warn($"Error sending message for topic: {topicName}", ex);
-
-                throw ex;
+                throw;
             }
         }
 

@@ -51,6 +51,7 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
@@ -63,6 +64,7 @@
     <Compile Include="Data\IDataObjectMessageHandler.cs" />
     <Compile Include="Data\IDataObjectMessageProducer.cs" />
     <Compile Include="Data\Logs\Log200MessageDataAdapter.cs" />
+    <Compile Include="Data\MessageContractResolver.cs" />
     <Compile Include="Data\MessageProducerBase.cs" />
     <Compile Include="Data\MessageTransaction.cs" />
     <Compile Include="Data\Logs\Log141MessageDataAdapter.cs" />

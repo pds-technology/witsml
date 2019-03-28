@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+
 namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
@@ -30,9 +33,16 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="dataObject">The optional data object instance.</param>
         public DataObjectMessage(string uri, object dataObject = null)
         {
+            Uuid = Guid.NewGuid();
             Uri = uri;
             DataObject = dataObject;
+            CustomData = new Dictionary<string, object>();
         }
+
+        /// <summary>
+        /// Gets or sets the unique identifier for the message.
+        /// </summary>
+        public Guid Uuid { get; set; }
 
         /// <summary>
         /// Gets or sets the user host.
@@ -70,8 +80,23 @@ namespace PDS.WITSMLstudio.Store.Data
         public string Uri { get; set; }
 
         /// <summary>
+        /// Gets or sets the created date time in UTC.
+        /// </summary>
+        public DateTime? CreatedDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last update date time in UTC.
+        /// </summary>
+        public DateTime? LastUpdateDateTime { get; set; }
+
+        /// <summary>
         /// Gets or sets the data object instance.
         /// </summary>
         public object DataObject { get; set; }
+
+        /// <summary>
+        /// Gets or sets the custom data dictionary.
+        /// </summary>
+        public Dictionary<string, object> CustomData { get; set; }
     }
 }
