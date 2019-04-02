@@ -35,7 +35,8 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             Uuid = Guid.NewGuid();
             Uri = uri;
-            DataObject = dataObject;
+            ObjectMetadata = dataObject;
+            ExecutionDateTime = DateTime.UtcNow;
             CustomData = new Dictionary<string, object>();
         }
 
@@ -90,9 +91,14 @@ namespace PDS.WITSMLstudio.Store.Data
         public DateTime? LastUpdateDateTime { get; set; }
 
         /// <summary>
+        /// Gets or sets the execution date time.
+        /// </summary>
+        public DateTime ExecutionDateTime { get; set; }
+
+        /// <summary>
         /// Gets or sets the data object instance.
         /// </summary>
-        public object DataObject { get; set; }
+        public object ObjectMetadata { get; set; }
 
         /// <summary>
         /// Gets or sets the custom data dictionary.

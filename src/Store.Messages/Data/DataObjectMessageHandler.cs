@@ -77,11 +77,11 @@ namespace PDS.WITSMLstudio.Store.Data
 
             var createdDateTime = commonDataObject?.CommonData?.DateTimeCreation == null
                 ? abstractDataObject?.Citation?.Creation?.ToUniversalTime()
-                : ((DateTimeOffset)commonDataObject.CommonData.DateTimeCreation.Value).UtcDateTime;
+                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeCreation.Value).UtcDateTime;
 
             var lastUpdateDateTime = commonDataObject?.CommonData?.DateTimeLastChange == null
                 ? abstractDataObject?.Citation?.LastUpdate?.ToUniversalTime()
-                : ((DateTimeOffset)commonDataObject.CommonData.DateTimeLastChange.Value).UtcDateTime;
+                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeLastChange.Value).UtcDateTime;
 
             foreach (var message in messages)
             {

@@ -492,20 +492,28 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             try
             {
-                // Try to resolve object specific handler
+                // Try to resolve object/version specific handler
                 return Container.Resolve<IDataObjectMessageHandler<T>>();
             }
             catch
             {
                 try
                 {
-                    // Else, try to resolve global handler
-                    return Container.Resolve<IDataObjectMessageHandler>();
+                    // Else, ry to resolve object specific handler
+                    return Container.Resolve<IDataObjectMessageHandler>(ObjectName.Name);
                 }
                 catch
                 {
-                    // Otherwise, use default handler
-                    return new DataObjectMessageHandler();
+                    try
+                    {
+                        // Else, try to resolve global handler
+                        return Container.Resolve<IDataObjectMessageHandler>();
+                    }
+                    catch
+                    {
+                        // Otherwise, use default handler
+                        return new DataObjectMessageHandler();
+                    }
                 }
             }
         }
