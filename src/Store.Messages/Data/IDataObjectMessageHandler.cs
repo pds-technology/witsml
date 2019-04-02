@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.Etp.Common.Datatypes;
 
 namespace PDS.WITSMLstudio.Store.Data
@@ -34,13 +35,13 @@ namespace PDS.WITSMLstudio.Store.Data
     public interface IDataObjectMessageHandler
     {
         /// <summary>
-        /// Creates the message.
+        /// Creates the data object messages.
         /// </summary>
         /// <param name="objectType">The object type.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="dataObject">The data object.</param>
         /// <returns></returns>
-        DataObjectMessage CreateMessage(string objectType, EtpUri uri, object dataObject = null);
+        List<DataObjectMessage> CreateMessages(string objectType, EtpUri uri, object dataObject = null);
 
         /// <summary>
         /// Formats the message.

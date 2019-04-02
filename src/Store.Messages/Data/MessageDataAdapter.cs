@@ -324,12 +324,14 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 Logger.DebugFormat("Inserting {0} data object.", objectType);
 
-                var message = MessageHandler.CreateMessage(objectType, uri, entity);
-                var topicName = MessageHandler.GetInsertTopicName(message, WitsmlSettings.GlobalInsertTopicName);
-
-                if (MessageHandler.IsMessageValid(message, topicName))
+                foreach (var message in MessageHandler.CreateMessages(objectType, uri, entity))
                 {
-                    SendMessage(message, topicName).Wait();
+                    var topicName = MessageHandler.GetInsertTopicName(message, WitsmlSettings.GlobalInsertTopicName);
+
+                    if (MessageHandler.IsMessageValid(message, topicName))
+                    {
+                        SendMessage(message, topicName).Wait();
+                    }
                 }
             }
             catch (Exception ex)
@@ -363,12 +365,14 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 Logger.DebugFormat("Updating {0} data object.", objectType);
 
-                var message = MessageHandler.CreateMessage(objectType, uri, entity);
-                var topicName = MessageHandler.GetUpdateTopicName(message, WitsmlSettings.GlobalUpdateTopicName);
-
-                if (MessageHandler.IsMessageValid(message, topicName))
+                foreach (var message in MessageHandler.CreateMessages(objectType, uri, entity))
                 {
-                    SendMessage(message, topicName).Wait();
+                    var topicName = MessageHandler.GetUpdateTopicName(message, WitsmlSettings.GlobalUpdateTopicName);
+
+                    if (MessageHandler.IsMessageValid(message, topicName))
+                    {
+                        SendMessage(message, topicName).Wait();
+                    }
                 }
             }
             catch (Exception ex)
@@ -402,12 +406,14 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 Logger.DebugFormat("Replacing {0} data object.", objectType);
 
-                var message = MessageHandler.CreateMessage(objectType, uri, entity);
-                var topicName = MessageHandler.GetReplaceTopicName(message, WitsmlSettings.GlobalReplaceTopicName);
-
-                if (MessageHandler.IsMessageValid(message, topicName))
+                foreach (var message in MessageHandler.CreateMessages(objectType, uri, entity))
                 {
-                    SendMessage(message, topicName).Wait();
+                    var topicName = MessageHandler.GetReplaceTopicName(message, WitsmlSettings.GlobalReplaceTopicName);
+
+                    if (MessageHandler.IsMessageValid(message, topicName))
+                    {
+                        SendMessage(message, topicName).Wait();
+                    }
                 }
             }
             catch (Exception ex)
@@ -440,12 +446,14 @@ namespace PDS.WITSMLstudio.Store.Data
             {
                 Logger.DebugFormat("Deleting {0} data object.", objectType);
 
-                var message = MessageHandler.CreateMessage(objectType, uri);
-                var topicName = MessageHandler.GetDeleteTopicName(message, WitsmlSettings.GlobalDeleteTopicName);
-
-                if (MessageHandler.IsMessageValid(message, topicName))
+                foreach (var message in MessageHandler.CreateMessages(objectType, uri))
                 {
-                    SendMessage(message, topicName).Wait();
+                    var topicName = MessageHandler.GetDeleteTopicName(message, WitsmlSettings.GlobalDeleteTopicName);
+
+                    if (MessageHandler.IsMessageValid(message, topicName))
+                    {
+                        SendMessage(message, topicName).Wait();
+                    }
                 }
             }
             catch (Exception ex)

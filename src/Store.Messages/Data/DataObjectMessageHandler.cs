@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Web;
 using Energistics.Etp.Common.Datatypes;
 using Newtonsoft.Json;
@@ -57,59 +58,67 @@ namespace PDS.WITSMLstudio.Store.Data
         };
 
         /// <summary>
-        /// Creates the message.
+        /// Creates the data object messages.
         /// </summary>
         /// <param name="objectType">The object type.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="dataObject">The data object.</param>
         /// <returns></returns>
-        public virtual DataObjectMessage CreateMessage(string objectType, EtpUri uri, object dataObject = null)
+        public virtual List<DataObjectMessage> CreateMessages(string objectType, EtpUri uri, object dataObject = null)
         {
-            var message = CreateDataObjectMessage(uri, dataObject);
+            var messages = CreateDataObjectMessages(uri, dataObject);
             var witsmlContext = WitsmlOperationContext.Current;
             //var serviceContext = WebOperationContext.Current;
             var httpContext = HttpContext.Current;
             var httpRequest = httpContext?.Request;
 
-            if (httpRequest != null)
-            {
-                message.UserHost = httpRequest.UserHostAddress;
-                message.UserAgent = httpRequest.UserAgent;
-                message.Username = httpContext.User?.Identity?.Name;
-
-                if (httpContext.IsWebSocketRequest)
-                {
-                    // TODO: What is needed for ETP connections?
-                }
-            }
-
-            message.Function = witsmlContext.Request.Function;
-            message.OptionsIn = witsmlContext.Request.Options;
-            message.ObjectType = objectType;
-
             var commonDataObject = dataObject as Energistics.DataAccess.ICommonDataObject;
             var abstractDataObject = dataObject as Energistics.DataAccess.WITSML200.AbstractObject;
 
-            message.CreatedDateTime = commonDataObject?.CommonData?.DateTimeCreation == null
+            var createdDateTime = commonDataObject?.CommonData?.DateTimeCreation == null
                 ? abstractDataObject?.Citation?.Creation?.ToUniversalTime()
-                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeCreation.Value).UtcDateTime;
+                : ((DateTimeOffset)commonDataObject.CommonData.DateTimeCreation.Value).UtcDateTime;
 
-            message.LastUpdateDateTime = commonDataObject?.CommonData?.DateTimeLastChange == null
+            var lastUpdateDateTime = commonDataObject?.CommonData?.DateTimeLastChange == null
                 ? abstractDataObject?.Citation?.LastUpdate?.ToUniversalTime()
-                : ((DateTimeOffset) commonDataObject.CommonData.DateTimeLastChange.Value).UtcDateTime;
+                : ((DateTimeOffset)commonDataObject.CommonData.DateTimeLastChange.Value).UtcDateTime;
 
-            return message;
+            foreach (var message in messages)
+            {
+                if (httpRequest != null)
+                {
+                    message.UserHost = httpRequest.UserHostAddress;
+                    message.UserAgent = httpRequest.UserAgent;
+                    message.Username = httpContext.User?.Identity?.Name;
+
+                    if (httpContext.IsWebSocketRequest)
+                    {
+                        // TODO: What is needed for ETP connections?
+                    }
+                }
+
+                message.Function = witsmlContext.Request.Function;
+                message.OptionsIn = witsmlContext.Request.Options;
+                message.ObjectType = objectType;
+                message.CreatedDateTime = createdDateTime;
+                message.LastUpdateDateTime = lastUpdateDateTime;
+            }
+
+            return messages;
         }
 
         /// <summary>
-        /// Creates the data object message.
+        /// Creates the data object messages.
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="dataObject">The data object.</param>
         /// <returns></returns>
-        public virtual DataObjectMessage CreateDataObjectMessage(EtpUri uri, object dataObject = null)
+        public virtual List<DataObjectMessage> CreateDataObjectMessages(EtpUri uri, object dataObject = null)
         {
-            return new DataObjectMessage(uri, dataObject);
+            return new List<DataObjectMessage>
+            {
+                new DataObjectMessage(uri, dataObject)
+            };
         }
 
         /// <summary>
