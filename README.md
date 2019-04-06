@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/iej6hbx4o93kg6ss?svg=true)](https://ci.appveyor.com/project/PDS/witsml-server)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/18119/badge.svg)](https://scan.coverity.com/projects/pds-technology-witsml-server)
+
 ## PDS WITSMLstudio Store
 
 **Quick Links:**&nbsp;
@@ -74,7 +77,7 @@ Integration tests for Store.MongoDb.
 ### Copyright and License
 Copyright &copy; 2018 PDS Americas LLC
 
-Released under the PDS Open Source WITSML™ Product License Agreement
+Released under the PDS Open Source WITSMLâ„¢ Product License Agreement
 http://www.pds.group/WITSMLstudio/OpenSource/ProductLicenseAgreement
 
 ---
