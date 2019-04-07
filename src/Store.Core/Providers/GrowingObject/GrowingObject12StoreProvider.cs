@@ -227,7 +227,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
                 var etpUri = new EtpUri(dataObject.Resource.Uri);
                 var uid = etpUri.ObjectId;
 
-                ObjectPart(uri, uid, dataObject.Resource.ContentType, dataObject.Data, messageId, flag);
+                GetPartsResponse(uri, uid, dataObject.Resource.ContentType, dataObject.Data, messageId, flag);
             });
         }
 

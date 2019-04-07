@@ -149,5 +149,17 @@
     <Setting Name="IsRequestCompressionEnabled" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="GlobalInsertTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WitsmlDataAdapter-Insert</Value>
+    </Setting>
+    <Setting Name="GlobalUpdateTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WitsmlDataAdapter-Update</Value>
+    </Setting>
+    <Setting Name="GlobalReplaceTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WitsmlDataAdapter-Replace</Value>
+    </Setting>
+    <Setting Name="GlobalDeleteTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WitsmlDataAdapter-Delete</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
