@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/45oiw568eb0grkrk?svg=true)](https://ci.appveyor.com/project/PDS/witsml)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/18117/badge.svg)](https://scan.coverity.com/projects/pds-technology-witsml)
+
 ## WITSML
 
 **Quick Links:**&nbsp;

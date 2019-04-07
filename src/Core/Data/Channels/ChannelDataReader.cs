@@ -1977,10 +1977,25 @@ namespace PDS.WITSMLstudio.Data.Channels
             if (IsNull(value))
                 return "null";
 
-            if (double.TryParse(value, out number))
+            value = value.Trim();
+
+            if (double.TryParse(value, out number) && !HasLeadingZeros(value))
                 return value;
 
-            return JsonConvert.ToString(value.Trim());
+            return JsonConvert.ToString(value);
+        }
+
+        /// <summary>
+        /// Determines whether the numeric string value has leading zeros.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        private static bool HasLeadingZeros(string value)
+        {
+            if (value == null || value.Length < 2)
+                return false;
+
+            return value[0] == '0' && value[1] != '.';
         }
 
         /// <summary>

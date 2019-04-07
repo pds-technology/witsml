@@ -69,13 +69,15 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         }
 
         /// <summary>
-        /// Gets the object details for the specified URI.
+        /// Gets the object details for the specified URIs.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
-        public void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Store.GetObject, Etp12.Datatypes.Object.DataObject> args)
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetDataObjects}" /> instance containing the event data.</param>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="dataObject">The data object.</param>
+        public void GetObject(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Store.GetDataObjects> args, string uri, Etp12.Datatypes.Object.DataObject dataObject)
         {
-            GetObject(etpAdapter, args.Message.Uri, args.Context);
+            GetObject(etpAdapter, uri, dataObject);
         }
 
         /// <summary>

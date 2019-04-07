@@ -254,6 +254,26 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static bool IsRequestCompressionEnabled = Properties.Settings.Default.IsRequestCompressionEnabled;
 
         /// <summary>
+        /// The global insert topic name.
+        /// </summary>
+        public static string GlobalInsertTopicName = Properties.Settings.Default.GlobalInsertTopicName;
+
+        /// <summary>
+        /// The global update topic name.
+        /// </summary>
+        public static string GlobalUpdateTopicName = Properties.Settings.Default.GlobalUpdateTopicName;
+        
+        /// <summary>
+        /// The global replace topic name.
+        /// </summary>
+        public static string GlobalReplaceTopicName = Properties.Settings.Default.GlobalReplaceTopicName;
+        
+        /// <summary>
+        /// The global delete topic name.
+        /// </summary>
+        public static string GlobalDeleteTopicName = Properties.Settings.Default.GlobalDeleteTopicName;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

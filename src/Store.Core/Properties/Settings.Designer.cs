@@ -12,7 +12,7 @@ namespace PDS.WITSMLstudio.Store.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -462,6 +462,42 @@ namespace PDS.WITSMLstudio.Store.Properties {
         public bool IsRequestCompressionEnabled {
             get {
                 return ((bool)(this["IsRequestCompressionEnabled"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WitsmlDataAdapter-Insert")]
+        public string GlobalInsertTopicName {
+            get {
+                return ((string)(this["GlobalInsertTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WitsmlDataAdapter-Update")]
+        public string GlobalUpdateTopicName {
+            get {
+                return ((string)(this["GlobalUpdateTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WitsmlDataAdapter-Replace")]
+        public string GlobalReplaceTopicName {
+            get {
+                return ((string)(this["GlobalReplaceTopicName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WitsmlDataAdapter-Delete")]
+        public string GlobalDeleteTopicName {
+            get {
+                return ((string)(this["GlobalDeleteTopicName"]));
             }
         }
     }

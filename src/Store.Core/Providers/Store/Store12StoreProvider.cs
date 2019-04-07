@@ -22,6 +22,7 @@ using Energistics.Etp;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.Object;
+using Energistics.Etp.v12.Datatypes;
 using Energistics.Etp.v12.Datatypes.Object;
 using Energistics.Etp.v12.Protocol.Store;
 using PDS.WITSMLstudio.Framework;
@@ -95,7 +96,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 Uri = uri,
                 Uuid = uuid ?? string.Empty,
                 Name = name,
-                ChildCount = childCount,
+                TargetCount = childCount,
                 ContentType = uri.ContentType,
                 ResourceType = ResourceKind.DataObject,
                 CustomData = new Dictionary<string, string>(),
@@ -108,47 +109,14 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// <summary>
         /// Handles the GetObject message of the Store protocol.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
-        protected override void HandleGetObject(ProtocolEventArgs<GetObject, DataObject> args)
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}" /> instance containing the event data.</param>
+        /// <param name="dataObjects">The data objects.</param>
+        /// <param name="errors">The errors.</param>
+        protected override void HandleGetDataObjects(ProtocolEventArgs<GetDataObjects> args, IList<DataObject> dataObjects, IList<ErrorInfo> errors)
         {
-            try
+            foreach (var uri in args.Message.Uris)
             {
-                var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
-                if (!uri.IsValid)
-                {
-                    args.Cancel = true;
-                    return;
-                }
-
-                if (!this.ValidateUriObjectType(uri, args.Header.MessageId))
-                {
-                    args.Cancel = true;
-                    return;
-                }
-
-                // Validate that objectId was provided
-                if (string.IsNullOrWhiteSpace(uri.ObjectId))
-                {
-                    this.InvalidUri(args.Message.Uri, args.Header.MessageId);
-                    args.Cancel = true;
-                    return;
-                }
-
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
-
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.GetDataSchemaVersion()));
-                provider.GetObject(Session.Adapter, args);
-
-                if (args.Context.Data == null || args.Context.Data.Length < 1)
-                {
-                    this.NotFound(args.Message.Uri, args.Header.MessageId);
-                    args.Cancel = true;
-                }
-            }
-            catch (ContainerException ex)
-            {
-                this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
-                args.Cancel = true;
+                GetObject(args, uri, dataObjects, errors);
             }
         }
 
@@ -156,18 +124,125 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         /// Handles the PutObject message of the Store protocol.
         /// </summary>
         /// <param name="header">The message header.</param>
-        /// <param name="putObject">The put object message.</param>
-        protected override void HandlePutObject(IMessageHeader header, PutObject putObject)
+        /// <param name="putDataObjects">The put data objects message.</param>
+        protected override void HandlePutDataObjects(IMessageHeader header, PutDataObjects putDataObjects)
         {
-            base.HandlePutObject(header, putObject);
+            base.HandlePutDataObjects(header, putDataObjects);
 
-            var uri = this.CreateAndValidateUri(putObject.DataObject.Resource.Uri, header.MessageId);
-            if (!uri.IsValid) return;
-            if (!this.ValidateUriObjectType(uri, header.MessageId)) return;
+            foreach (var dataObject in putDataObjects.DataObjects)
+            {
+                PutObject(header, dataObject);
+            }
+        }
 
+        /// <summary>
+        /// Handles the DeleteObject message of the Store protocol.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="deleteDataObjects">The delete data objects message.</param>
+        protected override void HandleDeleteDataObjects(IMessageHeader header, DeleteDataObjects deleteDataObjects)
+        {
+            base.HandleDeleteDataObjects(header, deleteDataObjects);
+
+            foreach (var uri in deleteDataObjects.Uris)
+            {
+                DeleteObject(header, uri);
+            }
+        }
+
+        /// <summary>
+        /// Gets the data object from the data store.
+        /// </summary>
+        /// <param name="args">The event args.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="dataObjects">The data objects.</param>
+        /// <param name="errors">The errors.</param>
+        private void GetObject(ProtocolEventArgs<GetDataObjects> args, string uri, IList<DataObject> dataObjects, IList<ErrorInfo> errors)
+        {
             try
             {
-                var data = putObject.DataObject.GetString();
+                var dataObject = new DataObject();
+                var etpUri = new EtpUri(uri);
+
+                if (!etpUri.IsValid)
+                {
+                    errors.Add(new ErrorInfo
+                    {
+                        Code = (int) EtpErrorCodes.InvalidUri,
+                        Message = "Invalid data object URI",
+                        Uri = uri
+                    });
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(etpUri.ObjectType))
+                {
+                    errors.Add(new ErrorInfo
+                    {
+                        Code = (int) EtpErrorCodes.UnsupportedObject,
+                        Message = "Data object not supported",
+                        Uri = uri
+                    });
+                    return;
+                }
+
+                // Validate that objectId was provided
+                if (string.IsNullOrWhiteSpace(etpUri.ObjectId))
+                {
+                    errors.Add(new ErrorInfo
+                    {
+                        Code = (int) EtpErrorCodes.InvalidUri,
+                        Message = "Invalid data object URI",
+                        Uri = uri
+                    });
+                    return;
+                }
+
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, etpUri.ObjectType, null, null, null);
+
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(etpUri.GetDataSchemaVersion()));
+                provider.GetObject(Session.Adapter, args, uri, dataObject);
+
+                if (dataObject.Data == null || dataObject.Data.Length < 1)
+                {
+                    errors.Add(new ErrorInfo
+                    {
+                        Code = (int) EtpErrorCodes.NotFound,
+                        Message = "Data object not found",
+                        Uri = uri
+                    });
+                    return;
+                }
+
+                // Success
+                dataObjects.Add(dataObject);
+            }
+            catch (ContainerException)
+            {
+                errors.Add(new ErrorInfo
+                {
+                    Code = (int) EtpErrorCodes.UnsupportedObject,
+                    Message = "Data object not supported",
+                    Uri = uri
+                });
+            }
+        }
+
+        /// <summary>
+        /// Puts the data object into the data store.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="dataObject">The data object.</param>
+        private void PutObject(IMessageHeader header, DataObject dataObject)
+        {
+            try
+            {
+                var uri = this.CreateAndValidateUri(dataObject.Resource.Uri, header.MessageId);
+
+                if (!uri.IsValid) return;
+                if (!this.ValidateUriObjectType(uri, header.MessageId)) return;
+
+                var data = dataObject.GetString();
 
                 if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))
                 {
@@ -182,29 +257,18 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
-                dataAdapter.Put(putObject.DataObject);
+                dataAdapter.Put(dataObject);
 
                 Acknowledge(header.MessageId);
             }
             catch (ContainerException ex)
             {
-                this.UnsupportedObject(ex, putObject.DataObject.Resource.Uri, header.MessageId);
+                this.UnsupportedObject(ex, dataObject.Resource.Uri, header.MessageId);
             }
             catch (WitsmlException ex)
             {
                 ProtocolException((int)EtpErrorCodes.InvalidObject, $"Invalid object: {ex.Message}; Error code: {(int)ex.ErrorCode}", header.MessageId);
             }
-        }
-
-        /// <summary>
-        /// Handles the DeleteObject message of the Store protocol.
-        /// </summary>
-        /// <param name="header">The message header.</param>
-        /// <param name="deleteObject">The delete object message.</param>
-        protected override void HandleDeleteObject(IMessageHeader header, DeleteObject deleteObject)
-        {
-            base.HandleDeleteObject(header, deleteObject);
-            DeleteObject(header, deleteObject.Uri);
         }
 
         /// <summary>
@@ -217,6 +281,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             try
             {
                 var etpUri = this.CreateAndValidateUri(uri, header.MessageId);
+
                 if (!etpUri.IsValid) return;
                 if (!this.ValidateUriObjectType(etpUri, header.MessageId)) return;
 

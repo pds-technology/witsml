@@ -80,11 +80,11 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
         /// <param name="etpAdapter">The ETP adapter.</param>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
-        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetResources, IList<Etp12.Datatypes.Object.Resource>> args)
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetTreeResources, IList}"/> instance containing the event data.</param>
+        public void GetResources(IEtpAdapter etpAdapter, ProtocolEventArgs<Etp12.Protocol.Discovery.GetTreeResources, IList<Etp12.Datatypes.Object.Resource>> args)
         {
             string serverSortOrder;
-            GetResources(etpAdapter, args.Message.Uri, args.Context, out serverSortOrder);
+            GetResources(etpAdapter, args.Message.Context.Uri, args.Context, out serverSortOrder);
         }
 
         /// <summary>
