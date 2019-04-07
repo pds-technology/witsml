@@ -285,7 +285,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// Removes the log curves not found in the array.
         /// </summary>
         /// <param name="mnemonics">An array of mnemonics.</param>
-        public void RemoveLogCurves(string[] mnemonics)
+        public void RemoveLogCurves(params string[] mnemonics)
         {
             _log131?.LogCurveInfo.RemoveAll(x =>
             {
@@ -319,6 +319,21 @@ namespace PDS.WITSMLstudio.Adapters
                     Select(x => x.WrappedLogCurveInfo).
                     Cast<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>().
                     ToList();
+            }
+        }
+
+        /// <summary>
+        /// Removes the log data.
+        /// </summary>
+        public void RemoveLogData()
+        {
+            if (_log131 != null)
+            {
+                _log131.LogData = null;
+            }
+            if (_log141 != null)
+            {
+                _log141.LogData = null;
             }
         }
 
