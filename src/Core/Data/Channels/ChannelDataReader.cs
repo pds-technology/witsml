@@ -94,7 +94,25 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="id">The identifier.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
         public ChannelDataReader(IList<string> data, int count, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
-            : this(Combine(data, dataDelimiter, count), mnemonics, units, dataTypes, nullValues, uri, id)
+            : this(Combine(data, dataDelimiter, count, 1), mnemonics, units, dataTypes, nullValues, uri, id)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
+        /// </summary>
+        /// <param name="data">The channel data.</param>
+        /// <param name="count">The number of mnemonics in mnemonicList element.</param>
+        /// <param name="indexColumn">The index column.</param>
+        /// <param name="mnemonics">The channel mnemonics.</param>
+        /// <param name="units">The channel units.</param>
+        /// <param name="dataTypes">The data types.</param>
+        /// <param name="nullValues">The null values.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="dataDelimiter">The log data delimiter.</param>
+        public ChannelDataReader(IList<string> data, int count, int indexColumn, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+            : this(Combine(data, dataDelimiter, count, indexColumn), mnemonics, units, dataTypes, nullValues, uri, id)
         {
         }
 
@@ -1933,14 +1951,29 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="data">The data.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
         /// <param name="count">The number of mnemonics in mnemonicList element.</param>
+        /// <param name="indexColumn">The index column.</param>
         /// <returns>A JSON arrary of string values from the data list.</returns>
-        private static string Combine(IList<string> data, string dataDelimiter, int count)
+        private static string Combine(IList<string> data, string dataDelimiter, int count, int indexColumn)
         {
             _log.Debug("Combining log data elements into channel data json structure.");
+
+            if (indexColumn < 1)
+            {
+                _log.Warn($"Implicit indexes not supported.");
+                return string.Empty;  // TODO: Properly handle 1.3.1.1 implicit indexes
+            }
+            if (indexColumn > count)
+            {
+                _log.Warn($"Index Column is {indexColumn} but there are only {count} columns.");
+                return string.Empty;
+            }
+            --indexColumn;
 
             var delimiter = ChannelDataExtensions.GetDataDelimiterOrDefault(dataDelimiter);
             var json = new StringBuilder("[");
             var rows = new List<string>();
+            bool loggedMissingIndex = false;
+            bool loggedUnexpectedRowLength = false;
 
             if (data != null)
             {
@@ -1951,11 +1984,24 @@ namespace PDS.WITSMLstudio.Data.Channels
                     if (!values.Any())
                         continue;
 
+                    if (values.Length <= indexColumn && !loggedMissingIndex)
+                    {
+                        _log.Debug($"Missing index in: '{row}'");
+                        loggedMissingIndex = true;
+                        continue;
+                    }
+                    if (values.Length != count && !loggedUnexpectedRowLength)
+                    {
+                        _log.Debug($"Row has {values.Length} columns but {count} were expected in: '{row}'");
+                        loggedUnexpectedRowLength = true;
+                        continue;
+                    }
+
                     values = values
                         .Select(Format)
                         .ToArray();
 
-                    rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
+                    rows.Add($"[[{values[indexColumn]}],[{string.Join(",", values.Where((v, i) => i != indexColumn))}]]");
                 }
             }
 

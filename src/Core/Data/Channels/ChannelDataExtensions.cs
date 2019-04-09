@@ -126,7 +126,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             var dataTypes = logCurveInfos.Select(x => x.TypeLogData?.ToString()).ToArray();
             var nullValues = logCurveInfos.Select(x => x.NullValue).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri())
+            return new ChannelDataReader(log.LogData, mnemonics.Length + 1, (int)log.IndexCurve?.ColumnIndex, mnemonics, units, dataTypes, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
