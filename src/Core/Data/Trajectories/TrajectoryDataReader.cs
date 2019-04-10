@@ -15,6 +15,7 @@ namespace PDS.WITSMLstudio.Data.Trajectories
     /// <summary>
     /// 
     /// </summary>
+    [Serializable]
     public class TrajectoryDataReader : IDataReader
     {
         /// <summary>
