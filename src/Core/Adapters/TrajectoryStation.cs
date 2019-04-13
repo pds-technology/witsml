@@ -173,7 +173,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Returns the dispEw / easting value
         /// </summary>
-        public LengthMeasure Easting
+        public LengthMeasure DispEW
         {
             get
             {
@@ -194,7 +194,7 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// returns the dispNs / northing value
         /// </summary>
-        public LengthMeasure Northing
+        public LengthMeasure DispNS
         {
             get
             {
