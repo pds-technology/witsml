@@ -213,7 +213,10 @@ namespace PDS.WITSMLstudio.Store.Configuration
 
             foreach (var option in options.Where(x => !keywords.Contains(x.Key)))
             {
-                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, "Option not supported: " + option.Key);
+                if (WitsmlSettings.ThrowForUnsupportedOptionsIn)
+                    throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, "Option not supported: " + option.Key);
+
+                _log.Warn($"Option not supported: {option.Key}={option.Value}");
             }
         }
 

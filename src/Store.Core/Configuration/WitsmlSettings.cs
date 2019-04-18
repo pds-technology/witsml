@@ -274,6 +274,11 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static string GlobalDeleteTopicName = Properties.Settings.Default.GlobalDeleteTopicName;
 
         /// <summary>
+        /// The ThrowForUnsupportedOptionsIn setting. 
+        /// </summary>
+        public static bool ThrowForUnsupportedOptionsIn = Properties.Settings.Default.ThrowForUnsupportedOptionsIn;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

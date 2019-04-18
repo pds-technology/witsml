@@ -91,7 +91,11 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void WitsmlValidator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
         {
+            var setting = WitsmlSettings.ThrowForUnsupportedOptionsIn;
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = true;
+
             var response = DevKit.Add<WellList, Well>(Well, optionsIn: "returnElements=all");
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = setting;
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
@@ -260,7 +264,12 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void WitsmlValidator_GetFromStore_Error_440_Option_Keyword_Not_Supported()
         {
+            var setting = WitsmlSettings.ThrowForUnsupportedOptionsIn;
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = true;
+
             var response = DevKit.GetFromStore(ObjectTypes.Well, QueryEmptyObject, null, "optionNotExists=BadValue");
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = setting;
+
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
         }
 
