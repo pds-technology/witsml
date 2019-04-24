@@ -55,6 +55,11 @@ namespace PDS.WITSMLstudio.Store.Data
         protected IDataObjectMessageHandler MessageHandler { get; }
 
         /// <summary>
+        /// Gets the strongly typed data object message handler.
+        /// </summary>
+        protected IDataObjectMessageHandler<T> TypedMessageHandler => MessageHandler as IDataObjectMessageHandler<T>;
+
+        /// <summary>
         /// Gets the message producer.
         /// </summary>
         protected IDataObjectMessageProducer MessageProducer { get; }
@@ -196,7 +201,7 @@ namespace PDS.WITSMLstudio.Store.Data
         public override List<T> GetAll(EtpUri? parentUri = null)
         {
             return MessageHandler.IsQueryEnabled
-                ? MessageHandler.GetAll<T>(parentUri)
+                ? TypedMessageHandler.GetAll(parentUri)
                 : new List<T>();
         }
 
@@ -208,7 +213,7 @@ namespace PDS.WITSMLstudio.Store.Data
         protected virtual List<T> GetAll(WitsmlQueryParser parser)
         {
             return MessageHandler.IsQueryEnabled
-                ? MessageHandler.GetAll<T>(parser)
+                ? TypedMessageHandler.GetAll(parser)
                 : new List<T>();
         }
 
@@ -220,7 +225,7 @@ namespace PDS.WITSMLstudio.Store.Data
         protected virtual T GetObject(EtpUri uri)
         {
             return MessageHandler.IsQueryEnabled
-                ? MessageHandler.GetObject<T>(uri)
+                ? TypedMessageHandler.GetObject(uri)
                 : null;
         }
 

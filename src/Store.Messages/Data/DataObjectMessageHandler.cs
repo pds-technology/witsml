@@ -29,11 +29,40 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <summary>
     /// Provides common properties and methods for all strongly typed data object message handlers.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TObject">The data object type.</typeparam>
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectMessageHandler" />
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.IDataObjectMessageHandler{T}" />
     public class DataObjectMessageHandler<T> : DataObjectMessageHandler, IDataObjectMessageHandler<T>
     {
+        /// <summary>
+        /// Gets a data object based on the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A data object retrieved from the data store.</returns>
+        public virtual T GetObject(EtpUri uri)
+        {
+            return default(T);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public virtual List<T> GetAll(EtpUri? parentUri = null)
+        {
+            return new List<T>();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects based on the specified query template parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
+        public virtual List<T> GetAll(WitsmlQueryParser parser)
+        {
+            return new List<T>();
+        }
     }
 
     /// <summary>
@@ -193,39 +222,6 @@ namespace PDS.WITSMLstudio.Store.Data
         public virtual string GetDeleteTopicName(DataObjectMessage message, string defaultTopicName)
         {
             return defaultTopicName;
-        }
-
-        /// <summary>
-        /// Gets a data object based on the specified URI.
-        /// </summary>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns>A data object retrieved from the data store.</returns>
-        public virtual TObject GetObject<TObject>(EtpUri uri)
-        {
-            return default(TObject);
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public virtual List<TObject> GetAll<TObject>(EtpUri? parentUri = null)
-        {
-            return new List<TObject>();
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects based on the specified query template parser.
-        /// </summary>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <param name="parser">The query template parser.</param>
-        /// <returns>A collection of data objects retrieved from the data store.</returns>
-        public virtual List<TObject> GetAll<TObject>(WitsmlQueryParser parser)
-        {
-            return new List<TObject>();
         }
     }
 }
