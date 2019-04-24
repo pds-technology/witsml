@@ -52,7 +52,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         {
             Logger.DebugFormat("Getting the supported capabilities for Wellbore data version {0}.", capServer.Version);
 
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
+            if (MessageHandler.IsQueryEnabled)
+                capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
+
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);

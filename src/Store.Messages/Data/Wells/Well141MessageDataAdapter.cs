@@ -52,7 +52,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
             Logger.DebugFormat("Getting the supported capabilities for Well data version {0}.", capServer.Version);
 
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
+            if (MessageHandler.IsQueryEnabled)
+                capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
+
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);

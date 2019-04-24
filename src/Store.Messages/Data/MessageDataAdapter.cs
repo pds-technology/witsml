@@ -189,14 +189,27 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<T> GetAll(EtpUri? parentUri = null)
+        {
+            return MessageHandler.IsQueryEnabled
+                ? MessageHandler.GetAll<T>(parentUri)
+                : new List<T>();
+        }
+
+        /// <summary>
         /// Gets a collection of data objects based on the specified query template parser.
         /// </summary>
         /// <param name="parser">The query template parser.</param>
         /// <returns>A collection of data objects retrieved from the data store.</returns>
         protected virtual List<T> GetAll(WitsmlQueryParser parser)
         {
-            //throw new NotImplementedException();
-            return new List<T>();
+            return MessageHandler.IsQueryEnabled
+                ? MessageHandler.GetAll<T>(parser)
+                : new List<T>();
         }
 
         /// <summary>
@@ -206,8 +219,9 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A data object retrieved from the data store.</returns>
         protected virtual T GetObject(EtpUri uri)
         {
-            //throw new NotImplementedException();
-            return null;
+            return MessageHandler.IsQueryEnabled
+                ? MessageHandler.GetObject<T>(uri)
+                : null;
         }
 
         /// <summary>

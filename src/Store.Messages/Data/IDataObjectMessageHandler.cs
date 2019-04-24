@@ -35,6 +35,11 @@ namespace PDS.WITSMLstudio.Store.Data
     public interface IDataObjectMessageHandler
     {
         /// <summary>
+        /// Determines whether querying is enabled, e.g. GetFromStore, GetObject, etc.
+        /// </summary>
+        bool IsQueryEnabled { get; }
+
+        /// <summary>
         /// Creates the data object messages.
         /// </summary>
         /// <param name="objectType">The object type.</param>
@@ -89,5 +94,29 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="defaultTopicName">The default topic name.</param>
         /// <returns></returns>
         string GetDeleteTopicName(DataObjectMessage message, string defaultTopicName);
+
+        /// <summary>
+        /// Gets a data object based on the specified URI.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A data object retrieved from the data store.</returns>
+        TObject GetObject<TObject>(EtpUri uri);
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        List<TObject> GetAll<TObject>(EtpUri? parentUri = null);
+
+        /// <summary>
+        /// Gets a collection of data objects based on the specified query template parser.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
+        List<TObject> GetAll<TObject>(WitsmlQueryParser parser);
     }
 }
