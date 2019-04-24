@@ -22,7 +22,6 @@ using System.ComponentModel.Composition;
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using Confluent.Kafka.Serialization;
 using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data
@@ -34,17 +33,13 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <seealso cref="System.IDisposable" />
     [Export(typeof(IDataObjectMessageProducer))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class KafkaMessageProducer : MessageProducerBase, IDisposable
+    public class KafkaMessageProducer : MessageProducerBase
     {
         #region Fields 
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(KafkaMessageProducer));
 
-        private readonly IDictionary<string, object> _config;
-        private readonly StringSerializer _keySerializer;
-        private readonly StringSerializer _valueSerializer;
-
-        private bool _disposed = false;
+        private readonly ProducerConfig _config;
 
         #endregion
 
@@ -56,14 +51,20 @@ namespace PDS.WITSMLstudio.Store.Data
         [ImportingConstructor]
         public KafkaMessageProducer()
         {
-            _keySerializer = new StringSerializer(Encoding.UTF8);
-            _valueSerializer = new StringSerializer(Encoding.UTF8);
-
-            _config = new Dictionary<string, object>
+            var advancedConfig = new Dictionary<string,string>
             {
-                {KafkaSettings.DebugKey, KafkaSettings.DebugContexts},
-                {KafkaSettings.BrokerListKey, KafkaSettings.BrokerList}
+                { KafkaSettings.SecurityProtocolKey, KafkaSettings.SecurityProtocol }
             };
+
+            // pass username and password only if the mechanism is defined
+            if (!string.IsNullOrWhiteSpace(KafkaSettings.SaslMechanism))
+            {
+                advancedConfig.Add(KafkaSettings.SaslMechanismKey, KafkaSettings.SaslMechanism);
+                advancedConfig.Add(KafkaSettings.SaslUsernameKey, KafkaSettings.SaslUsername);
+                advancedConfig.Add(KafkaSettings.SaslPasswordKey, KafkaSettings.SaslPassword);
+            }
+
+            _config = new ProducerConfig(advancedConfig) { BootstrapServers = KafkaSettings.BrokerList };
         }
 
         #endregion
@@ -79,54 +80,19 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>An awaitable task.</returns>
         public override async Task SendMessageAsync(string topic, string key, string payload)
         {
-            using (var producer = new Producer<string, string>(_config, _keySerializer, _valueSerializer))
+            using (var producer = new ProducerBuilder<string, string>(_config).Build())
             {
                 _log.Debug($"{producer.Name} producing on topic: {topic}; key: {key}; message:{Environment.NewLine}{payload}");
 
-                var message = await producer.ProduceAsync(topic, key, payload);
-
-                if (message.Error)
-                {
-                    throw new KafkaException(message.Error);
-                }
+                var message = await producer.ProduceAsync(topic,
+                    new Message<string, string>
+                    {
+                        Key = key, Value = payload
+                    });
 
                 _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
             }
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, 
-        /// releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        #endregion
-
-        #region Private / Protected Methods
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
-        /// <param name="disposing">
-        /// <c>true</c> to release both managed and unmanaged resources
-        /// <c>false</c> to release only unmanaged resources
-        /// </param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _keySerializer.Dispose();
-                    _valueSerializer.Dispose();
-                }
-
-                _disposed = true;
-            }
-        }
+        }    
 
         #endregion
     }

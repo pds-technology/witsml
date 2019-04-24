@@ -17,5 +17,17 @@
     <Setting Name="KafkaEnableAutoCreate" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="KafkaSecurityProtocol" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PLAINTEXT</Value>
+    </Setting>
+    <Setting Name="KafkaSaslMechanism" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KafkaSaslUsername" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KafkaSaslPassword" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
