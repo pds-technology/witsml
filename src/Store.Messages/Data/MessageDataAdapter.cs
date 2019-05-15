@@ -71,7 +71,10 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object.</param>
         /// <returns><c>true</c> if validation is enabled for this data adapter; otherwise, <c>false</c>.</returns>
-        public override bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, T dataObject) => false;
+        public override bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, T dataObject)
+        {
+            return MessageHandler.IsValidationEnabled(function, parser, dataObject);
+        }
 
         /// <summary>
         /// Gets a data object by the specified UUID.

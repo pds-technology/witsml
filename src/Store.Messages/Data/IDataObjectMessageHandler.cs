@@ -60,6 +60,15 @@ namespace PDS.WITSMLstudio.Store.Data
         bool IsQueryEnabled { get; }
 
         /// <summary>
+        /// Gets a value indicating whether validation is enabled for this data object type.
+        /// </summary>
+        /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns><c>true</c> if validation is enabled for this data object type; otherwise, <c>false</c>.</returns>
+        bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, object dataObject);
+
+        /// <summary>
         /// Creates the data object messages.
         /// </summary>
         /// <param name="objectType">The object type.</param>
