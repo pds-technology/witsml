@@ -62,9 +62,15 @@ namespace PDS.WITSMLstudio.Framework
             {
                 var type = ReflectionModelServices.GetPartType(part).Value;
                 var assemblyName = type.Assembly.GetName().Name;
+                var typeName = type.FullName ?? string.Empty;
+
+                if (typeName.Contains("`"))
+                {
+                    typeName = typeName.Substring(0, typeName.IndexOf("`", StringComparison.InvariantCultureIgnoreCase));
+                }
 
                 return !config.ExcludedAssemblies.ContainsIgnoreCase(assemblyName) ||
-                       config.IncludedTypes.ContainsIgnoreCase(type.FullName);
+                       config.IncludedTypes.ContainsIgnoreCase(typeName);
             };
         }
 
