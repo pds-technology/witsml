@@ -31,8 +31,31 @@ namespace PDS.WITSMLstudio.Framework
         public List<string> ExcludedAssemblies { get; set; } = new List<string>();
 
         /// <summary>
+        /// Gets or sets the list of types to exclude from the included assemblies.
+        /// </summary>
+        public List<string> ExcludedTypes { get; set; } = new List<string>();
+
+        /// <summary>
         /// Gets or sets the list of types to include from the excluded assemblies.
         /// </summary>
         public List<string> IncludedTypes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Verifies initialization of included / excluded collections.
+        /// </summary>
+        /// <returns>The current instance.</returns>
+        public ContainerConfig Verify()
+        {
+            if (ExcludedAssemblies == null)
+                ExcludedAssemblies = new List<string>();
+
+            if (ExcludedTypes == null)
+                ExcludedTypes = new List<string>();
+
+            if (IncludedTypes == null)
+                IncludedTypes = new List<string>();
+
+            return this;
+        }
     }
 }

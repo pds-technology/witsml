@@ -72,5 +72,21 @@ namespace PDS.WITSMLstudio.Framework
         /// <param name="contractName">The contract name.</param>
         /// <returns>A collection of object instances with all dependencies resolved.</returns>
         IEnumerable<object> ResolveAll(Type type, string contractName = null);
+
+        /// <summary>
+        /// Tries to resolve a single instance of the specified type and optional contract name.
+        /// </summary>
+        /// <typeparam name="T">The contract type.</typeparam>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>The object instance with all dependencies resolved.</returns>
+        T TryResolve<T>(string contractName = null);
+
+        /// <summary>
+        /// Tries to resolve a single instance of the specified type and optional contract name.
+        /// </summary>
+        /// <param name="type">The contract type.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>The object instance with all dependencies resolved.</returns>
+        object TryResolve(Type type, string contractName = null);
     }
 }
