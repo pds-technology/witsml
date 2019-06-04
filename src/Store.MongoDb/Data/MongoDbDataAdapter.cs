@@ -30,6 +30,7 @@ using PDS.WITSMLstudio.Data.ChangeLogs;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data.ChangeLogs;
 using PDS.WITSMLstudio.Store.Data.Transactions;
+using PDS.WITSMLstudio.Store.MongoDb;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -40,6 +41,7 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private static readonly bool _isDbAuditHistoryEnabled = Settings.Default.IsDbAuditHistoryEnabled;
         private DbAuditHistoryDataAdapter _auditHistoryAdapter;
 
         /// <summary>
@@ -783,6 +785,9 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="changeType">Type of the change.</param>
         protected virtual void AuditEntity(EtpUri uri, Witsml141.ReferenceData.ChangeInfoType changeType)
         {
+            // Ensure change log support has not been disabled
+            if (!_isDbAuditHistoryEnabled) return;
+
             if (AuditHistoryAdapter == null || ObjectTypes.ChangeLog.Equals(uri.ObjectType)) return;
 
             var current = GetEntity(uri); //, GetAuditProjectionPropertyNames());
@@ -807,6 +812,9 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="isNewEntry">if set to <c>true</c> add a new entry.</param>
         protected virtual void AuditEntity(T entity, DbAuditHistory auditHistory, bool isNewEntry)
         {
+            // Ensure change log support has not been disabled
+            if (!_isDbAuditHistoryEnabled) return;
+
             if (isNewEntry)
             {
                 AuditHistoryAdapter?.InsertEntity(auditHistory);
