@@ -43,7 +43,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <summary>
         /// Gets or sets the unique identifier for the message.
         /// </summary>
-        public Guid Uuid { get; set; }
+        public Guid? Uuid { get; set; }
 
         /// <summary>
         /// Gets or sets the user host.
@@ -63,7 +63,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <summary>
         /// Gets or sets the WITSML Store API function.
         /// </summary>
-        public Functions Function { get; set; }
+        public Functions? Function { get; set; }
 
         /// <summary>
         /// Gets or sets the WITSML optionsIn.
@@ -93,7 +93,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <summary>
         /// Gets or sets the execution date time.
         /// </summary>
-        public DateTime ExecutionDateTime { get; set; }
+        public DateTime? ExecutionDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the data object instance.
