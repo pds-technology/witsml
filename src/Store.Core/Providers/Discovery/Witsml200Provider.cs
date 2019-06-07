@@ -43,7 +43,6 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private readonly IContainer _container;
         private readonly IEtpDataProvider<Log> _logDataProvider;
         private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
-        private readonly IEtpDataProvider<WellboreGeology> _wellboreGeologyDataProvider;
         private readonly IList<EtpContentType> _contentTypes;
 
         /// <summary>
@@ -52,18 +51,15 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         /// <param name="container">The composition container.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
-        /// <param name="wellboreGeologyDataProvider">The wellbore geology data Provider.</param>
         [ImportingConstructor]
         public Witsml200Provider(
             IContainer container,
             IEtpDataProvider<Log> logDataProvider,
-            IEtpDataProvider<ChannelSet> channelSetDataProvider,
-            IEtpDataProvider<WellboreGeology> wellboreGeologyDataProvider)
+            IEtpDataProvider<ChannelSet> channelSetDataProvider)
         {
             _container = container;
             _logDataProvider = logDataProvider;
             _channelSetDataProvider = channelSetDataProvider;
-            _wellboreGeologyDataProvider = wellboreGeologyDataProvider;
             _contentTypes = new List<EtpContentType>();
         }
 

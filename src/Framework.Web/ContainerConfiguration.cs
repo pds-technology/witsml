@@ -29,12 +29,18 @@ namespace PDS.WITSMLstudio.Framework.Web
     /// </summary>
     public static class ContainerConfiguration
     {
+        private static string _workingDirectory;
+
         /// <summary>
         /// Registers a dependency resolver using the specified assembly path.
         /// </summary>
         /// <param name="assemblyPath">The assembly path.</param>
         public static void Register(string assemblyPath)
         {
+            _workingDirectory = string.IsNullOrWhiteSpace(assemblyPath) || assemblyPath == "."
+                ? Environment.CurrentDirectory
+                : assemblyPath;
+
             var container = ContainerFactory.Create(assemblyPath);
             var resolver = new DependencyResolver(container);
 
@@ -56,7 +62,7 @@ namespace PDS.WITSMLstudio.Framework.Web
         public static string MapWorkingDirectory(string path)
         {
             if (HttpContext.Current == null)
-                return Path.Combine(Environment.CurrentDirectory, path);
+                return Path.Combine(_workingDirectory, path);
 
             return HttpContext.Current.Server.MapPath(Path.Combine("~/bin", path));
         }
