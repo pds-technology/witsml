@@ -52,7 +52,9 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         {
             Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
 
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            if (MessageHandler.IsQueryEnabled)
+                capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+
             capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);

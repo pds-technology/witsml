@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Framework
         {
             var config = GetContainerConfig(configurationFilePath);
 
-            if (config?.ExcludedAssemblies == null || !config.ExcludedAssemblies.Any())
+            if (config.ExcludedAssemblies.Count < 1 && config.ExcludedTypes.Count < 1)
             {
                 return part => true;
             }
@@ -62,9 +62,15 @@ namespace PDS.WITSMLstudio.Framework
             {
                 var type = ReflectionModelServices.GetPartType(part).Value;
                 var assemblyName = type.Assembly.GetName().Name;
+                var typeName = type.FullName ?? string.Empty;
 
-                return !config.ExcludedAssemblies.ContainsIgnoreCase(assemblyName) ||
-                       config.IncludedTypes.ContainsIgnoreCase(type.FullName);
+                if (typeName.Contains("`"))
+                {
+                    typeName = typeName.Substring(0, typeName.IndexOf("`", StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                return (!config.ExcludedAssemblies.ContainsIgnoreCase(assemblyName) && !config.ExcludedTypes.ContainsIgnoreCase(typeName))
+                    || config.IncludedTypes.ContainsIgnoreCase(typeName);
             };
         }
 
@@ -75,7 +81,7 @@ namespace PDS.WITSMLstudio.Framework
             try
             {
                 _config = File.Exists(configurationFilePath)
-                    ? JsonConvert.DeserializeObject<ContainerConfig>(File.ReadAllText(configurationFilePath))
+                    ? JsonConvert.DeserializeObject<ContainerConfig>(File.ReadAllText(configurationFilePath)).Verify()
                     : new ContainerConfig();
             }
             catch

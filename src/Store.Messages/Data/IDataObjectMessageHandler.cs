@@ -24,9 +24,29 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <summary>
     /// Defines common properties and methods for all strongly typed data object message handlers.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The data object type.</typeparam>
     public interface IDataObjectMessageHandler<T> : IDataObjectMessageHandler
     {
+        /// <summary>
+        /// Gets a data object based on the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A data object retrieved from the data store.</returns>
+        T GetObject(EtpUri uri);
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        List<T> GetAll(EtpUri? parentUri = null);
+
+        /// <summary>
+        /// Gets a collection of data objects based on the specified query template parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>A collection of data objects retrieved from the data store.</returns>
+        List<T> GetAll(WitsmlQueryParser parser);
     }
 
     /// <summary>
@@ -34,6 +54,20 @@ namespace PDS.WITSMLstudio.Store.Data
     /// </summary>
     public interface IDataObjectMessageHandler
     {
+        /// <summary>
+        /// Determines whether querying is enabled, e.g. GetFromStore, GetObject, etc.
+        /// </summary>
+        bool IsQueryEnabled { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether validation is enabled for this data object type.
+        /// </summary>
+        /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns><c>true</c> if validation is enabled for this data object type; otherwise, <c>false</c>.</returns>
+        bool IsValidationEnabled(Functions function, WitsmlQueryParser parser, object dataObject);
+
         /// <summary>
         /// Creates the data object messages.
         /// </summary>

@@ -161,5 +161,8 @@
     <Setting Name="GlobalDeleteTopicName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">WitsmlDataAdapter-Delete</Value>
     </Setting>
+    <Setting Name="ThrowForUnsupportedOptionsIn" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

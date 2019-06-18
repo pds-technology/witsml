@@ -37,7 +37,7 @@ namespace PDS.WITSMLstudio.Store.Data
             Uri = uri;
             ObjectMetadata = dataObject;
             ExecutionDateTime = DateTime.UtcNow;
-            CustomData = new Dictionary<string, object>();
+            //CustomData = new Dictionary<string, object>();
         }
 
         /// <summary>

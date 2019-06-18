@@ -78,7 +78,15 @@ namespace PDS.WITSMLstudio.Framework
                 existingValue = (DateTimeOffset) (Timestamp) existingValue;
             }
 
-            return base.ReadJson(reader, objectType, existingValue, serializer);
+            var result = base.ReadJson(reader, objectType, existingValue, serializer);
+
+            if (result != null)
+            {
+                // Cast DateTime and DateTimeOffset to Timestamp
+                result = (Timestamp) (DateTimeOffset) result;
+            }
+
+            return result;
         }
     }
 }

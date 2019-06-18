@@ -137,6 +137,42 @@ namespace PDS.WITSMLstudio.Framework
             }
         }
 
+        /// <summary>
+        /// Tries to resolve a single instance of the specified type and optional contract name.
+        /// </summary>
+        /// <typeparam name="T">The contract type.</typeparam>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>The object instance with all dependencies resolved.</returns>
+        public T TryResolve<T>(string contractName = null)
+        {
+            try
+            {
+                return Resolve<T>(contractName);
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// Tries to resolve a single instance of the specified type and optional contract name.
+        /// </summary>
+        /// <param name="type">The contract type.</param>
+        /// <param name="contractName">The contract name.</param>
+        /// <returns>The object instance with all dependencies resolved.</returns>
+        public object TryResolve(Type type, string contractName = null)
+        {
+            try
+            {
+                return Resolve(type, contractName);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         #region IDisposable Support
         private bool disposedValue; // To detect redundant calls
 

@@ -140,7 +140,19 @@ namespace PDS.WITSMLstudio
         /// Find Reources
         /// </summary>
         [Description("Find Resources")]
-        FindResources
+        FindResources,
+
+        /// <summary>
+        /// Get Tree Resources
+        /// </summary>
+        [Description("Get Tree Resources")]
+        GetTreeResources,
+
+        /// <summary>
+        /// Get Graph Resources
+        /// </summary>
+        [Description("Get Graph Resources")]
+        GetGraphResources
         #endregion
     }
 }

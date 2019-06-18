@@ -279,7 +279,7 @@ namespace PDS.WITSMLstudio.Query
 
             if (ObjectTypes.Log.EqualsIgnoreCase(objectType))
             {
-                _template.Add(queryIn, xpath, "indexType", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "direction");
+                _template.Add(queryIn, xpath, "indexType", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "direction", "indexCurve");
                 _template.Add(queryIn, $"{xpath}/startIndex", "@uom");
                 _template.Add(queryIn, $"{xpath}/endIndex", "@uom");
 

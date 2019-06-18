@@ -87,7 +87,11 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         {
             AddParents();
 
+            var setting = WitsmlSettings.ThrowForUnsupportedOptionsIn;
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = true;
+
             var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "returnElements=all");
+            WitsmlSettings.ThrowForUnsupportedOptionsIn = setting;
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);

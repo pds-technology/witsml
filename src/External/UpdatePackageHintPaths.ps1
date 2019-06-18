@@ -10,7 +10,7 @@ $existsPathPattern = @"
 Exists\('(\d|\w|\s|\.|\\)*packages
 "@
 
-ls (Split-Path $dte.Solution.FileName -Parent) -Recurse -include *.csproj, *.sln, *.fsproj, *.vbproj |
+ls (Split-Path $PSScriptRoot -Parent) -Recurse -include *.csproj, *.sln, *.fsproj, *.vbproj |
   foreach {
     $content = cat $_.FullName | Out-String
     $origContent = $content
