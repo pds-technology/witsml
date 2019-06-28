@@ -116,6 +116,24 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Determines whether a range starts after the specified value.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
+        /// <returns><c>true</c> if the range starts after the specified value; otherwise, <c>false</c>.</returns>
+        public static bool StartsAfter(this Range<DateTimeOffset?> range, DateTimeOffset? value, bool increasing = true, bool inclusive = false)
+        {
+            if (!range.Start.HasValue)
+                return false;
+
+            return increasing
+                ? (inclusive ? value <= range.Start.Value : value < range.Start.Value)
+                : (inclusive ? value >= range.Start.Value : value > range.Start.Value);
+        }
+
+        /// <summary>
         /// Determines whether a range starts before the specified value.
         /// </summary>
         /// <param name="range">The range.</param>
@@ -142,6 +160,24 @@ namespace PDS.WITSMLstudio
         /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
         /// <returns><c>true</c> if the range ends before the specified value; otherwise, <c>false</c>.</returns>
         public static bool EndsBefore(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
+        {
+            if (!range.End.HasValue)
+                return false;
+
+            return increasing
+                ? (inclusive ? value >= range.End.Value : value > range.End.Value)
+                : (inclusive ? value <= range.End.Value : value < range.End.Value);
+        }
+
+        /// <summary>
+        /// Determines whether a range ends before the specified value.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
+        /// <returns><c>true</c> if the range ends before the specified value; otherwise, <c>false</c>.</returns>
+        public static bool EndsBefore(this Range<DateTimeOffset?> range, DateTimeOffset? value, bool increasing = true, bool inclusive = false)
         {
             if (!range.End.HasValue)
                 return false;
@@ -313,6 +349,24 @@ namespace PDS.WITSMLstudio
                 return false;
 
             if (range.StartsAfter(compareRange.End.GetValueOrDefault(), increasing))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether this instance overlaps the compared range.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="compareRange">The compared range.</param>
+        /// <param name="increasing">If the range is increasing.</param>
+        /// <returns><c>true</c> if range overlaps the compared range; otherwise, <c>false</c>.</returns>
+        public static bool Overlaps(this Range<DateTimeOffset?>? range, Range<DateTime?> compareRange, bool increasing)
+        {
+            if (range.HasValue && range.Value.EndsBefore(compareRange.Start.GetValueOrDefault(), increasing))
+                return false;
+
+            if (range.HasValue && range.Value.StartsAfter(compareRange.End.GetValueOrDefault(), increasing))
                 return false;
 
             return true;
