@@ -339,11 +339,12 @@ namespace PDS.WITSMLstudio
         /// Gets the .NET type for the specified object type and WITSML version.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The WITSML version.</param>
         /// <returns>The .NET type for the data object.</returns>
-        public static Type GetObjectType(string objectType, WMLSVersion version)
+        public static Type GetObjectType(string objectType, string family, WMLSVersion version)
         {
-            return GetObjectType(objectType, version == WMLSVersion.WITSML131
+            return GetObjectType(objectType, family, version == WMLSVersion.WITSML131
                 ? OptionsIn.DataVersion.Version131.Value
                 : OptionsIn.DataVersion.Version141.Value);
         }
@@ -352,44 +353,68 @@ namespace PDS.WITSMLstudio
         /// Gets the .NET type for the specified object type and WITSML version.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The WITSML version.</param>
         /// <returns>The .NET type for the data object.</returns>
-        public static Type GetObjectType(string objectType, string version)
+        /// <remarks>Handles versions of the format X.Y[.X.[.W]] and dataVersion=X.Y[.Z[.W]].</remarks>
+        public static Type GetObjectType(string objectType, string family, string version)
         {
-            var ns = OptionsIn.DataVersion.Version131.Equals(version)
-                ? "Energistics.DataAccess.WITSML131."
-                : OptionsIn.DataVersion.Version200.Equals(version)
-                ? "Energistics.DataAccess.WITSML200."
-                : OptionsIn.DataVersion.Version210.Equals(version)
-                ? "Energistics.DataAccess.RESQML210."
-                : "Energistics.DataAccess.WITSML141.";
+            if (string.IsNullOrEmpty(version) || version.Length < 3)
+                return null;
+
+            Assembly assembly;
+            string familyUpper = family.ToUpperInvariant();
+
+            if (familyUpper == "WITSML")
+                assembly = typeof(IWitsmlDataObject).Assembly;
+            else if (familyUpper == "PRODML")
+                assembly = typeof(IProdmlDataObject).Assembly;
+            else if (familyUpper == "RESQML")
+                assembly = typeof(IResqmlDataObject).Assembly;
+            else if (familyUpper == "EML")
+            {
+                // Assume WITSML 2.0 for now.
+                familyUpper = "WITSML";
+                version = "2.0";
+                assembly = typeof(IWitsmlDataObject).Assembly;
+            }
+            else
+                return null;
+
+            var index = version.LastIndexOf('=');
+            index++; // index will be -1 if no '=' is found so no special case needed.
+
+            char build = version.Length > index + 4 ? version[index+4] : '0';
+            var ns = $"Energistics.DataAccess.{familyUpper}{version[index]}{version[index+2]}{build}.";
 
             if (WbGeometry.EqualsIgnoreCase(objectType) && !OptionsIn.DataVersion.Version200.Equals(version))
                 objectType = $"StandAlone{WellboreGeometry.ToPascalCase()}";
 
-            return typeof(IDataObject).Assembly.GetType(ns + objectType.ToPascalCase());
+            return assembly.GetType(ns + objectType.ToPascalCase());
         }
 
         /// <summary>
         /// Gets the property name for the recurring element within the container.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The version.</param>
         /// <returns>The recurring element property name.</returns>
-        public static string GetObjectTypeListProperty(string objectType, string version)
+        public static string GetObjectTypeListProperty(string objectType, string family, string version)
         {
-            return GetObjectTypeListPropertyInfo(objectType, version)?.Name;
+            return GetObjectTypeListPropertyInfo(objectType, family, version)?.Name;
         }
 
         /// <summary>
         /// Gets the propertyinfo for the recurring element within the container.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The version.</param>
         /// <returns>The recurring element propertyinfo.</returns>
-        public static PropertyInfo GetObjectTypeListPropertyInfo(string objectType, string version)
+        public static PropertyInfo GetObjectTypeListPropertyInfo(string objectType, string family, string version)
         {
-            var objectGroupType = GetObjectGroupType(objectType, version);
+            var objectGroupType = GetObjectGroupType(objectType, family, version);
 
             return objectGroupType?
                 .GetProperties()
@@ -403,23 +428,25 @@ namespace PDS.WITSMLstudio
         /// Gets the .NET type of the collection for the specified data object type and WITSML version.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The WITSML version.</param>
         /// <returns>The .NET type for the data object collection.</returns>
-        public static Type GetObjectGroupType(string objectType, WMLSVersion version)
+        public static Type GetObjectGroupType(string objectType, string family, WMLSVersion version)
         {
             if (WbGeometry.EqualsIgnoreCase(objectType))
                 objectType = WellboreGeometry;
 
-            return GetObjectType(objectType + "List", version);
+            return GetObjectType(objectType + "List", family, version);
         }
 
         /// <summary>
         /// Gets the .NET type of the collection for the specified data object type and WITSML version.
         /// </summary>
         /// <param name="objectType">The data object type.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="version">The WITSML version.</param>
         /// <returns>The .NET type for the data object collection.</returns>
-        public static Type GetObjectGroupType(string objectType, string version)
+        public static Type GetObjectGroupType(string objectType, string family, string version)
         {
             if (WbGeometry.EqualsIgnoreCase(objectType))
                 objectType = WellboreGeometry;
@@ -428,7 +455,7 @@ namespace PDS.WITSMLstudio
                 ? string.Empty
                 : "List";
 
-            return GetObjectType(objectType + suffix, version);
+            return GetObjectType(objectType + suffix, family, version);
         }
 
         /// <summary>
@@ -522,6 +549,56 @@ namespace PDS.WITSMLstudio
                 : ns.StartsWith("Energistics.DataAccess.WITSML200")
                 ? OptionsIn.DataVersion.Version200.Value
                 : OptionsIn.DataVersion.Version141.Value;
+        }
+
+        /// <summary>
+        /// Gets the data object family for the specified data object type.
+        /// </summary>
+        /// <param name="type">The data object type.</param>
+        /// <returns>The data family.</returns>
+        public static string GetFamily(Type type)
+        {
+            if (string.IsNullOrWhiteSpace(type.Namespace)) return null;
+            var ns = type.Namespace;
+
+            return ns.Contains("WITSML")
+                ? "WITSML"
+                : ns.Contains("PRODML")
+                ? "PRODML"
+                : ns.Contains("RESQML")
+                ? "RESQML"
+                : null;
+        }
+
+        /// <summary>
+        /// Gets the data object family of the object.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        /// <returns>The data object family.</returns>
+        public static string GetFamily(XElement element)
+        {
+            var ns = element?.GetDefaultNamespace()?.NamespaceName;
+            if (string.IsNullOrEmpty(ns))
+                return null;
+
+            if (ns.ContainsIgnoreCase("witsml"))
+                return "WITSML";
+            if (ns.ContainsIgnoreCase("prodml"))
+                return "PRODML";
+            if (ns.ContainsIgnoreCase("resqml"))
+                return "RESQML";
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the data object family of the object.
+        /// </summary>
+        /// <param name="pluralObject">The plural object.</param>
+        /// <returns>The data object family.</returns>
+        public static string GetFamily(IEnergisticsCollection pluralObject)
+        {
+            return GetFamily(pluralObject.GetType());
         }
 
         /// <summary>

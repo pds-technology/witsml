@@ -26,6 +26,8 @@ using Newtonsoft.Json;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 
+using UnitOfMeasureExt = Energistics.DataAccess.ExtensibleEnum<Energistics.DataAccess.WITSML200.ReferenceData.UnitOfMeasure>;
+
 namespace PDS.WITSMLstudio.Data.Logs
 {
     /// <summary>
@@ -111,7 +113,7 @@ namespace PDS.WITSMLstudio.Data.Logs
         /// <param name="uom">The uom.</param>
         /// <param name="datumReference">The datum reference.</param>
         /// <returns></returns>
-        public ChannelIndex CreateChannelIndex(ChannelIndexType indexType, IndexDirection direction, string mnemonic, UnitOfMeasure? uom, string datumReference)
+        public ChannelIndex CreateChannelIndex(ChannelIndexType indexType, IndexDirection direction, string mnemonic, UnitOfMeasureExt? uom, string datumReference)
         {
             return new ChannelIndex()
             {
@@ -184,7 +186,7 @@ namespace PDS.WITSMLstudio.Data.Logs
         /// <param name="etpDataType">Type of the ETP data.</param>
         /// <param name="pointMetadataList">The point metadata list.</param>
         /// <returns></returns>
-        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, UnitOfMeasure? uom, string channelClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
+        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, UnitOfMeasureExt? uom, string channelClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
         {
             return new Channel()
             {

@@ -64,6 +64,11 @@ namespace PDS.WITSMLstudio.Store.Data
 
             Register(new TimestampSerializer());
             Register(new XmlElementSerializer());
+            Register(new ExtensibleEnumSerializer<Witsml200.ReferenceData.UnitOfMeasure>());
+            Register(new ExtensibleEnumSerializer<Witsml200.ReferenceData.LithologyKind>());
+            Register(new ExtensibleEnumSerializer<Witsml200.ReferenceData.LithologyQualifierKind>());
+            Register(new ExtensibleEnumSerializer<Witsml200.ReferenceData.EquipmentType>());
+            Register(new ExtensibleEnumSerializer<Witsml200.ReferenceData.QuantityClassKind>());
         }
 
         /// <summary>

@@ -71,30 +71,30 @@ namespace PDS.WITSMLstudio
         [TestMethod]
         public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_131()
         {
-            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, WMLSVersion.WITSML131);
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, "witsml", WMLSVersion.WITSML131);
             Assert.AreEqual(typeof(Witsml131.StandAloneWellboreGeometry), objectType);
 
-            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version131.Value);
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, "witsml", OptionsIn.DataVersion.Version131.Value);
             Assert.IsNull(objectType);
         }
 
         [TestMethod]
         public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_141()
         {
-            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, WMLSVersion.WITSML141);
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, "witsml", WMLSVersion.WITSML141);
             Assert.AreEqual(typeof(Witsml141.StandAloneWellboreGeometry), objectType);
 
-            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version141.Value);
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, "witsml", OptionsIn.DataVersion.Version141.Value);
             Assert.IsNull(objectType);
         }
 
         [TestMethod]
         public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_200()
         {
-            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version200.Value);
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, "witsml", OptionsIn.DataVersion.Version200.Value);
             Assert.IsNull(objectType);
 
-            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version200.Value);
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, "witsml", OptionsIn.DataVersion.Version200.Value);
             Assert.AreEqual(typeof(Witsml200.WellboreGeometry), objectType);
         }
 
@@ -131,26 +131,26 @@ namespace PDS.WITSMLstudio
         [TestMethod]
         public void ObjectTypes_GetObjectTypeListProperty_Returns_Property_Name_For_WellList()
         {
-            var propertyName = ObjectTypes.GetObjectTypeListProperty(ObjectTypes.Well, OptionsIn.DataVersion.Version141);
+            var propertyName = ObjectTypes.GetObjectTypeListProperty(ObjectTypes.Well, "witsml", OptionsIn.DataVersion.Version141);
             Assert.AreEqual("Well", propertyName);
 
-            Assert.IsNull(ObjectTypes.GetObjectTypeListProperty(ObjectTypes.Well, OptionsIn.DataVersion.Version200.Value));
+            Assert.IsNull(ObjectTypes.GetObjectTypeListProperty(ObjectTypes.Well, "witsml", OptionsIn.DataVersion.Version200.Value));
         }
 
         [TestMethod]
         public void ObjectTypes_GetObjectTypeListPropertyInfo_Returns_PropertyInfo_For_WellList()
         {
-            var property = ObjectTypes.GetObjectTypeListPropertyInfo(ObjectTypes.Well, OptionsIn.DataVersion.Version141);
+            var property = ObjectTypes.GetObjectTypeListPropertyInfo(ObjectTypes.Well, "witsml", OptionsIn.DataVersion.Version141);
             Assert.AreEqual("Well", property.Name);
             Assert.AreEqual(typeof(List<Witsml141.Well>), property.PropertyType);
 
-            Assert.IsNull(ObjectTypes.GetObjectTypeListPropertyInfo(ObjectTypes.Well, OptionsIn.DataVersion.Version200.Value));
+            Assert.IsNull(ObjectTypes.GetObjectTypeListPropertyInfo(ObjectTypes.Well, "witsml", OptionsIn.DataVersion.Version200.Value));
         }
 
         [TestMethod]
         public void ObjectTypes_GetObjectGroupType_Returns_Correct_WbGeometry_Type_For_131()
         {
-            var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, WMLSVersion.WITSML131);
+            var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, "witsml", WMLSVersion.WITSML131);
             Assert.AreEqual(typeof(Witsml131.WellboreGeometryList), objectType);
             Assert.AreEqual(ObjectTypes.Unknown, ObjectTypes.GetObjectGroupType(null));
         }
@@ -158,7 +158,7 @@ namespace PDS.WITSMLstudio
         [TestMethod]
         public void ObjectTypes_GetObjectGroupType_Returns_Correct_WbGeometry_Type_For_141()
         {
-            var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version141);
+            var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, "witsml", OptionsIn.DataVersion.Version141);
             Assert.AreEqual(typeof(Witsml141.WellboreGeometryList), objectType);
         }
 

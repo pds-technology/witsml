@@ -144,10 +144,11 @@ namespace PDS.WITSMLstudio
 
             var type = entity.GetType();
             var objectType = ObjectTypes.GetObjectType(type);
+            var family = ObjectTypes.GetFamily(type);
             var version = ObjectTypes.GetVersion(type);
 
-            var groupType = ObjectTypes.GetObjectGroupType(objectType, version);
-            var property = ObjectTypes.GetObjectTypeListPropertyInfo(objectType, version);
+            var groupType = ObjectTypes.GetObjectGroupType(objectType, family, version);
+            var property = ObjectTypes.GetObjectTypeListPropertyInfo(objectType, family, version);
             var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
             var list = Activator.CreateInstance(property.PropertyType) as IList;
             if (list == null) return group;
