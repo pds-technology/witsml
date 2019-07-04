@@ -373,7 +373,7 @@ namespace PDS.WITSMLstudio
                 assembly = typeof(IResqmlDataObject).Assembly;
             else if (familyUpper == "EML")
             {
-                // Assume WITSML 2.0 for now.
+                // TODO: Update this once common is implemented independently.
                 familyUpper = "WITSML";
                 version = "2.0";
                 assembly = typeof(IWitsmlDataObject).Assembly;
@@ -561,6 +561,8 @@ namespace PDS.WITSMLstudio
             if (string.IsNullOrWhiteSpace(type.Namespace)) return null;
             var ns = type.Namespace;
 
+            // TODO: Update this once common is implemented independently.
+
             return ns.Contains("WITSML")
                 ? "WITSML"
                 : ns.Contains("PRODML")
@@ -587,6 +589,11 @@ namespace PDS.WITSMLstudio
                 return "PRODML";
             if (ns.ContainsIgnoreCase("resqml"))
                 return "RESQML";
+
+            // TODO: Update this once common is implemented independently.
+
+            if (ns.ContainsIgnoreCase("common"))
+                return "WITSML";
 
             return null;
         }
