@@ -210,12 +210,12 @@ namespace PDS.WITSMLstudio.Store.Data
                 return baseUri.Append(objectType, Attribute("uuid"));
 
             if (typeof(IWellObject).IsAssignableFrom(type))
-                baseUri = baseUri.Append(ObjectTypes.Well, Attribute("uidWell"));
+                baseUri = baseUri.Append(ObjectTypes.Well, Attribute("uidWell"), true);
 
             if (typeof(IWellboreObject).IsAssignableFrom(type))
-                baseUri = baseUri.Append(ObjectTypes.Wellbore, Attribute("uidWellbore"));
+                baseUri = baseUri.Append(ObjectTypes.Wellbore, Attribute("uidWellbore"), true);
 
-            return baseUri.Append(objectType, Attribute("uid"));
+            return baseUri.Append(objectType, Attribute("uid"), true);
         }
 
         /// <summary>
