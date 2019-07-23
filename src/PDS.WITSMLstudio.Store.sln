@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store", "Store\Store.csproj", "{9E51075C-D571-42F5-A311-0589231DBA9C}"
 EndProject
@@ -49,6 +49,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevKit.UnitTest", "..\ext\witsml\ext\etp-devkit\src\DevKit.UnitTest\DevKit.UnitTest.csproj", "{BC953158-9584-45CF-BA13-10CE67348759}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETP.Messages", "..\ext\witsml\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj", "{1A788A14-70D7-4B2B-96A3-086C86D0C925}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Standards.DevKit", "Standards.DevKit", "{02FCF40C-FD76-410F-93B4-3AABF2B71842}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj", "{3F3D2683-6036-4C06-911D-2DB5C1682D91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.PRODML", "..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj", "{57EA0F9F-5E9A-4788-9738-BE3381343E1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.RESQML", "..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj", "{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.WITSML", "..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj", "{8184E6C9-3746-40E5-8B81-6F24785C3739}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -124,6 +134,22 @@ Global
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F3D2683-6036-4C06-911D-2DB5C1682D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F3D2683-6036-4C06-911D-2DB5C1682D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F3D2683-6036-4C06-911D-2DB5C1682D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F3D2683-6036-4C06-911D-2DB5C1682D91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57EA0F9F-5E9A-4788-9738-BE3381343E1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57EA0F9F-5E9A-4788-9738-BE3381343E1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57EA0F9F-5E9A-4788-9738-BE3381343E1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57EA0F9F-5E9A-4788-9738-BE3381343E1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8184E6C9-3746-40E5-8B81-6F24785C3739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8184E6C9-3746-40E5-8B81-6F24785C3739}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8184E6C9-3746-40E5-8B81-6F24785C3739}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8184E6C9-3746-40E5-8B81-6F24785C3739}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,5 +169,12 @@ Global
 		{30DE888B-A6B7-4528-AD89-324A7F9B0F4C} = {8B46808F-ADCA-4536-B382-B4E5592D32D2}
 		{BC953158-9584-45CF-BA13-10CE67348759} = {8B46808F-ADCA-4536-B382-B4E5592D32D2}
 		{1A788A14-70D7-4B2B-96A3-086C86D0C925} = {8B46808F-ADCA-4536-B382-B4E5592D32D2}
+		{3F3D2683-6036-4C06-911D-2DB5C1682D91} = {02FCF40C-FD76-410F-93B4-3AABF2B71842}
+		{57EA0F9F-5E9A-4788-9738-BE3381343E1A} = {02FCF40C-FD76-410F-93B4-3AABF2B71842}
+		{6D7CDB8E-B137-4AD0-8A8D-7EEAAFB69960} = {02FCF40C-FD76-410F-93B4-3AABF2B71842}
+		{8184E6C9-3746-40E5-8B81-6F24785C3739} = {02FCF40C-FD76-410F-93B4-3AABF2B71842}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C02E5B2-57C7-436E-B568-7D8473FF1A3E}
 	EndGlobalSection
 EndGlobal

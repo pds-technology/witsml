@@ -156,18 +156,18 @@ namespace PDS.WITSMLstudio.Store.Providers.StoreNotification
             {
                 ChangeKind = changeKind,
                 ChangeTime = dateTime.ToUnixTimeMicroseconds(),
-                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Version, dataObject, request.Request.IncludeObjectData)
+                DataObject = GetDataObject(etpUri.ObjectType, etpUri.Family, etpUri.Version, dataObject, request.Request.IncludeObjectData)
             });
         }
 
-        protected virtual DataObject GetDataObject(string objectType, string version, object dataObject, bool includeObjectData)
+        protected virtual DataObject GetDataObject(string objectType, string family, string version, object dataObject, bool includeObjectData)
         {
             var jObject = dataObject as JObject;
 
             if (jObject != null || dataObject is string)
             {
-                var type = ObjectTypes.GetObjectGroupType(objectType, version) ??
-                           ObjectTypes.GetObjectType(objectType, version);
+                var type = ObjectTypes.GetObjectGroupType(objectType, family, version) ??
+                           ObjectTypes.GetObjectType(objectType, family, version);
 
                 dataObject = jObject?.ToObject(type) ??
                     WitsmlParser.Parse(type, WitsmlParser.Parse(dataObject.ToString()).Root);

@@ -40,10 +40,6 @@
       <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20181029.2\lib\net40\Energistics.DataAccess.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -189,6 +185,22 @@
     <Compile Include="TestContextProvider.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
+      <Project>{57ea0f9f-5e9a-4788-9738-be3381343e1a}</Project>
+      <Name>DataAccess.PRODML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
+      <Project>{6d7cdb8e-b137-4ad0-8a8d-7eeaafb69960}</Project>
+      <Name>DataAccess.RESQML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
+      <Project>{8184e6c9-3746-40e5-8b81-6f24785c3739}</Project>
+      <Name>DataAccess.WITSML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
+      <Project>{3f3d2683-6036-4c06-911d-2db5c1682d91}</Project>
+      <Name>DataAccess</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>

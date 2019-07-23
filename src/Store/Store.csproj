@@ -66,10 +66,6 @@
       <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20181029.2\lib\net40\Energistics.DataAccess.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Hangfire.Core, Version=1.6.8.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\Hangfire.Core.1.6.8\lib\net45\Hangfire.Core.dll</HintPath>
       <Private>True</Private>
