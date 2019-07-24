@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
             DevKit.AddAndAssert(CementJob);
 
             var deleteXml = string.Format(BasicXMLTemplate,CementJob.UidWell, CementJob.UidWellbore,CementJob.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.CementJob, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
             AddParents();
             DevKit.AddAndAssert<CementJobList, CementJob>(CementJob);
             var nonConformingXml = string.Format(BasicXMLTemplate, CementJob.UidWell, CementJob.UidWellbore, CementJob.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.CementJob, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

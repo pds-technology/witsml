@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{SidewallCore}" />
     [Export(typeof(IDataObjectValidator<SidewallCore>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class SidewallCore131Validator : DataObjectValidator<SidewallCore, Wellbore, Well>
+    public partial class SidewallCore131Validator : WellboreDataObjectValidator<SidewallCore, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SidewallCore131Validator" /> class.

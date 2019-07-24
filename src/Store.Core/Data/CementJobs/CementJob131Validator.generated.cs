@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{CementJob}" />
     [Export(typeof(IDataObjectValidator<CementJob>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class CementJob131Validator : DataObjectValidator<CementJob, Wellbore, Well>
+    public partial class CementJob131Validator : WellboreDataObjectValidator<CementJob, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CementJob131Validator" /> class.

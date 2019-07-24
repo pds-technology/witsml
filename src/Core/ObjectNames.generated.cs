@@ -110,6 +110,21 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName DataAssuranceRecord200 = new ObjectName(ObjectTypes.DataAssuranceRecord, Version200);
 
         /// <summary>
+        /// The data object name for a 1.4.1.1 DepthRegImage.
+        /// </summary>
+        public static readonly ObjectName DepthRegImage141 = new ObjectName(ObjectTypes.DepthRegImage, Version141);
+
+        /// <summary>
+        /// The data object name for a 2.0 DepthRegImage.
+        /// </summary>
+        public static readonly ObjectName DepthRegImage200 = new ObjectName(ObjectTypes.DepthRegImage, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 DownholeComponent.
+        /// </summary>
+        public static readonly ObjectName DownholeComponent141 = new ObjectName(ObjectTypes.DownholeComponent, Version141);
+
+        /// <summary>
         /// The data object name for a 2.0 DownholeComponent.
         /// </summary>
         public static readonly ObjectName DownholeComponent200 = new ObjectName(ObjectTypes.DownholeComponent, Version200);
@@ -380,6 +395,11 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
 
         /// <summary>
+        /// The data object name for a 1.4.1.1 WellboreCompletion.
+        /// </summary>
+        public static readonly ObjectName WellboreCompletion141 = new ObjectName(ObjectTypes.WellboreCompletion, Version141);
+
+        /// <summary>
         /// The data object name for a 2.0 WellboreCompletion.
         /// </summary>
         public static readonly ObjectName WellboreCompletion200 = new ObjectName(ObjectTypes.WellboreCompletion, Version200);
@@ -405,9 +425,19 @@ namespace PDS.WITSMLstudio
         public static readonly ObjectName WellboreMarkerSet200 = new ObjectName(ObjectTypes.WellboreMarkerSet, Version200);
 
         /// <summary>
+        /// The data object name for a 1.4.1.1 WellCMLedger.
+        /// </summary>
+        public static readonly ObjectName WellCMLedger141 = new ObjectName(ObjectTypes.WellCMLedger, Version141);
+
+        /// <summary>
         /// The data object name for a 2.0 WellCMLedger.
         /// </summary>
         public static readonly ObjectName WellCMLedger200 = new ObjectName(ObjectTypes.WellCMLedger, Version200);
+
+        /// <summary>
+        /// The data object name for a 1.4.1.1 WellCompletion.
+        /// </summary>
+        public static readonly ObjectName WellCompletion141 = new ObjectName(ObjectTypes.WellCompletion, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 WellCompletion.

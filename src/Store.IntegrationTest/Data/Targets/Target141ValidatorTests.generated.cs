@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
             DevKit.AddAndAssert(Target);
 
             var deleteXml = string.Format(BasicXMLTemplate,Target.UidWell, Target.UidWellbore,Target.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Target, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
             AddParents();
             DevKit.AddAndAssert<TargetList, Target>(Target);
             var nonConformingXml = string.Format(BasicXMLTemplate, Target.UidWell, Target.UidWellbore, Target.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Target, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

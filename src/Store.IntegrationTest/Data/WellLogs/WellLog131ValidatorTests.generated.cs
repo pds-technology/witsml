@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellLogs
             DevKit.AddAndAssert(WellLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,WellLog.UidWell, WellLog.UidWellbore,WellLog.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.WellLog, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellLogs
             AddParents();
             DevKit.AddAndAssert<WellLogList, WellLog>(WellLog);
             var nonConformingXml = string.Format(BasicXMLTemplate, WellLog.UidWell, WellLog.UidWellbore, WellLog.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.WellLog, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

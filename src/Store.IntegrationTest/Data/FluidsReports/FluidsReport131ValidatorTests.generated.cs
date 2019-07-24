@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
             DevKit.AddAndAssert(FluidsReport);
 
             var deleteXml = string.Format(BasicXMLTemplate,FluidsReport.UidWell, FluidsReport.UidWellbore,FluidsReport.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.FluidsReport, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
             AddParents();
             DevKit.AddAndAssert<FluidsReportList, FluidsReport>(FluidsReport);
             var nonConformingXml = string.Format(BasicXMLTemplate, FluidsReport.UidWell, FluidsReport.UidWellbore, FluidsReport.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FluidsReport, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

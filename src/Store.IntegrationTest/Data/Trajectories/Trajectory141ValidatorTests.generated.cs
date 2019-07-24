@@ -321,7 +321,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             var deleteXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Trajectory, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -696,7 +696,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
             AddParents();
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
             var nonConformingXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

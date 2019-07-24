@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{FluidsReport}" />
     [Export(typeof(IDataObjectValidator<FluidsReport>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class FluidsReport131Validator : DataObjectValidator<FluidsReport, Wellbore, Well>
+    public partial class FluidsReport131Validator : WellboreDataObjectValidator<FluidsReport, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FluidsReport131Validator" /> class.

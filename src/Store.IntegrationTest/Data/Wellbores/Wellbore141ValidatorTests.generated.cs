@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             var deleteXml = string.Format(BasicXMLTemplate,Wellbore.UidWell, Wellbore.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -687,7 +687,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
             AddParents();
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
             var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

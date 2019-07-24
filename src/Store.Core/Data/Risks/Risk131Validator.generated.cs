@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Risks
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Risk}" />
     [Export(typeof(IDataObjectValidator<Risk>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Risk131Validator : DataObjectValidator<Risk, Wellbore, Well>
+    public partial class Risk131Validator : WellboreDataObjectValidator<Risk, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Risk131Validator" /> class.

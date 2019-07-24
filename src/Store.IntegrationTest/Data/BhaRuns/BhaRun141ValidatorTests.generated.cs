@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
             DevKit.AddAndAssert(BhaRun);
 
             var deleteXml = string.Format(BasicXMLTemplate,BhaRun.UidWell, BhaRun.UidWellbore,BhaRun.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.BhaRun, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
             AddParents();
             DevKit.AddAndAssert<BhaRunList, BhaRun>(BhaRun);
             var nonConformingXml = string.Format(BasicXMLTemplate, BhaRun.UidWell, BhaRun.UidWellbore, BhaRun.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.BhaRun, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

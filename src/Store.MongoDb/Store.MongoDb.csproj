@@ -196,8 +196,22 @@
       <DependentUpon>DataAssuranceRecord200DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataAdapter.generated.cs">
+      <DependentUpon>DepthRegImage141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataAdapter.generated.cs">
+      <DependentUpon>DepthRegImage200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataAdapter.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataAdapter.generated.cs">
+      <DependentUpon>DownholeComponent141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.cs" />
-    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs">
+      <DependentUpon>DownholeComponent200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DrillReports\DrillReport141DataAdapter.cs" />
     <Compile Include="Data\DrillReports\DrillReport141DataAdapter.generated.cs">
       <DependentUpon>DrillReport141DataAdapter.cs</DependentUpon>
@@ -392,6 +406,10 @@
     <Compile Include="Data\WbGeometries\WbGeometry141DataAdapter.generated.cs">
       <DependentUpon>WbGeometry141DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataAdapter.cs" />
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataAdapter.generated.cs">
+      <DependentUpon>WellboreCompletion141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.cs" />
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.generated.cs">
       <DependentUpon>WellboreCompletion200DataAdapter.cs</DependentUpon>
@@ -424,9 +442,17 @@
     <Compile Include="Data\Wellbores\Wellbore200DataAdapter.generated.cs">
       <DependentUpon>Wellbore200DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataAdapter.cs" />
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataAdapter.generated.cs">
+      <DependentUpon>WellCMLedger141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.cs" />
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.generated.cs">
       <DependentUpon>WellCMLedger200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion141DataAdapter.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion141DataAdapter.generated.cs">
+      <DependentUpon>WellCompletion141DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.cs" />
     <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.generated.cs">

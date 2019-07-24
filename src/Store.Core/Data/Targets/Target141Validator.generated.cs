@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Targets
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Target}" />
     [Export(typeof(IDataObjectValidator<Target>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Target141Validator : DataObjectValidator<Target, Wellbore, Well>
+    public partial class Target141Validator : WellboreDataObjectValidator<Target, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Target141Validator" /> class.

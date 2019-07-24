@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{BhaRun}" />
     [Export(typeof(IDataObjectValidator<BhaRun>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class BhaRun131Validator : DataObjectValidator<BhaRun, Wellbore, Well>
+    public partial class BhaRun131Validator : WellboreDataObjectValidator<BhaRun, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BhaRun131Validator" /> class.

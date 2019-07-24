@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{FormationMarker}" />
     [Export(typeof(IDataObjectValidator<FormationMarker>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class FormationMarker141Validator : DataObjectValidator<FormationMarker, Wellbore, Well>
+    public partial class FormationMarker141Validator : WellboreDataObjectValidator<FormationMarker, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FormationMarker141Validator" /> class.

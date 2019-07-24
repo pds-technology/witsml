@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Trajectory}" />
     [Export(typeof(IDataObjectValidator<Trajectory>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Trajectory141Validator : DataObjectValidator<Trajectory, Wellbore, Well>
+    public partial class Trajectory141Validator : WellboreDataObjectValidator<Trajectory, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory141Validator" /> class.

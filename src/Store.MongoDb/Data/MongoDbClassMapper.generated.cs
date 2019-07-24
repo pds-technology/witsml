@@ -72,7 +72,12 @@ namespace PDS.WITSMLstudio.Store.Data
             // dataAssuranceRecord
             Register2<Witsml200.DataAssuranceRecord>();
 
+            // depthRegImage
+            Register<Witsml141.DepthRegImage>();
+            Register2<Witsml200.DepthRegImage>();
+
             // downholeComponent
+            Register<Witsml141.DownholeComponent>();
             Register2<Witsml200.DownholeComponent>();
 
             // drillReport
@@ -175,6 +180,7 @@ namespace PDS.WITSMLstudio.Store.Data
             Register2<Witsml200.Wellbore>();
 
             // wellboreCompletion
+            Register<Witsml141.WellboreCompletion>();
             Register2<Witsml200.WellboreCompletion>();
 
             // wellboreGeology
@@ -190,9 +196,11 @@ namespace PDS.WITSMLstudio.Store.Data
             Register2<Witsml200.WellboreMarkerSet>();
 
             // wellCMLedger
+            Register<Witsml141.WellCMLedger>();
             Register2<Witsml200.WellCMLedger>();
 
             // wellCompletion
+            Register<Witsml141.WellCompletion>();
             Register2<Witsml200.WellCompletion>();
 
             // wellLog

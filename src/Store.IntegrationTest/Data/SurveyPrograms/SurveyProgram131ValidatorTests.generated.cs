@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
             DevKit.AddAndAssert(SurveyProgram);
 
             var deleteXml = string.Format(BasicXMLTemplate,SurveyProgram.UidWell, SurveyProgram.UidWellbore,SurveyProgram.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.SurveyProgram, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
             AddParents();
             DevKit.AddAndAssert<SurveyProgramList, SurveyProgram>(SurveyProgram);
             var nonConformingXml = string.Format(BasicXMLTemplate, SurveyProgram.UidWell, SurveyProgram.UidWellbore, SurveyProgram.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.SurveyProgram, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

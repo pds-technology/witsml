@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.ConvCores
             DevKit.AddAndAssert(ConvCore);
 
             var deleteXml = string.Format(BasicXMLTemplate,ConvCore.UidWell, ConvCore.UidWellbore,ConvCore.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.ConvCore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.ConvCores
             AddParents();
             DevKit.AddAndAssert<ConvCoreList, ConvCore>(ConvCore);
             var nonConformingXml = string.Format(BasicXMLTemplate, ConvCore.UidWell, ConvCore.UidWellbore, ConvCore.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.ConvCore, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

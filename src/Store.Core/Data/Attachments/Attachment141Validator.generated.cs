@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Attachment}" />
     [Export(typeof(IDataObjectValidator<Attachment>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Attachment141Validator : DataObjectValidator<Attachment, Wellbore, Well>
+    public partial class Attachment141Validator : WellboreDataObjectValidator<Attachment, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment141Validator" /> class.

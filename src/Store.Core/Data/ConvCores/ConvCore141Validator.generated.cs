@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.ConvCores
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{ConvCore}" />
     [Export(typeof(IDataObjectValidator<ConvCore>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class ConvCore141Validator : DataObjectValidator<ConvCore, Wellbore, Well>
+    public partial class ConvCore141Validator : WellboreDataObjectValidator<ConvCore, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ConvCore141Validator" /> class.

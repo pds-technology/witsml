@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
             DevKit.AddAndAssert(Tubular);
 
             var deleteXml = string.Format(BasicXMLTemplate,Tubular.UidWell, Tubular.UidWellbore,Tubular.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Tubular, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
             AddParents();
             DevKit.AddAndAssert<TubularList, Tubular>(Tubular);
             var nonConformingXml = string.Format(BasicXMLTemplate, Tubular.UidWell, Tubular.UidWellbore, Tubular.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Tubular, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
