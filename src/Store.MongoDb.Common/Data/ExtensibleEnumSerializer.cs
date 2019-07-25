@@ -29,7 +29,7 @@ namespace PDS.WITSMLstudio.Store.Data
     /// </summary>
     /// <seealso cref="MongoDB.Bson.Serialization.Serializers.SerializerBase{ExtensibleEnum{TEnum}}" />
     public class ExtensibleEnumSerializer<TEnum> : StructSerializerBase<ExtensibleEnum<TEnum>>
-        where TEnum : struct, Enum
+        where TEnum : struct, IComparable
     {
         private BsonStringSerializer _serializer;
         /// <summary>
