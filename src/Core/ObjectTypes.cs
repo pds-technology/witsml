@@ -558,16 +558,25 @@ namespace PDS.WITSMLstudio
         /// <returns>The data family.</returns>
         public static string GetFamily(Type type)
         {
-            if (string.IsNullOrWhiteSpace(type.Namespace)) return null;
-            var ns = type.Namespace;
+            return GetFamily(type.Namespace);
+        }
+
+        /// <summary>
+        /// Gets the data object family for the specified data object type.
+        /// </summary>
+        /// <param name="namespace">The data object type's namespace.</param>
+        /// <returns>The data family.</returns>
+        public static string GetFamily(string @namespace)
+        {
+            if (string.IsNullOrWhiteSpace(@namespace)) return null;
 
             // TODO: Update this once common is implemented independently.
 
-            return ns.Contains("WITSML")
+            return @namespace.Contains("WITSML")
                 ? "WITSML"
-                : ns.Contains("PRODML")
+                : @namespace.Contains("PRODML")
                 ? "PRODML"
-                : ns.Contains("RESQML")
+                : @namespace.Contains("RESQML")
                 ? "RESQML"
                 : null;
         }
