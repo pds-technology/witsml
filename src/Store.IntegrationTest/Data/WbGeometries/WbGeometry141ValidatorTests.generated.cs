@@ -317,7 +317,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             DevKit.AddAndAssert(WbGeometry);
 
             var deleteXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.WbGeometry, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -692,7 +692,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
             AddParents();
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             var nonConformingXml = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

@@ -24,28 +24,24 @@ using PDS.WITSMLstudio.Framework;
 namespace PDS.WITSMLstudio.Store.Data
 {
     /// <summary>
-    /// Provides common validation for child data objects.
+    /// Provides common validation for well child data objects other than wellbore.
     /// </summary>
     /// <typeparam name="TObject">The type of the object.</typeparam>
-    /// <typeparam name="TWellbore">The type of the wellbore.</typeparam>
     /// <typeparam name="TWell">The type of the well.</typeparam>
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{TObject}" />
-    public abstract class DataObjectValidator<TObject, TWellbore, TWell> : DataObjectValidator<TObject>
-        where TObject : IWellboreObject
-        where TWellbore : IWellObject
+    public abstract class WellDataObjectValidator<TObject, TWell> : DataObjectValidator<TObject>
+        where TObject : IWellObject
         where TWell : IDataObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataObjectValidator{TObject, TWellbore, TWell}" /> class.
+        /// Initializes a new instance of the <see cref="WellDataObjectValidator{TObject, TWell}" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="dataAdapter">The data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
-        protected DataObjectValidator(IContainer container, IWitsmlDataAdapter<TObject> dataAdapter, IWitsmlDataAdapter<TWellbore> wellboreDataAdapter, IWitsmlDataAdapter<TWell> wellDataAdapter) : base(container)
+        protected WellDataObjectValidator(IContainer container, IWitsmlDataAdapter<TObject> dataAdapter, IWitsmlDataAdapter<TWell> wellDataAdapter) : base(container)
         {
             DataAdapter = dataAdapter;
-            WellboreDataAdapter = wellboreDataAdapter;
             WellDataAdapter = wellDataAdapter;
         }
 
@@ -53,11 +49,6 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Gets the data adapter.
         /// </summary>
         protected IWitsmlDataAdapter<TObject> DataAdapter { get; }
-
-        /// <summary>
-        /// Gets the wellbore data adapter.
-        /// </summary>
-        protected IWitsmlDataAdapter<TWellbore> WellboreDataAdapter { get; }
 
         /// <summary>
         /// Gets the well data adapter.
@@ -71,36 +62,25 @@ namespace PDS.WITSMLstudio.Store.Data
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var uri = DataObject.GetUri();
-            var uriWellbore = uri.Parent;
-            var uriWell = uriWellbore.Parent;
-            var wellbore = WellboreDataAdapter.Get(uriWellbore, "Uid", "UidWell");
+            var uriWell = uri.Parent;
+            var well = WellDataAdapter.Get(uriWell);
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
             }
-            // Validate parent uid property
-            else if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWellbore" });
-            }
 
             // Validate parent exists
-            else if (!WellDataAdapter.Exists(uriWell))
+            else if (well == null)
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
-            // Validate parent exists
-            else if (wellbore == null)
-            {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
-            }
 
             // Validate parent uid case
-            else if (!wellbore.UidWell.Equals(DataObject.UidWell) || !wellbore.Uid.Equals(DataObject.UidWellbore))
+            else if (!well.Uid.Equals(DataObject.UidWell))
             {
-                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell", "UidWellbore" });
+                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
             }
 
             // Validate UID does not exist
@@ -130,17 +110,27 @@ namespace PDS.WITSMLstudio.Store.Data
             return ValidateObjectExistence();
         }
 
-        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        /// <summary>
+        /// Validates the existence of the well object and its parent.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        protected IEnumerable<ValidationResult> ValidateObjectExistence()
         {
             var uri = DataObject.GetUri();
 
             // Validate uid properties
             if (string.IsNullOrWhiteSpace(DataObject.UidWell) ||
-                string.IsNullOrWhiteSpace(DataObject.UidWellbore) ||
                 string.IsNullOrWhiteSpace(DataObject.Uid))
             {
                 yield return
-                    new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid", "UidWell", "UidWellbore"});
+                    new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid", "UidWell"});
+            }
+            // Validate that a well for the Uid exists
+            else if (!WellDataAdapter.Exists(uri.Parent))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell" });
             }
             // Validate UID exists
             else if (!DataAdapter.Exists(uri))

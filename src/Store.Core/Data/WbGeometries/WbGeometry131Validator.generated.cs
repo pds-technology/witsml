@@ -37,7 +37,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{WbGeometry}" />
     [Export(typeof(IDataObjectValidator<WbGeometry>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class WbGeometry131Validator : DataObjectValidator<WbGeometry, Wellbore, Well>
+    public partial class WbGeometry131Validator : WellboreDataObjectValidator<WbGeometry, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry131Validator" /> class.

@@ -286,7 +286,7 @@ namespace PDS.WITSMLstudio.Linq
                 values.Add(objectIds[ObjectTypes.Wellbore]);
             }
 
-            var query = CreateWitsmlQuery(objectType);
+            var query = CreateWitsmlQuery(objectType, uri.Family);
             query = FormatWitsmlQuery(query, optionsIn);
 
             var result = query
@@ -318,11 +318,12 @@ namespace PDS.WITSMLstudio.Linq
         /// Creates the WITSML query.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
+        /// <param name="family">The object family.</param>
         /// <returns>An <see cref="IWitsmlQuery"/></returns>
-        protected IWitsmlQuery CreateWitsmlQuery(string objectType)
+        protected IWitsmlQuery CreateWitsmlQuery(string objectType, string family)
         {
-            var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
-            var dataType = ObjectTypes.GetObjectType(objectType, DataSchemaVersion);
+            var listType = ObjectTypes.GetObjectGroupType(objectType, family, DataSchemaVersion);
+            var dataType = ObjectTypes.GetObjectType(objectType, family, DataSchemaVersion);
 
             return GetType()
                 .GetMethod("CreateQuery", BindingFlags.NonPublic | BindingFlags.Instance)

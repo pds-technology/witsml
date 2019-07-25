@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
             DevKit.AddAndAssert(StimJob);
 
             var deleteXml = string.Format(BasicXMLTemplate,StimJob.UidWell, StimJob.UidWellbore,StimJob.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.StimJob, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
             AddParents();
             DevKit.AddAndAssert<StimJobList, StimJob>(StimJob);
             var nonConformingXml = string.Format(BasicXMLTemplate, StimJob.UidWell, StimJob.UidWellbore, StimJob.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.StimJob, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

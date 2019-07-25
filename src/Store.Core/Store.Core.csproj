@@ -41,10 +41,6 @@
       <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20181029.2\lib\net40\Energistics.DataAccess.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Fare, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\Fare.1.0.3\lib\net35\Fare.dll</HintPath>
       <Private>True</Private>
@@ -254,7 +250,30 @@
     <Compile Include="Data\DataObjectValidationContext.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
-    <Compile Include="Data\DataObjectValidatorOfT.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataProvider.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataProvider.generated.cs">
+      <DependentUpon>DepthRegImage141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DepthRegImages\DepthRegImage141Validator.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141Validator.generated.cs">
+      <DependentUpon>DepthRegImage141Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataProvider.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataProvider.generated.cs">
+      <DependentUpon>DepthRegImage200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DepthRegImages\DepthRegImage200Validator.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage200Validator.generated.cs">
+      <DependentUpon>DepthRegImage200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataProvider.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataProvider.generated.cs">
+      <DependentUpon>DownholeComponent141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DownholeComponents\DownholeComponent141Validator.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent141Validator.generated.cs">
+      <DependentUpon>DownholeComponent141Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataProvider.cs" />
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataProvider.generated.cs">
       <DependentUpon>DownholeComponent200DataProvider.cs</DependentUpon>
@@ -361,9 +380,13 @@
       <DependentUpon>Message141Validator.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\MudLogReports\MudLogReport200DataProvider.cs" />
-    <Compile Include="Data\MudLogReports\MudLogReport200DataProvider.generated.cs" />
+    <Compile Include="Data\MudLogReports\MudLogReport200DataProvider.generated.cs">
+      <DependentUpon>MudLogReport200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\MudLogReports\MudLogReport200Validator.cs" />
-    <Compile Include="Data\MudLogReports\MudLogReport200Validator.generated.cs" />
+    <Compile Include="Data\MudLogReports\MudLogReport200Validator.generated.cs">
+      <DependentUpon>MudLogReport200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\MudLogs\MudLog131DataProvider.cs" />
     <Compile Include="Data\MudLogs\MudLog131DataProvider.generated.cs">
       <DependentUpon>MudLog131DataProvider.cs</DependentUpon>
@@ -607,6 +630,14 @@
     <Compile Include="Data\WbGeometries\WbGeometry141Validator.generated.cs">
       <DependentUpon>WbGeometry141Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataProvider.cs" />
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataProvider.generated.cs">
+      <DependentUpon>WellboreCompletion141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141Validator.cs" />
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141Validator.generated.cs">
+      <DependentUpon>WellboreCompletion141Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataProvider.cs" />
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataProvider.generated.cs">
       <DependentUpon>WellboreCompletion200DataProvider.cs</DependentUpon>
@@ -615,6 +646,8 @@
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200Validator.generated.cs">
       <DependentUpon>WellboreCompletion200Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellDataObjectValidator.cs" />
+    <Compile Include="Data\WellboreDataObjectValidator.cs" />
     <Compile Include="Data\WellboreGeologies\WellboreGeology200DataProvider.cs" />
     <Compile Include="Data\WellboreGeologies\WellboreGeology200DataProvider.generated.cs">
       <DependentUpon>WellboreGeology200DataProvider.cs</DependentUpon>
@@ -666,6 +699,14 @@
     <Compile Include="Data\Wellbores\Wellbore200Validator.generated.cs">
       <DependentUpon>Wellbore200Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataProvider.cs" />
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataProvider.generated.cs">
+      <DependentUpon>WellCMLedger141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141Validator.cs" />
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141Validator.generated.cs">
+      <DependentUpon>WellCMLedger141Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataProvider.cs" />
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataProvider.generated.cs">
       <DependentUpon>WellCMLedger200DataProvider.cs</DependentUpon>
@@ -673,6 +714,14 @@
     <Compile Include="Data\WellCMLedgers\WellCMLedger200Validator.cs" />
     <Compile Include="Data\WellCMLedgers\WellCMLedger200Validator.generated.cs">
       <DependentUpon>WellCMLedger200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion141DataProvider.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion141DataProvider.generated.cs">
+      <DependentUpon>WellCompletion141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion141Validator.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion141Validator.generated.cs">
+      <DependentUpon>WellCompletion141Validator.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\WellCompletions\WellCompletion200DataProvider.cs" />
     <Compile Include="Data\WellCompletions\WellCompletion200DataProvider.generated.cs">
@@ -786,6 +835,22 @@
     <Compile Include="WitsmlStore.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
+      <Project>{57ea0f9f-5e9a-4788-9738-be3381343e1a}</Project>
+      <Name>DataAccess.PRODML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
+      <Project>{6d7cdb8e-b137-4ad0-8a8d-7eeaafb69960}</Project>
+      <Name>DataAccess.RESQML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
+      <Project>{8184e6c9-3746-40e5-8b81-6f24785c3739}</Project>
+      <Name>DataAccess.WITSML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
+      <Project>{3f3d2683-6036-4c06-911d-2db5c1682d91}</Project>
+      <Name>DataAccess</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>

@@ -19,6 +19,8 @@
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Etp.Common.Datatypes;
+using System;
+using System.Collections.Generic;
 
 namespace PDS.WITSMLstudio.Store.Data.StimJobs
 {
@@ -37,7 +39,16 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
             dataObject.Kind = "Default";
             dataObject.CustomerName = "Default";
             dataObject.ServiceCompany = "Default";
-            dataObject.MaterialCatalog = new StimJobMaterialCatalog();
+            dataObject.MaterialCatalog = new StimJobMaterialCatalog
+            {
+                ProppantAgents = new List<StimProppantAgent>()
+                {
+                    new StimProppantAgent
+                    {
+                        Uid = Guid.NewGuid().ToString()
+                    }
+                }
+            };
         }
     }
 }

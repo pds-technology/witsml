@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{SurveyProgram}" />
     [Export(typeof(IDataObjectValidator<SurveyProgram>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class SurveyProgram141Validator : DataObjectValidator<SurveyProgram, Wellbore, Well>
+    public partial class SurveyProgram141Validator : WellboreDataObjectValidator<SurveyProgram, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SurveyProgram141Validator" /> class.

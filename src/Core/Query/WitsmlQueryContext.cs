@@ -120,7 +120,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The wells.</returns>
         public override IEnumerable<IDataObject> GetAllWells()
         {
-            var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Well, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
+            var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Well, "WITSML", DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
 
             _template.Add(queryIn, "//well", "timeZone", "wellDatum", "wellLocation");
             _template.Add(queryIn, "//well/wellDatum", "name");
@@ -137,7 +137,7 @@ namespace PDS.WITSMLstudio.Query
         /// <returns>The wellbores.</returns>
         public override IEnumerable<IWellObject> GetWellbores(EtpUri parentUri)
         {
-            var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Wellbore, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
+            var queryIn = QueryTemplates.GetTemplate(ObjectTypes.Wellbore, parentUri.Family, DataSchemaVersion, OptionsIn.ReturnElements.IdOnly);
 
             _template.Set(queryIn, "//@uidWell", parentUri.ObjectId);
 
@@ -406,8 +406,9 @@ namespace PDS.WITSMLstudio.Query
 
                 if (returnCode > 0)
                 {
-                    var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
                     var document = WitsmlParser.Parse(xmlOut);
+                    var family = ObjectTypes.GetFamily(document.Root);
+                    var listType = ObjectTypes.GetObjectGroupType(objectType, family, DataSchemaVersion);
 
                     result = WitsmlParser.Parse(listType, document.Root) as IEnergisticsCollection;
                 }
@@ -462,7 +463,7 @@ namespace PDS.WITSMLstudio.Query
 
         private XDocument GetTemplateAndSetIds(string objectType, EtpUri uri, OptionsIn.ReturnElements templateType)
         {
-            var queryIn = QueryTemplates.GetTemplate(objectType, DataSchemaVersion, templateType);
+            var queryIn = QueryTemplates.GetTemplate(objectType, uri.Family, DataSchemaVersion, templateType);
             SetFilterCriteria(objectType, queryIn, uri);
 
             return queryIn;

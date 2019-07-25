@@ -321,7 +321,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             DevKit.AddAndAssert(Log);
 
             var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -696,7 +696,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
             var nonConformingXml = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.Log, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

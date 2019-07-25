@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
             DevKit.AddAndAssert(OpsReport);
 
             var deleteXml = string.Format(BasicXMLTemplate,OpsReport.UidWell, OpsReport.UidWellbore,OpsReport.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.OpsReport, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
             AddParents();
             DevKit.AddAndAssert<OpsReportList, OpsReport>(OpsReport);
             var nonConformingXml = string.Format(BasicXMLTemplate, OpsReport.UidWell, OpsReport.UidWellbore, OpsReport.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.OpsReport, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

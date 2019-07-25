@@ -160,7 +160,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 }
                 else
                 {
-                    var objectType = ObjectTypes.GetObjectType(etpUri.ObjectType, etpUri.Version);
+                    var objectType = ObjectTypes.GetObjectType(etpUri.ObjectType, etpUri.Family, etpUri.Version);
                     var contentType = EtpContentTypes.GetContentType(objectType);
                     var hasChildren = contentType.IsRelatedTo(EtpContentTypes.Eml210) ? 0 : -1;
                     var dataProvider = GetDataProvider(etpUri.ObjectType);
@@ -221,7 +221,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                 .Select(x => new
                 {
                     ContentType = x,
-                    DataType = ObjectTypes.GetObjectType(x.ObjectType, DataSchemaVersion)
+                    DataType = ObjectTypes.GetObjectType(x.ObjectType, x.Family, DataSchemaVersion)
                 })
                 .Select(x => new
                 {

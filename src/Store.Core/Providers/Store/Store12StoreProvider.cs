@@ -247,8 +247,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 if (EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format))
                 {
                     var objectType = uri.IsRelatedTo(EtpUris.Witsml200) || uri.IsRelatedTo(EtpUris.Eml210)
-                        ? ObjectTypes.GetObjectType(uri.ObjectType, OptionsIn.DataVersion.Version200.Value)
-                        : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Version);
+                        ? ObjectTypes.GetObjectType(uri.ObjectType, uri.Family, OptionsIn.DataVersion.Version200.Value)
+                        : ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Family, uri.Version);
 
                     var instance = Energistics.Etp.Common.EtpExtensions.Deserialize(objectType, data);
                     data = WitsmlParser.ToXml(instance);

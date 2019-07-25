@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Message}" />
     [Export(typeof(IDataObjectValidator<Message>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Message131Validator : DataObjectValidator<Message, Wellbore, Well>
+    public partial class Message131Validator : WellboreDataObjectValidator<Message, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message131Validator" /> class.

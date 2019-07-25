@@ -525,7 +525,8 @@ namespace PDS.WITSMLstudio.Store
         {
             var objectType = ObjectTypes.GetObjectType<TList>();
             var version = ObjectTypes.GetVersion(typeof(TList));
-            var property = ObjectTypes.GetObjectTypeListProperty(objectType, version);
+            var family = ObjectTypes.GetFamily(typeof(TList));
+            var property = ObjectTypes.GetObjectTypeListProperty(objectType, family, version);
 
             var info = typeof(TList).GetProperty(property);
             var list = New<TList>(x => info.SetValue(x, entityList));

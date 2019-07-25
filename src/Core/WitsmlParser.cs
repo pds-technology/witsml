@@ -65,7 +65,8 @@ namespace PDS.WITSMLstudio
         public static IEnergisticsCollection Transform(IEnergisticsCollection collection, string dataVersion)
         {
             var objectType = ObjectTypes.GetObjectType(collection);
-            var listType = ObjectTypes.GetObjectGroupType(objectType, dataVersion);
+            var family = ObjectTypes.GetFamily(collection);
+            var listType = ObjectTypes.GetObjectGroupType(objectType, family, dataVersion);
             var converter = _upgradeMethod.MakeGenericMethod(collection.GetType(), listType);
 
             try

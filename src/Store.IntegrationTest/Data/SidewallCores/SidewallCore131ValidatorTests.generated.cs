@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
             DevKit.AddAndAssert(SidewallCore);
 
             var deleteXml = string.Format(BasicXMLTemplate,SidewallCore.UidWell, SidewallCore.UidWellbore,SidewallCore.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.SidewallCore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
             AddParents();
             DevKit.AddAndAssert<SidewallCoreList, SidewallCore>(SidewallCore);
             var nonConformingXml = string.Format(BasicXMLTemplate, SidewallCore.UidWell, SidewallCore.UidWellbore, SidewallCore.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.SidewallCore, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

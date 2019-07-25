@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
             DevKit.AddAndAssert(DrillReport);
 
             var deleteXml = string.Format(BasicXMLTemplate,DrillReport.UidWell, DrillReport.UidWellbore,DrillReport.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.DrillReport, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
             AddParents();
             DevKit.AddAndAssert<DrillReportList, DrillReport>(DrillReport);
             var nonConformingXml = string.Format(BasicXMLTemplate, DrillReport.UidWell, DrillReport.UidWellbore, DrillReport.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.DrillReport, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

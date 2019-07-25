@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{MudLog}" />
     [Export(typeof(IDataObjectValidator<MudLog>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class MudLog131Validator : DataObjectValidator<MudLog, Wellbore, Well>
+    public partial class MudLog131Validator : WellboreDataObjectValidator<MudLog, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MudLog131Validator" /> class.

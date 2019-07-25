@@ -29,10 +29,11 @@ namespace PDS.WITSMLstudio.Query
         /// Gets the template for Witsml object.
         /// </summary>
         /// <param name="version">The version.</param>
+        /// <param name="family">THe data object family name.</param>
         /// <param name="objectType">Type of the object.</param>
         /// <param name="returnElementsOptionIn">The return elements option in.</param>
         /// <returns>The XDocument.</returns>
-        public static XDocument GetTemplate(string objectType, string version, OptionsIn.ReturnElements returnElementsOptionIn)
+        public static XDocument GetTemplate(string objectType, string family, string version, OptionsIn.ReturnElements returnElementsOptionIn)
         {
             var documentTemplate = new XDocument();
 
@@ -49,7 +50,7 @@ namespace PDS.WITSMLstudio.Query
             if (documentTemplate.Root != null) return documentTemplate;
 
             // Unsupported objects
-            var type = ObjectTypes.GetObjectGroupType(objectType, version);
+            var type = ObjectTypes.GetObjectGroupType(objectType, family, version);
 
             if (OptionsIn.ReturnElements.IdOnly.Equals(returnElementsOptionIn.Value))
             {

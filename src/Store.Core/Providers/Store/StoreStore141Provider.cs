@@ -127,8 +127,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             if (entity == null)
                 return null;
 
-            var groupType = ObjectTypes.GetObjectGroupType(uri.ObjectType, WMLSVersion.WITSML141);
-            var property = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Version);
+            var groupType = ObjectTypes.GetObjectGroupType(uri.ObjectType, uri.Family, WMLSVersion.WITSML141);
+            var property = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Family, uri.Version);
 
             var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
             var list = Activator.CreateInstance(property.PropertyType) as IList;

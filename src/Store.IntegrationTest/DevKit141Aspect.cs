@@ -463,7 +463,9 @@ namespace PDS.WITSMLstudio.Store
                     UidObject = uri.ObjectId
                 };
             }
-            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType) ||
+                ObjectTypes.DownholeComponent.EqualsIgnoreCase(uri.ObjectType) ||
+                ObjectTypes.WellCompletion.Equals(uri.ObjectType))
             {
                 return new ChangeLog()
                 {
@@ -689,6 +691,50 @@ namespace PDS.WITSMLstudio.Store
         }
 
         /// <summary>
+        /// Does get query for single depthRegImage object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="depthRegImage">the depthRegImage with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first depthRegImage from the response</returns>
+        public DepthRegImage GetAndAssert(DepthRegImage depthRegImage, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<DepthRegImageList, DepthRegImage>(depthRegImage, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Adds depthRegImage object and test the return code
+        /// </summary>
+        /// <param name="depthRegImage">the depthRegImage</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(DepthRegImage depthRegImage, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<DepthRegImageList, DepthRegImage>(depthRegImage, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on depthRegImage object and test the return code
+        /// </summary>
+        /// <param name="depthRegImage">the depthRegImage</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void UpdateAndAssert(DepthRegImage depthRegImage, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<DepthRegImageList, DepthRegImage>(depthRegImage, errorCode);
+        }
+
+        /// <summary>
+        /// Deletes depthRegImage object and test the return code
+        /// </summary>
+        /// <param name="depthRegImage">the depthRegImage</param>
+        /// <param name="errorCode">the errorCode</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(DepthRegImage depthRegImage, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<DepthRegImageList, DepthRegImage>(depthRegImage, errorCode, partialDelete);
+        }
+
+        /// <summary>
         /// Does get query for single drillReport object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="drillReport">the drillReport with UIDs for well and wellbore</param>
@@ -731,6 +777,51 @@ namespace PDS.WITSMLstudio.Store
         {
             DeleteAndAssert<DrillReportList, DrillReport>(drillReport, errorCode, partialDelete);
         }
+
+        /// <summary>
+        /// Does get query for single downholeComponent object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="downholeComponent">the downholeComponent with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first downholeComponent from the response</returns>
+        public DownholeComponent GetAndAssert(DownholeComponent downholeComponent, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<DownholeComponentList, DownholeComponent>(downholeComponent, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Adds downholeComponent object and test the return code
+        /// </summary>
+        /// <param name="downholeComponent">the downholeComponent</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(DownholeComponent downholeComponent, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<DownholeComponentList, DownholeComponent>(downholeComponent, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on downholeComponent object and test the return code
+        /// </summary>
+        /// <param name="downholeComponent">the downholeComponent</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void UpdateAndAssert(DownholeComponent downholeComponent, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<DownholeComponentList, DownholeComponent>(downholeComponent, errorCode);
+        }
+
+        /// <summary>
+        /// Deletes downholeComponent object and test the return code
+        /// </summary>
+        /// <param name="downholeComponent">the downholeComponent</param>
+        /// <param name="errorCode">the errorCode</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(DownholeComponent downholeComponent, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<DownholeComponentList, DownholeComponent>(downholeComponent, errorCode, partialDelete);
+        }
+
 
         /// <summary>
         /// Does get query for single fluidsReport object and test for result count equal to 1 and is not null
@@ -1611,6 +1702,138 @@ namespace PDS.WITSMLstudio.Store
         public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
             DeleteAndAssert<WellboreList, Wellbore>(wellbore, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Does get query for single wellboreCompletion object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="wellboreCompletion">the wellboreCompletion with UIDs for well and wellboreCompletion</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wellboreCompletion from the response</returns>
+        public WellboreCompletion GetAndAssert(WellboreCompletion wellboreCompletion, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<WellboreCompletionList, WellboreCompletion>(wellboreCompletion, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Adds wellboreCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellboreCompletion">the wellboreCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(WellboreCompletion wellboreCompletion, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<WellboreCompletionList, WellboreCompletion>(wellboreCompletion, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellboreCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellboreCompletion">the wellboreCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void UpdateAndAssert(WellboreCompletion wellboreCompletion, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellboreCompletionList, WellboreCompletion>(wellboreCompletion, errorCode);
+        }
+
+        /// <summary>
+        /// Deletes wellboreCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellboreCompletion">the wellboreCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(WellboreCompletion wellboreCompletion, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<WellboreCompletionList, WellboreCompletion>(wellboreCompletion, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Does get query for single wellCMLedger object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="wellCMLedger">the wellCMLedger with UIDs for well and wellCMLedger</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wellCMLedger from the response</returns>
+        public WellCMLedger GetAndAssert(WellCMLedger wellCMLedger, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<WellCMLedgerList, WellCMLedger>(wellCMLedger, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Adds wellCMLedger object and test the return code
+        /// </summary>
+        /// <param name="wellCMLedger">the wellCMLedger</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(WellCMLedger wellCMLedger, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<WellCMLedgerList, WellCMLedger>(wellCMLedger, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellCMLedger object and test the return code
+        /// </summary>
+        /// <param name="wellCMLedger">the wellCMLedger</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void UpdateAndAssert(WellCMLedger wellCMLedger, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellCMLedgerList, WellCMLedger>(wellCMLedger, errorCode);
+        }
+
+        /// <summary>
+        /// Deletes wellCMLedger object and test the return code
+        /// </summary>
+        /// <param name="wellCMLedger">the wellCMLedger</param>
+        /// <param name="errorCode">the errorCode</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(WellCMLedger wellCMLedger, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<WellCMLedgerList, WellCMLedger>(wellCMLedger, errorCode, partialDelete);
+        }
+
+        /// <summary>
+        /// Does get query for single wellCompletion object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="wellCompletion">the wellCompletion with UIDs for well and wellCompletion</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wellCompletion from the response</returns>
+        public WellCompletion GetAndAssert(WellCompletion wellCompletion, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<WellCompletionList, WellCompletion>(wellCompletion, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Adds wellCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellCompletion">the wellCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(WellCompletion wellCompletion, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<WellCompletionList, WellCompletion>(wellCompletion, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellCompletion">the wellCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void UpdateAndAssert(WellCompletion wellCompletion, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellCompletionList, WellCompletion>(wellCompletion, errorCode);
+        }
+
+        /// <summary>
+        /// Deletes wellCompletion object and test the return code
+        /// </summary>
+        /// <param name="wellCompletion">the wellCompletion</param>
+        /// <param name="errorCode">the errorCode</param>
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(WellCompletion wellCompletion, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        {
+            DeleteAndAssert<WellCompletionList, WellCompletion>(wellCompletion, errorCode, partialDelete);
         }
 
         /// <summary>

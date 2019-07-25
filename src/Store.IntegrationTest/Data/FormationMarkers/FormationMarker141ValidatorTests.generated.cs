@@ -314,7 +314,7 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
             DevKit.AddAndAssert(FormationMarker);
 
             var deleteXml = string.Format(BasicXMLTemplate,FormationMarker.UidWell, FormationMarker.UidWellbore,FormationMarker.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.FormationMarker, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -689,7 +689,7 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
             AddParents();
             DevKit.AddAndAssert<FormationMarkerList, FormationMarker>(FormationMarker);
             var nonConformingXml = string.Format(BasicXMLTemplate, FormationMarker.UidWell, FormationMarker.UidWellbore, FormationMarker.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.FormationMarker, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

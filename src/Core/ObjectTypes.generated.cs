@@ -80,6 +80,11 @@ namespace PDS.WITSMLstudio
         public const string DataAssuranceRecord = "dataAssuranceRecord";
 
         /// <summary>
+        /// The data object type for a DepthRegImage.
+        /// </summary>
+        public const string DepthRegImage = "depthRegImage";
+
+        /// <summary>
         /// The data object type for a DownholeComponent.
         /// </summary>
         public const string DownholeComponent = "downholeComponent";

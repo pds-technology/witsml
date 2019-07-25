@@ -231,7 +231,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             DevKit.AddAndAssert(MudLog);
 
             var deleteXml = string.Format(BasicXMLTemplate,MudLog.UidWell, MudLog.UidWellbore,MudLog.Uid,
-                "<name />");
+                "<nameWell />");
             var results = DevKit.DeleteFromStore(ObjectTypes.MudLog, deleteXml, null, null);
 
             Assert.IsNotNull(results);
@@ -428,7 +428,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             AddParents();
             DevKit.AddAndAssert<MudLogList, MudLog>(MudLog);
             var nonConformingXml = string.Format(BasicXMLTemplate, MudLog.UidWell, MudLog.UidWellbore, MudLog.Uid,
-                $"<name></name>");
+                $"<nameWell></nameWell>");
 
             var response = DevKit.UpdateInStore(ObjectTypes.MudLog, nonConformingXml, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);

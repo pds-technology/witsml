@@ -2,3 +2,7 @@
 	path = ext/etp-devkit
 	url = ../etp-devkit
 	branch = etp1.2
+[submodule "ext/devkit-c"]
+	path = ext/devkit-c
+	url = ../devkit-c
+	branch = refs/heads/master

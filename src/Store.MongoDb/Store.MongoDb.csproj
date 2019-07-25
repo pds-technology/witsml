@@ -45,10 +45,6 @@
       <HintPath>$(SolutionDir)\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Standards.DevKit-PDS.2.0.20181029.2\lib\net40\Energistics.DataAccess.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="LinqToQuerystring, Version=0.7.0.8, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\LinqToQuerystring.0.7.0.8\lib\net35\LinqToQuerystring.dll</HintPath>
       <Private>True</Private>
@@ -200,8 +196,22 @@
       <DependentUpon>DataAssuranceRecord200DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\ChangeLogs\DbAuditHistoryDataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage141DataAdapter.generated.cs">
+      <DependentUpon>DepthRegImage141DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataAdapter.cs" />
+    <Compile Include="Data\DepthRegImages\DepthRegImage200DataAdapter.generated.cs">
+      <DependentUpon>DepthRegImage200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataAdapter.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent141DataAdapter.generated.cs">
+      <DependentUpon>DownholeComponent141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.cs" />
-    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs" />
+    <Compile Include="Data\DownholeComponents\DownholeComponent200DataAdapter.generated.cs">
+      <DependentUpon>DownholeComponent200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DrillReports\DrillReport141DataAdapter.cs" />
     <Compile Include="Data\DrillReports\DrillReport141DataAdapter.generated.cs">
       <DependentUpon>DrillReport141DataAdapter.cs</DependentUpon>
@@ -396,6 +406,10 @@
     <Compile Include="Data\WbGeometries\WbGeometry141DataAdapter.generated.cs">
       <DependentUpon>WbGeometry141DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataAdapter.cs" />
+    <Compile Include="Data\WellboreCompletions\WellboreCompletion141DataAdapter.generated.cs">
+      <DependentUpon>WellboreCompletion141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.cs" />
     <Compile Include="Data\WellboreCompletions\WellboreCompletion200DataAdapter.generated.cs">
       <DependentUpon>WellboreCompletion200DataAdapter.cs</DependentUpon>
@@ -428,9 +442,17 @@
     <Compile Include="Data\Wellbores\Wellbore200DataAdapter.generated.cs">
       <DependentUpon>Wellbore200DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataAdapter.cs" />
+    <Compile Include="Data\WellCMLedgers\WellCMLedger141DataAdapter.generated.cs">
+      <DependentUpon>WellCMLedger141DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.cs" />
     <Compile Include="Data\WellCMLedgers\WellCMLedger200DataAdapter.generated.cs">
       <DependentUpon>WellCMLedger200DataAdapter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WellCompletions\WellCompletion141DataAdapter.cs" />
+    <Compile Include="Data\WellCompletions\WellCompletion141DataAdapter.generated.cs">
+      <DependentUpon>WellCompletion141DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.cs" />
     <Compile Include="Data\WellCompletions\WellCompletion200DataAdapter.generated.cs">
@@ -480,6 +502,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
+      <Project>{57ea0f9f-5e9a-4788-9738-be3381343e1a}</Project>
+      <Name>DataAccess.PRODML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
+      <Project>{6d7cdb8e-b137-4ad0-8a8d-7eeaafb69960}</Project>
+      <Name>DataAccess.RESQML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
+      <Project>{8184e6c9-3746-40e5-8b81-6f24785c3739}</Project>
+      <Name>DataAccess.WITSML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
+      <Project>{3f3d2683-6036-4c06-911d-2db5c1682d91}</Project>
+      <Name>DataAccess</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>

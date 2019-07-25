@@ -298,7 +298,7 @@ namespace PDS.WITSMLstudio.Store
                 }
             };
 
-            var list = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Version);
+            var list = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Family, uri.Version);
             var collection = Activator.CreateInstance<TList>();
 
             list.SetValue(collection, new List<TObject> { instance });

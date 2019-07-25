@@ -19,6 +19,8 @@
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using UnitOfMeasureExt = Energistics.DataAccess.ExtensibleEnum<Energistics.DataAccess.WITSML200.ReferenceData.UnitOfMeasure>;
+
 namespace PDS.WITSMLstudio
 {
     /// <summary>
@@ -46,7 +48,7 @@ namespace PDS.WITSMLstudio
         [TestMethod]
         public void Extensions_GetUnit_Returns_Original_UnitOfMeasure()
         {
-            var nullUom = default(UnitOfMeasure?);
+            var nullUom = default(UnitOfMeasureExt?);
             var result = Units.GetUnit(nullUom);
 
             Assert.IsFalse(string.IsNullOrWhiteSpace(result));
@@ -69,7 +71,8 @@ namespace PDS.WITSMLstudio
             uom = "m";
             result = Units.GetUnitOfMeasure(uom);
             Assert.IsNotNull(result);
-            Assert.AreEqual(UnitOfMeasure.m, result);
+            Assert.IsTrue(result.Value.IsEnum);
+            Assert.IsTrue(result.Equals(UnitOfMeasure.m));
         }
     }
 }

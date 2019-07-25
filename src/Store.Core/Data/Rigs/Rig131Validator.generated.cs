@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Rig}" />
     [Export(typeof(IDataObjectValidator<Rig>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Rig131Validator : DataObjectValidator<Rig, Wellbore, Well>
+    public partial class Rig131Validator : WellboreDataObjectValidator<Rig, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig131Validator" /> class.

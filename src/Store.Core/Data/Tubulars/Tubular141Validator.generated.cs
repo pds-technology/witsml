@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
     /// <seealso cref="PDS.WITSMLstudio.Store.Data.DataObjectValidator{Tubular}" />
     [Export(typeof(IDataObjectValidator<Tubular>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public partial class Tubular141Validator : DataObjectValidator<Tubular, Wellbore, Well>
+    public partial class Tubular141Validator : WellboreDataObjectValidator<Tubular, Wellbore, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Tubular141Validator" /> class.
