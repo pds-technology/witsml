@@ -80,7 +80,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var type = typeof(TObject);
 
-            if (type.Assembly != typeof(Energistics.DataAccess.IDataObject).Assembly)
+            if (!ObjectTypes.IsEnergisticsObjectType(type))
                 return;
 
             var contentType = EtpUris.GetUriFamily(type)

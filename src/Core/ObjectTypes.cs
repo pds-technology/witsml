@@ -206,6 +206,18 @@ namespace PDS.WITSMLstudio
         }
 
         /// <summary>
+        /// Gets whether the specified type represents and Energistics data object type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
+        public static bool IsEnergisticsObjectType(Type type)
+        {
+            return type.Assembly == typeof(IWitsmlDataObject).Assembly
+                   || type.Assembly == typeof(IProdmlDataObject).Assembly
+                   || type.Assembly == typeof(IResqmlDataObject).Assembly;
+        }
+
+        /// <summary>
         /// Determines whether the specified property name is for a child data object reference.
         /// </summary>
         /// <param name="contentType">The content type.</param>
