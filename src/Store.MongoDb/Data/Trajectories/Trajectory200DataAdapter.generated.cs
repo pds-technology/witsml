@@ -39,7 +39,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-    /// <seealso cref="PDS.WITSMLstudio.Store.Data.MongoDbDataAdapter{Trajectory}" />
+    /// <seealso cref="PDS.WITSMLstudio.Store.Data.GrowingObjects.GrowingObjectDataAdapterBase{Trajectory}" />
     [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IWitsmlDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
