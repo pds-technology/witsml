@@ -36,10 +36,17 @@ namespace PDS.WITSMLstudio.Framework
         /// Initializes a new instance of the <see cref="Container"/> class.
         /// </summary>
         /// <param name="container">The container.</param>
-        internal Container(CompositionContainer container)
+        /// <param name="configuration">The container configuration.</param>
+        internal Container(CompositionContainer container, ContainerConfig configuration = null)
         {
             _container = container;
+            Configuration = configuration ?? new ContainerConfig();
         }
+
+        /// <summary>
+        /// Gets the composition container configuration.
+        /// </summary>
+        public ContainerConfig Configuration { get; }
 
         /// <summary>
         /// Satisfies all registered dependencies for the specified object instance.

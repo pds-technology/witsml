@@ -60,14 +60,19 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns>A composition container instance.</returns>
         public static IContainer Create(ComposablePartCatalog catalog, string assemblyPath = null)
         {
+            ContainerConfig configuration = null;
+
             if (!string.IsNullOrWhiteSpace(assemblyPath))
             {
                 var fullPath = Path.Combine(assemblyPath, ConfigurationPath, ContainerConfigurationFileName);
-                catalog = new ConfiguredCatalog(catalog, fullPath);
+                var configuredCatalog = new ConfiguredCatalog(catalog, fullPath);
+
+                catalog = configuredCatalog;
+                configuration = configuredCatalog.Configuration;
             }
 
             var container = new CompositionContainer(catalog, true);
-            var instance = new Container(container);
+            var instance = new Container(container, configuration);
 
             container.ComposeExportedValue<IContainer>(instance);
 

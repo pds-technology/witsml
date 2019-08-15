@@ -28,6 +28,11 @@ namespace PDS.WITSMLstudio.Framework
     public interface IContainer : IDisposable
     {
         /// <summary>
+        /// Gets the composition container configuration.
+        /// </summary>
+        ContainerConfig Configuration { get; }
+
+        /// <summary>
         /// Satisfies all registered dependencies for the specified object instance.
         /// </summary>
         /// <param name="instance">The object instance.</param>

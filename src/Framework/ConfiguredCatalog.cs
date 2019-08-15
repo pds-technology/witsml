@@ -49,6 +49,11 @@ namespace PDS.WITSMLstudio.Framework
             }
         }
 
+        /// <summary>
+        /// Gets the composition container configuration.
+        /// </summary>
+        public ContainerConfig Configuration => _config;
+
         private static Func<ComposablePartDefinition, bool> GetPartFilter(string configurationFilePath)
         {
             var config = GetContainerConfig(configurationFilePath);

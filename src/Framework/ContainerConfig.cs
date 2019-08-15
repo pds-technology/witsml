@@ -41,6 +41,11 @@ namespace PDS.WITSMLstudio.Framework
         public List<string> IncludedTypes { get; set; } = new List<string>();
 
         /// <summary>
+        /// Gets or sets the disabled capabilities.
+        /// </summary>
+        public CapabilityConfig DisabledCapabilities { get; set; } = new CapabilityConfig();
+
+        /// <summary>
         /// Verifies initialization of included / excluded collections.
         /// </summary>
         /// <returns>The current instance.</returns>
@@ -55,7 +60,32 @@ namespace PDS.WITSMLstudio.Framework
             if (IncludedTypes == null)
                 IncludedTypes = new List<string>();
 
+            if (DisabledCapabilities == null)
+                DisabledCapabilities = new CapabilityConfig();
+
+            if (DisabledCapabilities.Functions == null)
+                DisabledCapabilities.Functions = new List<string>();
+
+            if (DisabledCapabilities.ObjectTypes == null)
+                DisabledCapabilities.ObjectTypes = new List<string>();
+
             return this;
         }
+    }
+
+    /// <summary>
+    /// Encapsulates the capability configuration settings.
+    /// </summary>
+    public class CapabilityConfig
+    {
+        /// <summary>
+        /// Gets or sets the functions.
+        /// </summary>
+        public List<string> Functions { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the object types.
+        /// </summary>
+        public List<string> ObjectTypes { get; set; } = new List<string>();
     }
 }
