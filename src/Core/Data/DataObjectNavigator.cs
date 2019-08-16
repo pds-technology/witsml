@@ -737,6 +737,10 @@ namespace PDS.WITSMLstudio.Data
                     if (attributeAttribute.AttributeName.EqualsIgnoreCase(name))
                         return prop;
                 }
+
+                // If no matches on Attributes try to match by property name
+                if (prop.Name.EqualsIgnoreCase(name))
+                    return prop;
             }
             return null;
         }
