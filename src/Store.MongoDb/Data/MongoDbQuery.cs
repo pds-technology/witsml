@@ -61,7 +61,15 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <value><c>true</c> if the current property is within a recurring element; otherwise, <c>false</c>.</value>
         private bool IsRecurringElement => Context.RecurringFilterStack.Any();
-        
+
+        /// <summary>
+        /// Gets date time property names for handling date time values.
+        /// </summary>
+        /// <value>
+        /// The date time properties names.
+        /// </value>
+        public virtual string[] DateTimeProperties => new[] { ".DateTimeCreation", ".DateTimeLastChange", ".DateTimeChange" };
+
         /// <summary>
         /// Executes this MongoDb query.
         /// </summary>
@@ -272,7 +280,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="dateTimeValue">The date time value.</param>
         protected override void HandleDateTimeValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
-            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
+            if (DateTimeProperties.Any(propertyPath.EndsWith))
             {
                 if (IsRecurringElement)
                 {
@@ -284,7 +292,7 @@ namespace PDS.WITSMLstudio.Store.Data
                         }));
                 }
 
-                Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
+                Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, dateTimeValue));
             }
             else
             {
@@ -315,7 +323,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="timestampValue">The timestamp value.</param>
         protected override void HandleTimestampValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
-            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange") || propertyPath.EndsWith(".DateTimeChange"))
+            if (DateTimeProperties.Any(propertyPath.EndsWith))
             {
                 if (IsRecurringElement)
                 {
