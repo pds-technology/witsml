@@ -213,6 +213,10 @@ namespace PDS.WITSMLstudio.Data
                     var childType = propertyType.GetGenericArguments()[0];
                     NavigateArrayElementType(propertyInfo, elementList, childType, element, propertyPath);
                 }
+                else
+                {
+                    NavigateElementType(propertyInfo, propertyType, element, propertyPath);
+                }
             }
             else if (propertyType.IsAbstract)
             {
@@ -323,12 +327,18 @@ namespace PDS.WITSMLstudio.Data
         {
             RemoveInvalidChildElementsAndAttributes(propertyInfo, elementType, element);
 
-            if (element.HasElements || element.HasAttributes)
+            if (element.HasElements || (element.HasAttributes && !element.Attributes().All(IsIgnoredAttribute)))
             {
                 NavigateElement(element, elementType, propertyPath);
             }
             else
             {
+                if (element.Attributes().Any(a => a.Name == Xsi("type")))
+                {
+                    var dataType = GetConcreteType(element, propertyInfo.PropertyType);
+                    elementType = dataType ?? elementType;
+                }
+
                 NavigateProperty(propertyInfo, element, elementType, propertyPath, element.Value);
             }
         }
@@ -360,8 +370,7 @@ namespace PDS.WITSMLstudio.Data
         {
             foreach (var attribute in element.Attributes())
             {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type") ||
-                    (skipUom && attribute.Name.LocalName == "uom"))
+                if (IsIgnoredAttribute(attribute) || (skipUom && attribute.Name.LocalName == "uom"))
                     continue;
 
                 var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
@@ -782,7 +791,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="element">The element.</param>
         /// <param name="propType">Type of the property.</param>
         /// <returns>The concrete type</returns>
-        protected Type GetConcreteType(XElement element, Type propType)
+        protected virtual Type GetConcreteType(XElement element, Type propType)
         {
             var xsiType = element.Attributes()
                 .Where(x => x.Name == Xsi("type"))
@@ -796,13 +805,86 @@ namespace PDS.WITSMLstudio.Data
 
             var typeName = xsiType.LastOrDefault();
 
-            return propType.Assembly.GetTypes()
+            var dataType = propType.Assembly.GetTypes()
                 .FirstOrDefault(t =>
                 {
                     var xmlType = XmlAttributeCache<XmlTypeAttribute>.GetCustomAttribute(t);
                     return ((xmlType != null && xmlType.TypeName == typeName) &&
                         (string.IsNullOrWhiteSpace(@namespace) || xmlType.Namespace == @namespace));
                 });
+
+            return dataType ?? GetClrType(typeName);
+        }
+
+        /// <summary>
+        /// Gets the the CLR type for the specified XML data type.
+        /// </summary>
+        /// <param name="xmlDataType">The XML data type.</param>
+        /// <returns>The CLR type.</returns>
+        /// <remarks>See: https://docs.microsoft.com/en-us/dotnet/standard/data/xml/mapping-xml-data-types-to-clr-types </remarks>
+        protected virtual Type GetClrType(string xmlDataType)
+        {
+            switch (xmlDataType)
+            {
+                case "base64Binary":
+                case "hexBinary":
+                    return typeof(byte[]);
+
+                case "bool":
+                case "boolean":
+                    return typeof(bool);
+
+                case "byte":
+                    return typeof(sbyte);
+
+                case "date":
+                case "datetime":
+                case "time":
+                    return typeof(DateTime);
+
+                case "decimal":
+                case "integer":
+                case "positiveInteger":
+                case "negativeInteger":
+                case "nonNegativeInteger":
+                case "nonPositiveInteger":
+                    return typeof(decimal);
+
+                case "double":
+                    return typeof(double);
+
+                case "duration":
+                case "dayTimeDuration":
+                case "yearMonthDuration":
+                    return typeof(TimeSpan);
+
+                case "float":
+                    return typeof(float);
+
+                case "int":
+                    return typeof(int);
+
+                case "long":
+                    return typeof(long);
+
+                case "short":
+                    return typeof(short);
+
+                case "unsignedByte":
+                    return typeof(byte);
+
+                case "unsignedInt":
+                    return typeof(uint);
+
+                case "unsignedLong":
+                    return typeof(ulong);
+
+                case "unsignedShort":
+                    return typeof(ushort);
+
+                default:
+                    return typeof(string);
+            }
         }
 
         /// <summary>
@@ -944,7 +1026,14 @@ namespace PDS.WITSMLstudio.Data
             return type.GetProperties().Any(XmlAttributeCache<XmlAnyElementAttribute>.IsDefined);
         }
 
-        private bool IsNumeric(Type propertyType)
+        /// <summary>
+        /// Determines whether the specified property type is numeric.
+        /// </summary>
+        /// <param name="propertyType">The property type.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified property type is numeric; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool IsNumeric(Type propertyType)
         {
             var type = propertyType;
 
@@ -964,6 +1053,18 @@ namespace PDS.WITSMLstudio.Data
             return type.IsNumeric();
         }
 
+        /// <summary>
+        /// Determines whether the specified attribute is an ignored attribute.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified attribute is ignored; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool IsIgnoredAttribute(XAttribute attribute)
+        {
+            return attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type");
+        }
+
         private void RemoveInvalidChildElementsAndAttributes(PropertyInfo propertyInfo, Type elementType, XElement element)
         {
             // Ignore list properties that declare child elements using XmlArrayItem
@@ -973,8 +1074,7 @@ namespace PDS.WITSMLstudio.Data
 
             foreach (var attribute in element.Attributes())
             {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
-                    continue;
+                if (IsIgnoredAttribute(attribute)) continue;
 
                 var attributeInfo = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
 
