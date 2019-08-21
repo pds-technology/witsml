@@ -342,18 +342,18 @@ namespace PDS.WITSMLstudio.Adapters
         /// </summary>
         private void InitializeLogData()
         {
-            if (_log131 != null && _log131.LogCurveInfo != null && _log131.LogCurveInfo.Count > 0)
+            if (_log131?.LogCurveInfo != null && _log131.LogCurveInfo.Count > 0)
             {
                 var mnemonicList = _log131.LogCurveInfo.OrderBy(x => x.ColumnIndex).Select(l => l.Mnemonic).ToArray();
                 var unitList = _log131.LogCurveInfo.OrderBy(x => x.ColumnIndex).Select(l => l.Unit ?? string.Empty).ToArray();
 
                 LogData = new List<LogData>();
 
-                if (_log131.LogData != null)
+                if (_log131.LogData?.Count > 0)
                     LogData.Add(new LogData(mnemonicList, unitList, _log131.LogData));
             }
 
-            if (_log141 != null && _log141.LogData != null)
+            if (_log141?.LogData != null)
             {
                 LogData = new List<LogData>();
 
