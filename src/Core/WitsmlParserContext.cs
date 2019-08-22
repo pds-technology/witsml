@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Xml.Linq;
 using PDS.WITSMLstudio.Data;
 
@@ -65,12 +64,7 @@ namespace PDS.WITSMLstudio
         /// <param name="element">The XML element.</param>
         public WitsmlParserContext(XElement element) : base(element)
         {
+            DataObjectType = typeof(T);
         }
-
-        /// <summary>
-        /// Gets the type of the data object.
-        /// </summary>
-        /// <value>The type of the data object.</value>
-        public override Type DataObjectType => typeof(T);
     }
 }

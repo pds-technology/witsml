@@ -65,16 +65,13 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <summary>
         /// Gets date time property names for handling date time values.
         /// </summary>
-        /// <value>
-        /// The date time properties names.
-        /// </value>
         public virtual string[] DateTimeProperties => new[] { ".DateTimeCreation", ".DateTimeLastChange", ".DateTimeChange" };
 
         /// <summary>
         /// Executes this MongoDb query.
         /// </summary>
         /// <returns>The list of queried data object.</returns>
-        public List<T> Execute()
+        public virtual List<T> Execute()
         {
             Logger.DebugFormat("Executing query for {0}", _parser.ObjectType);
 
@@ -116,7 +113,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Filters the recurring elements.
         /// </summary>
         /// <param name="entities">The entities.</param>
-        public List<T> FilterRecurringElements(List<T> entities)
+        public virtual List<T> FilterRecurringElements(List<T> entities)
         {
             // Skip if no recurring element filters were detected
             if (!Context.RecurringElementFilters.Any())
@@ -137,7 +134,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Navigates the root element.
         /// </summary>
         /// <param name="returnElements">The return elements.</param>
-        public void Navigate(string returnElements)
+        public virtual void Navigate(string returnElements)
         {
             // Check if to project fields
             Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
@@ -422,7 +419,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Builds the query filter.
         /// </summary>
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
-        private FilterDefinition<T> BuildFilter()
+        protected virtual FilterDefinition<T> BuildFilter()
         {
             Logger.DebugFormat("Building filter criteria for entity: {0}", _parser.ObjectType);
 
@@ -450,7 +447,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Builds the projection for the query.
         /// </summary>
         /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection()
+        protected virtual ProjectionDefinition<T> BuildProjection()
         {
             Logger.DebugFormat("Building projection fields for entity: {0}", _parser.ObjectType);
 
@@ -481,7 +478,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Adds the projection property.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
-        private void AddProjectionProperty(string propertyPath)
+        protected virtual void AddProjectionProperty(string propertyPath)
         {
             if (!Context.IsProjection || Context.Fields.Contains(propertyPath))
                 return;
@@ -493,7 +490,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Initializes the recurring element filters.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
-        private void InitializeRecurringElementFilter(string propertyPath)
+        protected virtual void InitializeRecurringElementFilter(string propertyPath)
         {
             var filter = new RecurringElementFilter(propertyPath)
             {
@@ -512,7 +509,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="isRecurringCriteria">if set to <c>true</c> is recurring criteria.</param>
-        private void HandleRecurringElementFilters(string propertyPath, bool isRecurringCriteria = false)
+        protected virtual void HandleRecurringElementFilters(string propertyPath, bool isRecurringCriteria = false)
         {
             // Pull the current filter off the stack
             var filter = Context.RecurringFilterStack.Pop();
@@ -567,7 +564,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Filters the recurring elements.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        private bool FilterRecurringElements(T entity)
+        protected virtual bool FilterRecurringElements(T entity)
         {
             return Context.RecurringElementFilters
                 .Aggregate(true, (current, filter) => FilterRecurringElements(entity, entity, filter, filter.PropertyPath) && current);
@@ -580,7 +577,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="instance">The instance.</param>
         /// <param name="filter">The filter.</param>
         /// <param name="propertyPath">The property path.</param>
-        private bool FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string propertyPath)
+        protected virtual bool FilterRecurringElements(object dataObject, object instance, RecurringElementFilter filter, string propertyPath)
         {
             var propertyNames = propertyPath.Split('.');
             IList recurringElementList = null;
@@ -634,7 +631,12 @@ namespace PDS.WITSMLstudio.Store.Data
             return recurringElementList.Count <= 0;
         }
 
-        private string GetNestedPath(string propertyPath)
+        /// <summary>
+        /// Gets the nested path.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns></returns>
+        protected virtual string GetNestedPath(string propertyPath)
         {
             var filter = Context.RecurringFilterStack.Peek();
 

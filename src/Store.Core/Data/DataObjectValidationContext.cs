@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using PDS.WITSMLstudio.Data;
 
 namespace PDS.WITSMLstudio.Store.Data
@@ -28,10 +27,12 @@ namespace PDS.WITSMLstudio.Store.Data
     public class DataObjectValidationContext<T> : DataObjectNavigationContext
     {
         /// <summary>
-        /// Gets the type of the data object.
+        /// Initializes a new instance of the <see cref="DataObjectValidationContext{T}"/> class.
         /// </summary>
-        /// <value>The type of the data object.</value>
-        public override Type DataObjectType => typeof(T);
+        public DataObjectValidationContext()
+        {
+            DataObjectType = typeof(T);
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether NaN elements should be removed.

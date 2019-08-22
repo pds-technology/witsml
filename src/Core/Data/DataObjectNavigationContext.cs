@@ -39,7 +39,7 @@ namespace PDS.WITSMLstudio.Data
         /// Gets the type of the data object.
         /// </summary>
         /// <value>The type of the data object.</value>
-        public abstract Type DataObjectType { get; }
+        public Type DataObjectType { get; set; }
 
         /// <summary>
         /// Gets or sets the list of ignored element names.

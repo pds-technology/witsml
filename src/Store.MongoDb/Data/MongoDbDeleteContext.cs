@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MongoDB.Driver;
@@ -42,12 +41,6 @@ namespace PDS.WITSMLstudio.Store.Data
             PropertyValues = new List<object>();
             Update = null;
         }
-
-        /// <summary>
-        /// Gets the type of the data object.
-        /// </summary>
-        /// <value>The type of the data object.</value>
-        public override Type DataObjectType { get; }
 
         /// <summary>
         /// Gets the property information list.

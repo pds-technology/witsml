@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using PDS.WITSMLstudio.Data;
 
@@ -35,12 +34,6 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             DataObjectType = typeof(T);
         }
-
-        /// <summary>
-        /// Gets the type of the data object.
-        /// </summary>
-        /// <value>The type of the data object.</value>
-        public override Type DataObjectType { get; }
 
         /// <summary>
         /// Gets or sets the list of properties.

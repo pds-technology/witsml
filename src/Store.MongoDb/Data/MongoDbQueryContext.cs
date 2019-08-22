@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using MongoDB.Driver;
 using PDS.WITSMLstudio.Data;
@@ -42,12 +41,6 @@ namespace PDS.WITSMLstudio.Store.Data
             RecurringElementFilters = new List<RecurringElementFilter>();
             RecurringFilterStack = new Stack<RecurringElementFilter>();
         }
-
-        /// <summary>
-        /// Gets the type of the data object.
-        /// </summary>
-        /// <value>The type of the data object.</value>
-        public override Type DataObjectType { get; }
 
         /// <summary>
         /// Gets or sets the list of filters.
