@@ -61,14 +61,15 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="entity">The entity.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="updates">The updates.</param>
-        public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
+        public virtual void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
             Logger.Debug($"Updating data object: {uri}");
 
-            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, IdPropertyName);
+            _entityFilter = BuildEntityFilter(entity, uri);
             Entity = entity;
 
-            Context.Update = Update(updates, uri.ObjectId);
+            var entityId = GetEntityId(entity, uri);
+            Context.Update = Update(updates, entityId);
             BuildUpdate(Parser.Element());
 
             LogUpdateFilter(_entityFilter, Context.Update);
@@ -82,11 +83,58 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="filter">The filter.</param>
         /// <param name="update">The update.</param>
-        public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
+        public virtual void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             LogUpdateFilter(filter, update);
             Collection.UpdateOne(filter, update);
-        }      
+        }
+
+        /// <summary>
+        /// Creates an <see cref="UpdateDefinition{T}"/> based on the supplied dictionary of name/value pairs.
+        /// </summary>
+        /// <param name="updates">The updates.</param>
+        /// <param name="idValue">The id value.</param>
+        /// <returns>The update definition.</returns>
+        protected virtual UpdateDefinition<T> Update(Dictionary<string, object> updates, string idValue)
+        {
+            var update = Builders<T>.Update.Set(IdPropertyName, idValue);
+
+            foreach (var pair in updates)
+                update = update.Set(pair.Key, pair.Value);
+
+            return update;
+        }
+
+        /// <summary>
+        /// Builds the update based on the specified xml element.
+        /// </summary>
+        /// <param name="element">The xml element.</param>
+        protected virtual void BuildUpdate(XElement element)
+        {
+            NavigateElement(element, Context.DataObjectType);
+        }
+
+        /// <summary>
+        /// Gets the entity id for the specified data object.
+        /// </summary>
+        /// <param name="entity">The data object entity.</param>
+        /// <param name="uri">The data object uri.</param>
+        /// <returns></returns>
+        protected virtual string GetEntityId(T entity, EtpUri uri)
+        {
+            return uri.ObjectId;
+        }
+
+        /// <summary>
+        /// Builds the entity filter from the specified uri.
+        /// </summary>
+        /// <param name="entity">The data object entity.</param>
+        /// <param name="uri">The data object uri.</param>
+        /// <returns>The filter definition.</returns>
+        protected virtual FilterDefinition<T> BuildEntityFilter(T entity, EtpUri uri)
+        {
+            return MongoDbUtility.GetEntityFilter<T>(uri, IdPropertyName);
+        }
 
         /// <summary>
         /// Navigates the uom attribute.
@@ -154,39 +202,6 @@ namespace PDS.WITSMLstudio.Store.Data
 
             return true;
         }
-
-        private void BuildUpdate(XElement element)
-        {
-            NavigateElement(element, Context.DataObjectType);
-        }
-
-        /// <summary>
-        /// Sets the property.
-        /// </summary>
-        /// <typeparam name="TValue">The type of the value.</typeparam>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        protected override void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
-        {
-            Context.Update = Context.Update.Set(propertyPath, propertyValue);
-            SetSpecifiedProperty(propertyInfo, propertyPath, true);
-        }
-
-        /// <summary>
-        /// Unsets the property.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
-        protected override void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
-        {
-            if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
-                throw new WitsmlException(ErrorCodes.MissingRequiredData);
-
-            Context.Update = Context.Update.Unset(propertyPath);
-            SetSpecifiedProperty(propertyInfo, propertyPath, false);
-        }    
 
         /// <summary>
         /// Updates the array elements.
@@ -269,22 +284,14 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
-        /// Creates an <see cref="UpdateDefinition{T}"/> based on the supplied dictionary of name/value pairs.
+        /// Updates the array elements which don't contain a uid property.
         /// </summary>
-        /// <param name="updates">The updates.</param>
-        /// <param name="uidValue">The uid value.</param>
-        /// <returns>The update definition.</returns>
-        private UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
-        {
-            var update = Builders<T>.Update.Set(IdPropertyName, uidValue);
-
-            foreach (var pair in updates)
-                update = update.Set(pair.Key, pair.Value);
-
-            return update;
-        }
-
-        private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        /// <param name="elements">The elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected virtual void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.Debug($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
 
@@ -334,7 +341,14 @@ namespace PDS.WITSMLstudio.Store.Data
                 Collection.BulkWrite(updateList);
         }
 
-        private void UpdateXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
+        /// <summary>
+        /// Updates the xml any elements.
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected virtual void UpdateXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
         {
             if (elements.Count < 1 || propertyInfo == null) return;
             var element = elements.First();
@@ -380,7 +394,41 @@ namespace PDS.WITSMLstudio.Store.Data
                 Collection.BulkWrite(updateList);
         }
 
-        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
+        /// <summary>
+        /// Sets the property.
+        /// </summary>
+        /// <typeparam name="TValue">The type of the value.</typeparam>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected override void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
+        {
+            Context.Update = Context.Update.Set(propertyPath, propertyValue);
+            SetSpecifiedProperty(propertyInfo, propertyPath, true);
+        }
+
+        /// <summary>
+        /// Unsets the property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
+        protected override void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
+        {
+            if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
+                throw new WitsmlException(ErrorCodes.MissingRequiredData);
+
+            Context.Update = Context.Update.Unset(propertyPath);
+            SetSpecifiedProperty(propertyInfo, propertyPath, false);
+        }
+
+        /// <summary>
+        /// Sets the special Specified property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="specified">The specified value.</param>
+        protected virtual void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
         {
             var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
 
@@ -390,7 +438,12 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
+        /// <summary>
+        /// Logs the update filter.
+        /// </summary>
+        /// <param name="filter">The filter definition.</param>
+        /// <param name="update">The update definition.</param>
+        protected virtual void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             if (!Logger.IsDebugEnabled)
                 return;
