@@ -902,7 +902,12 @@ namespace PDS.WITSMLstudio.Data
             }
             catch (ArgumentException ex)
             {
-                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure, ex);
+                var errorCode = enumType.Name.IndexOf("Uom", StringComparison.InvariantCultureIgnoreCase) > -1 ||
+                                enumType.Name.IndexOf("Unit", StringComparison.InvariantCultureIgnoreCase) > -1
+                    ? ErrorCodes.InvalidUnitOfMeasure
+                    : ErrorCodes.InputTemplateNonConforming;
+
+                throw new WitsmlException(errorCode, ex);
             }
         }
 
