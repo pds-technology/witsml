@@ -941,13 +941,16 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         private void CreateChannelDataChunkIndex()
         {
             var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Uri").Ascending("Indices.0.Start").Ascending("Indices.0.End");
-            GetCollection().Indexes.CreateOneAsync(keys);
+            GetCollection().Indexes.CreateOneAsync(new CreateIndexModel<ChannelDataChunk>(keys));
+
             var uri = Builders<ChannelDataChunk>.IndexKeys.Ascending("Uri");
-            GetCollection().Indexes.CreateOneAsync(uri);
+            GetCollection().Indexes.CreateOneAsync(new CreateIndexModel<ChannelDataChunk>(uri));
+
             var start = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.Start");
-            GetCollection().Indexes.CreateOneAsync(start);
+            GetCollection().Indexes.CreateOneAsync(new CreateIndexModel<ChannelDataChunk>(start));
+
             var end = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.End");
-            GetCollection().Indexes.CreateOneAsync(end);
+            GetCollection().Indexes.CreateOneAsync(new CreateIndexModel<ChannelDataChunk>(end));
         }
 
         private void UpdateMongoFile(ChannelDataChunk dc)

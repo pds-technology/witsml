@@ -201,7 +201,7 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
         private long GetActiveWellboreCount(string wellboreUri)
         {
             var filter = MongoDbUtility.BuildFilter<DbGrowingObject>("WellboreUri", wellboreUri);
-            return GetCollection().Count(filter);
+            return GetCollection().CountDocuments(filter);
         }
     }
 }
