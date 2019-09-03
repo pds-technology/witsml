@@ -47,7 +47,9 @@ namespace PDS.WITSMLstudio.Store.Jobs.Configuration
             });
 
             var changeDetectionPeriod = Math.Max(WitsmlSettings.ChangeDetectionPeriod / 60, 1);
-            RecurringJob.AddOrUpdate<ObjectGrowingManager>(ObjectGrowingManager.JobId, x => x.Start(), Cron.MinuteInterval(changeDetectionPeriod));
+            var cronExpression = $"*/{changeDetectionPeriod} * * * *";
+
+            RecurringJob.AddOrUpdate<ObjectGrowingManager>(ObjectGrowingManager.JobId, x => x.Start(), cronExpression);
         }
 
         /// <summary>
