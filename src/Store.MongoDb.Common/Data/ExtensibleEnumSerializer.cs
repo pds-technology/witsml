@@ -60,7 +60,20 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A deserialized value.</returns>
         public override ExtensibleEnum<TEnum> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            return new ExtensibleEnum<TEnum>(_serializer.Deserialize(context, args).ToString());
+            var dataType = context.Reader.GetCurrentBsonType();
+            var enumValue = string.Empty;
+
+            if (dataType == BsonType.String)
+            {
+                enumValue = context.Reader.ReadString();
+            }
+            else if (dataType == BsonType.Int32)
+            {
+                var intValue = context.Reader.ReadInt32();
+                enumValue = ((TEnum)(object)intValue).ToString();
+            }
+
+            return new ExtensibleEnum<TEnum>(enumValue);
         }
     }
 }
