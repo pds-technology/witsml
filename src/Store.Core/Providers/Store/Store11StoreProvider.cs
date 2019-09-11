@@ -78,7 +78,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             {
                 var data = EtpContentType.Json.EqualsIgnoreCase(uri.ContentType.Format)
                     ? Energistics.Etp.Common.EtpExtensions.Serialize(entity)
-                    : WitsmlParser.ToXml(entity, removeTypePrefix: true);
+                    : WitsmlParser.ToXml(entity, nilOnly: true, removeTypePrefix: true);
 
                 dataObject.SetString(data, compress);
             }

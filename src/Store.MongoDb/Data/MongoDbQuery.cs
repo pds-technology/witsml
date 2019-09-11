@@ -81,7 +81,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
             // Build Mongo filter
             var filter = BuildFilter();
-            var results = _collection.Find(filter ?? "{}");
+            var query = PrepareQuery(filter);
             var entities = new List<T>();
 
             // Format response using MongoDb projection, i.e. selecting specified fields only
@@ -89,7 +89,7 @@ namespace PDS.WITSMLstudio.Store.Data
                 OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
                 OptionsIn.ReturnElements.LatestChangeOnly.Equals(returnElements))
             {
-                entities.AddRange(results.ToEnumerable());
+                entities.AddRange(query.ToEnumerable());
             }
             else if (Context.IsProjection)
             {
@@ -97,10 +97,10 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (projection != null)
                 {
-                    results = results.Project<T>(projection);
+                    query = query.Project<T>(projection);
                 }
 
-                entities.AddRange(results.ToEnumerable());
+                entities.AddRange(query.ToEnumerable());
             }
 
             Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.ObjectType, entities.Count);
@@ -149,6 +149,17 @@ namespace PDS.WITSMLstudio.Store.Data
 
             // Navigate the root element and create filter and projection fields
             Navigate(element);
+        }
+
+        /// <summary>
+        /// Prepares the query for execution.
+        /// </summary>
+        /// <param name="filter">The query filter.</param>
+        /// <returns>A fluent aggregation interface.</returns>
+        protected virtual IAggregateFluent<T> PrepareQuery(FilterDefinition<T> filter)
+        {
+            //return _collection.Find(filter ?? "{}");
+            return _collection.Aggregate().Match(filter ?? "{}");
         }
 
         /// <summary>
