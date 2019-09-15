@@ -670,9 +670,16 @@ namespace PDS.WITSMLstudio
         /// <returns>The plural string.</returns>
         public static string SingleToPlural(string singleString, bool isWitsmlPlural = true)
         {
-            return isWitsmlPlural || !singleString.EndsWith("y")
-                ? singleString + "s"
-                : singleString.Substring(0, singleString.Length - 1) + "ies";
+            if (isWitsmlPlural)
+                return singleString + "s";
+
+            if (singleString.EndsWith("y"))
+                return singleString.Substring(0, singleString.Length - 1) + "ies";
+
+            if (singleString.EndsWith("x"))
+                return singleString + "es";
+
+            return singleString + "s";
         }
 
         /// <summary>
@@ -684,6 +691,8 @@ namespace PDS.WITSMLstudio
         {
             return pluralString.EndsWith("ies")
                 ? pluralString.Substring(0, pluralString.Length - 3) + "y"
+                : pluralString.EndsWith("xes")
+                ? pluralString.Substring(0, pluralString.Length - 2)
                 : pluralString.EndsWith("s")
                 ? pluralString.Substring(0, pluralString.Length - 1)
                 : pluralString;
