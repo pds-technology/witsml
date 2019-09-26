@@ -2767,19 +2767,22 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var partialDeleteHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("CURVE2"));
             var secondUpdateHistory = history.FirstOrDefault(h => h.Mnemonics != null && h.Mnemonics.Equals("BDEP,CURVE3"));
 
-            Assert.AreEqual(ChangeInfoType.update, firstUpdateHistory?.ChangeType);
-            Assert.AreEqual(3, firstUpdateHistory?.StartIndex.Value);
-            Assert.AreEqual(3, firstUpdateHistory?.EndIndex.Value);
-            Assert.IsTrue(tenMinutesAgo < firstUpdateHistory?.DateTimeChange);
+            Assert.IsNotNull(firstUpdateHistory);
+            Assert.AreEqual(ChangeInfoType.update, firstUpdateHistory.ChangeType);
+            Assert.AreEqual(3, firstUpdateHistory.StartIndex.Value);
+            Assert.AreEqual(3, firstUpdateHistory.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < firstUpdateHistory.DateTimeChange.Value);
 
-            Assert.AreEqual(2, partialDeleteHistory?.StartIndex.Value);
-            Assert.AreEqual(2, partialDeleteHistory?.EndIndex.Value);
-            Assert.IsTrue(tenMinutesAgo < partialDeleteHistory?.DateTimeChange);
+            Assert.IsNotNull(partialDeleteHistory);
+            Assert.AreEqual(2, partialDeleteHistory.StartIndex.Value);
+            Assert.AreEqual(2, partialDeleteHistory.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < partialDeleteHistory.DateTimeChange.Value);
 
-            Assert.AreEqual(ChangeInfoType.update, secondUpdateHistory?.ChangeType);
-            Assert.AreEqual(1, secondUpdateHistory?.StartIndex.Value);
-            Assert.AreEqual(4, secondUpdateHistory?.EndIndex.Value);
-            Assert.IsTrue(tenMinutesAgo < secondUpdateHistory?.DateTimeChange);
+            Assert.IsNotNull(secondUpdateHistory);
+            Assert.AreEqual(ChangeInfoType.update, secondUpdateHistory.ChangeType);
+            Assert.AreEqual(1, secondUpdateHistory.StartIndex.Value);
+            Assert.AreEqual(4, secondUpdateHistory.EndIndex.Value);
+            Assert.IsTrue(tenMinutesAgo < secondUpdateHistory.DateTimeChange.Value);
         }
 
         [TestMethod]
