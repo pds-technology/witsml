@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         public Attachment200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Attachment200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

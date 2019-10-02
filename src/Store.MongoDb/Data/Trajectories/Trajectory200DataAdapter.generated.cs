@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Trajectories
         public Trajectory200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Trajectory200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
         public BhaRun200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.BhaRun200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

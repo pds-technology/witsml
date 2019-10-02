@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobEvaluations
         public CementJobEvaluation200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.CementJobEvaluation200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

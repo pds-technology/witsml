@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Messages
         public Message141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Message141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

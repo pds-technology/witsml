@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.DepthRegImages
         public DepthRegImage141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.DepthRegImage141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

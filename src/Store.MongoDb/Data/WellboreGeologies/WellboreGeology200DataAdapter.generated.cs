@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreGeologies
         public WellboreGeology200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WellboreGeology200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

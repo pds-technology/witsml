@@ -38,7 +38,7 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
         [ImportingConstructor]
         public Channel200MessageDataAdapter(IContainer container) : base(container, ObjectNames.Channel200)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
     }
 }

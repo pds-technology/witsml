@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.OpsReports
         public OpsReport131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.OpsReport131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

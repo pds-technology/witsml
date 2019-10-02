@@ -38,7 +38,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         [ImportingConstructor]
         public Wellbore200MessageDataAdapter(IContainer container) : base(container, ObjectNames.Wellbore200)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
     }
 }

@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.Tubulars
         public Tubular200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Tubular200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

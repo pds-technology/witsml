@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.ActivityTemplates
         public ActivityTemplate200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.ActivityTemplate200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

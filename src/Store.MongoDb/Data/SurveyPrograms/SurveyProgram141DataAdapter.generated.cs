@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.SurveyPrograms
         public SurveyProgram141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.SurveyProgram141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

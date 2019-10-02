@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellCompletions
         public WellCompletion141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WellCompletion141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

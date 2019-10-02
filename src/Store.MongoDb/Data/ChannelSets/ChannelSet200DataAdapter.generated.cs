@@ -55,7 +55,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
         public ChannelSet200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter)
             : base(container, databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
             ChannelDataChunkAdapter = channelDataChunkAdapter;
         }
 

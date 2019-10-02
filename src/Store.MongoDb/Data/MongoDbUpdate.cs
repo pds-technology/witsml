@@ -52,7 +52,7 @@ namespace PDS.WITSMLstudio.Store.Data
         public MongoDbUpdate(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) 
             : base(container, collection, parser, idPropertyName, ignored)
         {
-            Logger.Debug("Instance created.");           
+            Logger.Verbose("Instance created.");           
         }
 
         /// <summary>

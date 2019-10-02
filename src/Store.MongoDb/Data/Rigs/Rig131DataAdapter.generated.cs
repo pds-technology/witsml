@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
         public Rig131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Rig131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.CementJobs
         public CementJob141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.CementJob141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

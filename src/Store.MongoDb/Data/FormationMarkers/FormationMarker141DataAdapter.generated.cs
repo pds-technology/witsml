@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.FormationMarkers
         public FormationMarker141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.FormationMarker141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.SidewallCores
         public SidewallCore131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.SidewallCore131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

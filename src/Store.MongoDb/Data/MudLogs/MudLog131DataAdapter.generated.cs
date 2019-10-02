@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         public MudLog131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.MudLog131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

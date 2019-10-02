@@ -137,7 +137,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="records">The collection of data records.</param>
         public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
         {
-            _log.Debug("ChannelDataReader instance created for IChannelDataRecords");
+            _log.Verbose("ChannelDataReader instance created for IChannelDataRecords");
 
             var items = records
                 .Cast<ChannelDataReader>()
@@ -176,7 +176,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="id">The identifier.</param>
         internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null)
         {
-            _log.Debug("ChannelDataReader instance created");
+            _log.Verbose("ChannelDataReader instance created");
 
             _records = records;
             _count = GetRowValues(0).Count();

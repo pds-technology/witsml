@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.Rigs
         public Rig200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Rig200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

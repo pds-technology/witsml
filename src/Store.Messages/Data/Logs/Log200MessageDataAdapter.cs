@@ -38,7 +38,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         [ImportingConstructor]
         public Log200MessageDataAdapter(IContainer container) : base(container, ObjectNames.Log200)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
     }
 }

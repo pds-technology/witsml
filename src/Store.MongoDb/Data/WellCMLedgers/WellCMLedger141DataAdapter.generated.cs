@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellCMLedgers
         public WellCMLedger141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WellCMLedger141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

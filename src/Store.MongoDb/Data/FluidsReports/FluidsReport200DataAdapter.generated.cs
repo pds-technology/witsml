@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.FluidsReports
         public FluidsReport200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.FluidsReport200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

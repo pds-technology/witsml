@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wellbores
         public Wellbore131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Wellbore131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

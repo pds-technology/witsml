@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.DrillReports
         public DrillReport200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.DrillReport200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

@@ -51,7 +51,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChangeLogs
         public DbAuditHistoryDataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, "dbAuditHistory")
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="ignored">The ignored.</param>
         public MongoDbDelete(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(container, new MongoDbDeleteContext<T>())
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
             Context.Ignored = ignored;
 
             _collection = collection;

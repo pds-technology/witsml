@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.WellboreMarkerSets
         public WellboreMarkerSet200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WellboreMarkerSet200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

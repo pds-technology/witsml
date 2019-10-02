@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
             : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
             ChannelSetDataAdapter = channelSetDataAdapter;
         }
 

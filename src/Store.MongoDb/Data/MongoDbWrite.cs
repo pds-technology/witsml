@@ -67,7 +67,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="ignored">The ignored.</param>
         public MongoDbWrite(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(container, new MongoDbUpdateContext<T>())
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
             Context.Ignored = ignored;
 
             Collection = collection;

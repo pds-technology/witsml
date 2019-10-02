@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobs
         public StimJob141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.StimJob141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

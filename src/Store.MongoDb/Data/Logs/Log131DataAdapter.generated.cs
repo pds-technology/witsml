@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
         public Log131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Log131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

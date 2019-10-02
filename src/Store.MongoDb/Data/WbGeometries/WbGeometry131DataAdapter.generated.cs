@@ -57,7 +57,7 @@ namespace PDS.WITSMLstudio.Store.Data.WbGeometries
         public WbGeometry131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.WbGeometry131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

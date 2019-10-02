@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Risks
         public Risk141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Risk141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

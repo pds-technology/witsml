@@ -56,7 +56,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
         /// <param name="dbCollectionName">Name of the database collection.</param>
         protected MudLogDataAdapter(IContainer container, IDatabaseProvider databaseProvider, string dbCollectionName) : base(container, databaseProvider, dbCollectionName)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

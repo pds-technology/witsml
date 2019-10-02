@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.StimJobStages
         public StimJobStage200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.StimJobStage200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

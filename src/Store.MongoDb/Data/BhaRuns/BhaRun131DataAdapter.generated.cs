@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.BhaRuns
         public BhaRun131DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.BhaRun131)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

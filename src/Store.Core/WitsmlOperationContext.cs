@@ -28,6 +28,7 @@ using Witsml141 = Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Transactions;
+using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store
 {
@@ -47,7 +48,7 @@ namespace PDS.WITSMLstudio.Store
         /// </summary>
         private WitsmlOperationContext()
         {
-            _log.Debug("Instance created.");
+            _log.Verbose("Instance created.");
             Warnings = new List<WitsmlValidationResult>();
         }
 

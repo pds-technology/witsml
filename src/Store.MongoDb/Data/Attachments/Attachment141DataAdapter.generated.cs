@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.Attachments
         public Attachment141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Attachment141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

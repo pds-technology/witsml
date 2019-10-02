@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.DownholeComponents
         public DownholeComponent141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.DownholeComponent141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>
