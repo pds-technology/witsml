@@ -377,7 +377,13 @@ namespace PDS.WITSMLstudio.Store.Data
             if (IsRecurringElement)
             {
                 Context.CurrentRecurringFilters.Add(new RecurringElementFilter(GetNestedPath(propertyPath), $"Equals({propertyValue})",
-                    (dataObject, instance, filter) => Equals(filter.GetPropertyValue<object>(instance), objectValue)));
+                    (dataObject, instance, filter) =>
+                    {
+                        var value = filter.GetPropertyValue<object>(instance);
+                        if (value is Enum && objectValue is string)
+                            value = ((Enum)value).GetName();
+                        return Equals(value, objectValue);
+                    }));
             }
 
             Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
