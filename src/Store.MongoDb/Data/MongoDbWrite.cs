@@ -239,7 +239,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Pushes the property information.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
-        protected void PushPropertyInfo(PropertyInfo propertyInfo)
+        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo)
         {
             var parentValue = Context.PropertyValues.LastOrDefault();
 
@@ -266,7 +266,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
+        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
         {
             Context.PropertyInfos.Add(propertyInfo);
             Context.PropertyValues.Add(propertyValue);
@@ -275,7 +275,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <summary>
         /// Pops the property information.
         /// </summary>
-        protected void PopPropertyInfo()
+        protected virtual void PopPropertyInfo()
         {
             Context.PropertyInfos.Remove(Context.PropertyInfos.Last());
             Context.PropertyValues.Remove(Context.PropertyValues.Last());
@@ -287,7 +287,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="element">The element.</param>
         /// <param name="idField">The identifier field.</param>
         /// <returns>The element id value.</returns>
-        protected string GetElementId(XElement element, string idField)
+        protected virtual string GetElementId(XElement element, string idField)
         {
             var idAttribute = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(idField));
             if (idAttribute != null)
@@ -308,7 +308,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="idField">The identifier field.</param>
         /// <param name="idList">The identifier list.</param>
         /// <returns>The "identifier, items" collection</returns>
-        protected IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
+        protected virtual IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
         {
             var idProp = GetPropertyInfoForAnElement(properties, idField);
 
@@ -316,10 +316,22 @@ namespace PDS.WITSMLstudio.Store.Data
                 .Cast<object>()
                 .ToDictionary(x =>
                 {
-                    var id = idProp.GetValue(x).ToString();
+                    var id = GetItemId(x, properties, idProp);
                     idList.Add(id);
                     return id;
                 });
+        }
+
+        /// <summary>
+        /// Gets the identified for the specified recurring item.
+        /// </summary>
+        /// <param name="item">The recurring item.</param>
+        /// <param name="properties">The properties.</param>
+        /// <param name="idPropertyInfo">The identifier property information.</param>
+        /// <returns></returns>
+        protected virtual string GetItemId(object item, IList<PropertyInfo> properties, PropertyInfo idPropertyInfo)
+        {
+            return idPropertyInfo?.GetValue(item)?.ToString() ?? string.Empty;
         }
 
         /// <summary>
@@ -329,7 +341,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="type">The type.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        protected void ValidateArrayElement(PropertyInfo propertyInfo, Type type, XElement element, string propertyPath)
+        protected virtual void ValidateArrayElement(PropertyInfo propertyInfo, Type type, XElement element, string propertyPath)
         {
             var validator = new MongoDbUpdate<T>(Container, Collection, Parser, IdPropertyName, Context.Ignored);
             validator.Context.ValidationOnly = true;
@@ -343,7 +355,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="properties">The properties.</param>
         /// <param name="isAdd">if set to <c>true</c> [is add].</param>
         /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
-        protected void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
+        protected virtual void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
         {
             Logger.Debug($"Validating array element: {element.Name.LocalName}");
 
@@ -390,7 +402,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="listType">Type of the list.</param>
         /// <param name="item">The item.</param>
         /// <returns>The list of specified type.</returns>
-        protected IList CreateList(Type listType, object item)
+        protected virtual IList CreateList(Type listType, object item)
         {
             var list = Activator.CreateInstance(listType) as IList;
             list?.Add(item);

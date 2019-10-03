@@ -72,7 +72,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="entity">The entity.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="updates">The updates.</param>
-        public void PartialDelete(T entity, EtpUri uri, Dictionary<string, object> updates)
+        public virtual void PartialDelete(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
             Logger.Debug($"Partial deleting data object: {uri}");
 
@@ -97,7 +97,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <param name="updates">The updates.</param>
         /// <param name="uidValue">The uid value.</param>
         /// <returns></returns>
-        public UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
+        public virtual UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
         {
             var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
 
@@ -204,12 +204,20 @@ namespace PDS.WITSMLstudio.Store.Data
             return true;
         }
 
-        private void BuildPartialDelete(XElement element)
+        /// <summary>
+        /// Builds the partial delete definition.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        protected virtual void BuildPartialDelete(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
         }
 
-        private void PushPropertyInfo(PropertyInfo propertyInfo)
+        /// <summary>
+        /// Pushes the property information.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo)
         {
             var parentValue = Context.PropertyValues.LastOrDefault();
 
@@ -231,25 +239,38 @@ namespace PDS.WITSMLstudio.Store.Data
             PushPropertyInfo(propertyInfo, propertyValue);
         }
 
-        private void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
+        /// <summary>
+        /// Pushes the property information.
+        /// </summary>
+        /// <param name="propertyInfo">The property information</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
         {
             Context.PropertyInfos.Add(propertyInfo);
             Context.PropertyValues.Add(propertyValue);
         }
 
-        private void PopPropertyInfo()
+        /// <summary>
+        /// Removes the property information.
+        /// </summary>
+        protected virtual void PopPropertyInfo()
         {
             Context.PropertyInfos.Remove(Context.PropertyInfos.Last());
             Context.PropertyValues.Remove(Context.PropertyValues.Last());
         }
 
-        //private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
+        //protected virtual void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
         //{
         //    Context.Update = Context.Update.Set(propertyPath, propertyValue);
         //    SetSpecifiedProperty(propertyInfo, propertyPath, true);
         //}
 
-        private void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
+        /// <summary>
+        /// Unsets the property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected virtual void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
         {
             if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
@@ -258,7 +279,13 @@ namespace PDS.WITSMLstudio.Store.Data
             SetSpecifiedProperty(propertyInfo, propertyPath, false);
         }
 
-        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
+        /// <summary>
+        /// Sets the special Specified property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="specified">The specified value.</param>
+        protected virtual void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
         {
             var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
 
@@ -268,7 +295,14 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private void PartialDeleteXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
+        /// <summary>
+        /// Partially deletes the XML any elements.
+        /// </summary>
+        /// <param name="elements">The XML elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected virtual void PartialDeleteXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
         {
             if (elements.Count < 1 || propertyInfo == null) return;
             var element = elements.First();
@@ -317,7 +351,15 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private void PartialDeleteArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        /// <summary>
+        /// Partially deletes the array elements.
+        /// </summary>
+        /// <param name="elements">The XML elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="type">The property type.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected virtual void PartialDeleteArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.Debug($"Partial deleting array elements: {parentPath} {propertyInfo?.Name}");
 
@@ -393,7 +435,13 @@ namespace PDS.WITSMLstudio.Store.Data
                 _collection.BulkWrite(updateList);
         }
 
-        private string GetElementId(XElement element, string idField)
+        /// <summary>
+        /// Gets the element's id.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        /// <param name="idField">The id field.</param>
+        /// <returns></returns>
+        protected virtual string GetElementId(XElement element, string idField)
         {
             var idAttribute = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(idField));
             if (idAttribute != null)
@@ -406,7 +454,15 @@ namespace PDS.WITSMLstudio.Store.Data
             return string.Empty;
         }
 
-        private IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
+        /// <summary>
+        /// Creates a dictionary of items keyed by each item's id.
+        /// </summary>
+        /// <param name="items">The items.</param>
+        /// <param name="properties">The property information.</param>
+        /// <param name="idField">The id field.</param>
+        /// <param name="idList">The id list.</param>
+        /// <returns></returns>
+        protected virtual IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
         {
             var idProp = GetPropertyInfoForAnElement(properties, idField);
 
@@ -420,7 +476,12 @@ namespace PDS.WITSMLstudio.Store.Data
                 });
         }
 
-        private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
+        /// <summary>
+        /// Logs the specified filter and update definitions.
+        /// </summary>
+        /// <param name="filter">The filter definition.</param>
+        /// <param name="update">The update definition.</param>
+        protected virtual void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             if (!Logger.IsDebugEnabled)
                 return;
@@ -436,7 +497,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="pullUpdate">The pull update.</param>
-        private void AddToPullCollection(string path, UpdateOneModel<T> pullUpdate)
+        protected virtual void AddToPullCollection(string path, UpdateOneModel<T> pullUpdate)
         {
             var depth = path.Split('.').Length;
 
@@ -457,7 +518,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Removes the array elements by depth, i.e remove the most nested array elements
         /// so that it won't cause positional error.
         /// </summary>
-        private void RemoveArrayElementsByDepth()
+        protected virtual void RemoveArrayElementsByDepth()
         {
             var depths = _pullUpdates.Keys.ToList();
             depths.Sort();

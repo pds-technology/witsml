@@ -103,7 +103,7 @@ namespace PDS.WITSMLstudio.Data
         /// Navigates the specified element.
         /// </summary>
         /// <param name="element">The XML element.</param>
-        protected void Navigate(XElement element)
+        protected virtual void Navigate(XElement element)
         {
             Logger.DebugFormat("Navigating XML element: {0}", element?.Name.LocalName);
 
@@ -117,7 +117,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="element">The element.</param>
         /// <param name="type">The type.</param>
         /// <param name="parentPath">The parent path.</param>
-        protected void NavigateElement(XElement element, Type type, string parentPath = null)
+        protected virtual void NavigateElement(XElement element, Type type, string parentPath = null)
         {
             if (IsIgnored(element.Name.LocalName)) return;
 
@@ -392,7 +392,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="propertyInfo">The property information.</param>
         /// <param name="attribute">The attribute.</param>
         /// <param name="parentPath">The parent path.</param>
-        protected void NavigateAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
+        protected virtual void NavigateAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
         {
             var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
@@ -409,7 +409,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void NavigateProperty(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void NavigateProperty(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (string.IsNullOrWhiteSpace(propertyValue))
             {
@@ -479,7 +479,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="element">The element.</param>
         /// <returns>The parsed object.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected object ParseNestedElement(Type type, XElement element)
+        protected virtual object ParseNestedElement(Type type, XElement element)
         {
             if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
                 throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
@@ -664,7 +664,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="name">The XML element or attribute name.</param>
         /// <param name="type">The XML object type.</param>
         /// <param name="remove">if set to <c>true</c> the element or attribute will be removed.</param>
-        private void HandleInvalidElementOrAttribute(XObject element, string name, string type, bool remove = true)
+        protected virtual void HandleInvalidElementOrAttribute(XObject element, string name, string type, bool remove = true)
         {
             var message = $"Invalid {type} found: {name}";
 
@@ -707,7 +707,7 @@ namespace PDS.WITSMLstudio.Data
         /// Removes the specified XML object from it's parent.
         /// </summary>
         /// <param name="xmlObject">The XML object.</param>
-        protected void Remove(XObject xmlObject)
+        protected virtual void Remove(XObject xmlObject)
         {
             var attribute = xmlObject as XAttribute;
             attribute?.Remove();
@@ -722,7 +722,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="properties">The properties.</param>
         /// <param name="name">The name of the property.</param>
         /// <returns>The property info for the element.</returns>
-        protected PropertyInfo GetPropertyInfoForAnElement(IList<PropertyInfo> properties, string name)
+        protected virtual PropertyInfo GetPropertyInfoForAnElement(IList<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
             {
@@ -762,7 +762,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="measureValue">The measure value.</param>
         /// <returns>The uom value if valid.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
+        protected virtual string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = XmlAttributeCache<XmlAttributeAttribute>.GetCustomAttribute(uomProperty);
             var isRequired = IsRequired(uomProperty) && Context.Function != Functions.GetFromStore;
@@ -894,7 +894,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="enumValue">The enum value.</param>
         /// <returns></returns>
         /// <exception cref="WitsmlException"></exception>
-        protected object ParseEnum(Type enumType, string enumValue)
+        protected virtual object ParseEnum(Type enumType, string enumValue)
         {
             try
             {
@@ -917,7 +917,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="type">The property type.</param>
         /// <param name="element">An optional element containing type information.</param>
         /// <returns>A collection of <see cref="PropertyInfo"/> objects.</returns>
-        protected IList<PropertyInfo> GetPropertyInfo(Type type, XElement element = null)
+        protected virtual IList<PropertyInfo> GetPropertyInfo(Type type, XElement element = null)
         {
             if (type.IsAbstract && element != null)
                 type = GetConcreteType(element, type);
@@ -933,7 +933,7 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="parentPath">The parent path.</param>
         /// <param name="propertyName">The property name.</param>
         /// <returns>The full path for the property.</returns>
-        protected string GetPropertyPath(string parentPath, string propertyName)
+        protected virtual string GetPropertyPath(string parentPath, string propertyName)
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
@@ -946,7 +946,7 @@ namespace PDS.WITSMLstudio.Data
         /// <returns>
         ///   <c>true</c> if the element has any attribute with non-empty value; otherwise, <c>false</c>.
         /// </returns>
-        protected bool HasAttributesWithValues(XElement element)
+        protected virtual bool HasAttributesWithValues(XElement element)
         {
             return element.Attributes().Any(a => !a.IsNamespaceDeclaration && !string.IsNullOrWhiteSpace(a.Value));
         }
@@ -1070,7 +1070,13 @@ namespace PDS.WITSMLstudio.Data
             return attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type");
         }
 
-        private void RemoveInvalidChildElementsAndAttributes(PropertyInfo propertyInfo, Type elementType, XElement element)
+        /// <summary>
+        /// Removes invalid child elements and attributes from the specified element.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementType">The element type.</param>
+        /// <param name="element">The XML element.</param>
+        protected virtual void RemoveInvalidChildElementsAndAttributes(PropertyInfo propertyInfo, Type elementType, XElement element)
         {
             // Ignore list properties that declare child elements using XmlArrayItem
             if (XmlAttributeCache<XmlArrayItemAttribute>.GetCustomAttribute(propertyInfo) != null) return;

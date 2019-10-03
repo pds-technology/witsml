@@ -61,7 +61,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Merges the entity with the update query.
         /// </summary>
         /// <param name="entity">The entity to be merged.</param>
-        public void Merge(T entity)
+        public virtual void Merge(T entity)
         {
             Entity = entity;
             Merge(Parser.Element());
@@ -328,7 +328,15 @@ namespace PDS.WITSMLstudio.Store.Data
             return true;
         }
 
-        private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        /// <summary>
+        /// Updates array elements without uid properties.
+        /// </summary>
+        /// <param name="elements">The collection of XML elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="type">The property type.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected virtual void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.Debug($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
 
@@ -374,12 +382,20 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private void Merge(XElement element)
+        /// <summary>
+        /// Merges the specified XML element.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        protected virtual void Merge(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
         }
 
-        private void UnsetProperty(PropertyInfo propertyInfo)
+        /// <summary>
+        /// Unsets the property and its corresponding Specified property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        protected virtual void UnsetProperty(PropertyInfo propertyInfo)
         {
             if (Context.PropertyValues.Count == 1)
             {
@@ -398,7 +414,13 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private void SetSpecifiedProperty(PropertyInfo propertyInfo, object obj, bool specified)
+        /// <summary>
+        /// Sets the special Specified property value.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="obj">The object instance.</param>
+        /// <param name="specified">The Specified property value.</param>
+        protected virtual void SetSpecifiedProperty(PropertyInfo propertyInfo, object obj, bool specified)
         {
             var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
 
@@ -408,7 +430,12 @@ namespace PDS.WITSMLstudio.Store.Data
             }
         }
 
-        private bool RemoveItem(XElement element)
+        /// <summary>
+        /// Determines whether the specified element should be removed.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        /// <returns></returns>
+        protected virtual bool RemoveItem(XElement element)
         {
             if (element.HasElements)
                 return false;
@@ -417,7 +444,12 @@ namespace PDS.WITSMLstudio.Store.Data
             return attributes.Count == 1 && attributes.Any(a => a.Name.LocalName == "uid");
         }
 
-        private bool RemoveAll(List<XElement> elements)
+        /// <summary>
+        /// Determines if the specified elements should be removed.
+        /// </summary>
+        /// <param name="elements">The collection of XML elements.</param>
+        /// <returns></returns>
+        protected virtual bool RemoveAll(List<XElement> elements)
         {
             return elements.Count == 1 && elements.Any(e => !e.HasElements && !e.HasAttributes);
         }
@@ -429,7 +461,7 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>
         ///   <c>true</c> if propertyInfo is a type of Energistics.DataAccess.EnumValue.EnumValue property Name; otherwise, <c>false</c>.
         /// </returns>
-        private static bool IsTypeOfEnumValueName(PropertyInfo propertyInfo)
+        protected virtual bool IsTypeOfEnumValueName(PropertyInfo propertyInfo)
         {
             return propertyInfo.DeclaringType != null && 
                 propertyInfo.DeclaringType.IsAssignableFrom(typeof(Energistics.DataAccess.EnumValue.EnumValue)) && 
