@@ -1,3 +1,5 @@
+# Script must be executed from Visual Studio's Package Manager Console
+
 $hintPathPattern = @"
 <HintPath>(\d|\w|\s|\.|\\)*packages
 "@

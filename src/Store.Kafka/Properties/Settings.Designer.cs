@@ -34,42 +34,6 @@ namespace PDS.WITSMLstudio.Store.Kafka.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
-        public int KafkaPollingIntervalInMilliseconds {
-            get {
-                return ((int)(this["KafkaPollingIntervalInMilliseconds"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("all")]
-        public string KafkaDebugContexts {
-            get {
-                return ((string)(this["KafkaDebugContexts"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool KafkaEnableAutoCommit {
-            get {
-                return ((bool)(this["KafkaEnableAutoCommit"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool KafkaEnableAutoCreate {
-            get {
-                return ((bool)(this["KafkaEnableAutoCreate"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("PLAINTEXT")]
         public string KafkaSecurityProtocol {
             get {
@@ -101,6 +65,15 @@ namespace PDS.WITSMLstudio.Store.Kafka.Properties {
         public string KafkaSaslPassword {
             get {
                 return ((string)(this["KafkaSaslPassword"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool KafkaEnableIdempotence {
+            get {
+                return ((bool)(this["KafkaEnableIdempotence"]));
             }
         }
     }

@@ -16,29 +16,41 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.Etp.Common;
 using PDS.WITSMLstudio.Store.Kafka.Properties;
 
 namespace PDS.WITSMLstudio.Store.Configuration
 {
     /// <summary>
-    /// Enacpsulates all message broker configuration settings.
+    /// Encapsulates all message broker configuration settings.
     /// </summary>
     public static class KafkaSettings
     {
-        public static int PollingIntervalInMilliseconds = Settings.Default.KafkaPollingIntervalInMilliseconds;
-        public static bool EnableAutoCommit = Settings.Default.KafkaEnableAutoCommit;
+        /// <summary>
+        /// Initial list of brokers as a CSV list of broker host or host:port.
+        ///
+        /// Preferably at least 2 are set.
+        /// </summary>
         public static string BrokerList = Settings.Default.KafkaBrokerList;
-        public static string DebugContexts = Settings.Default.KafkaDebugContexts;
+
+        /// <summary>
+        /// When set to true, the producer will ensure that messages are successfully produced exactly once
+        /// and in the original produce order. The following configuration properties are adjusted
+        /// automatically (if not modified by the user) when idempotence is enabled:
+        /// 
+        ///     max.in.flight.requests.per.connection=5 (must be less than or equal to 5)
+        ///     retries=INT32_MAX (must be greater than 0)
+        ///     acks=all
+        ///     queuing.strategy=fifo
+        ///
+        /// Producer instantiation will fail if user-supplied configuration is incompatible.        
+        /// </summary>
+        public static bool EnableIdempotence = Settings.Default.KafkaEnableIdempotence;
+
         public static string SecurityProtocol = Settings.Default.KafkaSecurityProtocol;
         public static string SaslMechanism = Settings.Default.KafkaSaslMechanism;
         public static string SaslUsername = Settings.Default.KafkaSaslUsername;
         public static string SaslPassword = Settings.Default.KafkaSaslPassword;
 
-        public const string DebugKey = "debug";
-        public const string GroupIdKey = "group.id";
-        public const string BrokerListKey = "bootstrap.servers";
-        public const string EnableAutoCommitKey = "enable.auto.commit";
         public const string SecurityProtocolKey = "security.protocol";
         public const string SaslMechanismKey = "sasl.mechanism";
         public const string SaslUsernameKey = "sasl.username";

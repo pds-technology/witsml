@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -33,14 +33,26 @@ namespace PDS.WITSMLstudio.Store.Data
     /// <seealso cref="System.IDisposable" />
     [Export(typeof(IDataObjectMessageProducer))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class KafkaMessageProducer : MessageProducerBase
+    public class KafkaMessageProducer : MessageProducerBase, IDisposable
     {
-        #region Fields 
+        #region Fields & Properties
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(KafkaMessageProducer));
 
-        private readonly ProducerConfig _config;
+        private IProducer<string, string> _producer;
 
+        private IProducer<string, string> Producer
+        {
+            get
+            {
+                if (_producer == null)
+                {
+                    InitializeProducer();
+                }
+
+                return _producer;
+            }
+        }
         #endregion
 
         #region Constructors 
@@ -50,8 +62,37 @@ namespace PDS.WITSMLstudio.Store.Data
         /// </summary>
         [ImportingConstructor]
         public KafkaMessageProducer()
+        {            
+            _log.Debug("Instance created.");
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Sends the message asynchronously.
+        /// </summary>
+        /// <param name="topic">The topic.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="payload">The payload.</param>
+        /// <returns>An awaitable task.</returns>
+        public override async Task SendMessageAsync(string topic, string key, string payload)
         {
-            var advancedConfig = new Dictionary<string,string>
+            _log.Debug($"{Producer.Name} producing on topic: {topic}; key: {key}; message:{Environment.NewLine}{payload}");
+
+            var message = await Producer.ProduceAsync(topic,
+                new Message<string, string>
+                {
+                    Key = key, Value = payload
+                });
+
+            _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
+        }
+
+        private void InitializeProducer()
+        {
+            var advancedConfig = new Dictionary<string, string>
             {
                 { KafkaSettings.SecurityProtocolKey, KafkaSettings.SecurityProtocol }
             };
@@ -64,35 +105,58 @@ namespace PDS.WITSMLstudio.Store.Data
                 advancedConfig.Add(KafkaSettings.SaslPasswordKey, KafkaSettings.SaslPassword);
             }
 
-            _config = new ProducerConfig(advancedConfig) { BootstrapServers = KafkaSettings.BrokerList };
+            var config = new ProducerConfig(advancedConfig)
+            {
+                BootstrapServers = KafkaSettings.BrokerList,
+                EnableIdempotence = KafkaSettings.EnableIdempotence
+            };
+
+            _log.DebugFormat("Broker List: {0}, Security Protocol: {1}, SASL Mechanism: {2}",
+                KafkaSettings.BrokerList, KafkaSettings.SecurityProtocol, KafkaSettings.SaslMechanism);
+
+            _producer = new ProducerBuilder<string, string>(config)
+                .SetErrorHandler((kafkaProducer, error) =>
+                {
+                    var originator = error.IsBrokerError ? "broker" : error.IsLocalError ? "local" : "unknown";
+                    var fatal = error.IsFatal ? "fatal" : "";
+                    var err = error.IsError ? "error" : "";
+                    _log.Error($"{_producer.Name} {fatal}{err} occurred: originator {originator}, reason {error.Reason}");
+                })
+                .SetLogHandler((a, b) =>
+                {
+                    var logLevels = new[]
+                    {
+                        SyslogLevel.Emergency,
+                        SyslogLevel.Alert,
+                        SyslogLevel.Critical,
+                        SyslogLevel.Error,
+                        SyslogLevel.Warning,
+                        SyslogLevel.Notice
+                    };
+                    if (logLevels.Contains(b.Level))
+                    {
+                        _log.Warn($"{_producer.Name} [{b.Level}]{b.Facility}: {b.Name} - {b.Message}");
+                    }
+                })
+                .Build();
         }
 
         #endregion
 
-        #region Public Methods
+        #region IDisposable
 
-        /// <summary>
-        /// Sends the message asynchronously.
-        /// </summary>
-        /// <param name="topic">The topic.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="payload">The payload.</param>
-        /// <returns>An awaitable task.</returns>
-        public override async Task SendMessageAsync(string topic, string key, string payload)
+        protected virtual void Dispose(bool disposing)
         {
-            using (var producer = new ProducerBuilder<string, string>(_config).Build())
+            if (disposing)
             {
-                _log.Debug($"{producer.Name} producing on topic: {topic}; key: {key}; message:{Environment.NewLine}{payload}");
-
-                var message = await producer.ProduceAsync(topic,
-                    new Message<string, string>
-                    {
-                        Key = key, Value = payload
-                    });
-
-                _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
+                _producer?.Dispose();
             }
-        }    
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
 
         #endregion
     }
