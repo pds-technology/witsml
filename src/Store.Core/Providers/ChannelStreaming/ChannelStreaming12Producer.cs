@@ -602,10 +602,10 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                         c =>
                             (c.ChannelStreamingType != ChannelStreamingTypes.RangeRequest &&
                             c.ChannelMetadata.Status != (int) ChannelStatusKind.Active && c.ChannelMetadata.EndIndex.HasValue &&
-                            c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
+                            c.LastIndex >= c.ChannelMetadata.EndIndex.Value) ||
 
                             (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
-                            c.StartIndex >= c.EndIndex))
+                            c.LastIndex >= c.EndIndex))
                     .ToArray();
 
                 // Remove any contexts from the list that have completed returning all data
@@ -728,15 +728,26 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 // Get the channel from the context.
                 var channel = context.ChannelMetadata;
 
-                // Create a range for the current start index.
-                var start = new Range<double?>(context.StartIndex.HasValue ? Convert.ToDouble(context.StartIndex) : (double?)null, null);
+                // create range for requested range.
+                var range = new Range<double?>(Convert.ToDouble(context.StartIndex), Convert.ToDouble(context.EndIndex));
 
                 // If we have an established Start and it starts after the current primaryIndexValue then skip this value.
-                if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: !firstStart))
+                if (context.StartIndex.HasValue && range.StartsAfter(primaryIndexValue, increasing))
+                    continue;
+
+                // If we have an established End and it ends before the current primaryIndexValue then skip this value.
+                if (context.EndIndex.HasValue && range.EndsBefore(primaryIndexValue, increasing))
+                    continue;
+
+                // Create a range for the current start index.
+                var start = new Range<double?>(context.LastIndex.HasValue ? Convert.ToDouble(context.LastIndex) : (double?)null, null);
+
+                // If we have an established Start and it starts after the current primaryIndexValue then skip this value.
+                if (context.LastIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: !firstStart))
                     continue;
 
                 // Update the current StartIndex for our context with the current index value
-                context.StartIndex = indexValues[0] as long? ?? primaryIndexValue.IndexToScale(scale);
+                context.LastIndex = indexValues[0] as long? ?? primaryIndexValue.IndexToScale(scale);
 
                 // If the data does not include values for the channel we're streaming, then skip
                 if (!mnemonics.Contains(channel.ChannelName))

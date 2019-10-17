@@ -809,5 +809,50 @@ namespace PDS.WITSMLstudio.Store.Providers
                     .ToArray() ?? new Energistics.Etp.v12.Datatypes.DataAttribute[0]
             };
         }
+
+        /// <summary>
+        /// Merges a sequence of channel streaming contexts based on interval ranges.
+        /// </summary>
+        /// <param name="adapter">The ETP adapter.</param>
+        /// <param name="contexts">The channel streaming contexts.</param>
+        /// <returns>Sequence of non-overlapping contexts.</returns>
+        public static IEnumerable<ChannelStreamingContext> MergeOverlappingContexts(IEtpAdapter adapter, IEnumerable<ChannelStreamingContext> contexts)
+        {
+            var intervalList = contexts.ToList();
+
+            if (!intervalList.Any())
+                yield break;
+
+            var isIncreasing = adapter.IsIncreasing(intervalList[0].ChannelMetadata.Indexes[0] as IIndexMetadataRecord);
+
+            var orderedIntervals = isIncreasing ? intervalList.OrderBy(x => x.StartIndex) : intervalList.OrderByDescending(x => x.StartIndex);
+            var accumulator = orderedIntervals.First();
+            contexts = orderedIntervals.Skip(1);
+
+            foreach (var context in contexts)
+            {
+                var accumulatorRange = new Range<double?>(accumulator.StartIndex, accumulator.EndIndex);
+                var intervalRange = new Range<double?>(context.StartIndex, context.EndIndex);
+
+                if (accumulatorRange.Overlaps(intervalRange, isIncreasing))
+                {
+                    if (!accumulatorRange.End.HasValue || !intervalRange.End.HasValue)
+                    {
+                        accumulator.EndIndex = null;
+                    }
+                    else
+                    {
+                        accumulator.EndIndex = (long?)new List<Range<double?>>() { accumulatorRange, intervalRange }.GetMaxRangeEnd(isIncreasing);
+                    }
+                }
+                else
+                {
+                    yield return accumulator;
+                    accumulator = context;
+                }
+            }
+
+            yield return accumulator;
+        }
     }
 }
