@@ -43,7 +43,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private readonly IContainer _container;
         private readonly IEtpDataProvider<Log> _logDataProvider;
         private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
-        private readonly IList<EtpContentType> _contentTypes;
+        private IList<EtpContentType> _contentTypes;
+        private readonly object _contentTypesLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Witsml200Provider" /> class.
@@ -208,13 +209,19 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         {
             if (!_contentTypes.Any())
             {
-                var contentTypes = new List<EtpContentType>();
-                Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
+                lock (_contentTypesLock)
+                {
+                    if (!_contentTypes.Any())
+                    {
+                        var contentTypes = new List<EtpContentType>();
+                        Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
 
-                contentTypes
-                    .Where(x => x.IsRelatedTo(EtpContentTypes.Eml210) || x.IsRelatedTo(EtpContentTypes.Witsml200))
-                    .OrderBy(x => x.ObjectType)
-                    .ForEach(_contentTypes.Add);
+                        _contentTypes = contentTypes
+                            .Where(x => x.IsRelatedTo(EtpContentTypes.Eml210) || x.IsRelatedTo(EtpContentTypes.Witsml200))
+                            .OrderBy(x => x.ObjectType)
+                            .ToList();
+                    }
+                }
             }
 
             return _contentTypes
