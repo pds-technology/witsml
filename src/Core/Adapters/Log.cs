@@ -201,14 +201,34 @@ namespace PDS.WITSMLstudio.Adapters
         public string DataDelimiter => string.IsNullOrEmpty(_log141?.DataDelimiter) ? "," : _log141.DataDelimiter;
 
         /// <summary>
-        /// Gets the log's start datetime index.
+        /// Gets or sets the log's start datetime index.
         /// </summary>
-        public Timestamp? StartDateTimeIndex => _log131?.StartDateTimeIndex ?? _log141?.StartDateTimeIndex;
+        public Timestamp? StartDateTimeIndex
+        {
+            get { return _log131?.StartDateTimeIndex ?? _log141?.StartDateTimeIndex; }
+            set
+            {
+                if (_log131 != null)
+                    _log131.StartDateTimeIndex = value;
+                else if (_log141 != null)
+                    _log141.StartDateTimeIndex = value;
+            }
+        }
 
         /// <summary>
-        /// Gets the log's end datetime index.
+        /// Gets or sets the log's end datetime index.
         /// </summary>
-        public Timestamp? EndDateTimeIndex => _log131?.EndDateTimeIndex ?? _log141?.EndDateTimeIndex;
+        public Timestamp? EndDateTimeIndex
+        {
+            get { return _log131?.EndDateTimeIndex ?? _log141?.EndDateTimeIndex; }
+            set
+            {
+                if (_log131 != null)
+                    _log131.EndDateTimeIndex = value;
+                else if (_log141 != null)
+                    _log141.EndDateTimeIndex = value;
+            }
+        }
 
         /// <summary>
         /// Gets the log's start index.
@@ -279,6 +299,80 @@ namespace PDS.WITSMLstudio.Adapters
                        || Energistics.DataAccess.WITSML141.ReferenceData.LogDataType.datetime.ToString().Equals(datatype); // XXX This is incorrect but works around an issue in LogCurveItem creation
             }
             return false;
+        }
+
+        /// <summary>
+        /// Sets the log's start index.
+        /// </summary>
+        /// <param name="value">The measure value.</param>
+        /// <param name="uom">The unit of measure.</param>
+        public void SetStartIndex(double? value, string uom)
+        {
+            if (_log131 != null)
+            {
+                if (value == null)
+                {
+                    _log131.StartIndex = null;
+                    return;
+                }
+
+                if (_log131.StartIndex == null)
+                    _log131.StartIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure();
+
+                _log131.StartIndex.Value = value.Value;
+                _log131.StartIndex.Uom = uom;
+            }
+            else if (_log141 != null)
+            {
+                if (value == null)
+                {
+                    _log141.StartIndex = null;
+                    return;
+                }
+
+                if (_log141.StartIndex == null)
+                    _log141.StartIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure();
+
+                _log141.StartIndex.Value = value.Value;
+                _log141.StartIndex.Uom = uom;
+            }
+        }
+
+        /// <summary>
+        /// Sets the log's end index.
+        /// </summary>
+        /// <param name="value">The measure value.</param>
+        /// <param name="uom">The unit of measure.</param>
+        public void SetEndIndex(double? value, string uom)
+        {
+            if (_log131 != null)
+            {
+                if (value == null)
+                {
+                    _log131.EndIndex = null;
+                    return;
+                }
+
+                if (_log131.EndIndex == null)
+                    _log131.EndIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure();
+
+                _log131.EndIndex.Value = value.Value;
+                _log131.EndIndex.Uom = uom;
+            }
+            else if (_log141 != null)
+            {
+                if (value == null)
+                {
+                    _log141.EndIndex = null;
+                    return;
+                }
+
+                if (_log141.EndIndex == null)
+                    _log141.EndIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure();
+
+                _log141.EndIndex.Value = value.Value;
+                _log141.EndIndex.Uom = uom;
+            }
         }
 
         /// <summary>
