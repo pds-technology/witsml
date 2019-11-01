@@ -64,6 +64,8 @@
     <Compile Include="Data\MessageTransaction.cs" />
     <Compile Include="Data\Logs\Log141MessageDataAdapter.cs" />
     <Compile Include="Data\MessageDataAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141MessageDataAdapter.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200MessageDataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore200MessageDataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore141MessageDataAdapter.cs" />
     <Compile Include="Data\Wells\Well200MessageDataAdapter.cs" />

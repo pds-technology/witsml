@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)\packages\librdkafka.redist.1.2.0\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.0\build\librdkafka.redist.props')" />
+  <Import Project="$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props" Condition="Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -36,8 +36,8 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Confluent.Kafka, Version=1.2.0.0, Culture=neutral, PublicKeyToken=12c514ca49093d1e, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Confluent.Kafka.1.2.0\lib\net45\Confluent.Kafka.dll</HintPath>
+    <Reference Include="Confluent.Kafka, Version=1.2.1.0, Culture=neutral, PublicKeyToken=12c514ca49093d1e, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Confluent.Kafka.1.2.1\lib\net45\Confluent.Kafka.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
@@ -103,7 +103,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.0\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\src\packages\librdkafka.redist.1.2.0\build\librdkafka.redist.props'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props'))" />    
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
