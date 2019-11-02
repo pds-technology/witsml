@@ -6,7 +6,7 @@
 
 using System.ComponentModel;
 
-namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Data
 {
     /// <summary>
     /// Enumeration values for different modes of variable transfer.

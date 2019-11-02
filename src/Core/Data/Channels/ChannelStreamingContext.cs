@@ -21,7 +21,7 @@ using System.Threading;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.ChannelData;
 
-namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Data.Channels
 {
     /// <summary>
     /// Defines properties used to configure channel streaming.
@@ -84,19 +84,19 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         public IMessageHeader RangeRequestHeader { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether change notification 
-        /// should be received by the requestor.
+        /// Gets or sets a value indicating whether change notification should be received by the requestor.
         /// </summary>
-        /// <value>
-        /// <c>true</c> if change notification should be received by the requestor; 
-        /// otherwise, <c>false</c>.
-        /// </value>
         public bool ReceiveChangeNotification { get; set; }
 
         /// <summary>
         /// Gets or sets the query context.
         /// </summary>
         public string QueryContext { get; set; }
+
+        /// <summary>
+        /// Gets or sets the data context.
+        /// </summary>
+        public object DataContext { get; set; }
         
         /// <summary>
         /// Gets or sets the cancellation token source.
@@ -104,7 +104,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         public CancellationTokenSource TokenSource { get; set; }
 
         /// <summary>
-        /// Gets or sets the custom data.
+        /// Gets or sets the custom data dictionary.
         /// </summary>
         public Dictionary<string, object> CustomData { get; set; } = new Dictionary<string, object>();
     }

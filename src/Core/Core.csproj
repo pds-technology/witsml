@@ -132,6 +132,8 @@
     <Compile Include="Connections\ConnectionTypes.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistory.cs" />
     <Compile Include="Data\ChangeLogs\DbAuditHistoryList.cs" />
+    <Compile Include="Data\Channels\ChannelStreamingContext.cs" />
+    <Compile Include="Data\Channels\ChannelStreamingTypes.cs" />
     <Compile Include="Data\DataObjectNavigationContext.cs" />
     <Compile Include="Data\DataObjectNavigator.cs" />
     <Compile Include="Data\Channels\ChannelDataBlock.cs" />
@@ -142,6 +144,7 @@
     <Compile Include="Data\Channels\IQueryContext.cs" />
     <Compile Include="Data\DataGenerator.cs" />
     <Compile Include="Data\DataObjectTemplate.cs" />
+    <Compile Include="Data\IndexedDataItem.cs" />
     <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
@@ -151,6 +154,7 @@
     <Compile Include="Data\Trajectories\Trajectory141Generator.cs" />
     <Compile Include="Data\Trajectories\TrajectoryDataExtensions.cs" />
     <Compile Include="Data\Trajectories\TrajectoryDataReader.cs" />
+    <Compile Include="Data\TransferModes.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />

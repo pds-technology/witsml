@@ -16,40 +16,37 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.Etp.Common.Datatypes.ChannelData;
-
-namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
+namespace PDS.WITSMLstudio.Data.Channels
 {
     /// <summary>
-    /// Container class to hold an Index and Channel value DataItem
+    /// An enumeration of Channel Streaming Types
     /// </summary>
-    public struct IndexedDataItem
+    public enum ChannelStreamingTypes
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IndexedDataItem"/> struct.
+        /// Channel streaming start - latest value
         /// </summary>
-        /// <param name="indexDataItem">The index data item.</param>
-        /// <param name="valueDataItem">The value data item.</param>
-        public IndexedDataItem(IDataItem indexDataItem, IDataItem valueDataItem)
-        {
-            IndexDataItem = indexDataItem;
-            ValueDataItem = valueDataItem;
-        }
+        LatestValue,
 
         /// <summary>
-        /// Gets the index data item.
+        /// Channel streaming start - index count values before 
+        /// and including the latest value.
         /// </summary>
-        /// <value>
-        /// The index data item.
-        /// </value>
-        public IDataItem IndexDataItem { get; }
+        IndexCount,
 
         /// <summary>
-        /// Gets the channel value data item.
+        /// Channel streaming start - Stream from index value
         /// </summary>
-        /// <value>
-        /// The value data item.
-        /// </value>
-        public IDataItem ValueDataItem { get; }
+        IndexValue,
+
+        /// <summary>
+        /// Channel range request
+        /// </summary>
+        RangeRequest,
+
+        /// <summary>
+        /// Channel Streaming directly to Real-Time for ChannelDataLoad processing
+        /// </summary>
+        ChannelDataLoad
     }
 }
