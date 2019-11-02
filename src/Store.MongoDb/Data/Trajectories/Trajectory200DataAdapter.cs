@@ -31,6 +31,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using PDS.WITSMLstudio.Compatibility;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;

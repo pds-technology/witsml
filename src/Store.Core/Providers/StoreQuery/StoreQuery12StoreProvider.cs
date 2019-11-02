@@ -21,6 +21,7 @@ using System.Linq;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.v12.Protocol.StoreQuery;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Providers.Store;

@@ -28,6 +28,7 @@ using Energistics.Etp.Common.Datatypes.ChannelData;
 using Energistics.Etp.v11.Datatypes;
 using Energistics.Etp.v11.Datatypes.ChannelData;
 using Energistics.Etp.v11.Protocol.ChannelStreaming;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -432,7 +433,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
                 .GroupBy(x => x.ChannelId);
 
             var streamingContextList = streamingContextGroups
-                .SelectMany(x => EtpExtensions.MergeOverlappingContexts(Session.Adapter, x))
+                .SelectMany(x => Session.Adapter.MergeOverlappingContexts(x))
                 .ToList();
 
             // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex

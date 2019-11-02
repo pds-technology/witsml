@@ -27,6 +27,7 @@ using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.ChannelData;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Data.Channels;
 using PDS.WITSMLstudio.Data.Logs;

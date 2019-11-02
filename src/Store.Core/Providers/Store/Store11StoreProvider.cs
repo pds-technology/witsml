@@ -24,6 +24,7 @@ using Energistics.Etp.Common.Datatypes;
 using Energistics.Etp.Common.Datatypes.Object;
 using Energistics.Etp.v11.Datatypes.Object;
 using Energistics.Etp.v11.Protocol.Store;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 using PDS.WITSMLstudio.Store.Data;

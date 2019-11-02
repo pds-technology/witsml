@@ -144,6 +144,7 @@
     <Compile Include="Data\Channels\IQueryContext.cs" />
     <Compile Include="Data\DataGenerator.cs" />
     <Compile Include="Data\DataObjectTemplate.cs" />
+    <Compile Include="Data\EtpExtensions.cs" />
     <Compile Include="Data\IndexedDataItem.cs" />
     <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
