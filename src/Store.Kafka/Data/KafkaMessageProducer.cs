@@ -17,12 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using PDS.WITSMLstudio.Store.Configuration;
 
 namespace PDS.WITSMLstudio.Store.Data
 {
@@ -39,30 +36,28 @@ namespace PDS.WITSMLstudio.Store.Data
 
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(KafkaMessageProducer));
 
-        private IProducer<string, string> _producer;
+        private IKafkaProducerProvider ProducerProvider { get; }
 
-        private IProducer<string, string> Producer
-        {
-            get
-            {
-                if (_producer == null)
-                {
-                    InitializeProducer();
-                }
+        private IProducer<string, string> Producer => ProducerProvider.Producer;
 
-                return _producer;
-            }
-        }
         #endregion
 
-        #region Constructors 
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KafkaMessageProducer"/> class.
+        /// </summary>
+        public KafkaMessageProducer() : this(new KafkaProducerProvider())
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KafkaMessageProducer"/> class.
         /// </summary>
         [ImportingConstructor]
-        public KafkaMessageProducer()
-        {            
+        public KafkaMessageProducer(IKafkaProducerProvider producerProvider)
+        {
+            ProducerProvider = producerProvider;
             _log.Debug("Instance created.");
         }
 
@@ -90,57 +85,6 @@ namespace PDS.WITSMLstudio.Store.Data
             _log.Debug($"Partition: {message.Partition}; Offset: {message.Offset}");
         }
 
-        private void InitializeProducer()
-        {
-            var advancedConfig = new Dictionary<string, string>
-            {
-                { KafkaSettings.SecurityProtocolKey, KafkaSettings.SecurityProtocol }
-            };
-
-            // pass username and password only if the mechanism is defined
-            if (!string.IsNullOrWhiteSpace(KafkaSettings.SaslMechanism))
-            {
-                advancedConfig.Add(KafkaSettings.SaslMechanismKey, KafkaSettings.SaslMechanism);
-                advancedConfig.Add(KafkaSettings.SaslUsernameKey, KafkaSettings.SaslUsername);
-                advancedConfig.Add(KafkaSettings.SaslPasswordKey, KafkaSettings.SaslPassword);
-            }
-
-            var config = new ProducerConfig(advancedConfig)
-            {
-                BootstrapServers = KafkaSettings.BrokerList,
-                EnableIdempotence = KafkaSettings.EnableIdempotence
-            };
-
-            _log.DebugFormat("Broker List: {0}, Security Protocol: {1}, SASL Mechanism: {2}",
-                KafkaSettings.BrokerList, KafkaSettings.SecurityProtocol, KafkaSettings.SaslMechanism);
-
-            _producer = new ProducerBuilder<string, string>(config)
-                .SetErrorHandler((kafkaProducer, error) =>
-                {
-                    var originator = error.IsBrokerError ? "broker" : error.IsLocalError ? "local" : "unknown";
-                    var fatal = error.IsFatal ? "fatal" : "";
-                    var err = error.IsError ? "error" : "";
-                    _log.Error($"{_producer.Name} {fatal}{err} occurred: originator {originator}, reason {error.Reason}");
-                })
-                .SetLogHandler((a, b) =>
-                {
-                    var logLevels = new[]
-                    {
-                        SyslogLevel.Emergency,
-                        SyslogLevel.Alert,
-                        SyslogLevel.Critical,
-                        SyslogLevel.Error,
-                        SyslogLevel.Warning,
-                        SyslogLevel.Notice
-                    };
-                    if (logLevels.Contains(b.Level))
-                    {
-                        _log.Warn($"{_producer.Name} [{b.Level}]{b.Facility}: {b.Name} - {b.Message}");
-                    }
-                })
-                .Build();
-        }
-
         #endregion
 
         #region IDisposable
@@ -149,7 +93,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             if (disposing)
             {
-                _producer?.Dispose();
+                Producer?.Dispose();
             }
         }
 

@@ -65,7 +65,12 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Configuration\KafkaSettings.cs" />
+    <Compile Include="Data\IKafkaConsumerProvider.cs" />
+    <Compile Include="Data\IKafkaProducerProvider.cs" />
     <Compile Include="Data\KafkaMessageProducer.cs" />
+    <Compile Include="Data\KafkaConsumerProvider.cs" />
+    <Compile Include="Data\KafkaProducerProvider.cs" />
+    <Compile Include="Data\KafkaUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -103,7 +108,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props'))" />    
+    <Error Condition="!Exists('$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\librdkafka.redist.1.2.1\build\librdkafka.redist.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
