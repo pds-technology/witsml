@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Confluent.Kafka;
 using PDS.WITSMLstudio.Store.Configuration;
@@ -50,7 +51,10 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var clientConfig = CreateClientConfig();
 
-            return new ConsumerConfig(clientConfig);
+            return new ConsumerConfig(clientConfig)
+            {
+                GroupId = KafkaSettings.ConsumerGroupIdPrefix + DateTime.UtcNow.ToOADate()
+            };
         }
 
         public static ClientConfig CreateClientConfig()

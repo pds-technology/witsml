@@ -46,6 +46,8 @@ namespace PDS.WITSMLstudio.Store.Configuration
         /// </summary>
         public static bool EnableIdempotence = Settings.Default.KafkaEnableIdempotence;
 
+        public static string ConsumerGroupIdPrefix = Settings.Default.KafkaConsumerGroupIdPrefix;
+
         public static string SecurityProtocol = Settings.Default.KafkaSecurityProtocol;
         public static string SaslMechanism = Settings.Default.KafkaSaslMechanism;
         public static string SaslUsername = Settings.Default.KafkaSaslUsername;

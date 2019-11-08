@@ -40,12 +40,10 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var config = KafkaUtil.CreateProducerConfig();
 
-            var producer = new ProducerBuilder<string, string>(config)
+            return new ProducerBuilder<string, string>(config)
                 .SetErrorHandler(KafkaUtil.OnClientError)
                 .SetLogHandler(KafkaUtil.OnClientWarning)
                 .Build();
-
-            return producer;
         }
     }
 }
