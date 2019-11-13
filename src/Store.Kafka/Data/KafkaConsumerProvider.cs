@@ -34,12 +34,22 @@ namespace PDS.WITSMLstudio.Store.Data
             _consumer = new Lazy<IConsumer<string, string>>(BuildConsumer);
         }
 
+        public KafkaConsumerProvider(ConsumerConfig config)
+        {
+            _consumer = new Lazy<IConsumer<string, string>>(() => BuildConsumer(config));
+        }
+
         public IConsumer<string, string> Consumer => _consumer.Value;
 
         protected virtual IConsumer<string, string> BuildConsumer()
         {
             var config = KafkaUtil.CreateConsumerConfig();
 
+            return BuildConsumer(config);
+        }
+
+        protected virtual IConsumer<string, string> BuildConsumer(ConsumerConfig config)
+        {
             return new ConsumerBuilder<string, string>(config)
                 .SetErrorHandler(KafkaUtil.OnClientError)
                 .SetLogHandler(KafkaUtil.OnClientWarning)

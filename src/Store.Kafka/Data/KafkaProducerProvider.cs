@@ -34,12 +34,21 @@ namespace PDS.WITSMLstudio.Store.Data
             _producer = new Lazy<IProducer<string, string>>(BuildProducer);
         }
 
+        public KafkaProducerProvider(ProducerConfig config)
+        {
+            _producer = new Lazy<IProducer<string, string>>(() => BuildProducer(config));
+        }
+
         public IProducer<string, string> Producer => _producer.Value;
 
         protected virtual IProducer<string, string> BuildProducer()
         {
             var config = KafkaUtil.CreateProducerConfig();
+            return BuildProducer(config);
+        }
 
+        protected virtual IProducer<string, string> BuildProducer(ProducerConfig config)
+        {
             return new ProducerBuilder<string, string>(config)
                 .SetErrorHandler(KafkaUtil.OnClientError)
                 .SetLogHandler(KafkaUtil.OnClientWarning)
