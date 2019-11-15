@@ -54,7 +54,6 @@
     </Compile>
     <Compile Include="Data\ChannelSets\ChannelSet200MessageDataAdapter.cs" />
     <Compile Include="Data\Channels\Channel200MessageDataAdapter.cs" />
-    <Compile Include="Data\DataObjectMessage.cs" />
     <Compile Include="Data\DataObjectMessageHandler.cs" />
     <Compile Include="Data\IDataObjectMessageHandler.cs" />
     <Compile Include="Data\IDataObjectMessageProducer.cs" />

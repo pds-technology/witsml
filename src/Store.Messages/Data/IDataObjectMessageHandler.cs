@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Energistics.Etp.Common.Datatypes;
+using PDS.WITSMLstudio.Data;
 
 namespace PDS.WITSMLstudio.Store.Data
 {

@@ -22,6 +22,7 @@ using System.Web;
 using Energistics.Etp.Common.Datatypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using PDS.WITSMLstudio.Data;
 using PDS.WITSMLstudio.Framework;
 
 namespace PDS.WITSMLstudio.Store.Data

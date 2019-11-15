@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PDS.WITSMLstudio.Store.Data
+namespace PDS.WITSMLstudio.Data
 {
     /// <summary>
     /// Encapsulates common data object message properties.
