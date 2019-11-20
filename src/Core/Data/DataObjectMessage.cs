@@ -36,6 +36,7 @@ namespace PDS.WITSMLstudio.Data
             Uuid = Guid.NewGuid();
             Uri = uri;
             ObjectMetadata = dataObject;
+            ObjectMetadataType = dataObject?.GetType().AssemblyQualifiedName;
             ExecutionDateTime = DateTime.UtcNow;
             //CustomData = new Dictionary<string, object>();
         }
@@ -94,6 +95,11 @@ namespace PDS.WITSMLstudio.Data
         /// Gets or sets the execution date time.
         /// </summary>
         public DateTime? ExecutionDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the object metadata.
+        /// </summary>
+        public string ObjectMetadataType { get; set; }
 
         /// <summary>
         /// Gets or sets the data object instance.
