@@ -1113,7 +1113,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </returns>
         public int GetOrdinal(string name)
         {
-            return Array.IndexOf(GetAllMnemonics(), name);
+            return Array.FindIndex(GetAllMnemonics(), m => m.EqualsIgnoreCase(name));
         }
 
         /// <summary>
