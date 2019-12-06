@@ -41,9 +41,16 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var clientConfig = CreateClientConfig();
 
+            if (!Enum.TryParse(KafkaSettings.CompressionType ?? "None", out CompressionType compressionType))
+            {
+                compressionType = CompressionType.None;
+            }
+
             return new ProducerConfig(clientConfig)
             {
-                EnableIdempotence = KafkaSettings.EnableIdempotence
+                EnableIdempotence = KafkaSettings.EnableIdempotence,
+                CompressionType = compressionType,
+                MessageMaxBytes = KafkaSettings.MessageMaxBytes,
             };
         }
 

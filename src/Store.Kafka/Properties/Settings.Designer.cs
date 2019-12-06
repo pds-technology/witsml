@@ -85,5 +85,23 @@ namespace PDS.WITSMLstudio.Store.Kafka.Properties {
                 return ((string)(this["KafkaConsumerGroupIdPrefix"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string KafkaCompressionType {
+            get {
+                return ((string)(this["KafkaCompressionType"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000000")]
+        public int KafkaMessageMaxBytes {
+            get {
+                return ((int)(this["KafkaMessageMaxBytes"]));
+            }
+        }
     }
 }
