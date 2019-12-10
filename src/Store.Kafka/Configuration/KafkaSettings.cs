@@ -52,6 +52,8 @@ namespace PDS.WITSMLstudio.Store.Configuration
         public static string SaslMechanism = Settings.Default.KafkaSaslMechanism;
         public static string SaslUsername = Settings.Default.KafkaSaslUsername;
         public static string SaslPassword = Settings.Default.KafkaSaslPassword;
+        public static string CompressionType = Settings.Default.KafkaCompressionType;
+        public static int MessageMaxBytes = Settings.Default.KafkaMessageMaxBytes;
 
         public const string SecurityProtocolKey = "security.protocol";
         public const string SaslMechanismKey = "sasl.mechanism";
