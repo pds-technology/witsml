@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Security
         public void MongoDbMembershipProvider_CreateUser_creates_default_user_successfully()
         {
             MembershipCreateStatus status;
-            var info = Tuple.Create("witsml.user", "", "bobby.diaz@pds.nl");
+            var info = Tuple.Create("witsml.user", "", "witsmlstudio@pds.group");
 
             var user = Provider.CreateUser(
                 username: info.Item1,
