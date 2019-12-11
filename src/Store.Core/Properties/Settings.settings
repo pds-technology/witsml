@@ -9,10 +9,10 @@
       <Value Profile="(Default)">PDS Americas</Value>
     </Setting>
     <Setting Name="DefaultContactName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Bobby Diaz</Value>
+      <Value Profile="(Default)">WITSMLstudio Team</Value>
     </Setting>
     <Setting Name="DefaultContactEmail" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">bobby.diaz@pds.nl</Value>
+      <Value Profile="(Default)">witsmlstudio@pds.group</Value>
     </Setting>
     <Setting Name="DefaultContactPhone" Type="System.String" Scope="Application">
       <Value Profile="(Default)">+1 (832) 917-1705</Value>
