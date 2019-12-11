@@ -78,7 +78,7 @@ namespace PDS.WITSMLstudio.Store.Security
             MembershipCreateStatus status;
             var password = Membership.GeneratePassword(8, 2);
 
-            var info = Tuple.Create("pds.user", password, "bobby.diaz@pds.nl");
+            var info = Tuple.Create("pds.user", password, "witsmlstudio@pds.group");
 
             var saved = Provider.GetUser(info.Item1, false);
 
@@ -112,7 +112,7 @@ namespace PDS.WITSMLstudio.Store.Security
         [TestMethod]
         public void MongoDbMembershipProvider_can_validate_user()
         {
-            var info = Tuple.Create("witsml.user", "", "bobby.diaz@pds.nl");
+            var info = Tuple.Create("witsml.user", "", "witsmlstudio@pds.group");
 
             var result = Provider.ValidateUser(info.Item1, info.Item2);
             Assert.IsTrue(result);
