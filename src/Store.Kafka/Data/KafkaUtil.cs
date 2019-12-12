@@ -41,7 +41,8 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             var clientConfig = CreateClientConfig();
 
-            if (!Enum.TryParse(KafkaSettings.CompressionType ?? "None", out CompressionType compressionType))
+            CompressionType compressionType;
+            if (!Enum.TryParse(KafkaSettings.CompressionType ?? "None", out compressionType))
             {
                 compressionType = CompressionType.None;
             }
