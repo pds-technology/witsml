@@ -127,6 +127,8 @@ namespace PDS.WITSMLstudio.Connections
 
             var client = EtpFactory.CreateClient(connection.WebSocketType, connection.Uri, applicationName, applicationVersion, connection.SubProtocol, headers);
 
+            client.SetSecurityOptions(connection.SecurityProtocol, connection.AcceptInvalidCertificates);
+
             if (!string.IsNullOrWhiteSpace(connection.ProxyHost))
             {
                 client.SetProxy(connection.ProxyHost, connection.ProxyPort,
