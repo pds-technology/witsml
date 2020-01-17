@@ -83,17 +83,6 @@ namespace PDS.WITSMLstudio.Framework
         }
 
         /// <summary>
-        /// Removes any sub-second resolution from the <see cref="DateTimeOffset"/>.
-        /// </summary>
-        /// <param name="dateTimeOffset">The date time offset to truncate.</param>
-        /// <returns>The date time offset truncated to second resolution.</returns>
-        public static DateTimeOffset TruncateToSeconds(this DateTimeOffset dateTimeOffset)
-        {
-            return new DateTimeOffset(dateTimeOffset.Year, dateTimeOffset.Month, dateTimeOffset.Day,
-                dateTimeOffset.Hour, dateTimeOffset.Minute, dateTimeOffset.Second, dateTimeOffset.Offset);
-        }
-
-        /// <summary>
         /// Applies a time zone offset to the current <see cref="DateTimeOffset"/> instance.
         /// </summary>
         /// <param name="value">The date time value.</param>
@@ -172,6 +161,86 @@ namespace PDS.WITSMLstudio.Framework
 
             // Return a display representation of the Timestamp that does not include the timezone
             return dateTimeOffset.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> instance based on this one where the value is truncated to the hour.
+        /// </summary>
+        /// <param name="dateTime">The <see cref="DateTime"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTime"/> instance with the value truncated to the hour.</returns>
+        public static DateTime TruncateToHours(this DateTime dateTime)
+        {
+            return dateTime.AddTicks(-dateTime.Ticks % TimeSpan.TicksPerHour);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> instance based on this one where the value is truncated to the minute.
+        /// </summary>
+        /// <param name="dateTime">The <see cref="DateTime"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTime"/> instance with the value truncated to the minute.</returns>
+        public static DateTime TruncateToMinutes(this DateTime dateTime)
+        {
+            return dateTime.AddTicks(-dateTime.Ticks % TimeSpan.TicksPerMinute);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> instance based on this one where the value is truncated to the second.
+        /// </summary>
+        /// <param name="dateTime">The <see cref="DateTime"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTime"/> instance with the value truncated to the second.</returns>
+        public static DateTime TruncateToSeconds(this DateTime dateTime)
+        {
+            return dateTime.AddTicks(-dateTime.Ticks % TimeSpan.TicksPerSecond);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTime"/> instance based on this one where the value is truncated to the millisecond.
+        /// </summary>
+        /// <param name="dateTime">The <see cref="DateTime"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTime"/> instance with the value truncated to the millisecond.</returns>
+        public static DateTime TruncateToMilliseconds(this DateTime dateTime)
+        {
+            return dateTime.AddTicks(-dateTime.Ticks % TimeSpan.TicksPerMillisecond);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTimeOffset"/> instance based on this one where the value is truncated to the hour.
+        /// </summary>
+        /// <param name="DateTimeOffset">The <see cref="DateTimeOffset"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> instance with the value truncated to the hour.</returns>
+        public static DateTimeOffset TruncateToHours(this DateTimeOffset DateTimeOffset)
+        {
+            return DateTimeOffset.AddTicks(-DateTimeOffset.Ticks % TimeSpan.TicksPerHour);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTimeOffset"/> instance based on this one where the value is truncated to the minute.
+        /// </summary>
+        /// <param name="DateTimeOffset">The <see cref="DateTimeOffset"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> instance with the value truncated to the minute.</returns>
+        public static DateTimeOffset TruncateToMinutes(this DateTimeOffset DateTimeOffset)
+        {
+            return DateTimeOffset.AddTicks(-DateTimeOffset.Ticks % TimeSpan.TicksPerMinute);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTimeOffset"/> instance based on this one where the value is truncated to the second.
+        /// </summary>
+        /// <param name="DateTimeOffset">The <see cref="DateTimeOffset"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> instance with the value truncated to the second.</returns>
+        public static DateTimeOffset TruncateToSeconds(this DateTimeOffset DateTimeOffset)
+        {
+            return DateTimeOffset.AddTicks(-DateTimeOffset.Ticks % TimeSpan.TicksPerSecond);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="DateTimeOffset"/> instance based on this one where the value is truncated to the millisecond.
+        /// </summary>
+        /// <param name="DateTimeOffset">The <see cref="DateTimeOffset"/> instance's to return a truncated version of.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> instance with the value truncated to the millisecond.</returns>
+        public static DateTimeOffset TruncateToMilliseconds(this DateTimeOffset DateTimeOffset)
+        {
+            return DateTimeOffset.AddTicks(-DateTimeOffset.Ticks % TimeSpan.TicksPerMillisecond);
         }
     }
 }

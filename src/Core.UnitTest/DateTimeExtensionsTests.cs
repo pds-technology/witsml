@@ -134,5 +134,242 @@ namespace PDS.WITSMLstudio
 
             Assert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToMilliseconds_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var kind = DateTimeKind.Utc;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Millisecond, test.Kind);
+
+            var actual = test.TruncateToMilliseconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToMilliseconds_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var kind = DateTimeKind.Local;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Millisecond, test.Kind);
+
+            var actual = test.TruncateToMilliseconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToSeconds_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var kind = DateTimeKind.Utc;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Kind);
+
+            var actual = test.TruncateToSeconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToSeconds_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var kind = DateTimeKind.Local;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Kind);
+
+            var actual = test.TruncateToSeconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToMinutes_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var kind = DateTimeKind.Utc;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, 0, test.Kind);
+
+            var actual = test.TruncateToMinutes();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToMinutes_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var kind = DateTimeKind.Local;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, test.Minute, 0, test.Kind);
+
+            var actual = test.TruncateToMinutes();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToHours_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var kind = DateTimeKind.Utc;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, 0, 0, test.Kind);
+
+            var actual = test.TruncateToHours();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_TruncateToHours_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var kind = DateTimeKind.Local;
+            var test = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var expected = new DateTime(test.Year, test.Month, test.Day, test.Hour, 0, 0, test.Kind);
+
+            var actual = test.TruncateToHours();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Kind, actual.Kind);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToMilliseconds_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var offset = TimeSpan.Zero;
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Millisecond, test.Offset);
+
+            var actual = test.TruncateToMilliseconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToMilliseconds_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Millisecond, test.Offset);
+
+            var actual = test.TruncateToMilliseconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToSeconds_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var offset = TimeSpan.Zero;
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Offset);
+
+            var actual = test.TruncateToSeconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToSeconds_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, test.Second, test.Offset);
+
+            var actual = test.TruncateToSeconds();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToMinutes_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var offset = TimeSpan.Zero;
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, 0, test.Offset);
+
+            var actual = test.TruncateToMinutes();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToMinutes_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, test.Minute, 0, test.Offset);
+
+            var actual = test.TruncateToMinutes();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToHours_Removes_Unwanted_Resolution_In_UTC()
+        {
+            var offset = TimeSpan.Zero;
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, 0, 0, test.Offset);
+
+            var actual = test.TruncateToHours();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTimeOffset_TruncateToHours_Removes_Unwanted_Resolution_In_LocalTime()
+        {
+            var offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+            var test = new DateTimeOffset(new DateTimeOffset(2020, 01, 01, 12, 31, 19, 320, offset).Ticks + TimeSpan.TicksPerMillisecond / 4, offset);
+            var expected = new DateTimeOffset(test.Year, test.Month, test.Day, test.Hour, 0, 0, test.Offset);
+
+            var actual = test.TruncateToHours();
+
+            Assert.AreNotEqual(test, actual);
+            Assert.AreEqual(expected.Offset, actual.Offset);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void DateTimeExtensions_DateTime_AddSecondsFullPrecision_Preserves_Original_Precision_In_Utc()
+        {
+            var kind = DateTimeKind.Utc;
+            var original = new DateTime(new DateTime(2020, 01, 01, 12, 31, 19, 320, kind).Ticks + TimeSpan.TicksPerMillisecond / 4, kind);
+            var modified = original.AddSeconds(1.0);
+
+            var expected = TimeSpan.FromSeconds(1.0);
+            var actual = modified - original;
+
+            Assert.AreEqual(expected, actual);
+        }
     }
 }
