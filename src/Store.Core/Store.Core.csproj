@@ -824,6 +824,7 @@
     <Compile Include="Data\Security\IUserAuthorizationProvider.cs" />
     <Compile Include="Data\Security\UserAuthorizationProvider.cs" />
     <Compile Include="Transactions\IWitsmlTransaction.cs" />
+    <Compile Include="Transactions\TransactionWrapper.cs" />
     <Compile Include="Transactions\WitsmlTransaction.cs" />
     <Compile Include="WitsmlOperationContext.cs" />
     <Compile Include="WitsmlResult.cs" />

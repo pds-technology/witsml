@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess;
@@ -66,6 +67,12 @@ namespace PDS.WITSMLstudio.Store.Data
         public Type DataObjectType => typeof(T);
 
         /// <summary>
+        /// Gets or sets the transaction factory.
+        /// </summary>
+        [Import]
+        public ExportFactory<IWitsmlTransaction> TransactionFactory { get; set; }
+        
+        /// <summary>
         /// Gets the server sort order.
         /// </summary>
         public virtual string ServerSortOrder => ObjectTypes.NameProperty;
@@ -74,7 +81,11 @@ namespace PDS.WITSMLstudio.Store.Data
         /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
         /// </summary>
         /// <returns>A new <see cref="IWitsmlTransaction" /> instance.</returns>
-        public virtual IWitsmlTransaction GetTransaction() => Container.Resolve<IWitsmlTransaction>();
+        public virtual IWitsmlTransaction GetTransaction()
+        {
+            var export = TransactionFactory.CreateExport();
+            return new TransactionWrapper(export);
+        }
 
         /// <summary>
         /// Gets a value indicating whether validation is enabled for this data adapter.
@@ -119,7 +130,7 @@ namespace PDS.WITSMLstudio.Store.Data
         }
 
         /// <summary>
-        /// Replacs a data object in the data store.
+        /// Replaces a data object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be replaced.</param>
