@@ -327,7 +327,7 @@ namespace PDS.WITSMLstudio.Store.Data.MudLogs
             var ignored = new List<string> { "startMd", "endMd" };
 
             if (parser.IncludeGeologyIntervals())
-                ignored.Add("GeologyInterval");
+                ignored.Add("geologyInterval");
 
             return ignored;
         }
