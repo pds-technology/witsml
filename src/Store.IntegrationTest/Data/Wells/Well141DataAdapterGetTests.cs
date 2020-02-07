@@ -94,9 +94,9 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            CommonData commonData = new CommonData {PrivateGroupOnly = true};
+            CommonData commonData = new CommonData { PrivateGroupOnly = true };
             Well.Uid = DevKit.Uid();
-            Well.Name = DevKit.Name("Well-add-02");  
+            Well.Name = DevKit.Name("Well-add-02");
             Well.CommonData = commonData;
             response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
@@ -178,7 +178,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             Assert.IsTrue(parser.HasElements("country"));
             Assert.IsTrue(parser.HasElements("commonData"));
             Assert.IsFalse(parser.HasElements("wellDatum"));
-            
+
             var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlOut);
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
@@ -339,7 +339,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             well.Uid = uid;
             well.CommonData.DateTimeCreation = returnWell.CommonData.DateTimeCreation;
-            well.CommonData.DateTimeLastChange = returnWell.CommonData.DateTimeLastChange;                        
+            well.CommonData.DateTimeLastChange = returnWell.CommonData.DateTimeLastChange;
             string wellXml = EnergisticsConverter.ObjectToXml(well);
             string returnXml = EnergisticsConverter.ObjectToXml(returnWell);
 
@@ -419,7 +419,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
                 Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             }
 
-            query = new Well { Uid = testUid.ToUpper()};
+            query = new Well { Uid = testUid.ToUpper() };
             result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.IsTrue(result.Any(x => x.Uid == testUid));
@@ -447,7 +447,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
             var dummy = "Dummy";
             var datumKb = DevKit.WellDatum(dummy);
-            var query = new Well { Uid = dummy, Name = dummy, NameLegal = dummy, Country=dummy, County=dummy, WellDatum = DevKit.List(datumKb) };
+            var query = new Well { Uid = dummy, Name = dummy, NameLegal = dummy, Country = dummy, County = dummy, WellDatum = DevKit.List(datumKb) };
             var result = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
@@ -473,7 +473,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             var uid = response.SuppMsgOut;
 
-            var datumKb = DevKit.WellDatum("Kelly Bushing");       
+            var datumKb = DevKit.WellDatum("Kelly Bushing");
             var query1 = new Well { Uid = "", WellDatum = DevKit.List(datumKb) };
             var query2 = new Well { Uid = uid };
             var result = DevKit.Get<WellList, Well>(DevKit.List(query1, query2), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
@@ -613,7 +613,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             var datumKb = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
             var datumSl = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL);
-            var query = new Well { Uid = "", WellDatum = DevKit.List(datumKb,  datumSl) };
+            var query = new Well { Uid = "", WellDatum = DevKit.List(datumKb, datumSl) };
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.IsTrue(result.Any(x => x.Uid == uid));
@@ -624,7 +624,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
             var well01 = DevKit.GetFullWell();
             well01.Uid = DevKit.Uid();
-            well01.WellDatum.RemoveAt(0);            
+            well01.WellDatum.RemoveAt(0);
             var response = DevKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
@@ -846,7 +846,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Parse_DocumentInfo_Element()
         {
-            string queryInWithDocumentInfo = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><documentInfo /><well /></wells>";
+            string queryInWithDocumentInfo = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><documentInfo /><well><name /></well></wells>";
             var response = DevKit.GetFromStore(ObjectTypes.Well, queryInWithDocumentInfo, null, "");
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);

@@ -42,7 +42,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             DevKit.AddAndAssert(well);
             // Query well 
             var returnWell = DevKit.GetAndAssert(well);
-            
+
             var welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Sea Level", welldatum.Name);
@@ -72,7 +72,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             // Update well with invalid element
             var updateXml = string.Format(BasicXMLTemplate, Well.Uid,
-                "<operator>BBB Company</operator>" + 
+                "<operator>BBB Company</operator>" +
                 "<fieldsssssss>Big Field</fieldsssssss>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
@@ -92,7 +92,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
 
             // Update well with invalid element
             var updateXml = string.Format(BasicXMLTemplate, Well.Uid,
-                "<operator>BBB Company</operator>" + 
+                "<operator>BBB Company</operator>" +
                 "<field abc=\"abc\">Big Field</field>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
@@ -143,7 +143,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             var update = new Well
             {
                 Uid = uid,
-                WellDatum = new List<WellDatum> {wellDatum}
+                WellDatum = new List<WellDatum> { wellDatum }
             };
 
             var updateResponse = DevKit.Update<WellList, Well>(update);
@@ -190,7 +190,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             {
                 Uid = response.SuppMsgOut,
                 WellPublicLandSurveySystemLocation =
-                    new PublicLandSurveySystem() {PrincipalMeridian = PrincipalMeridian.ChoctawMeridian, Range = 1}
+                    new PublicLandSurveySystem() { PrincipalMeridian = PrincipalMeridian.ChoctawMeridian, Range = 1 }
             };
 
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
@@ -203,7 +203,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         {
             // Add a wellDatum to the test Well
             Well.Name = DevKit.Name("WellAddWithAttributesOnUpdate");
-            Well.WellDatum = new List<WellDatum> {DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB")};
+            Well.WellDatum = new List<WellDatum> { DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB") };
 
             // Add a well with a datum that we can reference in the update
             var response = DevKit.Add<WellList, Well>(Well);
@@ -214,7 +214,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             var updateWell = new Well()
             {
                 Uid = response.SuppMsgOut,
-                WellheadElevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.m, Datum = "KB" }
+                WellheadElevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.m, Datum = "KB", Value = 0.0 }
             };
 
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
@@ -366,7 +366,7 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             DevKit.UpdateAndAssert(updateWell);
 
             // Retrieve the updated well and check that there are four acquisitions
-            var queryWell = DevKit.GetAndAssert(new Well() {Uid = response.SuppMsgOut});
+            var queryWell = DevKit.GetAndAssert(new Well() { Uid = response.SuppMsgOut });
             Assert.IsNotNull(queryWell.CommonData);
             Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
             Assert.AreEqual(1, queryWell.CommonData.AcquisitionTimeZone.Count, "Acquisition time zone count did not match");

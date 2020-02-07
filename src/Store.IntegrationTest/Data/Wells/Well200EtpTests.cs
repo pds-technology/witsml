@@ -42,7 +42,8 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
             Well = new Well
             {
                 Uuid = DevKit.Uid(),
-                SchemaVersion = "2.0"
+                SchemaVersion = "2.0",
+                Block = "Test"
             };
 
             var dataObject = CreateDataObject(uri, Well);

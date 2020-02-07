@@ -61,32 +61,34 @@ namespace PDS.WITSMLstudio.Store.Data
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
-            var uri = DataObject.GetUri();
-            var uriWell = uri.Parent;
-            var well = WellDataAdapter.Get(uriWell);
-
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
             }
-
-            // Validate parent exists
-            else if (well == null)
+            else
             {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            }
+                var uri = DataObject.GetUri();
+                var uriWell = uri.Parent;
+                var well = WellDataAdapter.Get(uriWell);
 
-            // Validate parent uid case
-            else if (!well.Uid.Equals(DataObject.UidWell))
-            {
-                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
-            }
+                // Validate parent exists
+                if (well == null)
+                {
+                    yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
+                }
 
-            // Validate UID does not exist
-            else if (Context.Function != Functions.PutObject && DataAdapter.Exists(uri))
-            {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+                // Validate parent uid case
+                else if (!well.Uid.Equals(DataObject.UidWell))
+                {
+                    yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
+                }
+
+                // Validate UID does not exist
+                else if (Context.Function != Functions.PutObject && DataAdapter.Exists(uri))
+                {
+                    yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+                }
             }
         }
 
@@ -125,7 +127,7 @@ namespace PDS.WITSMLstudio.Store.Data
                 string.IsNullOrWhiteSpace(DataObject.Uid))
             {
                 yield return
-                    new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid", "UidWell"});
+                    new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell" });
             }
             // Validate that a well for the Uid exists
             else if (!WellDataAdapter.Exists(uri.Parent))
@@ -135,7 +137,7 @@ namespace PDS.WITSMLstudio.Store.Data
             // Validate UID exists
             else if (!DataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "Uid"});
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell", "Uid" });
             }
         }
     }

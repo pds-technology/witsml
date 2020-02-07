@@ -70,12 +70,14 @@ namespace PDS.WITSMLstudio.Store.Data.Wells
         [TestMethod]
         public void Well131DataAdapter_GetFromStore_Parse_DocumentInfo_Element()
         {
-            string queryInWithDocumentInfo =
+            var queryInWithDocumentInfo =
                     @"<wells xmlns=""http://www.witsml.org/schemas/131"" xmlns:xlink=""http://www.w3.org/1999/xlink"" 
                             xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:dc=""http://purl.org/dc/terms/"" 
                             xmlns:gml=""http://www.opengis.net/gml/3.2"" version=""1.3.1.1"" >                      
                         <documentInfo />
-                        <well />
+                        <well>
+                            <name />
+                        </well>
                     </wells>";
 
             var response = DevKit.GetFromStore(ObjectTypes.Well, queryInWithDocumentInfo, null, "");
