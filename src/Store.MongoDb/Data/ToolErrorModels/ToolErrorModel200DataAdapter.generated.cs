@@ -53,7 +53,7 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorModels
         public ToolErrorModel200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.ToolErrorModel200, ObjectTypes.Uuid)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>

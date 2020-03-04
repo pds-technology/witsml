@@ -54,7 +54,7 @@ namespace PDS.WITSMLstudio.Store.Data.ToolErrorTermSets
         public ToolErrorTermSet141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.ToolErrorTermSet141)
         {
-            Logger.Debug("Instance created.");
+            Logger.Verbose("Instance created.");
         }
 
         /// <summary>
