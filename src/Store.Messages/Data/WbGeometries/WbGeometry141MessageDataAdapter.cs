@@ -27,6 +27,9 @@ using Energistics.DataAccess.WITSML141;
 using PDS.WITSMLstudio.Framework;
 using PDS.WITSMLstudio.Store.Configuration;
 
+using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
+using WbGeometryList = Energistics.DataAccess.WITSML141.WellboreGeometryList;
+
 namespace PDS.WITSMLstudio.Store.Data.WbGeometries
 {
     /// <summary>
