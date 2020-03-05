@@ -254,7 +254,23 @@ namespace PDS.WITSMLstudio.Data
         /// <param name="propertyPath">The property path.</param>
         protected virtual void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
-            NavigateElementType(propertyInfo, childType, element, propertyPath);
+            var arrayItem = XmlAttributeCache<XmlArrayItemAttribute>.GetCustomAttribute(propertyInfo);
+
+            // Special case when the property has both XmlArrayAttribute and XamlArrayItemAttribute
+            // This indicates that the array is represented by .net primitives and not a class defined in code.
+            if (arrayItem != null)
+            {
+                if (element.HasElements)
+                {
+                    var childElements = element.Elements();
+                    foreach (var childElement in childElements)
+                        NavigateProperty(null, childElement, childType, GetPropertyPath(propertyPath, arrayItem.ElementName), childElement.Value);
+                }
+                else
+                    NavigateElementType(propertyInfo, propertyInfo.PropertyType, element, propertyPath);
+            }
+            else
+                NavigateElementType(propertyInfo, childType, element, propertyPath);
         }
 
         /// <summary>
