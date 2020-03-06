@@ -257,14 +257,16 @@ namespace PDS.WITSMLstudio.Data
             var arrayItem = XmlAttributeCache<XmlArrayItemAttribute>.GetCustomAttribute(propertyInfo);
 
             // Special case when the property has both XmlArrayAttribute and XamlArrayItemAttribute
-            // This indicates that the array is represented by .net primitives and not a class defined in code.
+            // This usually indicates that XML type of the list or array has not been translated into a .NET type so
+            // there is a mismatch between the XML type hierarchy and the .NET one.
+            // In this case, a pseudo-property may need to be navigated, which represents the array items as a "property" on the .NET list or array type.
             if (arrayItem != null)
             {
                 if (element.HasElements)
                 {
-                    var childElements = element.Elements();
-                    foreach (var childElement in childElements)
-                        NavigateProperty(null, childElement, childType, GetPropertyPath(propertyPath, arrayItem.ElementName), childElement.Value);
+                    var childPropertyInfo = new NavigatorArrayItemPropertyInfo(propertyInfo.PropertyType, childType, arrayItem.ElementName);
+                    foreach (var childElement in element.Elements())
+                        NavigateElementType(childPropertyInfo, childType, childElement, GetPropertyPath(propertyPath, arrayItem.ElementName));
                 }
                 else
                     NavigateElementType(propertyInfo, propertyInfo.PropertyType, element, propertyPath);
