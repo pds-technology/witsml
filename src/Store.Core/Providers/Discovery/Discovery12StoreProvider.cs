@@ -59,6 +59,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     args.Cancel = true;
                     return;
                 }
+
+                if (!this.ValidateUriParentHierarchy(uri, args.Header.MessageId))
+                {
+                    args.Cancel = true;
+                    return;
+                }
             }
 
             var max = WitsmlSettings.MaxGetResourcesResponse;

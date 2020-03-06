@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Etp.Common.Datatypes;
@@ -410,6 +412,377 @@ namespace PDS.WITSMLstudio
         {
             return channelSet.GetUri(log)
                 .Append(ObjectTypes.ChannelIndex, entity.Mnemonic, true);
+        }
+
+        // TODO: Remove this method when the corresponding EtpUriExtension in base submodule has been pushed through        
+        /// <summary>
+        /// Converts a full path 2.x EtpUri into a top level EtpUri
+        /// </summary>
+        /// <param name="uri">The specified URI.</param>
+        /// <returns>A top level EtpUri</returns>
+        public static EtpUri ToTopLevelUri(this EtpUri uri)
+        {
+            // If this is a root, base, 131 or 141 URI, just return it without any changes
+            if (uri.IsRootUri || uri.IsBaseUri || uri.IsRelatedTo(EtpUris.Witsml131) || uri.IsRelatedTo(EtpUris.Witsml141))
+                return uri;
+
+            return EtpUris.Witsml200
+                .Append(uri.ObjectType, uri.ObjectId);
+        }
+
+        /// <summary>
+        /// Creates <see cref="ObjectName"/> instance from <see cref="EtpContentType"/> instance.
+        /// </summary>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        public static ObjectName ToObjectName(this EtpContentType contentType)
+        {
+            return new ObjectName(contentType.ObjectType, contentType.Version);
+        }
+
+        /// <summary>
+        /// Determines whether this <see cref="EtpUri"/> instance is related to the specified <see cref="EtpContentType"/>.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <param name="contentType">The content type.</param>
+        /// <returns></returns>
+        public static bool IsRelatedTo(this EtpUri uri, EtpContentType contentType)
+        {
+            return uri.Family.EqualsIgnoreCase(contentType.Family)
+                   && uri.Version.EqualsIgnoreCase(contentType.Version)
+                   && uri.ObjectType.EqualsIgnoreCase(contentType.ObjectType);
+        }
+
+        /// <summary>
+        /// Gets the list of potential uris that represent the same object hierarchy.  Assumes URI is well formed.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public static List<EtpUri> GetRelatedHierarchyUris(this EtpUri uri)
+        {
+            // By default WITSML 2.x objects return top-level URIs in their channel metadata
+            // Ensure that it is first in the list to speed up any related processing that is
+            // looking for those type of URIs...
+            // WITSML 1.x object require the full hierarchy regardless.
+            var uris = new List<EtpUri>() { uri.ToTopLevelUri() };
+
+            if (!uri.IsValid)
+                return uris;
+
+            var uriHierarchy = uri.GetObjectIds().ToList();
+
+            if (!uriHierarchy.Any())
+                return uris;
+
+            var uriHierarchyMap = uriHierarchy
+                .ToLookup(x => x.ObjectType, x => x.ObjectId, StringComparer.InvariantCultureIgnoreCase)
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.InvariantCultureIgnoreCase);
+
+            var isWitsml20 = EtpUris.Witsml200.IsRelatedTo(uri);
+
+            if (!isWitsml20)
+                return uris;
+
+            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+                return uris;
+
+            var rootUri = EtpUris.Witsml200;
+
+            string wellObjectId;
+            uriHierarchyMap.TryGetValue(ObjectTypes.Well, out wellObjectId);
+
+            string wellboreObjectId;
+            uriHierarchyMap.TryGetValue(ObjectTypes.Wellbore, out wellboreObjectId);
+
+            string logObjectId;
+            uriHierarchyMap.TryGetValue(ObjectTypes.Log, out logObjectId);
+
+            string channelSetObjectId;
+            uriHierarchyMap.TryGetValue(ObjectTypes.ChannelSet, out channelSetObjectId);
+
+            if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            {
+                var hierarchyUri = rootUri
+                    .Append(ObjectTypes.Well, wellObjectId)
+                    .Append(ObjectTypes.Wellbore, uri.ObjectId);
+
+                uris.Add(hierarchyUri);
+            }
+            else
+            {
+                EtpUri hierarchyUri;
+
+                if (ObjectTypes.Channel.EqualsIgnoreCase(uri.ObjectType))
+                {
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.ChannelSet, channelSetObjectId)
+                        .Append(ObjectTypes.Channel, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, channelSetObjectId)
+                        .Append(ObjectTypes.Channel, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, channelSetObjectId)
+                        .Append(ObjectTypes.Channel, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Well, wellObjectId)
+                        .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, channelSetObjectId)
+                        .Append(ObjectTypes.Channel, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+                }
+                else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType))
+                {
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+
+                    hierarchyUri = rootUri
+                        .Append(ObjectTypes.Well, wellObjectId)
+                        .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                        .Append(ObjectTypes.Log, logObjectId)
+                        .Append(ObjectTypes.ChannelSet, uri.ObjectId);
+
+                    uris.Add(hierarchyUri);
+                }
+
+                hierarchyUri = rootUri
+                    .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                    .Append(uri.ObjectType, uri.ObjectId);
+
+                uris.Add(hierarchyUri);
+
+                hierarchyUri = rootUri
+                    .Append(ObjectTypes.Well, wellObjectId)
+                    .Append(ObjectTypes.Wellbore, wellboreObjectId)
+                    .Append(uri.ObjectType, uri.ObjectId);
+
+                uris.Add(hierarchyUri);
+            }
+
+            return uris;
+        }
+
+        /// <summary>
+        /// If valid, returns the uri that matches the requested query hierarchy.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <returns></returns>
+        public static EtpUri GetValidHierarchyUri(this EtpUri uri)
+        {
+            return uri.GetValidHierarchyUri(uri);
+        }
+
+        /// <summary>
+        /// If valid, returns the uri that matches the requested query hierarchy.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <param name="query">The hierarchy query.</param>
+        /// <returns></returns>
+        public static EtpUri GetValidHierarchyUri(this EtpUri uri, EtpUri query)
+        {
+            var hierarchyUris = uri.GetRelatedHierarchyUris();
+
+            var queryObjectIds = query.GetObjectIds().ToList();
+
+            return hierarchyUris.FirstOrDefault(x =>
+            {
+                var uriObjectIds = x.GetObjectIds().ToList();
+
+                if (uriObjectIds.Count != queryObjectIds.Count)
+                    return false;
+
+                for (var i = 0; i < uriObjectIds.Count; ++i)
+                {
+                    if (!uriObjectIds[i].ObjectType.EqualsIgnoreCase(queryObjectIds[i].ObjectType) || !uriObjectIds[i].ObjectId.IsMatch(queryObjectIds[i].ObjectId))
+                        return false;
+                }
+
+                return true;
+            });
+        }
+
+        /// <summary>
+        /// Get the uri family of the specified uri.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <returns></returns>
+        public static EtpUri GetUriFamily(this EtpUri uri)
+        {
+            if (!uri.IsValid || uri.IsBaseUri)
+                return new EtpUri();
+
+            return new EtpUri($"{EtpUri.RootUri}/{uri.Family}{uri.Version.Replace(".", string.Empty).Substring(0, 2)}");
+        }
+
+        /// <summary>
+        /// Gets the uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static EtpUri GetResolvedHierarchyUri(this EtpUri uri, EtpUri other)
+        {
+            var resolvedUri = new EtpUri();
+
+            if (other.IsRootUri)
+                return uri;
+
+            if (!uri.IsRelatedTo(other))
+                return resolvedUri;
+
+            var uriHierarchy = uri.GetObjectIds().ToList();
+            var otherHierarchy = other.GetObjectIds().ToList();
+
+            resolvedUri = uri.GetUriFamily();
+
+            var otherHierarchyMap = otherHierarchy
+                .ToLookup(x => x.ObjectType, x => x.ObjectId, StringComparer.InvariantCultureIgnoreCase)
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.InvariantCultureIgnoreCase);
+
+            uriHierarchy.ForEach(segment =>
+            {
+                var objectType = segment.ObjectType;
+                var objectId = segment.ObjectId;
+
+                if (string.IsNullOrWhiteSpace(objectId))
+                    otherHierarchyMap.TryGetValue(objectType, out objectId);
+
+                resolvedUri.Append(objectType, objectId);
+            });
+
+            return resolvedUri;
+        }
+
+        /// <summary>
+        /// Gets whether an URI is relative to another URI.
+        /// </summary>
+        /// <param name="uri">The child URI (E.g. {eml://witsml20/Well(1234)/Wellbore(5678)/Trajectory(91011)}).</param>
+        /// <param name="other">The parent URI (E.g. {eml://witsml20/Trajectory}).</param>
+        /// <returns></returns>
+        public static bool IsRelativeTo(this EtpUri uri, EtpUri other)
+        {
+            if (other.IsRootUri)
+                return true;
+
+            if (!uri.IsRelatedTo(other))
+                return false;
+
+            var uriHierarchy = uri.GetObjectIds().ToList();
+            var otherHierarchy = other.GetObjectIds().ToList();
+
+            if (!uriHierarchy.Any() || !otherHierarchy.Any())
+                return false;
+
+            var getObjectType = new Func<List<EtpUri.Segment>, int, EtpUri.Segment>((h, i) =>
+            {
+                return i >= 0 && i < h.Count ? h[i] : new EtpUri.Segment();
+            });
+
+            var isBaseUri = new Func<EtpUri.Segment, bool>((o) =>
+            {
+                return string.IsNullOrWhiteSpace(o.ObjectType) && string.IsNullOrWhiteSpace(o.ObjectId);
+            });
+
+            var uriIndex = uriHierarchy.Count - 1;
+            var otherIndex = otherHierarchy.Count - 1;
+
+            var uriTemp = getObjectType(uriHierarchy, uriIndex);
+            var otherTemp = getObjectType(otherHierarchy, otherIndex);
+            var valid = false;
+            while (!string.IsNullOrWhiteSpace(uriTemp.ObjectType))
+            {
+                if (uriTemp.ObjectType.EqualsIgnoreCase(otherTemp.ObjectType))
+                {
+                    valid = true;
+                    break;
+                }
+                uriTemp = getObjectType(uriHierarchy, --uriIndex);
+            }
+
+            if (isBaseUri(uriTemp) && isBaseUri(otherTemp))
+                return true;
+
+            if (!valid)
+                return false;
+
+            while (!string.IsNullOrWhiteSpace(uriTemp.ObjectType)
+                || !string.IsNullOrWhiteSpace(otherTemp.ObjectType))
+            {
+                var objectTypeMatch = uriTemp.ObjectType.EqualsIgnoreCase(otherTemp.ObjectType);
+                var objectIdMatch = objectTypeMatch && (uriTemp.ObjectId?.IsMatch(otherTemp.ObjectId) ?? string.IsNullOrWhiteSpace(otherTemp.ObjectId));
+                if (!objectIdMatch)
+                {
+                    valid = false;
+                    break;
+                }
+                uriTemp = getObjectType(uriHierarchy, --uriIndex);
+                otherTemp = getObjectType(otherHierarchy, --otherIndex);
+            }
+
+            return valid || isBaseUri(uriTemp) && isBaseUri(otherTemp);
+        }
+
+        /// <summary>
+        /// Returns whether the provided URIs reference the same object.
+        /// Two uri are the "same" if their hierarchies match (1.3.1.1/1.4.1.1) or if their object ids are equal (2.0).
+        /// </summary>
+        /// <param name="u"></param>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static bool AreSame(EtpUri u, EtpUri v)
+        {
+            if (!u.IsRelatedTo(v))
+                return false;
+
+            if (u.IsRelatedTo(EtpUris.Witsml200) && u.ObjectType.EqualsIgnoreCase(v.ObjectType) && !string.IsNullOrEmpty(u.ObjectId) && u.ObjectId.EqualsIgnoreCase(v.ObjectId))
+                return true;
+
+            return u.Equals(v);
+        }
+
+        /// <summary>
+        /// Gets whether an URI is the parent of another URI.
+        /// </summary>
+        /// <param name="uri">The parent URI.</param>
+        /// <param name="other">The child URI.</param>
+        /// <returns></returns>
+        public static bool IsParentOf(this EtpUri uri, EtpUri other)
+        {
+            return !AreSame(uri, other) && other.IsRelativeTo(uri);
+        }
+
+        /// <summary>
+        /// Gets whether an URI is the parent of another URI.
+        /// </summary>
+        /// <param name="uri">The parent URI.</param>
+        /// <param name="other">The child URI.</param>
+        /// <returns></returns>
+        public static bool IsChildOf(this EtpUri uri, EtpUri other)
+        {
+            return !AreSame(uri, other) && uri.IsRelativeTo(other);
         }
     }
 }

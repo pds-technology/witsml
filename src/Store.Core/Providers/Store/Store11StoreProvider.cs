@@ -122,6 +122,12 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                     return;
                 }
 
+                if (!this.ValidateUriParentHierarchy(uri, args.Header.MessageId))
+                {
+                    args.Cancel = true;
+                    return;
+                }
+
                 if (!this.ValidateUriObjectType(uri, args.Header.MessageId))
                 {
                     args.Cancel = true;
@@ -165,6 +171,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
             var uri = this.CreateAndValidateUri(putObject.DataObject.Resource.Uri, header.MessageId);
             if (!uri.IsValid) return;
+            if (!this.ValidateUriParentHierarchy(uri, header.MessageId)) return;
             if (!this.ValidateUriObjectType(uri, header.MessageId)) return;
 
             try
@@ -220,6 +227,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
             {
                 var etpUri = this.CreateAndValidateUri(uri, header.MessageId);
                 if (!etpUri.IsValid) return;
+                if (!this.ValidateUriParentHierarchy(etpUri, header.MessageId)) return;
                 if (!this.ValidateUriObjectType(etpUri, header.MessageId)) return;
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);

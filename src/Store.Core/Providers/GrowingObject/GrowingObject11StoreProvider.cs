@@ -195,7 +195,7 @@ namespace PDS.WITSMLstudio.Store.Providers.GrowingObject
         {
             etpUri = this.CreateAndValidateUri(uri, messageId);
 
-            if (!etpUri.IsValid || !this.ValidateUriObjectType(etpUri, messageId))
+            if (!etpUri.IsValid || !this.ValidateUriParentHierarchy(etpUri, messageId) || !this.ValidateUriObjectType(etpUri, messageId))
             {
                 return null;
             }

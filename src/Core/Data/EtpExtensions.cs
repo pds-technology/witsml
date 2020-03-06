@@ -71,6 +71,42 @@ namespace PDS.WITSMLstudio.Data
         }
 
         /// <summary>
+        /// Validates URI Parent Hierarchy.
+        /// </summary>
+        /// <param name="etpUri">The ETP URI.</param>
+        /// <returns></returns>
+        public static bool ValidateUriParentHierarchy(this EtpUri etpUri)
+        {
+            if (!etpUri.IsValid)
+                return false;
+
+            var parentUri = etpUri.Parent;
+
+            if (parentUri.IsRootUri || parentUri.IsBaseUri)
+                return true;
+
+            return parentUri.GetObjectIds().All(segment => !string.IsNullOrWhiteSpace(segment.ObjectId));
+        }
+
+        /// <summary>
+        /// Validates URI Parent Hierarchy.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="etpUri">The ETP URI.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns></returns>
+        public static bool ValidateUriParentHierarchy(this IProtocolHandler handler, EtpUri etpUri, long messageId = 0)
+        {
+            if (etpUri.ValidateUriParentHierarchy())
+                return true;
+
+            handler.InvalidUri($"{etpUri} is missing the objectId of a parent.", messageId);
+
+            return false;
+
+        }
+
+        /// <summary>
         /// Determines whether this URI can be used for for resolving channel metadata for the purpose of streaming via protocol 1.
         /// </summary>
         /// <param name="uri">The URI.</param>

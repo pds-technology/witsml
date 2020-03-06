@@ -134,7 +134,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(etpUri.Query))
                 parentUri = new EtpUri(parentUri + etpUri.Query);
 
-            if (!etpUri.IsRelatedTo(EtpUris.Witsml200))
+            if (!etpUri.IsRelatedTo(EtpUris.Witsml200) || !IsValidUri(etpUri))
             {
                 return;
             }
@@ -271,6 +271,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
         private IEtpDataProvider GetDataProvider(string objectType)
         {
             return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
+        }
+
+        private bool IsValidUri(EtpUri uri)
+        {
+            var etpUri = uri.GetValidHierarchyUri();
+
+            return etpUri.IsValid;
         }
 
         private IResource ToResource(IEtpAdapter etpAdapter, Channel entity, EtpUri parentUri)

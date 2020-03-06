@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -135,7 +136,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (!string.IsNullOrWhiteSpace(etpUri.Query))
                 parentUri = new EtpUri(parentUri + etpUri.Query);
 
-            if (!etpUri.IsRelatedTo(EtpUris.Witsml141))
+            if (!etpUri.IsRelatedTo(EtpUris.Witsml141) || !IsValidUri(etpUri))
             {
                 return;
             }
@@ -155,6 +156,13 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
                     .GetAll(parentUri)
                     .Cast<IWellboreObject>()
                     .ForEach(x => resources.Add(ToResource(etpAdapter, x)));
+            }
+            else if (string.IsNullOrWhiteSpace(etpUri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(etpUri.ObjectType))
+            {
+                _wellboreDataProvider.GetAll(parentUri)
+                    .ForEach(x => resources.Add(ToResource(etpAdapter, x)));
+
+                serverSortOrder = _wellboreDataProvider.ServerSortOrder;
             }
             else if (ObjectTypes.Well.EqualsIgnoreCase(etpUri.ObjectType))
             {
@@ -180,14 +188,56 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
         }
 
-        private IEnumerable<IWitsmlDataAdapter> GetWellboreDataAdapters()
+        private IEnumerable<IWitsmlDataAdapter> GetDataAdapters<TObject>()
         {
-            var wellboreObjectType = typeof(IWellboreObject);
+            var objectType = typeof(TObject);
 
             return Providers
                 .OfType<IWitsmlDataAdapter>()
-                .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
+                .Where(x => objectType.IsAssignableFrom(x.DataObjectType))
                 .OrderBy(x => x.GetType().Name);
+        }
+
+        private IEnumerable<IWitsmlDataAdapter> GetWellDataAdapters()
+        {
+            return GetDataAdapters<IWellObject>();
+        }
+
+        private IEnumerable<IWitsmlDataAdapter> GetWellboreDataAdapters()
+        {
+            return GetDataAdapters<IWellboreObject>();
+        }
+
+        private bool IsValidUri(EtpUri uri)
+        {
+            if (!uri.IsValid)
+                return false;
+
+            if (uri.IsRootUri || uri.IsBaseUri)
+                return true;
+
+            var wellboreObjectTypes = new HashSet<string>(GetWellboreDataAdapters().Select(x => x.DataObjectType.Name), StringComparer.InvariantCultureIgnoreCase);
+            var wellObjectTypes = new HashSet<string>(GetWellDataAdapters().Select(x => x.DataObjectType.Name).Except(wellboreObjectTypes), StringComparer.InvariantCultureIgnoreCase);
+
+            var objectType = uri.ObjectType;
+            var objectIds = uri.GetObjectIds().ToList();
+            var objectIdGroups = objectIds.GroupBy(x => x.ObjectType, StringComparer.InvariantCultureIgnoreCase);
+
+            // check for repeating groups
+            if (objectIdGroups.Any(x => x.Count() > 1))
+                return false;
+
+            if (wellObjectTypes.Contains(objectType))
+            {
+                return objectIds.Count >= 1 && ObjectTypes.Well.EqualsIgnoreCase(objectIds[0].ObjectType);
+            }
+
+            if (wellboreObjectTypes.Contains(objectType))
+            {
+                return objectIds.Count >= 2 && ObjectTypes.Well.EqualsIgnoreCase(objectIds[0].ObjectType) && ObjectTypes.Wellbore.EqualsIgnoreCase(objectIds[1].ObjectType);
+            }
+
+            return objectIds.Count == 1 && ObjectTypes.Well.EqualsIgnoreCase(objectIds[0].ObjectType);
         }
 
         private IResource ToResource(IEtpAdapter etpAdapter, Well entity)

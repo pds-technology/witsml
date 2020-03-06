@@ -241,6 +241,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
                 var uri = this.CreateAndValidateUri(dataObject.Resource.Uri, header.MessageId);
 
                 if (!uri.IsValid) return;
+                if (!this.ValidateUriParentHierarchy(uri, header.MessageId)) return;
                 if (!this.ValidateUriObjectType(uri, header.MessageId)) return;
 
                 var data = dataObject.GetString();
