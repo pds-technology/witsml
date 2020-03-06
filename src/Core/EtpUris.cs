@@ -684,6 +684,9 @@ namespace PDS.WITSMLstudio
         /// <returns></returns>
         public static bool IsRelativeTo(this EtpUri uri, EtpUri other)
         {
+            if (!uri.IsValid || !other.IsValid)
+                return false;
+
             if (other.IsRootUri)
                 return true;
 
@@ -692,9 +695,6 @@ namespace PDS.WITSMLstudio
 
             var uriHierarchy = uri.GetObjectIds().ToList();
             var otherHierarchy = other.GetObjectIds().ToList();
-
-            if (!uriHierarchy.Any() || !otherHierarchy.Any())
-                return false;
 
             var getObjectType = new Func<List<EtpUri.Segment>, int, EtpUri.Segment>((h, i) =>
             {
