@@ -16,13 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+#define ENABLE_ENUMERABLE_OPTIMIZATIONS
+#define ENABLE_ENUM_OPTIMIZATIONS
+
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -332,6 +337,104 @@ namespace PDS.WITSMLstudio.Framework
             return items;
         }
 
+#if ENABLE_ENUMERABLE_OPTIMIZATIONS
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static IList<T> ForEach<T>(this IList<T> collection, Action<T, int> action)
+        {
+            for (var index = 0; index < collection.Count; ++index)
+            {
+                action(collection[index], index);
+            }
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Returns whether a collection contains any values.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static bool Any<T>(this IList<T> collection)
+        {
+            return collection.Count > 0;
+        }
+
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static bool Any<T>(this IList<T> collection, Func<T, bool> action)
+        {
+            for (var index = 0; index < collection.Count; ++index)
+            {
+                if (action(collection[index])) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static bool Any<T>(this IList<T> collection, Func<T, int, bool> action)
+        {
+            for (var index = 0; index < collection.Count; ++index)
+            {
+                if (action(collection[index], index)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static bool All<T>(this IList<T> collection, Func<T, bool> action)
+        {
+            for (var index = 0; index < collection.Count; ++index)
+            {
+                if (!action(collection[index])) return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static bool All<T>(this IList<T> collection, Func<T, int, bool> action)
+        {
+            for (var index = 0; index < collection.Count; ++index)
+            {
+                if (!action(collection[index], index)) return false;
+            }
+
+            return true;
+        }
+#endif
+
         /// <summary>
         /// Creates a dictionary from collection without duplicates.
         /// </summary>
@@ -464,6 +567,150 @@ namespace PDS.WITSMLstudio.Framework
                 : value.ToString();
         }
 
+#if ENABLE_ENUM_OPTIMIZATIONS
+        private class EnumMemberInfo
+        {
+            private class EnumMemberData
+            {
+                public EnumMemberData(StringComparer stringComparison)
+                {
+                    NamedValues = new Dictionary<string, object>(stringComparison);
+                    EnumAttributeValues = new Dictionary<string, object>(stringComparison);
+                    DescriptionAttributeValues = new Dictionary<string, object>(stringComparison);
+                }
+
+                public Dictionary<string, object> NamedValues { get; }
+                public Dictionary<string, object> EnumAttributeValues { get; }
+                public Dictionary<string, object> DescriptionAttributeValues { get; }
+
+            }
+
+            public EnumMemberInfo(Type enumType)
+            {
+                // must be a valid enumeration member
+                if (!enumType.IsEnum)
+                {
+                    throw new ArgumentException($"{enumType} must be a valid enumeration type");
+                }
+
+                FieldInfo = enumType.GetFields(BindingFlags.Public | BindingFlags.Static);
+                MappedValues = new Dictionary<long, object>();
+
+                for (var i = 0; i < FieldInfo.Length; i++)
+                {
+                    var field = FieldInfo[i];
+                    var fieldName = field.Name;
+                    var fieldValue = field.GetValue(null);
+                    var fieldConstant = Convert.ToInt64(field.GetRawConstantValue());
+                    var xmlEnumAttribute = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(field);
+                    var descriptionAttribute = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(field);
+
+                    MappedValues[fieldConstant] = fieldValue;
+
+                    EnumMemberMappings.Item1.NamedValues[fieldName] = fieldValue;
+                    EnumMemberMappings.Item2.NamedValues[fieldName] = fieldValue;
+
+                    if (xmlEnumAttribute != null)
+                    {
+                        EnumMemberMappings.Item1.EnumAttributeValues[xmlEnumAttribute.Name] = fieldValue;
+                        EnumMemberMappings.Item2.EnumAttributeValues[xmlEnumAttribute.Name] = fieldValue;
+                    }
+
+                    if (descriptionAttribute != null)
+                    {
+                        EnumMemberMappings.Item1.DescriptionAttributeValues[descriptionAttribute.Description] = fieldValue;
+                        EnumMemberMappings.Item2.DescriptionAttributeValues[descriptionAttribute.Description] = fieldValue;
+                    }
+                }
+            }
+
+            private FieldInfo[] FieldInfo { get; }
+            private Dictionary<long, object> MappedValues { get; }
+            private Tuple<EnumMemberData, EnumMemberData> EnumMemberMappings { get; } = new Tuple<EnumMemberData, EnumMemberData>(
+                new EnumMemberData(StringComparer.InvariantCulture), new EnumMemberData(StringComparer.InvariantCultureIgnoreCase));
+
+            public object GetValue(long enumValue)
+            {
+                object mappedValue;
+                if (!MappedValues.TryGetValue(enumValue, out mappedValue))
+                    return null;
+
+                return mappedValue;
+            }
+
+            public object GetValue(string enumValue, bool ignoreCase)
+            {
+                return ignoreCase
+                    ? GetValue(EnumMemberMappings.Item2, enumValue)
+                    : GetValue(EnumMemberMappings.Item1, enumValue);
+            }
+
+            private object GetValue(EnumMemberData enumMemberData, string enumValue)
+            {
+                object mappedValue;
+                if (enumMemberData.NamedValues.TryGetValue(enumValue, out mappedValue)
+                    || enumMemberData.EnumAttributeValues.TryGetValue(enumValue, out mappedValue)
+                    || enumMemberData.DescriptionAttributeValues.TryGetValue(enumValue, out mappedValue))
+                {
+                    return mappedValue;
+                }
+
+                return null;
+            }
+
+        }
+
+        private static ConcurrentDictionary<Type, EnumMemberInfo> _enumMemberInfo = new ConcurrentDictionary<Type, EnumMemberInfo>();
+
+        /// <summary>
+        /// Parses the enum.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The enum value.</param>
+        /// <param name="ignoreCase">if set to <c>true</c> comparison is case insensitive.</param>
+        /// <returns>The parsed enumeration value.</returns>
+        public static object ParseEnum(this Type enumType, string enumValue, bool ignoreCase = true)
+        {
+            if (string.IsNullOrWhiteSpace(enumValue)) return null;
+
+            enumType = Nullable.GetUnderlyingType(enumType) ?? enumType;
+
+            // must be a valid enumeration type
+            if (!enumType.IsEnum)
+            {
+                throw new ArgumentException();
+            }
+
+            var enumMemberInfo = _enumMemberInfo.GetOrAdd(enumType, type => new EnumMemberInfo(type));
+            object enumMember = null;
+            try
+            {
+                double index;
+
+                // Ensure enumValue is not numeric
+                if (double.TryParse(enumValue, out index))
+                {
+                    enumMember = enumMemberInfo.GetValue((long)index);
+                }
+                else
+                {
+                    enumMember = enumMemberInfo.GetValue(enumValue, ignoreCase);
+                }
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            // must be a valid enumeration member
+            if (enumMember == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return enumMember;
+        }
+#else
         /// <summary>
         /// Parses the enum.
         /// </summary>
@@ -482,11 +729,7 @@ namespace PDS.WITSMLstudio.Framework
                 double index;
 
                 // Ensure enumValue is not numeric
-#if DEBUG
                 if (!double.TryParse(enumValue, out index) && Enum.IsDefined(enumType, enumValue))
-#else
-                if (!double.TryParse(enumValue, out index))
-#endif
                     return Enum.Parse(enumType, enumValue, ignoreCase);
             }
             catch
@@ -519,6 +762,7 @@ namespace PDS.WITSMLstudio.Framework
 
             return Enum.Parse(enumType, enumMember.Name, ignoreCase);
         }
+#endif
 
         /// <summary>
         /// Determines whether the specified type is numeric.
