@@ -19,6 +19,8 @@
 using System;
 using System.Configuration;
 using System.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using log4net;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using PDS.WITSMLstudio.Framework.Web.Security;
@@ -66,17 +68,17 @@ namespace PDS.WITSMLstudio.Store.Security
 
             try
             {
-                var decodedSecret = TextEncodings.Base64Url.Decode(_secret);
-                var signingCredentials = new HmacSigningCredentials(decodedSecret);
+                var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+                var signingCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
 
-                var parameters = new TokenValidationParameters()
+                var parameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
                 {
                     ValidAudience = _audience,
                     ValidIssuer = _issuer,
-                    IssuerSigningKey = signingCredentials.SigningKey
+                    IssuerSigningKey = signingCredentials.Key
                 };
 
-                SecurityToken validatedToken;
+                Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
 
                 var handler = new JwtSecurityTokenHandler();
                 var principal = handler.ValidateToken(encryptedToken, parameters, out validatedToken);

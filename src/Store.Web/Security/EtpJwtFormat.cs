@@ -18,6 +18,7 @@
 
 using System;
 using System.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using Thinktecture.IdentityModel.Tokens;
@@ -61,7 +62,8 @@ namespace PDS.WITSMLstudio.Store.Security
             }
 
             var keyByteArray = TextEncodings.Base64Url.Decode(_secret);
-            var signingKey = new HmacSigningCredentials(keyByteArray);
+            var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(keyByteArray);
+            var signingKey = new Microsoft.IdentityModel.Tokens.SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
 
             var issued = data.Properties.IssuedUtc.GetValueOrDefault(DateTimeOffset.Now);
             var expires = data.Properties.ExpiresUtc.GetValueOrDefault(issued.AddDays(30));
