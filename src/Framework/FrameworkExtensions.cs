@@ -685,17 +685,7 @@ namespace PDS.WITSMLstudio.Framework
             object enumMember = null;
             try
             {
-                double index;
-
-                // Ensure enumValue is not numeric
-                if (double.TryParse(enumValue, out index))
-                {
-                    enumMember = enumMemberInfo.GetValue((long)index);
-                }
-                else
-                {
-                    enumMember = enumMemberInfo.GetValue(enumValue, ignoreCase);
-                }
+                enumMember = enumMemberInfo.GetValue(enumValue, ignoreCase);
             }
             catch
             {
