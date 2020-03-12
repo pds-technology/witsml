@@ -634,7 +634,7 @@ namespace PDS.WITSMLstudio
             if (!uri.IsValid || uri.IsBaseUri)
                 return new EtpUri();
 
-            return new EtpUri($"{EtpUri.RootUri}/{uri.Family}{uri.Version.Replace(".", string.Empty).Substring(0, 2)}");
+            return new EtpUri($"{EtpUri.RootUri}{uri.Family}{uri.Version.Replace(".", string.Empty).Substring(0, 2)}");
         }
 
         /// <summary>
@@ -783,6 +783,118 @@ namespace PDS.WITSMLstudio
         public static bool IsChildOf(this EtpUri uri, EtpUri other)
         {
             return !AreSame(uri, other) && uri.IsRelativeTo(other);
+        }
+
+        /// <summary>
+        /// Tries to get the segment in the ETP URI corresponding to the specified object type.
+        /// </summary>
+        /// <param name="uri">The ETP URI to get the segment from.</param>
+        /// <param name="objectType">The object type of the segment to get.</param>
+        /// <param name="success"><c>true</c> if the object segment was found; <c>false</c> otherwise.</param>
+        /// <returns>The found segment or default if not found.</returns>
+        public static EtpUri.Segment TryGetObjectTypeSegment(this EtpUri uri, string objectType, out bool success)
+        {
+            success = false;
+            if (!uri.IsValid || string.IsNullOrEmpty(objectType))
+                return default(EtpUri.Segment);
+
+            foreach (var s in uri.GetObjectIds())
+            {
+                if (!string.IsNullOrEmpty(s.ObjectType) && objectType.EqualsIgnoreCase(s.ObjectType))
+                {
+                    success = true;
+                    return s;
+                }
+            }
+
+
+            return default(EtpUri.Segment);
+        }
+
+        /// <summary>
+        /// Tries to replace the segment in the ETP URI of the same object type with the specified segment.
+        /// </summary>
+        /// <param name="uri">The URI to create a new URI from with the segment replaced.</param>
+        /// <param name="segment">The segment to replace the current URI segment with.</param>
+        /// <param name="success"><c>true</c> if successful; <c>false</c> otherwise.</param>
+        /// <returns>The input URI with the segment replaced or the original URI if not successful.</returns>
+        public static EtpUri TryReplaceObjectTypeSegment(this EtpUri uri, EtpUri.Segment segment, out bool success)
+        {
+            success = false;
+            if (!uri.IsValid || string.IsNullOrEmpty(segment.ObjectType))
+                return uri;
+
+            var constructedUri = uri.GetUriFamily();
+            foreach (var s in uri.GetObjectIds())
+            {
+                if (!string.IsNullOrEmpty(s.ObjectType) && segment.ObjectType.EqualsIgnoreCase(s.ObjectType))
+                {
+                    constructedUri = constructedUri.Append(segment.ObjectType, segment.ObjectId);
+                    success = true;
+                }
+                else
+                {
+                    constructedUri = constructedUri.Append(s.ObjectType, s.ObjectId);
+                }
+            }
+
+            if (success)
+                return new EtpUri(constructedUri.ToString() + uri.Query);
+            else
+                return uri;
+        }
+
+        /// <summary>
+        /// Tries to get the ETP URI prefix up to the specified object type.
+        /// </summary>
+        /// <param name="uri">The URI to create the prefix from.</param>
+        /// <param name="objecType">The object type to end the prefix with.</param>
+        /// <param name="success"><c>true</c> if successful; <c>false</c> otherwise.</param>
+        /// <returns>The prefix of the input URI or the original URI without its query if not successful.</returns>
+        public static EtpUri TryReplaceObjectTypePrefix(this EtpUri uri, string objecType, out bool success)
+        {
+            success = false;
+            uri = new EtpUri(uri.GetLeftPart());
+
+            if (!uri.IsValid || string.IsNullOrEmpty(objecType))
+                return uri;
+
+            var constructedUri = uri.GetUriFamily();
+            foreach (var s in uri.GetObjectIds())
+            {
+                if (!string.IsNullOrEmpty(s.ObjectType) && objecType.EqualsIgnoreCase(s.ObjectType))
+                {
+                    constructedUri = constructedUri.Append(s.ObjectType, s.ObjectId);
+                    success = true;
+                    break;
+                }
+                else
+                {
+                    constructedUri = constructedUri.Append(s.ObjectType, s.ObjectId);
+                }
+            }
+
+            if (success)
+                return constructedUri;
+            else
+                return uri;
+        }
+
+        /// <summary>
+        /// Tries to replace the segment in the ETP URI of the same object type with the segment of the same type in the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI to create a new URI from with the segment replaced.</param>
+        /// <param name="uriWithSegment">The URI with the segment to replace in the URI.</param>
+        /// <param name="objectType">The object type of the segment to replace.</param>
+        /// <param name="success"><c>true</c> if successful; <c>false</c> otherwise.</param>
+        /// <returns>The input URI with the segment replaced or the original URI if not successful.</returns>
+        public static EtpUri TryReplaceObjectTypeSegment(this EtpUri uri, EtpUri uriWithSegment, string objectType, out bool success)
+        {
+            var segment = uriWithSegment.TryGetObjectTypeSegment(objectType, out success);
+            if (!success)
+                return uri;
+
+            return uri.TryReplaceObjectTypeSegment(segment, out success);
         }
     }
 }
