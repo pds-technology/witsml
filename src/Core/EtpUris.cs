@@ -851,7 +851,7 @@ namespace PDS.WITSMLstudio
         /// <param name="objecType">The object type to end the prefix with.</param>
         /// <param name="success"><c>true</c> if successful; <c>false</c> otherwise.</param>
         /// <returns>The prefix of the input URI or the original URI without its query if not successful.</returns>
-        public static EtpUri TryReplaceObjectTypePrefix(this EtpUri uri, string objecType, out bool success)
+        public static EtpUri TryGetObjectTypePrefix(this EtpUri uri, string objecType, out bool success)
         {
             success = false;
             uri = new EtpUri(uri.GetLeftPart());
