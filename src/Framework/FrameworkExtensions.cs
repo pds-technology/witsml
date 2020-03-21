@@ -16,9 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-#define ENABLE_ENUMERABLE_OPTIMIZATIONS
-#define ENABLE_ENUM_OPTIMIZATIONS
-
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -174,6 +171,8 @@ namespace PDS.WITSMLstudio.Framework
         {
             if (value == null) return null;
 
+            // TODO: char version of contains is faster than string version (investigate whether it matters)
+            //var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
             var separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 
             return value.Contains(separator)
@@ -337,7 +336,6 @@ namespace PDS.WITSMLstudio.Framework
             return items;
         }
 
-#if ENABLE_ENUMERABLE_OPTIMIZATIONS
         /// <summary>
         /// Performs the specified action on each item in the collection.
         /// </summary>
@@ -433,7 +431,62 @@ namespace PDS.WITSMLstudio.Framework
 
             return true;
         }
-#endif
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(IEnumerable<T> values, int count)
+        {
+            var list = values as IList<T>;
+            if (null != list)
+                return list.Skip(count);
+
+            var array = values as object[];
+            if (null != array)
+                return array.Skip(count).Cast<T>();
+
+            return Enumerable.Skip(values, count);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(this IList<T> values, int count)
+        {
+            while (count < values.Count)
+                yield return values[count++];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Skip<T>(this T[] values, int count)
+        {
+            while (count < values.Length)
+                yield return values[count++];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool Contains(this string instance, char value)
+        {
+            return instance.IndexOf(value) >= 0;
+        }
 
         /// <summary>
         /// Creates a dictionary from collection without duplicates.
@@ -567,7 +620,6 @@ namespace PDS.WITSMLstudio.Framework
                 : value.ToString();
         }
 
-#if ENABLE_ENUM_OPTIMIZATIONS
         private class EnumMemberInfo
         {
             private class EnumMemberData
@@ -700,59 +752,6 @@ namespace PDS.WITSMLstudio.Framework
 
             return enumMember;
         }
-#else
-        /// <summary>
-        /// Parses the enum.
-        /// </summary>
-        /// <param name="enumType">Type of the enum.</param>
-        /// <param name="enumValue">The enum value.</param>
-        /// <param name="ignoreCase">if set to <c>true</c> comparison is case insensitive.</param>
-        /// <returns>The parsed enumeration value.</returns>
-        public static object ParseEnum(this Type enumType, string enumValue, bool ignoreCase = true)
-        {
-            if (string.IsNullOrWhiteSpace(enumValue)) return null;
-
-            enumType = Nullable.GetUnderlyingType(enumType) ?? enumType;
-
-            try
-            {
-                double index;
-
-                // Ensure enumValue is not numeric
-                if (!double.TryParse(enumValue, out index) && Enum.IsDefined(enumType, enumValue))
-                    return Enum.Parse(enumType, enumValue, ignoreCase);
-            }
-            catch
-            {
-                // Ignore
-            }
-
-            var mode = ignoreCase
-                ? StringComparison.InvariantCultureIgnoreCase
-                : StringComparison.InvariantCulture;
-
-            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
-            {
-                if (string.Equals(x.Name, enumValue, mode))
-                    return true;
-
-                var xmlEnumAttrib = XmlAttributeCache<XmlEnumAttribute>.GetCustomAttribute(x);
-                if (xmlEnumAttrib != null && string.Equals(xmlEnumAttrib.Name, enumValue, mode))
-                    return true;
-
-                var descriptionAttr = XmlAttributeCache<DescriptionAttribute>.GetCustomAttribute(x);
-                return descriptionAttr != null && string.Equals(descriptionAttr.Description, enumValue, mode);
-            });
-
-            // must be a valid enumeration member
-            if (!enumType.IsEnum || enumMember == null)
-            {
-                throw new ArgumentException();
-            }
-
-            return Enum.Parse(enumType, enumMember.Name, ignoreCase);
-        }
-#endif
 
         /// <summary>
         /// Determines whether the specified type is numeric.

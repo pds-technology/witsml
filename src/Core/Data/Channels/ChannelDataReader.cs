@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -54,27 +55,32 @@ namespace PDS.WITSMLstudio.Data.Channels
         };
 
         private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
-        private static readonly string[] _empty = new string[0];
+        private static readonly IList<string> _empty = new List<string>(0);
 
         private List<List<List<object>>> _records;
         private IList<Range<double?>> _ranges;
-        private readonly string[] _originalMnemonics;
-        private readonly string[] _originalUnits;
-        private readonly string[] _originalDataTypes;
-        private readonly string[] _originalNullValues;
-        private string[] _allMnemonics;
-        private string[] _allUnits;
-        private string[] _allDataTypes;
-        private string[] _allNullValues;
+        private readonly IList<string> _originalMnemonics;
+        private readonly Dictionary<string, int> _originalMnemonicsMap;
+        private readonly IList<string> _originalUnits;
+        private readonly IList<string> _originalDataTypes;
+        private readonly IList<string> _originalNullValues;
+        private IList<string> _allMnemonics;
+        private Dictionary<string, int> _allMnemonicsMap;
+        private IList<string> _allUnits;
+        private IList<string> _allDataTypes;
+        private IList<string> _allNullValues;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
         private bool _settingMerged;
         private Dictionary<string, int> _indexMap;
 
+        private IList<string> _mnemonics;
+
         [NonSerialized]
         private Range<double?> _chunkRange;
-        private readonly List<string[]> _recordMnemonics;
+        private readonly List<IList<string>> _recordMnemonics;
+        private readonly List<Dictionary<string, int>> _recordMnemonicsMaps;
 
         /// <summary>
         /// Ordinal position of mnemonics that are included in slicing.  Null if reader is not sliced.
@@ -93,7 +99,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
-        public ChannelDataReader(IList<string> data, int count, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+        public ChannelDataReader(IList<string> data, int count, IList<string> mnemonics = null, IList<string> units = null, IList<string> dataTypes = null, IList<string> nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
             : this(Combine(data, dataDelimiter, count, 1), mnemonics, units, dataTypes, nullValues, uri, id)
         {
         }
@@ -126,7 +132,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null)
+        public ChannelDataReader(string data, IList<string> mnemonics = null, IList<string> units = null, IList<string> dataTypes = null, IList<string> nullValues = null, string uri = null, string id = null)
             : this(Deserialize(data), mnemonics, units, dataTypes, nullValues, uri, id)
         {
         }
@@ -148,10 +154,12 @@ namespace PDS.WITSMLstudio.Data.Channels
             _records = items.Select(x => x.Record._records[x.Row]).ToList();
 
             _recordMnemonics = items.Select(x => x.Mnemonics).ToList();
+            _recordMnemonicsMaps = _recordMnemonics.Select(CreateIndexMapping).ToList();
 
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = record?.Mnemonics ?? _empty;
+            _originalMnemonicsMap = CreateIndexMapping(_originalMnemonics);
             _originalUnits = record?.Units ?? _empty;
             _originalDataTypes = record?.DataTypes ?? _empty;
             _originalNullValues = record?.NullValues ?? _empty;
@@ -174,7 +182,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null)
+        internal ChannelDataReader(List<List<List<object>>> records, IList<string> mnemonics = null, IList<string> units = null, IList<string> dataTypes = null, IList<string> nullValues = null, string uri = null, string id = null)
         {
             _log.Verbose("ChannelDataReader instance created");
 
@@ -182,6 +190,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = mnemonics ?? _empty;
+            _originalMnemonicsMap = CreateIndexMapping(_originalMnemonics);
             _originalUnits = units ?? _empty;
             _originalDataTypes = dataTypes ?? _empty;
             _originalNullValues = nullValues ?? _empty;
@@ -210,58 +219,72 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Gets all mnemonics.
         /// </summary>
-        public string[] AllMnemonics
+        public IList<string> AllMnemonics
         {
-            get { return Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray(); }
+            get { return Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToList(); }
         }
 
         /// <summary>
         /// Gets the mnemonics included in slicing or all mnemonics if not sliced.
         /// </summary>
         /// <value>The list of channel mnemonics.</value>
-        public string[] Mnemonics { get; private set; }
+        public IList<string> Mnemonics
+        {
+            get => new ReadOnlyCollection<string>(_mnemonics);
+            private set
+            {
+                _mnemonics = value;
+                MnemonicsMap = new ReadOnlyDictionary<string, int>(CreateIndexMapping(_mnemonics));
+            }
+        }
+
+        /// <summary>
+        /// Gets the mnemonics included in slicing or all mnemonics if not sliced.
+        /// </summary>
+        /// <value>The list of channel mnemonics.</value>
+        public IDictionary<string, int> MnemonicsMap { get; private set; }
 
         /// <summary>
         /// Gets all units.
         /// </summary>
-        public string[] AllUnits
+        public IList<string> AllUnits
         {
-            get { return Indices.Select(i => i.Unit).Concat(Units).ToArray(); }
+            get { return Indices.Select(i => i.Unit).Concat(Units).ToList(); }
         }
 
         /// <summary>
         /// Gets the units included in slicing or all units if not sliced.
         /// </summary>
         /// <value>The list of channel units.</value>
-        public string[] Units { get; private set; }
+        public IList<string> Units { get; private set; }
 
         /// <summary>
         /// Get all data types.
         /// </summary>
-        public string[] AllDataTypes
+        public IList<string> AllDataTypes
         {
-            get { return Indices.Select(i => i.DataType).Concat(DataTypes).ToArray(); }
+            get { return Indices.Select(i => i.DataType).Concat(DataTypes).ToList(); }
         }
 
         /// <summary>
         /// Gets the data types included in slicing or all units if not sliced.
         /// </summary>
         /// <value> The data types. </value>
-        public string[] DataTypes { get; private set; }
+        public IList<string> DataTypes { get; private set; }
 
         /// <summary>
         /// Gets all null values.
         /// </summary>
-        public string[] AllNullValues
+        public IList<string> AllNullValues
         {
-            get { return Indices.Select(i => i.NullValue).Concat(NullValues).ToArray(); }
+            get { return Indices.Select(i => i.NullValue).Concat(NullValues).ToList(); }
         }
 
         /// <summary>
         /// Gets the null values included in slicing or all null values if not sliced.
         /// </summary>
         /// <value>The list of null values.</value>
-        public string[] NullValues { get; private set; }
+        public IList<string> NullValues { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to include the unit with the name.
@@ -468,9 +491,9 @@ namespace PDS.WITSMLstudio.Data.Channels
                 case IndexOrder.Before:
                     {
                         var row = _records[_current][1];
-                        for (var i = 0; i < Mnemonics.Length; i++)
+                        for (var i = 0; i < Mnemonics.Count; i++)
                         {
-                            if (i < _originalMnemonics.Length)
+                            if (i < _originalMnemonics.Count)
                             {
                                 var mnemonic = _originalMnemonics[i];
                                 var index = update.GetChannelIndex(mnemonic);
@@ -495,7 +518,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 case IndexOrder.Same:
                     {
                         var row = _records[_current][1];
-                        for (var i = 0; i < update.Mnemonics.Length; i++)
+                        for (var i = 0; i < update.Mnemonics.Count; i++)
                         {
                             var mnemonic = update.Mnemonics[i];
                             var index = _indexMap[mnemonic];
@@ -537,10 +560,10 @@ namespace PDS.WITSMLstudio.Data.Channels
                 values.Add(null);
             }
 
-            for (var i = 0; i < Mnemonics.Length; i++)
+            for (var i = 0; i < Mnemonics.Count; i++)
             {
                 var mnemonic = Mnemonics[i];
-                var index = Array.IndexOf(_originalMnemonics, mnemonic);
+                var index = GetChannelIndex(mnemonic);
                 if (index < 0)
                     continue;
 
@@ -557,7 +580,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <returns></returns>
         public int GetChannelIndex(string mnemonic)
         {
-            return Array.IndexOf(_originalMnemonics, mnemonic);
+            return GetOrdinal(mnemonic, _originalMnemonicsMap);
         }
 
         /// <summary>
@@ -579,7 +602,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 record.ResetMergeSettings();
                 if (append)
                 {
-                    for (var i = 0; i < record.Mnemonics.Length; i++)
+                    for (var i = 0; i < record.Mnemonics.Count; i++)
                     {
                         var mnemonic = record.Mnemonics[i];
                         if (Mnemonics.Contains(mnemonic))
@@ -591,16 +614,16 @@ namespace PDS.WITSMLstudio.Data.Channels
 
                     if (mnemonics.Count > 0)
                     {
-                        Mnemonics = Mnemonics.Concat(mnemonics.ToArray()).ToArray();
-                        Units = Units.Concat(units.ToArray()).ToArray();
-                        NullValues = NullValues.Concat(nullValues.ToArray()).ToArray();
+                        Mnemonics = Mnemonics.Concat(mnemonics).ToList();
+                        Units = Units.Concat(units).ToList();
+                        NullValues = NullValues.Concat(nullValues).ToList();
                     }
 
                     UpdateIndexMap();
                 }
                 else
                 {
-                    for (var i = 0; i < Mnemonics.Length; i++)
+                    for (var i = 0; i < Mnemonics.Count; i++)
                     {
                         var mnemonic = Mnemonics[i];
                         if (record.Mnemonics.Contains(mnemonic))
@@ -612,9 +635,9 @@ namespace PDS.WITSMLstudio.Data.Channels
 
                     if (mnemonics.Count > 0)
                     {
-                        Mnemonics = record.Mnemonics.Concat(mnemonics.ToArray()).ToArray();
-                        Units = record.Units.Concat(units.ToArray()).ToArray();
-                        NullValues = record.NullValues.Concat(nullValues.ToArray()).ToArray();
+                        Mnemonics = record.Mnemonics.Concat(mnemonics).ToList();
+                        Units = record.Units.Concat(units).ToList();
+                        NullValues = record.NullValues.Concat(nullValues).ToList();
                     }
                 }
 
@@ -659,7 +682,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             var newRow = new List<object>();
             var index = GetIndexValue();
 
-            for (var i = 0; i < _originalMnemonics.Length; i++)
+            for (var i = 0; i < _originalMnemonics.Count; i++)
             {
                 var mnemonic = _originalMnemonics[i];
                 if (deletedChannels.Contains(mnemonic))
@@ -764,8 +787,8 @@ namespace PDS.WITSMLstudio.Data.Channels
             if (channelIndex == null)
                 return Range.Empty;
 
-            var start = GetIndexValues(0).Skip(index).FirstOrDefault();
-            var end = GetIndexValues(RecordsAffected - 1).Skip(index).FirstOrDefault();
+            var start = FrameworkExtensions.Skip(GetIndexValues(0), index).FirstOrDefault();
+            var end = FrameworkExtensions.Skip(GetIndexValues(RecordsAffected - 1), index).FirstOrDefault();
 
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
@@ -785,7 +808,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // If there is no data then no need to evaluate
             if (RecordsAffected > 0)
             {
-                var allSlices = Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray();
+                var allSlices = Indices.Select(i => i.Mnemonic).Concat(Mnemonics);
 
                 allSlices.ForEach(m =>
                 {
@@ -1113,7 +1136,26 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </returns>
         public int GetOrdinal(string name)
         {
-            return Array.FindIndex(GetAllMnemonics(), m => m.EqualsIgnoreCase(name));
+            GetAllMnemonics();
+
+            return GetOrdinal(name, _allMnemonicsMap);
+        }
+
+        /// <summary>
+        /// Return the index of the named field.
+        /// </summary>
+        /// <param name="key">The name of the field to find.</param>
+        /// <param name="map">The mapping</param>
+        /// <returns>
+        /// The index of the named field.
+        /// </returns>
+        private int GetOrdinal<T>(T key, Dictionary<T, int> map)
+        {
+            int index;
+            if (map.TryGetValue(key, out index))
+                return index;
+
+            return -1;
         }
 
         /// <summary>
@@ -1200,7 +1242,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting the value at col: {0}", i);
 
-            var value = rowValues.Skip(i).FirstOrDefault();
+            var value = FrameworkExtensions.Skip(rowValues, i).FirstOrDefault();
             var array = value as JArray;
 
             if (array != null && array.Count == 1)
@@ -1223,14 +1265,12 @@ namespace PDS.WITSMLstudio.Data.Channels
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting the values for row: {0}", _current);
 
+            var count = 0;
             // Slice the results of GetRowValues
-            var rowValues = GetRowValues(_current)
-                .Where((r, i) => SliceExists(i))
-                .ToList();
-
-            var count = Math.Min(values.Length, rowValues.Count);
-            var source = rowValues.Take(count).ToArray();
-            Array.Copy(source, values, count);
+            foreach (var value in  GetRowValues(_current).Where((r, i) => i < values.Length && SliceExists(i)))
+            {
+                values[count++] = value;
+            }
 
             return count;
         }
@@ -1387,12 +1427,13 @@ namespace PDS.WITSMLstudio.Data.Channels
             _log.Debug("Slicing the channels without any data.");
 
             // Remove the index mnemonic from the mnemonicSlices
-            var indices = Indices.Select(i => i.Mnemonic).ToArray();
-            var slices = mnemonicSlices.Values.ToArray()
+            var indices = Indices.Select(i => i.Mnemonic).ToList();
+            var slices = mnemonicSlices.Values
                 .Where(m => !indices.Contains(m))
-                .ToArray();
+                .ToList();
 
             _allMnemonics = null;
+            _allMnemonicsMap = null;
             _allUnits = null;
             _allSliceOrdinals = null;
             _allDataTypes = null;
@@ -1406,27 +1447,27 @@ namespace PDS.WITSMLstudio.Data.Channels
             var allDataTypes = GetAllDataTypes();
             var allNulls = GetAllNullValues();
 
+            GetAllMnemonics();
             // Cache all mnemonic ordinal positions
-            var allOrdinals = GetAllMnemonics()
-                .ToDictionary(x => x, GetOrdinal);
+            var allOrdinals = _allMnemonicsMap;
 
             // Call GetChannelRanges so we can see which ranges have data or not.  
             //... Ranges will only be calculated for the current slices.
             var ranges = GetChannelRanges();
 
             // Apply slicing to mnemonics and units without any data (range)
-            Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
+            Mnemonics = Mnemonics.Where(m => ranges.ContainsKey(m)).ToList();
 
             // Get the ordinal position of each slice.
-            var sliceOrdinals = Mnemonics.Select(x => allOrdinals[x]).ToArray();
+            var sliceOrdinals = Mnemonics.Select(x => allOrdinals[x]);
 
             // All Slice Ordinals including the ordinals for indexes
-            _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray()
+            _allSliceOrdinals = Enumerable.Range(0, Depth)
                 .Concat(sliceOrdinals).ToArray();
 
-            Units = Mnemonics.Select(m => allUnits[allOrdinals[m]]).ToArray();
-            DataTypes = Mnemonics.Select(m => allDataTypes[allOrdinals[m]]).ToArray();
-            NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
+            Units = Mnemonics.Select(m => allUnits[allOrdinals[m]]).ToList();
+            DataTypes = Mnemonics.Select(m => allDataTypes[allOrdinals[m]]).ToList();
+            NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToList();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
@@ -1434,7 +1475,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 var allMnemonics = AllMnemonics;
 
                 // Get mnemonic ids for mnemonics that are not in the reader's mnemonics
-                var removeKeys = mnemonicSlices.Where(m => !allMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
+                var removeKeys = mnemonicSlices.Where(m => !allMnemonics.Contains(m.Value)).Select(m => m.Key);
 
                 // Remove mnemonics and corresponding units that are not in the reader
                 removeKeys.ForEach(k =>
@@ -1447,7 +1488,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             }
 
             // After slicing set the allNullValues context for next getData
-            _allNullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
+            _allNullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToList();
         }
 
         /// <summary>
@@ -1471,12 +1512,14 @@ namespace PDS.WITSMLstudio.Data.Channels
             int maxDataPoints = context.MaxDataPoints;
 
             var dataPointCount = 0;
-            var channelCount = AllMnemonics.Length;
+            var channelCount = AllMnemonics.Count;
             var channelData = new List<List<List<object>>>();
+            var slicedMnemonics = mnemonicSlices.Values.ToArray();
+            var slicedMnemonicsMap = CreateIndexMapping(slicedMnemonics);
 
             // Ranges will only be returned for channels that are included in slicing
             //... and contain data.
-            ranges = InitializeSliceRanges(mnemonicSlices.Values.ToArray());
+            ranges = InitializeSliceRanges(slicedMnemonics);
 
             // Create and initialize value count dictionary for channels
             Dictionary<int, int> requestedValueCount = null;
@@ -1486,20 +1529,18 @@ namespace PDS.WITSMLstudio.Data.Channels
             {
                 // Use _allSliceOrdinals that includes the index ordinals
                 //... to initialize requestedValueCount.
-                requestedValueCount = new Dictionary<int, int>();
                 if (_allSliceOrdinals == null)
                 {
-                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => m.Key)).Skip(Depth).ToArray();
+                    _allSliceOrdinals = mnemonicSlices.Keys.ToArray();
                 }
-                _allSliceOrdinals.ForEach(s => requestedValueCount.Add(s, 0));
+                requestedValueCount = _allSliceOrdinals.ToDictionary(x => x, x => 0);
             }
 
             // Read through all of the data
             while (Read())
             {
                 var rowValues = GetRowValues(_current).ToArray();
-                var slicedMnemonics = mnemonicSlices.Values.ToArray();
-                var fullRowValues = GetFullRowValues(rowValues, slicedMnemonics);
+                var fullRowValues = GetFullRowValues(rowValues, slicedMnemonics, slicedMnemonicsMap);
 
                 // If there is no channel data in the current row then don't process it
                 if (!HasValues(slicedMnemonics, fullRowValues)) continue;
@@ -1507,7 +1548,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 // Note: This was removed because it was too verbose but can be used later if needed.
                 //_log.DebugFormat("Appending channel data values for row: {0}", _current);
 
-                var channelValues = fullRowValues.Skip(Depth).ToList();
+                var channelValues = new ArraySegment<object>(fullRowValues, Depth, Math.Max(0, fullRowValues.Length - Depth)); //fullRowValues.Skip(Depth).ToList();
 
                 // Skip rows with no channel values
                 if (channelValues.Count < 1) continue;
@@ -1546,7 +1587,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                     else
                     {
                         // Update ranges for the current primaryIndex
-                        UpdateRanges(allValues, mnemonicSlices.Values.ToArray(), ranges, primaryIndex);
+                        UpdateRanges(allValues, slicedMnemonics, ranges, primaryIndex);
                     }
                 }
 
@@ -1576,7 +1617,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             }
 
             // if any ranges are empty, then we must (re)slice
-            if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
+            if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Count <= 0)
                 return channelData;
 
             _log.Debug("Re-slicing remaining channels with no data.");
@@ -1584,9 +1625,9 @@ namespace PDS.WITSMLstudio.Data.Channels
 
 
             using (
-                var reader = new ChannelDataReader(channelData, mnemonicSlices.Values.ToArray().Skip(Depth).ToArray(),
-                        units.Values.Skip(Depth).ToArray(), dataTypes.Values.Skip(Depth).ToArray(),
-                        nullValues.Values.Skip(Depth).ToArray())
+                var reader = new ChannelDataReader(channelData, slicedMnemonics.Skip(Depth).ToList(),
+                        units.Values.Skip(Depth).ToList(), dataTypes.Values.Skip(Depth).ToList(),
+                        nullValues.Values.Skip(Depth).ToList())
                     .WithIndices(Indices))
             {
                 reader.Slice(mnemonicSlices, units, dataTypes, nullValues);
@@ -1601,9 +1642,9 @@ namespace PDS.WITSMLstudio.Data.Channels
             return channelData;
         }
 
-        private object[] GetFullRowValues(object[] rowValues, string[] slicedMnemonics)
+        private object[] GetFullRowValues(object[] rowValues, string[] slicedMnemonics, Dictionary<string, int> slicedMnemonicsMap)
         {
-            var rowMnemonics = _recordMnemonics != null ? _recordMnemonics[_current] : slicedMnemonics;
+            var rowMnemonicsMap = _recordMnemonicsMaps != null ? _recordMnemonicsMaps[_current] : slicedMnemonicsMap;
             var fullRow = new object[slicedMnemonics.Length];
 
             // Add all of the indexes to the full row
@@ -1619,7 +1660,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 {
                     // Compute the source index for the sliced mnemonic we're looking for
                     var channel = slicedMnemonics[i];
-                    var index = Array.IndexOf(rowMnemonics, channel);
+                    var index = GetOrdinal(channel, rowMnemonicsMap);
 
                     // If the mnemonic is not in our row try another
                     if (index <= -1)
@@ -1705,14 +1746,12 @@ namespace PDS.WITSMLstudio.Data.Channels
         {
             _log.Debug("Updating request latest values count for all channels.");
 
-            var valueArray = values.ToArray();
-
-            for (var i = 0; i < valueArray.Length; i++)
+            for (var i = 0; i < values.Count; i++)
             {
                 var ordinal = _allSliceOrdinals[i];
                 var mnemonic = mnemonicSlices[ordinal];
 
-                if (requestedValueCount.ContainsKey(ordinal) && !IsNull(valueArray[i], ordinal))
+                if (requestedValueCount.ContainsKey(ordinal) && !IsNull(values[i], ordinal))
                 {
                     // If first time update for this channel value then start and end index are the same
                     if (requestedValueCount[ordinal] == 0)
@@ -1740,12 +1779,13 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Sets an array of all of the original mnemonics including the index mnemonics.
         /// </summary>
-        private string[] GetAllMnemonics()
+        private IList<string> GetAllMnemonics()
         {
             if (_allMnemonics == null)
             {
                 _log.Debug("Initializing _allMnemonics array.");
-                _allMnemonics = Indices.Select(i => i.Mnemonic).Concat(_originalMnemonics).ToArray();
+                _allMnemonics = Indices.Select(i => i.Mnemonic).Concat(_originalMnemonics).ToList();
+                _allMnemonicsMap = CreateIndexMapping(_allMnemonics);
             }
 
             return _allMnemonics;
@@ -1754,12 +1794,12 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Sets an array of all of the original units including the index units.
         /// </summary>
-        private string[] GetAllUnits()
+        private IList<string> GetAllUnits()
         {
             if (_allUnits == null)
             {
                 _log.Debug("Initializing _allUnits array.");
-                _allUnits = Indices.Select(i => i.Unit).Concat(_originalUnits).ToArray();
+                _allUnits = Indices.Select(i => i.Unit).Concat(_originalUnits).ToList();
             }
 
             return _allUnits;
@@ -1768,13 +1808,13 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <summary>
         /// Sets an array of all of the original data types including the index data types.
         /// </summary>
-        private string[] GetAllDataTypes()
+        private IList<string> GetAllDataTypes()
         {
             if (_allDataTypes == null)
             {
                 _log.Debug("Initializing _allDataTypes array.");
                 //todo: When data type is persisted in chunk use _originalDataTypes instead
-                _allDataTypes = Indices.Select(i => i.DataType).Concat(_originalMnemonics).ToArray();
+                _allDataTypes = Indices.Select(i => i.DataType).Concat(_originalMnemonics).ToList();
             }
 
             return _allDataTypes;
@@ -1784,7 +1824,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// Gets all null values.
         /// </summary>
         /// <returns></returns>
-        private string[] GetAllNullValues()
+        private IList<string> GetAllNullValues()
         {
             if (_allNullValues == null)
             {
@@ -1792,7 +1832,7 @@ namespace PDS.WITSMLstudio.Data.Channels
                 _allNullValues = Indices
                     .Select(i => i.NullValue.TrimTrailingZeros())
                     .Concat(_originalNullValues.Select(n => n.TrimTrailingZeros()))
-                    .ToArray();
+                    .ToList();
             }
 
             return _allNullValues;
@@ -1806,16 +1846,14 @@ namespace PDS.WITSMLstudio.Data.Channels
         private IEnumerable<object> GetRowValues(int row)
         {
             // Allow access to any legitimate row
-            if (row < -1 || row >= _records.Count)
+            if (row < 0 || row >= _records.Count)
                 return Enumerable.Empty<object>();
 
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting all values for row: {0}", row);
 
-            return _records
-                .Skip(row)
-                .Take(1)
-                .SelectMany(x => x.SelectMany(y => y));
+            return _records[row]
+                .SelectMany(x => x);
         }
 
         /// <summary>
@@ -1825,16 +1863,13 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <returns>An <see cref="IEnumerable{Object}"/> of index values for a given row.</returns>
         private IEnumerable<object> GetIndexValues(int row)
         {
-            if (IsClosed)
+            if (IsClosed || row < 0 || row >= _records.Count)
                 return Enumerable.Empty<object>();
 
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting index values for row: {0}", row);
 
-            return _records
-                .Skip(row)
-                .Take(1)
-                .SelectMany(x => x.First());
+            return _records[row][0];
         }
 
         /// <summary>
@@ -1844,17 +1879,15 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <returns> A <see cref="IDictionary{TKey, TValue}"/></returns>
         private IDictionary<int, object> GetChannelValuesByOrdinal(int row)
         {
-            if (IsClosed)
+            if (IsClosed || row < 0 || row >= _records.Count)
                 return new Dictionary<int, object>();
 
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting channel values for row: {0}", row);
 
+            var record = _records[row];
             // Slice row
-            return _records
-                .Skip(row)
-                .Take(1)
-                .SelectMany(x => x.Last())
+            return record[record.Count - 1]
                 .Select((v, i) => new { Value = v, Index = i })
                 .Where((r, i) => SliceExists(i + Depth))  // We need to look at the i-th + Depth slice since we're only looking at channel values
                 .ToDictionary(x => x.Index + Depth, x => x.Value);
@@ -1898,27 +1931,42 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             if (SliceExists(i))
             {
-                // Find start
-                foreach (var record in _records)
+                for (int forwardIndex = 0, reverseIndex = _records.Count - 1;
+                    forwardIndex < _records.Count && (null == start || null == end);
+                    ++forwardIndex, --reverseIndex)
                 {
-                    var value = record.Last().Skip(valueIndex).FirstOrDefault();
-
-                    if (!IsNull(value, i))
+                    // Find start
+                    if (null == start)
                     {
-                        start = record[0][0];
-                        break;
+                        var row = _records[forwardIndex];
+                        var record = row.Last();
+
+                        if (record.Count > valueIndex)
+                        {
+                            var value = record[valueIndex];
+
+                            if (!IsNull(value, i))
+                            {
+                                start = row[0][0];
+                            }
+                        }
                     }
-                }
 
-                // Find end
-                foreach (var record in _records.AsEnumerable().Reverse())
-                {
-                    var value = record.Last().Skip(valueIndex).FirstOrDefault();
-
-                    if (!IsNull(value, i))
+                    // Find end
+                    if (null == end)
                     {
-                        end = record[0][0];
-                        break;
+                        var row = _records[reverseIndex];
+                        var record = row.Last();
+
+                        if (record.Count > valueIndex)
+                        {
+                            var value = record[valueIndex];
+
+                            if (!IsNull(value, i))
+                            {
+                                end = row[0][0];
+                            }
+                        }
                     }
                 }
             }
@@ -2021,7 +2069,7 @@ namespace PDS.WITSMLstudio.Data.Channels
             double number;
 
             if (IsNull(value))
-                return "null";
+                return Null;
 
             value = value.Trim();
 
@@ -2066,11 +2114,11 @@ namespace PDS.WITSMLstudio.Data.Channels
         {
             if (value == null) return true;
 
-            var stringValue = $"{value}";
+            var stringValue = value.ToString(); // $"{value}";
             if (IsNull(stringValue)) return true;
 
             var nullValues = GetAllNullValues();
-            if (channelIndex >= nullValues.Length) return false;
+            if (channelIndex >= nullValues.Count) return false;
 
             var nullValue = nullValues[channelIndex];
             if (string.IsNullOrWhiteSpace(nullValue)) return false;
@@ -2189,14 +2237,14 @@ namespace PDS.WITSMLstudio.Data.Channels
             _indexMap = new Dictionary<string, int>();
             if (withinRange)
             {
-                for (var i = 0; i < Mnemonics.Length; i++)
+                for (var i = 0; i < Mnemonics.Count; i++)
                 {
                     _indexMap.Add(Mnemonics[i], i);
                 }
             }
             else
             {
-                for (var i = 0; i < _originalMnemonics.Length; i++)
+                for (var i = 0; i < _originalMnemonics.Count; i++)
                 {
                     _indexMap.Add(_originalMnemonics[i], i);
                 }
@@ -2206,6 +2254,12 @@ namespace PDS.WITSMLstudio.Data.Channels
         private bool WithinDeleteRange(double index, Range<double?> range, bool increasing)
         {
             return !range.StartsAfter(index, increasing) && !range.EndsBefore(index, increasing);
+        }
+
+        private static Dictionary<T, int> CreateIndexMapping<T>(IEnumerable<T> values)
+        {
+            return values.Select((value, index) => new {value, index})
+                .ToDictionary(entry => entry.value, entry => entry.index);
         }
 
         #region IDisposable Support

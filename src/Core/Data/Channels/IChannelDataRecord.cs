@@ -73,7 +73,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <value>
         /// The channel data mnemonics.
         /// </value>
-        string[] Mnemonics { get; }
+        IList<string> Mnemonics { get; }
 
         /// <summary>
         /// Gets the channel data units.
@@ -81,7 +81,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <value>
         /// The channel data units.
         /// </value>
-        string[] Units { get; }
+        IList<string> Units { get; }
 
         /// <summary>
         /// Gets the channel data null values.
@@ -89,7 +89,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <value>
         /// The channel data null values.
         /// </value>
-        string[] NullValues { get; }
+        IList<string> NullValues { get; }
 
         /// <summary>
         /// Gets the number of indices for the data.

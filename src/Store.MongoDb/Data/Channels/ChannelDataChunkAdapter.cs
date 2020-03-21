@@ -473,9 +473,9 @@ namespace PDS.WITSMLstudio.Store.Data.Channels
             double startIndex = 0;
             double endIndex = 0;
             double? previousIndex = null;
-            string[] chunkMnemonics = null;
-            string[] chunkUnits = null;
-            string[] chunkNullValues = null;
+            IList<string> chunkMnemonics = null;
+            IList<string> chunkUnits = null;
+            IList<string> chunkNullValues = null;
             var chunkSettingsSet = false;
 
             foreach (var record in records)

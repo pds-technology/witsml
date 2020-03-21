@@ -73,8 +73,12 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
 
             LogGenerator.GenerateChannelData(dataBlock, numRows);
 
+            var reader = dataBlock.GetReader();
+
+            Assert.IsTrue(reader.Read());
+
             // Read the first value for mnemonic "MSG"
-            var msgValue = dataBlock.GetReader()["MSG"];
+            var msgValue = reader["MSG"];
 
             // Submit channel data
             _channelDataProvider.UpdateChannelData(uri, dataBlock.GetReader());

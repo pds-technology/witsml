@@ -127,7 +127,7 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             List<List<List<object>>> logData;
 
             var entity = GetEntity(uri);
-            var queryMnemonics = mnemonics.ToArray();
+            var queryMnemonics = new HashSet<string>(mnemonics, StringComparer.InvariantCultureIgnoreCase);
 
             // Create a context to pass information required by the ChannelDataReader.
             var context = new ResponseContext()
@@ -384,12 +384,12 @@ namespace PDS.WITSMLstudio.Store.Data.ChannelSets
             return GetIgnoredElementNamesForQuery(parser);
         }
 
-        private string[] GetAllMnemonics(ChannelSet entity)
+        private List<string> GetAllMnemonics(ChannelSet entity)
         {
-            return entity.Index.Select(i => i.Mnemonic).Concat(entity.Channel.Select(c => c.Mnemonic)).ToArray();
+            return entity.Index.Select(i => i.Mnemonic).Concat(entity.Channel.Select(c => c.Mnemonic)).ToList();
         }
 
-        private IDictionary<int, string> ComputeMnemonicIndexes(ChannelSet entity, string[] allMnemonics, string[] queryMnemonics)
+        private IDictionary<int, string> ComputeMnemonicIndexes(ChannelSet entity, IList<string> allMnemonics, HashSet<string> queryMnemonics)
         {
             Logger.DebugFormat("Computing mnemonic indexes for ChannelSet.");
 
