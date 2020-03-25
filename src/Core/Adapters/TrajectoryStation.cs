@@ -117,37 +117,100 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the measured depth.
         /// </summary>
-        public double? MD => _trajectoryStation131?.MD.Value ?? _trajectoryStation141?.MD.Value;
+        public double? MD => _trajectoryStation131?.MD?.Value ?? _trajectoryStation141?.MD?.Value;
 
         /// <summary>
         /// Gets the true vertical depth.
         /// </summary>
-        public double? Tvd => _trajectoryStation131?.Tvd.Value ?? _trajectoryStation141?.Tvd.Value;
+        public double? Tvd => _trajectoryStation131?.Tvd?.Value ?? _trajectoryStation141?.Tvd?.Value;
 
         /// <summary>
         /// Gets the inclination.
         /// </summary>
-        public double? Incl => _trajectoryStation131?.Incl.Value ?? _trajectoryStation141?.Incl.Value;
+        public double? Incl => _trajectoryStation131?.Incl?.Value ?? _trajectoryStation141?.Incl?.Value;
 
         /// <summary>
         /// Gets the azimuth.
         /// </summary>
-        public double? Azi => _trajectoryStation131?.Azi.Value ?? _trajectoryStation141?.Azi.Value;
+        public double? Azi => _trajectoryStation131?.Azi?.Value ?? _trajectoryStation141?.Azi?.Value;
 
         /// <summary>
         /// Gets the magnetic toolface.
         /// </summary>
-        public double? Mtf => _trajectoryStation131?.Mtf.Value ?? _trajectoryStation141?.Mtf.Value;
+        public double? Mtf => _trajectoryStation131?.Mtf?.Value ?? _trajectoryStation141?.Mtf?.Value;
 
         /// <summary>
         /// Gets the gravity toolface.
         /// </summary>
-        public double? Gtf => _trajectoryStation131?.Gtf.Value ?? _trajectoryStation141?.Gtf.Value;
+        public double? Gtf => _trajectoryStation131?.Gtf?.Value ?? _trajectoryStation141?.Gtf?.Value;
 
         /// <summary>
         /// Gets the dogleg severity.
         /// </summary>
-        public double? DoglegSeverity => _trajectoryStation131?.DoglegSeverity.Value ?? _trajectoryStation141?.DoglegSeverity.Value;
+        public double? DoglegSeverity => _trajectoryStation131?.DoglegSeverity?.Value ?? _trajectoryStation141?.DoglegSeverity?.Value;
+
+        ///<summary>
+        /// Gets the vertical section
+        /// </summary>
+        public LengthMeasure VertSect
+        {
+            get
+            {
+                if (_trajectoryStation131?.VertSect != null)
+                {
+                    return new LengthMeasure(_trajectoryStation131.VertSect);
+                }
+
+                if (_trajectoryStation141?.VertSect != null)
+                {
+                    return new LengthMeasure(_trajectoryStation141.VertSect);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Returns the dispEw / easting value
+        /// </summary>
+        public LengthMeasure DispEW
+        {
+            get
+            {
+                if (_trajectoryStation131?.DispEW != null)
+                {
+                    return new LengthMeasure(_trajectoryStation131.DispEW);
+                }
+
+                if (_trajectoryStation141?.DispEW != null)
+                {
+                    return new LengthMeasure(_trajectoryStation141.DispEW);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// returns the dispNs / northing value
+        /// </summary>
+        public LengthMeasure DispNS
+        {
+            get
+            {
+                if (_trajectoryStation131?.DispNS != null)
+                {
+                    return new LengthMeasure(_trajectoryStation131.DispNS);
+                }
+
+                if (_trajectoryStation141?.DispNS != null)
+                {
+                    return new LengthMeasure(_trajectoryStation141.DispNS);
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>
         /// Gets the trajectory stations.
