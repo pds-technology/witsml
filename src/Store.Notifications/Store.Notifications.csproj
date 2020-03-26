@@ -121,39 +121,39 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
       <Project>{57ea0f9f-5e9a-4788-9738-be3381343e1a}</Project>
       <Name>DataAccess.PRODML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
       <Project>{6d7cdb8e-b137-4ad0-8a8d-7eeaafb69960}</Project>
       <Name>DataAccess.RESQML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
       <Project>{8184e6c9-3746-40e5-8b81-6f24785c3739}</Project>
       <Name>DataAccess.WITSML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
       <Project>{3f3d2683-6036-4c06-911d-2db5c1682d91}</Project>
       <Name>DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\src\DevKit\DevKit.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\src\DevKit\DevKit.csproj">
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>DevKit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework\Framework.csproj">
+    <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
+    <ProjectReference Include="..\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Store.Core</Name>
     </ProjectReference>

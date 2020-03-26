@@ -271,43 +271,43 @@
     <Content Include="Studio\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\src\DevKit\DevKit.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\src\DevKit\DevKit.csproj">
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>DevKit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework.Web\Framework.Web.csproj">
+    <ProjectReference Include="..\Framework.Web\Framework.Web.csproj">
       <Project>{90a1fd9f-6a85-4ad2-8523-1360034dcd76}</Project>
       <Name>Framework.Web</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework\Framework.csproj">
+    <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Jobs\Store.Jobs.csproj">
+    <ProjectReference Include="..\Store.Jobs\Store.Jobs.csproj">
       <Project>{006f1a29-952b-4264-8e91-0d445f74b183}</Project>
       <Name>Store.Jobs</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
       <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
       <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb\Store.MongoDb.csproj">
+    <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
       <Name>Store.MongoDb</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Web\Store.Web.csproj">
+    <ProjectReference Include="..\Store.Web\Store.Web.csproj">
       <Project>{5ff377f4-56c5-49d9-ba0a-1955a33c4902}</Project>
       <Name>Store.Web</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
+    <ProjectReference Include="..\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Store.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
     </ProjectReference>

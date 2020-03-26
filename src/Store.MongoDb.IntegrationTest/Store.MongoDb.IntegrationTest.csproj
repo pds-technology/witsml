@@ -198,59 +198,59 @@
     <Compile Include="TestContextProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.PRODML\DataAccess.PRODML.csproj">
       <Project>{57ea0f9f-5e9a-4788-9738-be3381343e1a}</Project>
       <Name>DataAccess.PRODML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.RESQML\DataAccess.RESQML.csproj">
       <Project>{6d7cdb8e-b137-4ad0-8a8d-7eeaafb69960}</Project>
       <Name>DataAccess.RESQML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess.WITSML\DataAccess.WITSML.csproj">
       <Project>{8184e6c9-3746-40e5-8b81-6f24785c3739}</Project>
       <Name>DataAccess.WITSML</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
+    <ProjectReference Include="..\..\ext\devkit-c\source\DevKitGenerator\DataAccess\DataAccess.csproj">
       <Project>{3f3d2683-6036-4c06-911d-2db5c1682d91}</Project>
       <Name>DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\ext\etp.net\src\ETP.Messages\ETP.Messages.csproj">
       <Project>{1a788a14-70d7-4b2b-96a3-086c86d0c925}</Project>
       <Name>ETP.Messages</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\ext\etp-devkit\src\DevKit\DevKit.csproj">
+    <ProjectReference Include="..\..\ext\etp-devkit\src\DevKit\DevKit.csproj">
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>DevKit</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework.Web\Framework.Web.csproj">
+    <ProjectReference Include="..\Framework.Web\Framework.Web.csproj">
       <Project>{90a1fd9f-6a85-4ad2-8523-1360034dcd76}</Project>
       <Name>Framework.Web</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Framework\Framework.csproj">
+    <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.IntegrationTest\Store.IntegrationTest.csproj">
+    <ProjectReference Include="..\Store.IntegrationTest\Store.IntegrationTest.csproj">
       <Project>{c050ab68-0543-4a23-870c-2d07f872484b}</Project>
       <Name>Store.IntegrationTest</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.Core\Store.Core.csproj">
+    <ProjectReference Include="..\Store.Core\Store.Core.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Store.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Core.UnitTest\Core.UnitTest.csproj">
+    <ProjectReference Include="..\Core.UnitTest\Core.UnitTest.csproj">
       <Project>{750f795f-0c36-4cb3-9372-c4a5a716c635}</Project>
       <Name>Core.UnitTest</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Core\Core.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
+    <ProjectReference Include="..\Store.MongoDb.Common\Store.MongoDb.Common.csproj">
       <Project>{c1fe065b-5750-4d15-84d8-77df756c52d8}</Project>
       <Name>Store.MongoDb.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ext\witsml\src\Store.MongoDb\Store.MongoDb.csproj">
+    <ProjectReference Include="..\Store.MongoDb\Store.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
       <Name>Store.MongoDb</Name>
     </ProjectReference>
