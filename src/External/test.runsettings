@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <!-- Parameters used by tests at runtime -->
+  <TestRunParameters>
+    <Parameter name="MongoDbConnection" value="mongodb://localhost:27017" />
+    <Parameter name="FallbackServerUrl" value="ws://localhost/witsml.web/api/etp" />
+    <Parameter name="WitsmlStoreUrl" value="http://localhost/witsml.web/api/soap" />
+    <Parameter name="WitsmlStoreUsername" value="" />
+    <Parameter name="WitsmlStorePassword" value="" />
+  </TestRunParameters>
+
+  <!-- Configurations for data collectors -->  
+  <DataCollectionRunSettings>  
+    <DataCollectors>  
+      <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">  
+        <Configuration>  
+          <CodeCoverage>  
+            <ModulePaths>  
+              <Exclude>  
+                <ModulePath>.*Energistics.DataAccess.*</ModulePath>  
+                <ModulePath>.*Etp.DevKit.*</ModulePath>  
+                <ModulePath>.*LinqExtender.*</ModulePath>  
+                <ModulePath>.*PDS.*Test\.dll$</ModulePath>  
+                <ModulePath>.*PDS.*Web\.dll$</ModulePath>  
+                <ModulePath>.*super.*socket.*</ModulePath>  
+                <ModulePath>.*antlr.*</ModulePath>  
+              </Exclude>  
+            </ModulePaths>  
+          </CodeCoverage>  
+        </Configuration>  
+      </DataCollector>  
+    </DataCollectors>  
+  </DataCollectionRunSettings>
+
+</RunSettings>

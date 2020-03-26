@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.WITSMLstudio.Store.Notifications" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="KafkaBrokerList" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KafkaPollingIntervalInMilliseconds" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="KafkaUpsertTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Upsert</Value>
+    </Setting>
+    <Setting Name="KafkaDeleteTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Delete</Value>
+    </Setting>
+    <Setting Name="KafkaDebugContexts" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">all</Value>
+    </Setting>
+    <Setting Name="KafkaEnableAutoCommit" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="KafkaInsertTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Insert</Value>
+    </Setting>
+    <Setting Name="KafkaUpdateTopicName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">StoreNotification-Update</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
