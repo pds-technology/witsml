@@ -1222,8 +1222,17 @@ namespace PDS.WITSMLstudio.Data.Channels
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
 
-            var rowValues = GetRowValues(IsClosed ? _records.Count - 1 : _current);
-            return GetValue(rowValues, i);
+            var row = _records[IsClosed ? _records.Count - 1 : _current];
+
+            object value;
+            value = i < Depth
+                ? row[0][i]
+                : row[1][i - Depth];
+
+            return value;
+
+            //var rowValues = GetRowValues(IsClosed ? _records.Count - 1 : _current);
+            //return GetValue(rowValues, i);
         }
 
         /// <summary>
