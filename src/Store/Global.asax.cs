@@ -59,8 +59,17 @@ namespace PDS.WITSMLstudio.Store
                 // Wait before initializing Hangfire to give server time to warm up
                 await Task.Delay(WitsmlSettings.ChangeDetectionPeriod * 1000);
 
+                var storageOptions = new MongoStorageOptions()
+                {
+                    MigrationOptions = new MongoMigrationOptions()
+                    {
+                        Strategy = MongoMigrationStrategy.Migrate,
+                        BackupStrategy = MongoBackupStrategy.None,
+                    }
+                };
+
                 // Configure and register Hangfire jobs
-                Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
+                Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, storageOptions);
                 HangfireConfig.Register(container);
             });
         }
