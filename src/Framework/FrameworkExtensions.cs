@@ -460,6 +460,9 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns></returns>
         public static IEnumerable<T> Skip<T>(this IList<T> values, int count)
         {
+            if (count < 0)
+                count = 0;
+
             while (count < values.Count)
                 yield return values[count++];
         }
@@ -473,6 +476,9 @@ namespace PDS.WITSMLstudio.Framework
         /// <returns></returns>
         public static IEnumerable<T> Skip<T>(this T[] values, int count)
         {
+            if (count < 0)
+                count = 0;
+
             while (count < values.Length)
                 yield return values[count++];
         }
