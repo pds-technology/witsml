@@ -216,8 +216,8 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             if (uri.IsRootUri || uri.IsBaseUri)
                 return true;
 
-            var wellboreObjectTypes = new HashSet<string>(GetWellboreDataAdapters().Select(x => x.DataObjectType.Name), StringComparer.InvariantCultureIgnoreCase);
-            var wellObjectTypes = new HashSet<string>(GetWellDataAdapters().Select(x => x.DataObjectType.Name).Except(wellboreObjectTypes), StringComparer.InvariantCultureIgnoreCase);
+            var wellboreObjectTypes = new HashSet<string>(GetWellboreDataAdapters().Select(x => ObjectTypes.GetObjectType(x.DataObjectType)), StringComparer.InvariantCultureIgnoreCase);
+            var wellObjectTypes = new HashSet<string>(GetWellDataAdapters().Select(x => ObjectTypes.GetObjectType(x.DataObjectType)).Except(wellboreObjectTypes), StringComparer.InvariantCultureIgnoreCase);
 
             var objectType = uri.ObjectType;
             var objectIds = uri.GetObjectIds().ToList();

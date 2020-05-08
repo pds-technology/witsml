@@ -1509,6 +1509,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProtocolTests.cs" />
+    <Compile Include="Providers\Discovery\Witsml131ProviderTests.cs" />
+    <Compile Include="Providers\Discovery\Witsml141ProviderTests.cs" />
     <Compile Include="SampleDataTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />
