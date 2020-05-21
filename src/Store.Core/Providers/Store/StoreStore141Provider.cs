@@ -148,7 +148,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         private long GetLastChanged(IDataObject entity)
         {
             var commonDataObject = entity as ICommonDataObject;
-            var unixTime = commonDataObject?.CommonData.DateTimeLastChange.ToUnixTimeMicroseconds();
+            var unixTime = commonDataObject?.CommonData?.DateTimeLastChange?.ToUnixTimeMicroseconds();
 
             return unixTime.GetValueOrDefault();
         }
