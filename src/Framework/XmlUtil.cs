@@ -59,7 +59,7 @@ namespace PDS.WITSMLstudio.Framework
             var navigator = node.CreateNavigator();
 
             var manager = new XmlNamespaceManager(navigator.NameTable ?? new NameTable());
-            manager.AddNamespace(DefaultPrefix, navigator.NamespaceURI);
+            manager.AddNamespace(prefix, navigator.NamespaceURI);
 
             return manager;
         }
