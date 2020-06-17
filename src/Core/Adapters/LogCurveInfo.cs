@@ -143,12 +143,16 @@ namespace PDS.WITSMLstudio.Adapters
         /// <summary>
         /// Gets the curve's minimum index.
         /// </summary>
-        public double? MinIndex => _logCurveInfo131?.MinIndex?.Value ?? _logCurveInfo141?.MinIndex?.Value;
+        public double? MinIndex => (_logCurveInfo131?.MinIndex?.ValueSpecified ?? _logCurveInfo141?.MinIndex?.ValueSpecified ?? false)
+            ? (_logCurveInfo131?.MinIndex?.Value ?? _logCurveInfo141?.MinIndex?.Value)
+            : null;
 
         /// <summary>
         /// Gets the curve's maximum index.
         /// </summary>
-        public double? MaxIndex => _logCurveInfo131?.MaxIndex?.Value ?? _logCurveInfo141?.MaxIndex?.Value;
+        public double? MaxIndex => (_logCurveInfo131?.MaxIndex?.ValueSpecified ?? _logCurveInfo141?.MaxIndex?.ValueSpecified ?? false)
+            ? (_logCurveInfo131?.MaxIndex?.Value ?? _logCurveInfo141?.MaxIndex?.Value)
+            : null;
 
         /// <summary>
         /// Gets the curve's depth uom.
@@ -216,7 +220,11 @@ namespace PDS.WITSMLstudio.Adapters
                 if (_logCurveInfo131.MinIndex == null)
                     _logCurveInfo131.MinIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure();
 
-                _logCurveInfo131.MinIndex.Value = value.Value;
+                if (value == null)
+                    _logCurveInfo131.MinIndex.ValueSpecified = false;
+                else
+                    _logCurveInfo131.MinIndex.Value = value.Value;
+
                 _logCurveInfo131.MinIndex.Uom = uom;
             }
             else if (_logCurveInfo141 != null)
@@ -230,7 +238,11 @@ namespace PDS.WITSMLstudio.Adapters
                 if (_logCurveInfo141.MinIndex == null)
                     _logCurveInfo141.MinIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure();
 
-                _logCurveInfo141.MinIndex.Value = value.Value;
+                if (value == null)
+                    _logCurveInfo141.MinIndex.ValueSpecified = false;
+                else
+                    _logCurveInfo141.MinIndex.Value = value.Value;
+
                 _logCurveInfo141.MinIndex.Uom = uom;
             }
         }
@@ -253,7 +265,11 @@ namespace PDS.WITSMLstudio.Adapters
                 if (_logCurveInfo131.MaxIndex == null)
                     _logCurveInfo131.MaxIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure();
 
-                _logCurveInfo131.MaxIndex.Value = value.Value;
+                if (value == null)
+                    _logCurveInfo131.MaxIndex.ValueSpecified = false;
+                else
+                    _logCurveInfo131.MaxIndex.Value = value.Value;
+
                 _logCurveInfo131.MaxIndex.Uom = uom;
             }
             else if (_logCurveInfo141 != null)
@@ -267,7 +283,11 @@ namespace PDS.WITSMLstudio.Adapters
                 if (_logCurveInfo141.MaxIndex == null)
                     _logCurveInfo141.MaxIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure();
 
-                _logCurveInfo141.MaxIndex.Value = value.Value;
+                if (value == null)
+                    _logCurveInfo141.MaxIndex.ValueSpecified = false;
+                else
+                    _logCurveInfo141.MaxIndex.Value = value.Value;
+
                 _logCurveInfo141.MaxIndex.Uom = uom;
             }
         }
