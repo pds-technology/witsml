@@ -520,7 +520,7 @@ namespace PDS.WITSMLstudio.Store.Data
         {
             // Only valid for 131, otherwise we want to ignore.
             var dataRowCount = WitsmlOperationContext.Current.DataSchemaVersion.Equals(OptionsIn.DataVersion.Version131.Value)
-                ? PropertyValue("dataRowCount")
+                ? PropertyValue("dataRowCount") ?? PropertyValue("DataRowCount")
                 : null;
 
             // return null if dataRowCount not provided
