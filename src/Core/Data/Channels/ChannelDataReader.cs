@@ -87,6 +87,29 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </summary>
         private int[] _allSliceOrdinals;
 
+        private static readonly Dictionary<string, Type> _typeLookup = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
+        {
+            // EtpDataType
+            ["boolean"] = typeof(bool),
+            ["bytes"] = typeof(byte[]),
+            ["double"] = typeof(double),
+            ["float"] = typeof(float),
+            ["int"] = typeof(int),
+            ["long"] = typeof(long),
+            ["null"] = null,
+            ["string"] = typeof(string),
+            ["vector"] = typeof(double[]),
+
+            // LogDataType
+            ["byte"] = typeof(byte),
+            ["datetime"] = typeof(DateTimeOffset),
+            ["date time"] = typeof(DateTimeOffset),
+            ["short"] = typeof(short),
+            ["string40"] = typeof(string),
+            ["string16"] = typeof(string),
+            ["unknown"] = typeof(object),
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
         /// </summary>
@@ -1039,10 +1062,29 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// </returns>
         public Type GetFieldType(int i)
         {
-            var rawValue = GetValue(i);
-            var type = rawValue?.GetType() ?? typeof(object);
-            return type.IsNumeric() ? typeof(double) : type;
+            Type type = null;
+            if (DataTypes.Count > 0)
+            {
+                if (i >= Depth)
+                {
+                    var typeName = DataTypes[i - Depth];
 
+                    _typeLookup.TryGetValue(typeName, out type);
+                }
+                else
+                {
+                    var index = GetIndex(i);
+                    type = index.IsTimeIndex ? typeof(DateTimeOffset) : typeof(double);
+                }
+            }
+
+            if (type == null)
+            {
+                var rawValue = GetValue(i);
+                type = rawValue?.GetType() ?? typeof(object);
+            }
+
+            return type.IsNumeric() ? typeof(double) : type;
         }
 
         /// <summary>
@@ -1149,7 +1191,7 @@ namespace PDS.WITSMLstudio.Data.Channels
         /// <returns>
         /// The index of the named field.
         /// </returns>
-        private int GetOrdinal<T>(T key, Dictionary<T, int> map)
+        private int GetOrdinal(string key, Dictionary<string, int> map)
         {
             int index;
             if (map.TryGetValue(key, out index))
@@ -1221,8 +1263,11 @@ namespace PDS.WITSMLstudio.Data.Channels
 
             // NOTE: logging here is too verbose!
             //_log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
+            var rowIndex = (IsClosed || _current < 0) ? _records.Count - 1 : _current;
+            if (rowIndex < 0)
+                return null;
 
-            var row = _records[IsClosed ? _records.Count - 1 : _current];
+            var row = _records[rowIndex];
 
             object value;
             value = i < Depth
@@ -1230,9 +1275,6 @@ namespace PDS.WITSMLstudio.Data.Channels
                 : row[1][i - Depth];
 
             return value;
-
-            //var rowValues = GetRowValues(IsClosed ? _records.Count - 1 : _current);
-            //return GetValue(rowValues, i);
         }
 
         /// <summary>
@@ -2265,10 +2307,10 @@ namespace PDS.WITSMLstudio.Data.Channels
             return !range.StartsAfter(index, increasing) && !range.EndsBefore(index, increasing);
         }
 
-        private static Dictionary<T, int> CreateIndexMapping<T>(IEnumerable<T> values)
+        private static Dictionary<string, int> CreateIndexMapping(IEnumerable<string> values)
         {
             return values.Select((value, index) => new {value, index})
-                .ToDictionary(entry => entry.value, entry => entry.index);
+                .ToDictionary(entry => entry.value, entry => entry.index, StringComparer.OrdinalIgnoreCase);
         }
 
         #region IDisposable Support
