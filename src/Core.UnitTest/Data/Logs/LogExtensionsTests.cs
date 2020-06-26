@@ -69,7 +69,7 @@ namespace PDS.WITSMLstudio.Data.Logs
             var nullValueList = log.GetNullValues(mnemonic).ToArray();
             Assert.AreEqual(3, nullValueList.Length);
             Assert.AreEqual("-3333.33", nullValueList[0]);
-            Assert.AreEqual("null", nullValueList[1]);
+            Assert.IsNull(nullValueList[1]);
             Assert.AreEqual("-1111.11", nullValueList[2]);
         }
 

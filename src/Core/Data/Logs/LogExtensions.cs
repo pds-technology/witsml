@@ -328,7 +328,7 @@ namespace PDS.WITSMLstudio.Data.Logs
                 ? logCurveInfoNullValue
                 : !string.IsNullOrWhiteSpace(logNullValue)
                 ? logNullValue
-                : "null";
+                : null;
         }
 
         /// <summary>
