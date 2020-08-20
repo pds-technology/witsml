@@ -1481,8 +1481,8 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             var delimiter = GetLogDataDelimiter(logHeader);
 
             var data = !dataTypes.Any() || dataTypes.Values.Contains("string")
-                ? logData.Select(row => string.Join(delimiter, row.SelectMany(x => x).Select(x => Format(x, delimiter)))).ToList()
-                : logData.Select(row => string.Join(delimiter, row.SelectMany(x => x))).ToList();
+                ? logData.Select(row => string.Join(delimiter, row.SelectMany(x => x).Select(x => FormatStringValue(x, delimiter)))).ToList()
+                : logData.Select(row => string.Join(delimiter, row.SelectMany(x => x).Select(x => FormatValue(x)))).ToList();
 
             SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
             SetLogIndexRange(log, logHeader, ranges, mnemonicSlices[0]);
@@ -1490,14 +1490,24 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
             return logData.Count;
         }
 
-        private object Format(object value, string delimiter)
+        private object FormatStringValue(object value, string delimiter)
         {
             // Return if value is not a string
-            if (!(value is string)) return value;
+            if (!(value is string)) return FormatValue(value);
 
             return value.ToString().Contains(delimiter)
                 ? $"\"{value}\""
                 : value;
+        }
+
+        private object FormatValue(object value)
+        {
+            if (value is DateTimeOffset)
+                return ((DateTimeOffset)value).ToString("o");
+            else if (value is DateTime)
+                return ((DateTime)value).ToString("o");
+            else
+                return value;
         }
 
         private void FormatLogHeader(T log, string[] mnemonics)

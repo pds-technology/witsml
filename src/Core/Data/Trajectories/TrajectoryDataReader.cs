@@ -74,6 +74,14 @@ namespace PDS.WITSMLstudio.Data.Trajectories
         }
 
         /// <summary>
+        /// Resets this instance.
+        /// </summary>
+        public void Reset()
+        {
+            _current = -1;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="i"></param>
