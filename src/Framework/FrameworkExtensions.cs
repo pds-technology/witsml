@@ -731,16 +731,37 @@ namespace PDS.WITSMLstudio.Framework
         {
             if (string.IsNullOrWhiteSpace(enumValue)) return null;
 
+            object enumMember;
+            // must be a valid enumeration member
+            if (TryParseEnum(enumType, enumValue, ignoreCase, out enumMember))
+                return enumMember;
+
+            throw new ArgumentException($"Could not parse enumeration value ({enumValue}), ({enumType}).");
+        }
+
+        /// <summary>
+        /// Tries to parses the enum value.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The input enum value.</param>
+        /// <param name="ignoreCase">if set to <c>true</c> comparison is case insensitive.</param>
+        /// <param name="enumMember">The output enum value.</param>
+        /// <returns>Whether parsing succeeded.</returns>
+        public static bool TryParseEnum(this Type enumType, string enumValue, bool ignoreCase, out object enumMember)
+        {
+            enumMember = null;
+
+            if (string.IsNullOrWhiteSpace(enumValue)) return false;
+
             enumType = Nullable.GetUnderlyingType(enumType) ?? enumType;
 
             // must be a valid enumeration type
             if (!enumType.IsEnum)
             {
-                throw new ArgumentException();
+                return false;
             }
 
             var enumMemberInfo = _enumMemberInfo.GetOrAdd(enumType, type => new EnumMemberInfo(type));
-            object enumMember = null;
             try
             {
                 enumMember = enumMemberInfo.GetValue(enumValue, ignoreCase);
@@ -751,12 +772,7 @@ namespace PDS.WITSMLstudio.Framework
             }
 
             // must be a valid enumeration member
-            if (enumMember == null)
-            {
-                throw new ArgumentException();
-            }
-
-            return enumMember;
+            return enumMember != null;
         }
 
         /// <summary>
