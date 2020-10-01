@@ -280,8 +280,8 @@ namespace PDS.WITSMLstudio.Store.Data.Transactions
                 count--;
 
                 if (count > 0) continue;
-                message = $"Transaction deadlock on data object with URI: {uri}";
-                throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
+                message = $"Transaction timeout on data object with URI: {uri}";
+                throw new WitsmlException(ErrorCodes.ErrorTransactionTimeout, message);
             }
 
             // Call Wait again to ensure new Context entry is created

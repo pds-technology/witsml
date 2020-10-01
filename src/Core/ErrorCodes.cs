@@ -528,9 +528,9 @@ namespace PDS.WITSMLstudio
         ErrorDeletingFromDataStore = -1004,
 
         /// <summary>
-        /// -1005 Transaction deadlock error.
+        /// -1005 Transaction timeout error.
         /// </summary>
-        ErrorTransactionDeadlock = -1005,
+        ErrorTransactionTimeout = -1005,
 
         /// <summary>
         /// -1006 Max document size exceeded.
