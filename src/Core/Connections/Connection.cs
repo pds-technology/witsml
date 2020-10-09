@@ -16,10 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.ComponentModel;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
-using Caliburn.Micro;
 using Energistics.Etp.Common;
 using Energistics.Etp.Common.Datatypes;
 
@@ -29,7 +29,7 @@ namespace PDS.WITSMLstudio.Connections
     /// Connection details for a connection
     /// </summary>
     [DataContract]
-    public class Connection : PropertyChangedBase
+    public class Connection : INotifyPropertyChanged
     {
         /// <summary>
         /// Initializes the <see cref="Connection"/> class.
@@ -68,7 +68,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_authenticationType != value)
                 {
                     _authenticationType = value;
-                    NotifyOfPropertyChange(() => AuthenticationType);
+                    NotifyOfPropertyChange(nameof(AuthenticationType));
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_securityProtocol != value)
                 {
                     _securityProtocol = value;
-                    NotifyOfPropertyChange(() => SecurityProtocol);
+                    NotifyOfPropertyChange(nameof(SecurityProtocol));
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_name, value))
                 {
                     _name = value;
-                    NotifyOfPropertyChange(() => Name);
+                    NotifyOfPropertyChange(nameof(Name));
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_uri, value))
                 {
                     _uri = value;
-                    NotifyOfPropertyChange(() => Uri);
+                    NotifyOfPropertyChange(nameof(Uri));
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_clientId, value))
                 {
                     _clientId = value;
-                    NotifyOfPropertyChange(() => ClientId);
+                    NotifyOfPropertyChange(nameof(ClientId));
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_redirectPort != value)
                 {
                     _redirectPort = value;
-                    NotifyOfPropertyChange(() => RedirectPort);
+                    NotifyOfPropertyChange(nameof(RedirectPort));
                 }
             }
         }
@@ -189,8 +189,8 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_proxyHost, value))
                 {
                     _proxyHost = value;
-                    NotifyOfPropertyChange(() => ProxyHost);
-                    NotifyOfPropertyChange(() => IsProxyHostName);
+                    NotifyOfPropertyChange(nameof(ProxyHost));
+                    NotifyOfPropertyChange(nameof(IsProxyHostName));
                 }
             }
         }
@@ -210,7 +210,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_proxyPort != value)
                 {
                     _proxyPort = value;
-                    NotifyOfPropertyChange(() => ProxyPort);
+                    NotifyOfPropertyChange(nameof(ProxyPort));
                 }
             }
         }
@@ -229,7 +229,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_proxyUsername, value))
                 {
                     _proxyUsername = value;
-                    NotifyOfPropertyChange(() => ProxyUsername);
+                    NotifyOfPropertyChange(nameof(ProxyUsername));
                 }
             }
         }
@@ -259,7 +259,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_proxyUseDefaultCredentials != value)
                 {
                     _proxyUseDefaultCredentials = value;
-                    NotifyOfPropertyChange(() => ProxyUseDefaultCredentials);
+                    NotifyOfPropertyChange(nameof(ProxyUseDefaultCredentials));
                 }
             }
         }
@@ -278,7 +278,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_username, value))
                 {
                     _username = value;
-                    NotifyOfPropertyChange(() => Username);
+                    NotifyOfPropertyChange(nameof(Username));
                 }
             }
         }
@@ -308,7 +308,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_jsonWebToken, value))
                 {
                     _jsonWebToken = value;
-                    NotifyOfPropertyChange(() => JsonWebToken);
+                    NotifyOfPropertyChange(nameof(JsonWebToken));
                 }
             }
         }
@@ -326,7 +326,7 @@ namespace PDS.WITSMLstudio.Connections
             {
                 if (_webSocketType == value) return;
                 _webSocketType = value;
-                NotifyOfPropertyChange(() => WebSocketType);
+                NotifyOfPropertyChange(nameof(WebSocketType));
             }
         }
 
@@ -344,7 +344,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_subProtocol, value))
                 {
                     _subProtocol = value;
-                    NotifyOfPropertyChange(() => SubProtocol);
+                    NotifyOfPropertyChange(nameof(SubProtocol));
                 }
             }
         }
@@ -363,7 +363,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_etpEncoding, value))
                 {
                     _etpEncoding = value;
-                    NotifyOfPropertyChange(() => EtpEncoding);
+                    NotifyOfPropertyChange(nameof(EtpEncoding));
                 }
             }
         }
@@ -382,7 +382,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (!string.Equals(_etpCompression, value))
                 {
                     _etpCompression = value;
-                    NotifyOfPropertyChange(() => EtpCompression);
+                    NotifyOfPropertyChange(nameof(EtpCompression));
                 }
             }
         }
@@ -401,7 +401,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_acceptInvalidCertificates != value)
                 {
                     _acceptInvalidCertificates = value;
-                    NotifyOfPropertyChange(() => AcceptInvalidCertificates);
+                    NotifyOfPropertyChange(nameof(AcceptInvalidCertificates));
                 }
             }
         }
@@ -420,7 +420,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_preAuthenticate != value)
                 {
                     _preAuthenticate = value;
-                    NotifyOfPropertyChange(() => PreAuthenticate);
+                    NotifyOfPropertyChange(nameof(PreAuthenticate));
                 }
             }
         }
@@ -440,7 +440,7 @@ namespace PDS.WITSMLstudio.Connections
                 {
                     _isAuthenticationBasic = value;
                     IsAuthenticationBearer = !value;
-                    NotifyOfPropertyChange(() => IsAuthenticationBasic);
+                    NotifyOfPropertyChange(nameof(IsAuthenticationBasic));
                 }
             }
         }
@@ -460,7 +460,7 @@ namespace PDS.WITSMLstudio.Connections
                 {
                     _isAuthenticationBearer = value;
                     IsAuthenticationBasic = !value;
-                    NotifyOfPropertyChange(() => IsAuthenticationBearer);
+                    NotifyOfPropertyChange(nameof(IsAuthenticationBearer));
                 }
             }
         }
@@ -479,7 +479,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_soapRequestCompressionMethod != value)
                 {
                     _soapRequestCompressionMethod = value;
-                    NotifyOfPropertyChange(() => SoapRequestCompressionMethod);
+                    NotifyOfPropertyChange(nameof(SoapRequestCompressionMethod));
                 }
             }
         }
@@ -498,7 +498,7 @@ namespace PDS.WITSMLstudio.Connections
                 if (_soapAcceptCompressedResponses != value)
                 {
                     _soapAcceptCompressedResponses = value;
-                    NotifyOfPropertyChange(() => SoapAcceptCompressedResponses);
+                    NotifyOfPropertyChange(nameof(SoapAcceptCompressedResponses));
                 }
             }
         }
@@ -520,5 +520,21 @@ namespace PDS.WITSMLstudio.Connections
                    $" SoapRequestCompressionMethod: {SoapRequestCompressionMethod};" +
                    $" SoapAcceptCompressedResponses: {SoapAcceptCompressedResponses};";
         }
+
+        #region INotifyPropertyChanged Members
+        /// <summary>
+        /// Occurs when a property value changes. 
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Triggers PropertyChanged Event
+        /// </summary>
+        /// <param name="info">Name of property changed</param>
+        protected void NotifyOfPropertyChange(string info)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
+        }
+        #endregion INotifyPropertyChanged Members
     }
 }
