@@ -255,7 +255,7 @@ namespace PDS.WITSMLstudio.Store.Data.Logs
                     : null;
 
                 // Ensure data object and parent data objects exist
-                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Family, uri.Version));
                 dataProvider.Ensure(uri);
 
                 if (indexInfo != null)

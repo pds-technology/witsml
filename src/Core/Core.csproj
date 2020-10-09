@@ -173,6 +173,7 @@
     <Compile Include="Linq\WitsmlContext.cs" />
     <Compile Include="Linq\WitsmlQuery.cs" />
     <Compile Include="Linq\WitsmlQueryExtensions.cs" />
+    <Compile Include="ObjectFamilies.cs" />
     <Compile Include="ObjectFolders.cs" />
     <Compile Include="ObjectName.cs" />
     <Compile Include="Export141Attribute.cs" />

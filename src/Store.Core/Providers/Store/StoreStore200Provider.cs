@@ -95,7 +95,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         private void GetObject(IEtpAdapter etpAdapter, string uri, Energistics.Etp.Common.Datatypes.Object.IDataObject dataObject)
         {
             var etpUri = new EtpUri(uri);
-            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Family, etpUri.GetDataSchemaVersion()));
             var entity = dataAdapter.Get(etpUri) as Witsml200.AbstractObject;
             var lastChanged = (entity?.Citation.LastUpdate).ToUnixTimeMicroseconds().GetValueOrDefault();
 
@@ -105,7 +105,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
         private void FindObjects(IEtpAdapter etpAdapter, string uri, IList<Etp12.Datatypes.Object.DataObject> context, out string serverSortOrder)
         {
             var etpUri = new EtpUri(uri);
-            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Family, etpUri.GetDataSchemaVersion()));
 
             serverSortOrder = dataAdapter.ServerSortOrder;
 

@@ -42,7 +42,7 @@ namespace PDS.WITSMLstudio
         /// Initializes a new instance of the <see cref="Export210Attribute"/> class.
         /// </summary>
         /// <param name="contractName">The contract name that is used to export the type or member marked with this attribute, or null or an empty string ("") to use the default contract name.</param>
-        public Export210Attribute(string contractName) : base(new ObjectName(contractName, Version))
+        public Export210Attribute(string contractName) : base(new ObjectName(contractName, ObjectFamilies.Witsml, Version)) // TODO: Update this once EML is handled separately
         {
         }
 
@@ -51,7 +51,7 @@ namespace PDS.WITSMLstudio
         /// </summary>
         /// <param name="contractName">The contract name that is used to export the type or member marked with this attribute, or null or an empty string ("") to use the default contract name.</param>
         /// <param name="contractType">The type to export.</param>
-        public Export210Attribute(string contractName, Type contractType) : base(new ObjectName(contractName, Version), contractType)
+        public Export210Attribute(string contractName, Type contractType) : base(new ObjectName(contractName, ObjectFamilies.Witsml, Version), contractType) // TODO: Update this once EML is handled separately
         {
         }
     }

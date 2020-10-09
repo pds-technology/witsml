@@ -149,7 +149,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
             }
             else if (string.IsNullOrWhiteSpace(etpUri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
             {
-                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, ObjectFamilies.Witsml, etpUri.Version));
                 serverSortOrder = dataProvider.ServerSortOrder;
 
                 dataProvider

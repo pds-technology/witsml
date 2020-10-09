@@ -16,9 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Linq;
-using PDS.WITSMLstudio.Framework;
-
 namespace PDS.WITSMLstudio
 {
     /// <summary>
@@ -32,7 +29,7 @@ namespace PDS.WITSMLstudio
         /// Initializes a new instance of the <see cref="ObjectName"/> struct.
         /// </summary>
         /// <param name="version">The version.</param>
-        public ObjectName(string version) : this(string.Empty, version)
+        public ObjectName(string version) : this(string.Empty, ObjectFamilies.Witsml, version)
         {
         }
 
@@ -40,27 +37,34 @@ namespace PDS.WITSMLstudio
         /// Initializes a new instance of the <see cref="ObjectName"/> struct.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="family">The family.</param>
         /// <param name="version">The version.</param>
-        public ObjectName(string name, string version)
+        public ObjectName(string name, string family, string version)
         {
             // Get the ObjectType identifier
             Name = ObjectTypes.ObjectTypeMap.ContainsKey(name) ? ObjectTypes.ObjectTypeMap[name] : name;
+            Family = family.ToUpperInvariant();
             Version = version;
 
-            _value = $"{Name}_{Version.Replace(".", string.Empty).Substring(0, 2)}";
+            _value = $"{Name}_{Family}_{Version.Replace(".", string.Empty).Substring(0, 2)}";
         }
+
+        /// <summary>
+        /// The Energistics standard family.
+        /// </summary>
+        public string Family { get; }
 
         /// <summary>
         /// Gets the name.
         /// </summary>
         /// <value>The name.</value>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the version.
         /// </summary>
         /// <value>The version.</value>
-        public string Version { get; private set; }
+        public string Version { get; }
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.

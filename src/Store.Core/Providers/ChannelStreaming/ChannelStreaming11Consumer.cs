@@ -127,7 +127,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <param name="reader">The channel data reader.</param>
         protected virtual void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            var dataProvider = _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            var dataProvider = _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Family, uri.Version));
             dataProvider.UpdateChannelData(uri, reader);
         }
 

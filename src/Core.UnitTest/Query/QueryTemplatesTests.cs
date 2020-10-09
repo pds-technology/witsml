@@ -34,7 +34,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_Header_Only_Template_For_Log_131()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.Log, "witsml", OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.HeaderOnly);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Log, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.HeaderOnly);
 
             var xml = template.ToString();
             Console.WriteLine(xml);
@@ -45,7 +45,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_Header_Only_Template_For_Log_141()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.Log, "witsml", OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.HeaderOnly);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Log, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.HeaderOnly);
 
             var xml = template.ToString();
             Console.WriteLine(xml);
@@ -56,7 +56,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_Trajectory_Has_Uom_141()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, "witsml", OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.All);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version141.Value, OptionsIn.ReturnElements.All);
             var node = template.Descendants(Xml141Namespace + "location").FirstOrDefault();
 
             var elementList = new List<string>()
@@ -78,7 +78,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_Trajectory_Has_Uom_131()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, "witsml", OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.Trajectory, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
             var node = template.Descendants(Xml131Namespace + "location").FirstOrDefault();
 
             var elementList = new List<string>()
@@ -100,7 +100,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_CementJob_Has_Uom_141()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, "witsml", OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
             var node = template.Descendants(Xml131Namespace + "cementAdditive").FirstOrDefault();
 
             var elementList = new List<string>()
@@ -116,7 +116,7 @@ namespace PDS.WITSMLstudio.Query
         [TestMethod]
         public void QueryTemplatesTests_Create_CementJob_Has_Uom_131()
         {
-            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, "witsml", OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
+            var template = QueryTemplates.GetTemplate(ObjectTypes.CementJob, ObjectFamilies.Witsml, OptionsIn.DataVersion.Version131.Value, OptionsIn.ReturnElements.All);
             var node = template.Descendants(Xml131Namespace + "cementAdditive").FirstOrDefault();
 
             var elementList = new List<string>()

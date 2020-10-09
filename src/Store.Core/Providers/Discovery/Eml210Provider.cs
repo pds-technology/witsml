@@ -215,7 +215,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
         private IEtpDataProvider GetDataProvider(string objectType)
         {
-            return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
+            return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, ObjectFamilies.Witsml, DataSchemaVersion)); // TODO: Update this when EML is handled separately.
         }
 
         private IResource ToResource(IEtpAdapter etpAdapter, AbstractObject entity, EtpUri parentUri, int hasChildren = -1)

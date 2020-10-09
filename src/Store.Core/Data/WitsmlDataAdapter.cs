@@ -362,7 +362,7 @@ namespace PDS.WITSMLstudio.Store.Data
             }
             if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
             {
-                adapters.Add(Container.Resolve<IWitsmlDataAdapter>(new ObjectName(ObjectTypes.Wellbore, uri.Version)));
+                adapters.Add(Container.Resolve<IWitsmlDataAdapter>(new ObjectName(ObjectTypes.Wellbore, uri.Family, uri.Version)));
             }
             else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
             {

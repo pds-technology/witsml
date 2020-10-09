@@ -168,7 +168,7 @@ namespace PDS.WITSMLstudio.Store
                 WitsmlValidator.ValidateRequest(CapServerProviders);
                 version = WitsmlOperationContext.Current.DataSchemaVersion;
 
-                var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
+                var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, ObjectFamilies.Witsml, version));
                 var result = dataProvider.GetFromStore(context);
 
                 var response = new WMLS_GetFromStoreResponse(
@@ -216,8 +216,9 @@ namespace PDS.WITSMLstudio.Store
                 UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders);
                 version = WitsmlOperationContext.Current.DataSchemaVersion;
+                var family = ObjectTypes.GetFamily(WitsmlOperationContext.Current.Document.Root);
 
-                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, family, version));
                 var result = dataWriter.AddToStore(context);
 
                 var response = new WMLS_AddToStoreResponse((short)result.Code, result.Message);
@@ -260,8 +261,9 @@ namespace PDS.WITSMLstudio.Store
                 UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders);
                 version = WitsmlOperationContext.Current.DataSchemaVersion;
+                var family = ObjectTypes.GetFamily(WitsmlOperationContext.Current.Document.Root);
 
-                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, family, version));
                 var result = dataWriter.UpdateInStore(context);
 
                 var response = new WMLS_UpdateInStoreResponse((short)result.Code, result.Message);
@@ -304,8 +306,9 @@ namespace PDS.WITSMLstudio.Store
                 UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders);
                 version = WitsmlOperationContext.Current.DataSchemaVersion;
+                var family = ObjectTypes.GetFamily(WitsmlOperationContext.Current.Document.Root);
 
-                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, family, version));
                 var result = dataWriter.DeleteFromStore(context);
 
                 var response = new WMLS_DeleteFromStoreResponse((short)result.Code, result.Message);

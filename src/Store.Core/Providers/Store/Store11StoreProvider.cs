@@ -190,7 +190,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, data, null, null);
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.GetDataSchemaVersion()));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Family, uri.GetDataSchemaVersion()));
                 dataAdapter.Put(putObject.DataObject);
 
                 Acknowledge(header.MessageId);
@@ -232,7 +232,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Store
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetDataSchemaVersion()));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.GetUriFamily(), etpUri.GetDataSchemaVersion()));
                 dataAdapter.Delete(etpUri);
 
                 Acknowledge(header.MessageId);

@@ -437,7 +437,7 @@ namespace PDS.WITSMLstudio
         /// <returns></returns>
         public static ObjectName ToObjectName(this EtpContentType contentType)
         {
-            return new ObjectName(contentType.ObjectType, contentType.Version);
+            return new ObjectName(contentType.ObjectType, contentType.Family, contentType.Version);
         }
 
         /// <summary>

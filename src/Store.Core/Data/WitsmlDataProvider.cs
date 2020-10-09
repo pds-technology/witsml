@@ -234,7 +234,7 @@ namespace PDS.WITSMLstudio.Store.Data
 
                 if (!parent.IsBaseUri)
                 {
-                    var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.GetDataSchemaVersion()));
+                    var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, uri.Family, parent.GetDataSchemaVersion()));
                     dataProvider.Ensure(parent);
                 }
 

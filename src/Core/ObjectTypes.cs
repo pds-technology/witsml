@@ -297,7 +297,7 @@ namespace PDS.WITSMLstudio
         /// <exception cref="System.ArgumentException">Invalid WITSML object type, does not implement IEnergisticsCollection</exception>
         public static string GetObjectType(Type type)
         {
-            if (!typeof(IEnergisticsCollection).IsAssignableFrom(type) && 
+            if (!typeof(IEnergisticsCollection).IsAssignableFrom(type) &&
                 !typeof(IDataObject).IsAssignableFrom(type) &&
                 !typeof(Witsml200.AbstractObject).IsAssignableFrom(type) &&
                 !typeof(Prodml200.AbstractObject).IsAssignableFrom(type) &&
@@ -377,13 +377,13 @@ namespace PDS.WITSMLstudio
             Assembly assembly;
             string familyUpper = family.ToUpperInvariant();
 
-            if (familyUpper == "WITSML")
+            if (familyUpper == ObjectFamilies.Witsml)
                 assembly = typeof(IWitsmlDataObject).Assembly;
-            else if (familyUpper == "PRODML")
+            else if (familyUpper == ObjectFamilies.Prodml)
                 assembly = typeof(IProdmlDataObject).Assembly;
-            else if (familyUpper == "RESQML")
+            else if (familyUpper == ObjectFamilies.Resqml)
                 assembly = typeof(IResqmlDataObject).Assembly;
-            else if (familyUpper == "EML")
+            else if (familyUpper == ObjectFamilies.Eml)
             {
                 // TODO: Update this once common is implemented independently.
                 familyUpper = "WITSML";
@@ -396,8 +396,8 @@ namespace PDS.WITSMLstudio
             var index = version.LastIndexOf('=');
             index++; // index will be -1 if no '=' is found so no special case needed.
 
-            char build = version.Length > index + 4 ? version[index+4] : '0';
-            var ns = $"Energistics.DataAccess.{familyUpper}{version[index]}{version[index+2]}{build}.";
+            char build = version.Length > index + 4 ? version[index + 4] : '0';
+            var ns = $"Energistics.DataAccess.{familyUpper}{version[index]}{version[index + 2]}{build}.";
 
             if (WbGeometry.EqualsIgnoreCase(objectType) && !OptionsIn.DataVersion.Version200.Equals(version))
                 objectType = $"StandAlone{WellboreGeometry.ToPascalCase()}";
@@ -479,8 +479,8 @@ namespace PDS.WITSMLstudio
         {
             try
             {
-                return element == null 
-                    ? Unknown 
+                return element == null
+                    ? Unknown
                     : PluralToSingle(GetObjectGroupType(element));
             }
             catch
@@ -584,12 +584,12 @@ namespace PDS.WITSMLstudio
 
             // TODO: Update this once common is implemented independently.
 
-            return @namespace.Contains("WITSML")
-                ? "WITSML"
-                : @namespace.Contains("PRODML")
-                ? "PRODML"
-                : @namespace.Contains("RESQML")
-                ? "RESQML"
+            return @namespace.Contains(ObjectFamilies.Witsml)
+                ? ObjectFamilies.Witsml
+                : @namespace.Contains(ObjectFamilies.Prodml)
+                ? ObjectFamilies.Prodml
+                : @namespace.Contains(ObjectFamilies.Resqml)
+                ? ObjectFamilies.Resqml
                 : null;
         }
 
@@ -604,17 +604,17 @@ namespace PDS.WITSMLstudio
             if (string.IsNullOrEmpty(ns))
                 return null;
 
-            if (ns.ContainsIgnoreCase("witsml"))
-                return "WITSML";
-            if (ns.ContainsIgnoreCase("prodml"))
-                return "PRODML";
-            if (ns.ContainsIgnoreCase("resqml"))
-                return "RESQML";
+            if (ns.ContainsIgnoreCase(ObjectFamilies.Witsml))
+                return ObjectFamilies.Witsml;
+            if (ns.ContainsIgnoreCase(ObjectFamilies.Prodml))
+                return ObjectFamilies.Prodml;
+            if (ns.ContainsIgnoreCase(ObjectFamilies.Resqml))
+                return ObjectFamilies.Resqml;
 
             // TODO: Update this once common is implemented independently.
 
             if (ns.ContainsIgnoreCase("common"))
-                return "WITSML";
+                return ObjectFamilies.Witsml;
 
             return null;
         }

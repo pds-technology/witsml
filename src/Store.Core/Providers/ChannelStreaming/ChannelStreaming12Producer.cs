@@ -197,7 +197,7 @@ namespace PDS.WITSMLstudio.Store.Providers.ChannelStreaming
         /// <returns></returns>
         protected virtual IChannelDataProvider GetDataProvider(EtpUri uri)
         {
-            return Container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            return Container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Family, uri.Version));
         }
 
         /// <summary>

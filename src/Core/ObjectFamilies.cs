@@ -19,17 +19,28 @@
 namespace PDS.WITSMLstudio
 {
     /// <summary>
-    /// Defines the supported list of version-qualified data object names.
+    /// Families of Energistics objects
     /// </summary>
-    public static partial class ObjectNames
+    public static class ObjectFamilies
     {
-        private static readonly string Version131 = OptionsIn.DataVersion.Version131.Value;
-        private static readonly string Version141 = OptionsIn.DataVersion.Version141.Value;
-        private static readonly string Version200 = OptionsIn.DataVersion.Version200.Value;
+        /// <summary>
+        /// WITSML objects
+        /// </summary>
+        public static readonly string Witsml = "WITSML";
 
         /// <summary>
-        /// The data object name for a 1.4.1.1 ChangeLog.
+        /// EML objects
         /// </summary>
-        public static readonly ObjectName ChangeLog141 = new ObjectName(ObjectTypes.ChangeLog, ObjectFamilies.Witsml, Version141);
+        public static readonly string Eml = "EML";
+
+        /// <summary>
+        /// PRODML objects
+        /// </summary>
+        public static readonly string Prodml = "PRODML";
+
+        /// <summary>
+        /// RESQML objects
+        /// </summary>
+        public static readonly string Resqml = "RESQML";
     }
 }

@@ -189,7 +189,8 @@ namespace PDS.WITSMLstudio.Store.Data
                 try
                 {
                     var version = ObjectTypes.GetVersion(childType);
-                    var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                    var family = ObjectTypes.GetVersion(childType);
+                    var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, family, version));
                     validator?.Validate(Context.Function, childType, items, elementList);
                 }
                 catch (ContainerException)

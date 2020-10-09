@@ -32,422 +32,422 @@ namespace PDS.WITSMLstudio
         /// <summary>
         /// The data object name for a 2.0 Activity.
         /// </summary>
-        public static readonly ObjectName Activity200 = new ObjectName(ObjectTypes.Activity, Version200);
+        public static readonly ObjectName Activity200 = new ObjectName(ObjectTypes.Activity, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 ActivityTemplate.
         /// </summary>
-        public static readonly ObjectName ActivityTemplate200 = new ObjectName(ObjectTypes.ActivityTemplate, Version200);
+        public static readonly ObjectName ActivityTemplate200 = new ObjectName(ObjectTypes.ActivityTemplate, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Attachment.
         /// </summary>
-        public static readonly ObjectName Attachment141 = new ObjectName(ObjectTypes.Attachment, Version141);
+        public static readonly ObjectName Attachment141 = new ObjectName(ObjectTypes.Attachment, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Attachment.
         /// </summary>
-        public static readonly ObjectName Attachment200 = new ObjectName(ObjectTypes.Attachment, Version200);
+        public static readonly ObjectName Attachment200 = new ObjectName(ObjectTypes.Attachment, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 BhaRun.
         /// </summary>
-        public static readonly ObjectName BhaRun131 = new ObjectName(ObjectTypes.BhaRun, Version131);
+        public static readonly ObjectName BhaRun131 = new ObjectName(ObjectTypes.BhaRun, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 BhaRun.
         /// </summary>
-        public static readonly ObjectName BhaRun141 = new ObjectName(ObjectTypes.BhaRun, Version141);
+        public static readonly ObjectName BhaRun141 = new ObjectName(ObjectTypes.BhaRun, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 BhaRun.
         /// </summary>
-        public static readonly ObjectName BhaRun200 = new ObjectName(ObjectTypes.BhaRun, Version200);
+        public static readonly ObjectName BhaRun200 = new ObjectName(ObjectTypes.BhaRun, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 CementJob.
         /// </summary>
-        public static readonly ObjectName CementJob131 = new ObjectName(ObjectTypes.CementJob, Version131);
+        public static readonly ObjectName CementJob131 = new ObjectName(ObjectTypes.CementJob, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 CementJob.
         /// </summary>
-        public static readonly ObjectName CementJob141 = new ObjectName(ObjectTypes.CementJob, Version141);
+        public static readonly ObjectName CementJob141 = new ObjectName(ObjectTypes.CementJob, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 CementJob.
         /// </summary>
-        public static readonly ObjectName CementJob200 = new ObjectName(ObjectTypes.CementJob, Version200);
+        public static readonly ObjectName CementJob200 = new ObjectName(ObjectTypes.CementJob, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 CementJobEvaluation.
         /// </summary>
-        public static readonly ObjectName CementJobEvaluation200 = new ObjectName(ObjectTypes.CementJobEvaluation, Version200);
+        public static readonly ObjectName CementJobEvaluation200 = new ObjectName(ObjectTypes.CementJobEvaluation, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 Channel.
         /// </summary>
-        public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
+        public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 ChannelSet.
         /// </summary>
-        public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
+        public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 ConvCore.
         /// </summary>
-        public static readonly ObjectName ConvCore131 = new ObjectName(ObjectTypes.ConvCore, Version131);
+        public static readonly ObjectName ConvCore131 = new ObjectName(ObjectTypes.ConvCore, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 ConvCore.
         /// </summary>
-        public static readonly ObjectName ConvCore141 = new ObjectName(ObjectTypes.ConvCore, Version141);
+        public static readonly ObjectName ConvCore141 = new ObjectName(ObjectTypes.ConvCore, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 DataAssuranceRecord.
         /// </summary>
-        public static readonly ObjectName DataAssuranceRecord200 = new ObjectName(ObjectTypes.DataAssuranceRecord, Version200);
+        public static readonly ObjectName DataAssuranceRecord200 = new ObjectName(ObjectTypes.DataAssuranceRecord, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 DepthRegImage.
         /// </summary>
-        public static readonly ObjectName DepthRegImage141 = new ObjectName(ObjectTypes.DepthRegImage, Version141);
+        public static readonly ObjectName DepthRegImage141 = new ObjectName(ObjectTypes.DepthRegImage, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 DepthRegImage.
         /// </summary>
-        public static readonly ObjectName DepthRegImage200 = new ObjectName(ObjectTypes.DepthRegImage, Version200);
+        public static readonly ObjectName DepthRegImage200 = new ObjectName(ObjectTypes.DepthRegImage, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 DownholeComponent.
         /// </summary>
-        public static readonly ObjectName DownholeComponent141 = new ObjectName(ObjectTypes.DownholeComponent, Version141);
+        public static readonly ObjectName DownholeComponent141 = new ObjectName(ObjectTypes.DownholeComponent, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 DownholeComponent.
         /// </summary>
-        public static readonly ObjectName DownholeComponent200 = new ObjectName(ObjectTypes.DownholeComponent, Version200);
+        public static readonly ObjectName DownholeComponent200 = new ObjectName(ObjectTypes.DownholeComponent, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 DrillReport.
         /// </summary>
-        public static readonly ObjectName DrillReport141 = new ObjectName(ObjectTypes.DrillReport, Version141);
+        public static readonly ObjectName DrillReport141 = new ObjectName(ObjectTypes.DrillReport, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 DrillReport.
         /// </summary>
-        public static readonly ObjectName DrillReport200 = new ObjectName(ObjectTypes.DrillReport, Version200);
+        public static readonly ObjectName DrillReport200 = new ObjectName(ObjectTypes.DrillReport, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 FluidsReport.
         /// </summary>
-        public static readonly ObjectName FluidsReport131 = new ObjectName(ObjectTypes.FluidsReport, Version131);
+        public static readonly ObjectName FluidsReport131 = new ObjectName(ObjectTypes.FluidsReport, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 FluidsReport.
         /// </summary>
-        public static readonly ObjectName FluidsReport141 = new ObjectName(ObjectTypes.FluidsReport, Version141);
+        public static readonly ObjectName FluidsReport141 = new ObjectName(ObjectTypes.FluidsReport, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 FluidsReport.
         /// </summary>
-        public static readonly ObjectName FluidsReport200 = new ObjectName(ObjectTypes.FluidsReport, Version200);
+        public static readonly ObjectName FluidsReport200 = new ObjectName(ObjectTypes.FluidsReport, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 FormationMarker.
         /// </summary>
-        public static readonly ObjectName FormationMarker131 = new ObjectName(ObjectTypes.FormationMarker, Version131);
+        public static readonly ObjectName FormationMarker131 = new ObjectName(ObjectTypes.FormationMarker, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 FormationMarker.
         /// </summary>
-        public static readonly ObjectName FormationMarker141 = new ObjectName(ObjectTypes.FormationMarker, Version141);
+        public static readonly ObjectName FormationMarker141 = new ObjectName(ObjectTypes.FormationMarker, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Log.
         /// </summary>
-        public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, Version131);
+        public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Log.
         /// </summary>
-        public static readonly ObjectName Log141 = new ObjectName(ObjectTypes.Log, Version141);
+        public static readonly ObjectName Log141 = new ObjectName(ObjectTypes.Log, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Log.
         /// </summary>
-        public static readonly ObjectName Log200 = new ObjectName(ObjectTypes.Log, Version200);
+        public static readonly ObjectName Log200 = new ObjectName(ObjectTypes.Log, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Message.
         /// </summary>
-        public static readonly ObjectName Message131 = new ObjectName(ObjectTypes.Message, Version131);
+        public static readonly ObjectName Message131 = new ObjectName(ObjectTypes.Message, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Message.
         /// </summary>
-        public static readonly ObjectName Message141 = new ObjectName(ObjectTypes.Message, Version141);
+        public static readonly ObjectName Message141 = new ObjectName(ObjectTypes.Message, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 MudLog.
         /// </summary>
-        public static readonly ObjectName MudLog131 = new ObjectName(ObjectTypes.MudLog, Version131);
+        public static readonly ObjectName MudLog131 = new ObjectName(ObjectTypes.MudLog, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 MudLog.
         /// </summary>
-        public static readonly ObjectName MudLog141 = new ObjectName(ObjectTypes.MudLog, Version141);
+        public static readonly ObjectName MudLog141 = new ObjectName(ObjectTypes.MudLog, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 MudLogReport.
         /// </summary>
-        public static readonly ObjectName MudLogReport200 = new ObjectName(ObjectTypes.MudLogReport, Version200);
+        public static readonly ObjectName MudLogReport200 = new ObjectName(ObjectTypes.MudLogReport, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 OpsReport.
         /// </summary>
-        public static readonly ObjectName OpsReport131 = new ObjectName(ObjectTypes.OpsReport, Version131);
+        public static readonly ObjectName OpsReport131 = new ObjectName(ObjectTypes.OpsReport, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 OpsReport.
         /// </summary>
-        public static readonly ObjectName OpsReport141 = new ObjectName(ObjectTypes.OpsReport, Version141);
+        public static readonly ObjectName OpsReport141 = new ObjectName(ObjectTypes.OpsReport, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 OpsReport.
         /// </summary>
-        public static readonly ObjectName OpsReport200 = new ObjectName(ObjectTypes.OpsReport, Version200);
+        public static readonly ObjectName OpsReport200 = new ObjectName(ObjectTypes.OpsReport, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Rig.
         /// </summary>
-        public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, Version131);
+        public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Rig.
         /// </summary>
-        public static readonly ObjectName Rig141 = new ObjectName(ObjectTypes.Rig, Version141);
+        public static readonly ObjectName Rig141 = new ObjectName(ObjectTypes.Rig, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Rig.
         /// </summary>
-        public static readonly ObjectName Rig200 = new ObjectName(ObjectTypes.Rig, Version200);
+        public static readonly ObjectName Rig200 = new ObjectName(ObjectTypes.Rig, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 RigUtilization.
         /// </summary>
-        public static readonly ObjectName RigUtilization200 = new ObjectName(ObjectTypes.RigUtilization, Version200);
+        public static readonly ObjectName RigUtilization200 = new ObjectName(ObjectTypes.RigUtilization, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Risk.
         /// </summary>
-        public static readonly ObjectName Risk131 = new ObjectName(ObjectTypes.Risk, Version131);
+        public static readonly ObjectName Risk131 = new ObjectName(ObjectTypes.Risk, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Risk.
         /// </summary>
-        public static readonly ObjectName Risk141 = new ObjectName(ObjectTypes.Risk, Version141);
+        public static readonly ObjectName Risk141 = new ObjectName(ObjectTypes.Risk, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Risk.
         /// </summary>
-        public static readonly ObjectName Risk200 = new ObjectName(ObjectTypes.Risk, Version200);
+        public static readonly ObjectName Risk200 = new ObjectName(ObjectTypes.Risk, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 SidewallCore.
         /// </summary>
-        public static readonly ObjectName SidewallCore131 = new ObjectName(ObjectTypes.SidewallCore, Version131);
+        public static readonly ObjectName SidewallCore131 = new ObjectName(ObjectTypes.SidewallCore, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 SidewallCore.
         /// </summary>
-        public static readonly ObjectName SidewallCore141 = new ObjectName(ObjectTypes.SidewallCore, Version141);
+        public static readonly ObjectName SidewallCore141 = new ObjectName(ObjectTypes.SidewallCore, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 StimJob.
         /// </summary>
-        public static readonly ObjectName StimJob141 = new ObjectName(ObjectTypes.StimJob, Version141);
+        public static readonly ObjectName StimJob141 = new ObjectName(ObjectTypes.StimJob, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 StimJob.
         /// </summary>
-        public static readonly ObjectName StimJob200 = new ObjectName(ObjectTypes.StimJob, Version200);
+        public static readonly ObjectName StimJob200 = new ObjectName(ObjectTypes.StimJob, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 StimJobStage.
         /// </summary>
-        public static readonly ObjectName StimJobStage200 = new ObjectName(ObjectTypes.StimJobStage, Version200);
+        public static readonly ObjectName StimJobStage200 = new ObjectName(ObjectTypes.StimJobStage, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 SurveyProgram.
         /// </summary>
-        public static readonly ObjectName SurveyProgram131 = new ObjectName(ObjectTypes.SurveyProgram, Version131);
+        public static readonly ObjectName SurveyProgram131 = new ObjectName(ObjectTypes.SurveyProgram, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 SurveyProgram.
         /// </summary>
-        public static readonly ObjectName SurveyProgram141 = new ObjectName(ObjectTypes.SurveyProgram, Version141);
+        public static readonly ObjectName SurveyProgram141 = new ObjectName(ObjectTypes.SurveyProgram, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 SurveyProgram.
         /// </summary>
-        public static readonly ObjectName SurveyProgram200 = new ObjectName(ObjectTypes.SurveyProgram, Version200);
+        public static readonly ObjectName SurveyProgram200 = new ObjectName(ObjectTypes.SurveyProgram, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Target.
         /// </summary>
-        public static readonly ObjectName Target131 = new ObjectName(ObjectTypes.Target, Version131);
+        public static readonly ObjectName Target131 = new ObjectName(ObjectTypes.Target, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Target.
         /// </summary>
-        public static readonly ObjectName Target141 = new ObjectName(ObjectTypes.Target, Version141);
+        public static readonly ObjectName Target141 = new ObjectName(ObjectTypes.Target, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 ToolErrorModel.
         /// </summary>
-        public static readonly ObjectName ToolErrorModel141 = new ObjectName(ObjectTypes.ToolErrorModel, Version141);
+        public static readonly ObjectName ToolErrorModel141 = new ObjectName(ObjectTypes.ToolErrorModel, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 ToolErrorModel.
         /// </summary>
-        public static readonly ObjectName ToolErrorModel200 = new ObjectName(ObjectTypes.ToolErrorModel, Version200);
+        public static readonly ObjectName ToolErrorModel200 = new ObjectName(ObjectTypes.ToolErrorModel, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 ToolErrorTermSet.
         /// </summary>
-        public static readonly ObjectName ToolErrorTermSet141 = new ObjectName(ObjectTypes.ToolErrorTermSet, Version141);
+        public static readonly ObjectName ToolErrorTermSet141 = new ObjectName(ObjectTypes.ToolErrorTermSet, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 ToolErrorTermSet.
         /// </summary>
-        public static readonly ObjectName ToolErrorTermSet200 = new ObjectName(ObjectTypes.ToolErrorTermSet, Version200);
+        public static readonly ObjectName ToolErrorTermSet200 = new ObjectName(ObjectTypes.ToolErrorTermSet, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Trajectory.
         /// </summary>
-        public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, Version131);
+        public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Trajectory.
         /// </summary>
-        public static readonly ObjectName Trajectory141 = new ObjectName(ObjectTypes.Trajectory, Version141);
+        public static readonly ObjectName Trajectory141 = new ObjectName(ObjectTypes.Trajectory, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Trajectory.
         /// </summary>
-        public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, Version200);
+        public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Tubular.
         /// </summary>
-        public static readonly ObjectName Tubular131 = new ObjectName(ObjectTypes.Tubular, Version131);
+        public static readonly ObjectName Tubular131 = new ObjectName(ObjectTypes.Tubular, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Tubular.
         /// </summary>
-        public static readonly ObjectName Tubular141 = new ObjectName(ObjectTypes.Tubular, Version141);
+        public static readonly ObjectName Tubular141 = new ObjectName(ObjectTypes.Tubular, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Tubular.
         /// </summary>
-        public static readonly ObjectName Tubular200 = new ObjectName(ObjectTypes.Tubular, Version200);
+        public static readonly ObjectName Tubular200 = new ObjectName(ObjectTypes.Tubular, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 WbGeometry.
         /// </summary>
-        public static readonly ObjectName WbGeometry131 = new ObjectName(ObjectTypes.WbGeometry, Version131);
+        public static readonly ObjectName WbGeometry131 = new ObjectName(ObjectTypes.WbGeometry, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 WbGeometry.
         /// </summary>
-        public static readonly ObjectName WbGeometry141 = new ObjectName(ObjectTypes.WbGeometry, Version141);
+        public static readonly ObjectName WbGeometry141 = new ObjectName(ObjectTypes.WbGeometry, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Well.
         /// </summary>
-        public static readonly ObjectName Well131 = new ObjectName(ObjectTypes.Well, Version131);
+        public static readonly ObjectName Well131 = new ObjectName(ObjectTypes.Well, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Well.
         /// </summary>
-        public static readonly ObjectName Well141 = new ObjectName(ObjectTypes.Well, Version141);
+        public static readonly ObjectName Well141 = new ObjectName(ObjectTypes.Well, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Well.
         /// </summary>
-        public static readonly ObjectName Well200 = new ObjectName(ObjectTypes.Well, Version200);
+        public static readonly ObjectName Well200 = new ObjectName(ObjectTypes.Well, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 Wellbore.
         /// </summary>
-        public static readonly ObjectName Wellbore131 = new ObjectName(ObjectTypes.Wellbore, Version131);
+        public static readonly ObjectName Wellbore131 = new ObjectName(ObjectTypes.Wellbore, ObjectFamilies.Witsml, Version131);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 Wellbore.
         /// </summary>
-        public static readonly ObjectName Wellbore141 = new ObjectName(ObjectTypes.Wellbore, Version141);
+        public static readonly ObjectName Wellbore141 = new ObjectName(ObjectTypes.Wellbore, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 Wellbore.
         /// </summary>
-        public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
+        public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 WellboreCompletion.
         /// </summary>
-        public static readonly ObjectName WellboreCompletion141 = new ObjectName(ObjectTypes.WellboreCompletion, Version141);
+        public static readonly ObjectName WellboreCompletion141 = new ObjectName(ObjectTypes.WellboreCompletion, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 WellboreCompletion.
         /// </summary>
-        public static readonly ObjectName WellboreCompletion200 = new ObjectName(ObjectTypes.WellboreCompletion, Version200);
+        public static readonly ObjectName WellboreCompletion200 = new ObjectName(ObjectTypes.WellboreCompletion, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 WellboreGeology.
         /// </summary>
-        public static readonly ObjectName WellboreGeology200 = new ObjectName(ObjectTypes.WellboreGeology, Version200);
+        public static readonly ObjectName WellboreGeology200 = new ObjectName(ObjectTypes.WellboreGeology, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 WellboreGeometry.
         /// </summary>
-        public static readonly ObjectName WellboreGeometry200 = new ObjectName(ObjectTypes.WellboreGeometry, Version200);
+        public static readonly ObjectName WellboreGeometry200 = new ObjectName(ObjectTypes.WellboreGeometry, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 WellboreMarker.
         /// </summary>
-        public static readonly ObjectName WellboreMarker200 = new ObjectName(ObjectTypes.WellboreMarker, Version200);
+        public static readonly ObjectName WellboreMarker200 = new ObjectName(ObjectTypes.WellboreMarker, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 2.0 WellboreMarkerSet.
         /// </summary>
-        public static readonly ObjectName WellboreMarkerSet200 = new ObjectName(ObjectTypes.WellboreMarkerSet, Version200);
+        public static readonly ObjectName WellboreMarkerSet200 = new ObjectName(ObjectTypes.WellboreMarkerSet, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 WellCMLedger.
         /// </summary>
-        public static readonly ObjectName WellCMLedger141 = new ObjectName(ObjectTypes.WellCMLedger, Version141);
+        public static readonly ObjectName WellCMLedger141 = new ObjectName(ObjectTypes.WellCMLedger, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 WellCMLedger.
         /// </summary>
-        public static readonly ObjectName WellCMLedger200 = new ObjectName(ObjectTypes.WellCMLedger, Version200);
+        public static readonly ObjectName WellCMLedger200 = new ObjectName(ObjectTypes.WellCMLedger, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.4.1.1 WellCompletion.
         /// </summary>
-        public static readonly ObjectName WellCompletion141 = new ObjectName(ObjectTypes.WellCompletion, Version141);
+        public static readonly ObjectName WellCompletion141 = new ObjectName(ObjectTypes.WellCompletion, ObjectFamilies.Witsml, Version141);
 
         /// <summary>
         /// The data object name for a 2.0 WellCompletion.
         /// </summary>
-        public static readonly ObjectName WellCompletion200 = new ObjectName(ObjectTypes.WellCompletion, Version200);
+        public static readonly ObjectName WellCompletion200 = new ObjectName(ObjectTypes.WellCompletion, ObjectFamilies.Witsml, Version200);
 
         /// <summary>
         /// The data object name for a 1.3.1.1 WellLog.
         /// </summary>
-        public static readonly ObjectName WellLog131 = new ObjectName(ObjectTypes.WellLog, Version131);
+        public static readonly ObjectName WellLog131 = new ObjectName(ObjectTypes.WellLog, ObjectFamilies.Witsml, Version131);
 
     }
 }

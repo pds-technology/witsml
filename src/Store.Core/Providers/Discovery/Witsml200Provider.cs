@@ -270,7 +270,7 @@ namespace PDS.WITSMLstudio.Store.Providers.Discovery
 
         private IEtpDataProvider GetDataProvider(string objectType)
         {
-            return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, DataSchemaVersion));
+            return _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, ObjectFamilies.Witsml, DataSchemaVersion));
         }
 
         private bool IsValidUri(EtpUri uri)

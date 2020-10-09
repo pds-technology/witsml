@@ -100,7 +100,8 @@ namespace PDS.WITSMLstudio.Store.Data.GrowingObjects
 
             foreach (var group in dataByVersion)
             {
-                var objectName = new ObjectName(objectType, group.Key);
+                var firstItem = group.FirstOrDefault();
+                var objectName = new ObjectName(objectType, firstItem?.Uri.Family, group.Key);
                 var dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
 
                 foreach (var item in group)
